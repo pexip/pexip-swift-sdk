@@ -27,19 +27,3 @@ final class ARecordTests: XCTestCase {
         }
     }
 }
-
-// MARK: - Stubs
-
-extension ARecord {
-    struct Stub {
-        let instance: ARecord
-        let data: Data
-    
-        // Hostname:    px01.vc.example.com
-        // IP address:  198.51.100.40
-        static let `default` = Stub(
-            instance: ARecord(ipv4Address: "198.51.100.40"),
-            data: Data([198, 51, 100, 40])
-        )
-    }
-}

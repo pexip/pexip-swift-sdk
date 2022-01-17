@@ -22,9 +22,9 @@ public final class DNSLookupService {
     public func resolveSRVRecords(
         service: String,
         proto: String,
-        domain: String
+        name: String
     ) async throws -> [SRVRecord] {
-        let name = "_\(service)._\(proto).\(domain)"
+        let name = "_\(service)._\(proto).\(name)"
         let records: [SRVRecord] = try await resolveRecords(for: name)
         
         // RFC 2782: if there is precisely one SRV RR, and its Target is "."
@@ -36,8 +36,8 @@ public final class DNSLookupService {
         }
     }
     
-    public func resolveARecords(domain: String) async throws -> [ARecord] {
-        try await resolveRecords(for: domain)
+    public func resolveARecords(for name: String) async throws -> [ARecord] {
+        try await resolveRecords(for: name)
     }
     
     private func resolveRecords<T: DNSRecord>(for name: String) async throws -> [T] {

@@ -3,13 +3,13 @@ import XCTest
 
 final class DNSLookupServiceTests: XCTestCase {
     private var service: DNSLookupService!
-    private var client: MockClient!
+    private var client: DNSClientMock!
     
     // MARK: - Setup
     
     override func setUp() {
         super.setUp()
-        client = MockClient()
+        client = DNSClientMock()
         service = DNSLookupService(client: client)
     }
     
@@ -31,7 +31,7 @@ final class DNSLookupServiceTests: XCTestCase {
         let records = try await service.resolveSRVRecords(
             service: "h323cs",
             proto: "tcp",
-            domain: "vc.example.com"
+            name: "vc.example.com"
         )
         
         XCTAssertEqual(client.name, "_h323cs._tcp.vc.example.com")
@@ -46,7 +46,7 @@ final class DNSLookupServiceTests: XCTestCase {
         let records = try await service.resolveSRVRecords(
             service: "h323cs",
             proto: "tcp",
-            domain: "vc.example.com"
+            name: "vc.example.com"
         )
         
         XCTAssertEqual(client.name, "_h323cs._tcp.vc.example.com")
@@ -60,7 +60,7 @@ final class DNSLookupServiceTests: XCTestCase {
             _ = try await service.resolveSRVRecords(
                 service: "h323cs",
                 proto: "tcp",
-                domain: "vc.example.com"
+                name: "vc.example.com"
             )
             XCTFail("Should fail with error")
         } catch {
@@ -75,7 +75,7 @@ final class DNSLookupServiceTests: XCTestCase {
         client.result = .success([record.data])
         
         let records = try await service.resolveARecords(
-            domain: "px01.vc.example.com"
+            for: "px01.vc.example.com"
         )
         
         XCTAssertEqual(client.name, "px01.vc.example.com")
@@ -86,7 +86,7 @@ final class DNSLookupServiceTests: XCTestCase {
         client.result = .failure(DNSClientError.timeout)
         
         do {
-            _ = try await service.resolveARecords(domain: "px01.vc.example.com")
+            _ = try await service.resolveARecords(for: "px01.vc.example.com")
             XCTFail("Should fail with error")
         } catch {
             XCTAssertEqual(error as? DNSClientError, .timeout)
@@ -98,7 +98,7 @@ final class DNSLookupServiceTests: XCTestCase {
 
 // MARK: - Mocks
 
-private final class MockClient: DNSClient {
+final class DNSClientMock: DNSClient {
     var result: Result<[Data], Error> = .success([])
     var name: String?
     
