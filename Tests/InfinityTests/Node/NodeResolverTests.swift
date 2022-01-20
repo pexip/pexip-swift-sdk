@@ -1,7 +1,7 @@
 import XCTest
 import dnssd
 @testable import DNSLookup
-@testable import ClientControl
+@testable import Infinity
 
 final class NodeResolverTests: XCTestCase {
     private var resolver: NodeResolver!

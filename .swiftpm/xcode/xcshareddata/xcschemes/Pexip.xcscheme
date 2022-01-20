@@ -76,6 +76,20 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Infinity"
+               BuildableName = "Infinity"
+               BlueprintName = "Infinity"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -101,6 +115,16 @@
                BlueprintIdentifier = "DNSLookupTests"
                BuildableName = "DNSLookupTests"
                BlueprintName = "DNSLookupTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "InfinityTests"
+               BuildableName = "InfinityTests"
+               BlueprintName = "InfinityTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>

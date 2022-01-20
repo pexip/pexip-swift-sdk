@@ -1,6 +1,6 @@
 import XCTest
 import dnssd
-@testable import ClientControl
+@testable import Infinity
 
 final class ConferenceURITests: XCTestCase {
     func testInit() throws {
