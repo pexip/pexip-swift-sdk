@@ -90,6 +90,20 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "HTTP"
+               BuildableName = "HTTP"
+               BlueprintName = "HTTP"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -125,6 +139,16 @@
                BlueprintIdentifier = "InfinityTests"
                BuildableName = "InfinityTests"
                BlueprintName = "InfinityTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "HTTPTests"
+               BuildableName = "HTTPTests"
+               BlueprintName = "HTTPTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
