@@ -2,6 +2,7 @@ import Foundation
 
 // MARK: - Protocol
 
+/// Pexip client REST API v2.
 protocol AuthClientProtocol {
     /// Requests a new token from the Pexip Conferencing Node.
     ///
@@ -11,6 +12,10 @@ protocol AuthClientProtocol {
     ///   - conferenceExtension: Conference to connect to (when being used with a Virtual Reception)
     ///
     /// - Returns: Information about the service you are connecting to
+    /// - Throws: `AuthForbiddenError` if either host/guest PIN or `conferenceExtension` is required
+    /// - Throws: `AuthError.invalidPin` if the supplied `pin` is invalid
+    /// - Throws: `AuthError.decodingFailed` if JSON decoding failed
+    /// - Throws: `HTTPError` if a network error was encountered during operation
     func requestToken(
         displayName: String,
         pin: String?,
@@ -20,9 +25,11 @@ protocol AuthClientProtocol {
     /// Refreshes a token to get a new one.
     ///
     /// - Returns: New authentication token
+    /// - Throws: `HTTPError` if a network error was encountered during operation
     func refreshToken() async throws -> AuthToken
     
     /// Releases the token (effectively a disconnect for the participant).
+    /// - Throws: `HTTPError` if a network error was encountered during operation
     func releaseToken() async throws
 }
 
@@ -77,24 +84,24 @@ struct AuthClient: AuthClientProtocol {
                 return (container.result.authToken, container.result.connectionDetails)
             case 401:
                 // Bad HTTP credentials
-                throw ClientControlError.authenticationFailed
+                throw HTTPError.unauthorized
             case 403:
                 // PIN challenge
                 do {
-                    throw try decoder.decode(ResponseContainer<ConnectionError>.self, from: data).result
+                    throw try decoder.decode(ResponseContainer<AuthForbiddenError>.self, from: data).result
                 } catch is DecodingError {
                     // Not able to parse requirements for `requestToken` request, PIN challenge failed
-                    throw ClientControlError.invalidPin
+                    throw AuthError.invalidPin
                 } catch {
                     throw error
                 }
             case 404:
-                throw ClientControlError.conferenceNotFound
+                throw HTTPError.resourceNotFound("conference")
             default:
-                throw ClientControlError.connectionFailed(statusCode: response.statusCode)
+                throw HTTPError.unacceptableStatusCode(response.statusCode)
             }
         } catch is DecodingError {
-            throw ClientControlError.decodingFailed
+            throw AuthError.decodingFailed
         } catch {
             throw error
         }
@@ -113,10 +120,7 @@ struct AuthClient: AuthClientProtocol {
 
 // MARK: - Errors
 
-enum ClientControlError: LocalizedError {
-    case authenticationFailed
-    case conferenceNotFound
-    case connectionFailed(statusCode: Int)
+enum AuthError: LocalizedError {
     case invalidPin
     case decodingFailed
 }

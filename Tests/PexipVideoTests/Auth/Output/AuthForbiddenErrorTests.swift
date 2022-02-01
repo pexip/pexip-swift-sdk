@@ -1,14 +1,14 @@
 import XCTest
 @testable import PexipVideo
 
-final class ConnectionErrorTests: XCTestCase {
+final class AuthForbiddenErrorTests: XCTestCase {
     private let decoder = JSONDecoder()
     
     // MARK: - Tests
     
     func testDecodingPinStatusNone() throws {
         let error = try decoder.decode(
-            ResponseContainer<ConnectionError>.self,
+            ResponseContainer<AuthForbiddenError>.self,
             from: try jsonData(pin: "none", guestPin: "none")
         ).result
         
@@ -18,7 +18,7 @@ final class ConnectionErrorTests: XCTestCase {
     
     func testDecodingPinStatusMissing() throws {
         let error = try decoder.decode(
-            ResponseContainer<ConnectionError>.self,
+            ResponseContainer<AuthForbiddenError>.self,
             from: try jsonData()
         ).result
         
@@ -28,7 +28,7 @@ final class ConnectionErrorTests: XCTestCase {
     
     func testDecodingPinStatusOptional() throws {
         let error = try decoder.decode(
-            ResponseContainer<ConnectionError>.self,
+            ResponseContainer<AuthForbiddenError>.self,
             from: try jsonData(pin: "required", guestPin: "none")
         ).result
         
@@ -39,7 +39,7 @@ final class ConnectionErrorTests: XCTestCase {
     func testDecodingPinStatusRequired() throws {
         // Guest: required, Host: required
         let errorA = try decoder.decode(
-            ResponseContainer<ConnectionError>.self,
+            ResponseContainer<AuthForbiddenError>.self,
             from: try jsonData(pin: "required", guestPin: "required")
         ).result
         
@@ -48,7 +48,7 @@ final class ConnectionErrorTests: XCTestCase {
         
         // Guest: required, Host: none
         let errorB = try decoder.decode(
-            ResponseContainer<ConnectionError>.self,
+            ResponseContainer<AuthForbiddenError>.self,
             from: try jsonData(pin: "none", guestPin: "required")
         ).result
         
@@ -58,7 +58,7 @@ final class ConnectionErrorTests: XCTestCase {
     
     func testDecodingConferenceExtensionStandard() throws {
         let error = try decoder.decode(
-            ResponseContainer<ConnectionError>.self,
+            ResponseContainer<AuthForbiddenError>.self,
             from: try jsonData(conferenceExtension: "standard")
         ).result
         
@@ -68,7 +68,7 @@ final class ConnectionErrorTests: XCTestCase {
     
     func testDecodingConferenceExtensionMssip() throws {
         let error = try decoder.decode(
-            ResponseContainer<ConnectionError>.self,
+            ResponseContainer<AuthForbiddenError>.self,
             from: try jsonData(conferenceExtension: "mssip")
         ).result
         
@@ -80,7 +80,7 @@ final class ConnectionErrorTests: XCTestCase {
         let data = try jsonData(conferenceExtension: "unknown")
         
         XCTAssertThrowsError(
-            try JSONDecoder().decode(ResponseContainer<ConnectionError>.self, from: data)
+            try JSONDecoder().decode(ResponseContainer<AuthForbiddenError>.self, from: data)
         ) { error in
             XCTAssertTrue(error is DecodingError)
         }

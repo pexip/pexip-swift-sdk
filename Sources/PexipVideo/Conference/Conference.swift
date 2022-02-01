@@ -6,7 +6,7 @@ public final class Conference {
         for uri: ConferenceURI
     ) async throws -> ConferenceConfiguration {
         let nodeResolver = ServiceLocator.makeNodeResolver()
-        let nodeAddress = try await nodeResolver.resolveNodeAddress(for: uri)
+        let nodeAddress = try await nodeResolver.resolveNodeAddress(for: uri.domain)
         return ConferenceConfiguration(nodeAddress: nodeAddress, alias: uri.alias)
     }
         

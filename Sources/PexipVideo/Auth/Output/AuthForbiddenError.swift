@@ -1,6 +1,6 @@
 import Foundation
 
-struct ConnectionError: LocalizedError, Decodable, Hashable {
+struct AuthForbiddenError: LocalizedError, Decodable, Hashable {
     /// PIN requirement status
     enum PinStatus: Hashable {
         /// No PIN required

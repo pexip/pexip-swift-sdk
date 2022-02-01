@@ -5,7 +5,7 @@ struct ServiceLocator {
     let authStorage = AuthStorage()
     var urlSession = URLSession.ephemeral()
     
-    static func makeNodeResolver() -> NodeResolver {
+    static func makeNodeResolver() -> NodeResolverProtocol {
         NodeResolver(
             dnsLookupClient: DNSLookupClient(),
             statusClient: NodeStatusClient(urlSession: .ephemeral())
