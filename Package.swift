@@ -12,7 +12,7 @@ let package = Package(
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "PexipVideo",
-            targets: ["PexipVideo"]
+            targets: ["PexipVideo", "WebRTC"]
         ),
     ],
     dependencies: [
@@ -24,7 +24,11 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "PexipVideo",
-            dependencies: []
+            dependencies: ["WebRTC"]
+        ),
+        .binaryTarget(
+            name: "WebRTC",
+            path: "Vendor/WebRTC/WebRTC.xcframework"
         ),
         .testTarget(
             name: "PexipVideoTests",
