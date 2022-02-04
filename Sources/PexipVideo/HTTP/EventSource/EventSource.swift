@@ -2,103 +2,120 @@ import Foundation
 
 /// Implementation of the W3C SSE spec
 /// https://html.spec.whatwg.org/multipage/server-sent-events.html
-final class EventSource: NSObject, URLSessionDataDelegate {
-    typealias EventListener = (Data?) -> Void
-    
-    enum State {
-        case connecting
-        case open
-        case closed
+final class EventSource {
+    static func eventStream(
+        withRequest request: URLRequest,
+        lastEventId: String? = nil,
+        urlProtocolClasses: [AnyClass]
+    ) -> AsyncThrowingStream<MessageEvent, Error> {
+        AsyncThrowingStream { continuation in
+             let eventSource = EventSource(
+                request: request,
+                lastEventId: lastEventId,
+                urlProtocolClasses: urlProtocolClasses
+             )
+             eventSource.onReceive = { event in
+                 continuation.yield(event)
+             }
+             eventSource.onComplete = { response, error in
+                 continuation.finish(
+                    throwing: EventSourceError(
+                        response: response,
+                        dataStreamError: error
+                    )
+                 )
+             }
+             continuation.onTermination = { @Sendable _ in
+                 eventSource.close()
+             }
+             eventSource.open()
+         }
     }
     
-    let url: URL
-    var onOpen: (() -> Void)?
-    var onMessage: ((MessageEvent) -> Void)?
-    var onComplete: ((HTTPURLResponse?, Error?) -> Void)?
-    
-    private(set) var state: State = .closed
-    private(set) var lastEventId: String?
-    private(set) var reconnectionTime: TimeInterval = 3
-    
-    private let headers: () -> [HTTPHeader]
-    private let protocolClasses: [AnyClass]
-    private let parser = EventStreamParser()
+    private var onReceive: ((MessageEvent) -> Void)?
+    private var onComplete: ((HTTPURLResponse?, Error?) -> Void)?
+    private let configuration: URLSessionConfiguration
+    private let request: URLRequest
     private var urlSession: URLSession?
-    private var eventListeners = [String: EventListener]()
+    private let dataTaskDelegate = DataTaskDelegate()
+    private let parser = EventStreamParser()
     
     // MARK: - Init
     
-    init(
-        url: URL,
-        headers: @escaping () -> [HTTPHeader],
-        protocolClasses: [AnyClass] = []
+    private init(
+        request: URLRequest,
+        lastEventId: String? = nil,
+        urlProtocolClasses: [AnyClass]
     ) {
-        self.url = url
-        self.protocolClasses = protocolClasses
-        self.headers = headers
-        super.init()
+        configuration = URLSessionConfiguration.eventSourceDefault
+        configuration.protocolClasses = urlProtocolClasses
+        
+        var request = request
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        request.timeoutInterval = TimeInterval(INT_MAX)
+        request.setValue(lastEventId, forHTTPHeaderField: "Last-Event-Id")
+        
+        self.request = request
+        setupDataTaskDelegate()
     }
     
-    // MARK: - API
-
-    func connect(lastEventId: String? = nil) {
-        self.lastEventId = lastEventId
-                
-        if state == .open {
-            disconnect()
-        }
-        
-        state = .connecting
-        
-        let configuration = URLSessionConfiguration.eventSourceDefault
-        configuration.protocolClasses = protocolClasses
-        
+    deinit {
+        onReceive = nil
+        onComplete = nil
+        close()
+    }
+    
+    // MARK: - Private methods
+    
+    private func open() {
+        close()
         urlSession = URLSession(
             configuration: configuration,
-            delegate: self,
+            delegate: dataTaskDelegate,
             delegateQueue: nil
         )
-        
-        urlSession?.dataTask(with: makeUrlRequest()).resume()
+        urlSession?.dataTask(with: request).resume()
     }
     
-    func reconnect() {
-        Task {
-            try await Task.sleep(seconds: reconnectionTime)
-            connect()
+    private func close() {
+        urlSession?.invalidateAndCancel()
+    }
+        
+    private func setupDataTaskDelegate() {
+        dataTaskDelegate.onReceive = { [weak self] data in
+            guard let self = self else { return }
+            for event in self.parser.events(from: data) {
+                self.onReceive?(event)
+            }
+        }
+        
+        dataTaskDelegate.onComplete = { [weak self] response, error in
+            self?.close()
+            self?.onComplete?(response, error)
         }
     }
+}
 
-    func disconnect() {
-        state = .closed
-        urlSession?.invalidateAndCancel()
-        parser.clear()
-    }
+// MARK: - Errors
 
-    func addEventListener(_ event: String, handler: @escaping EventListener) {
-        eventListeners[event] = handler
-    }
+struct EventSourceError: Error {
+    let response: HTTPURLResponse?
+    let dataStreamError: Error?
+}
 
-    func removeEventListener(_ event: String) {
-        eventListeners.removeValue(forKey: event)
+// MARK: - URLSessionDataDelegate
+
+private final class DataTaskDelegate: NSObject, URLSessionDataDelegate {
+    var onReceive: ((Data) -> Void)?
+    var onComplete: ((HTTPURLResponse?, Error?) -> Void)?
+    
+    deinit {
+        onReceive = nil
+        onComplete = nil
     }
     
-    // MARK: - URLSessionDataDelegate
-
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        let events = parser.events(from: data)
-        notifyEventListeners(events)
-    }
-
-    func urlSession(
-        _ session: URLSession,
-        dataTask: URLSessionDataTask,
-        didReceive response: URLResponse,
-        completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
-    ) {
-        completionHandler(.allow)
-        state = .open
-        onOpen?()
+        onReceive?(data)
     }
 
     func urlSession(
@@ -106,38 +123,8 @@ final class EventSource: NSObject, URLSessionDataDelegate {
         task: URLSessionTask,
         didCompleteWithError error: Error?
     ) {
-        if (error as NSError?)?.code != NSURLErrorCancelled {
-            disconnect()
+        if task.state == .completed {
             onComplete?(task.response as? HTTPURLResponse, error)
-        }
-    }
-    
-    // MARK: - Private methods
-
-    private func makeUrlRequest() -> URLRequest {
-        var request = URLRequest(
-            url: url,
-            cachePolicy: .reloadIgnoringLocalAndRemoteCacheData
-        )
-        request.timeoutInterval = TimeInterval(INT_MAX)
-        request.setValue(lastEventId, forHTTPHeaderField: "Last-Event-Id")
-        headers().forEach { request.setHTTPHeader($0) }
-        return request
-    }
-    
-    private func notifyEventListeners(_ events: [MessageEvent]) {
-        for event in events {
-            lastEventId = event.id
-
-            if let reconnectionTime = event.reconnectionTime {
-                self.reconnectionTime = reconnectionTime
-            }
-            
-            if let name = event.name, let eventListener = eventListeners[name] {
-                eventListener(event.data?.data(using: .utf8))
-            }
-            
-            onMessage?(event)
         }
     }
 }
@@ -156,4 +143,3 @@ private extension URLSessionConfiguration {
         return configuration
     }
 }
-

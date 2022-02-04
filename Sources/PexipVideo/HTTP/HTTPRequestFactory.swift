@@ -8,6 +8,8 @@ struct HTTPRequestFactory {
         let url = baseURL.appendingPathComponent(name)
         var request = URLRequest(url: url, httpMethod: method)
         
+        request.setHTTPHeader(.defaultUserAgent)
+        
         if let token = try await authTokenProvider.authToken() {
             request.setHTTPHeader(.init(name: "token", value: token.value))
         }

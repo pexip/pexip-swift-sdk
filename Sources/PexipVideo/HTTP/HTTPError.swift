@@ -2,6 +2,7 @@ import Foundation
 
 enum HTTPError: LocalizedError {
     case invalidHTTPResponse
+    case noDataInResponse
     case unacceptableStatusCode(Int)
     case unacceptableContentType(String?)
     case unauthorized
@@ -11,6 +12,8 @@ enum HTTPError: LocalizedError {
         switch self {
         case .invalidHTTPResponse:
             return "No HTTP response received"
+        case .noDataInResponse:
+            return "No data in response"
         case .unacceptableStatusCode(let statusCode):
             return "Unacceptable status code: \(statusCode)"
         case .unacceptableContentType(let mimeType):

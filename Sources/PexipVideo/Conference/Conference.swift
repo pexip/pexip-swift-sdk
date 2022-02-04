@@ -12,6 +12,8 @@ public final class Conference {
         
     private let serviceLocator: ServiceLocator
     private let session: AuthSession
+    private let eventSourceClient: SSEClientProtocol
+    private var eventStreamTask: Task<Void, Never>?
     
     // MARK: - Init
     
@@ -23,6 +25,7 @@ public final class Conference {
     init(serviceLocator: ServiceLocator) {
         self.serviceLocator = serviceLocator
         self.session = serviceLocator.makeAuthSession()
+        self.eventSourceClient = serviceLocator.makeEventSourceClient()
     }
     
     // MARK: - Public API
@@ -43,5 +46,27 @@ public final class Conference {
             pin: pin,
             conferenceExtension: conferenceExtension
         )
+        try await eventSourceClient.connect()
+        
+        eventStreamTask = Task {
+            for await event in await eventSourceClient.eventStream() {
+                handleEvent(event)
+            }
+        }
+    }
+    
+    public func disconnect() async throws {
+        try await session.deactivate()
+        eventStreamTask?.cancel()
+        await eventSourceClient.disconnect()
+    }
+    
+    // MARK: - Private methods
+    
+    private func handleEvent(_ event: ConferenceEvent) {
+        switch event {
+        case .chatMessage(let chatMessage):
+            print(chatMessage)
+        }
     }
 }
