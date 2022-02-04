@@ -2,14 +2,14 @@ import XCTest
 import dnssd
 @testable import PexipVideo
 
-final class ConferenceConfigurationTests: XCTestCase {
-    private var configuration: ConferenceConfiguration!
+final class APIConfigurationTests: XCTestCase {
+    private var configuration: APIConfiguration!
 
     // MARK: - Setup
 
     override func setUpWithError() throws {
         try super.setUpWithError()
-        configuration = ConferenceConfiguration(
+        configuration = APIConfiguration(
             nodeAddress: try XCTUnwrap(URL(string: "https://vc.example.com")),
             alias: "test"
         )
@@ -19,7 +19,7 @@ final class ConferenceConfigurationTests: XCTestCase {
 
     func testApiURLForNode() {
         XCTAssertEqual(
-            ConferenceConfiguration.apiURL(forNode: configuration.nodeAddress),
+            APIConfiguration.apiURL(forNode: configuration.nodeAddress),
             URL(string: "https://vc.example.com/api/client/v2")
         )
     }

@@ -1,8 +1,6 @@
 import Foundation
 
-typealias APIConfiguration = ConferenceConfiguration
-
-public struct ConferenceConfiguration {
+public struct APIConfiguration {
     static func apiURL(forNode nodeAddress: URL) -> URL {
         nodeAddress.appendingPathComponent("api/client/v2")
     }
@@ -11,7 +9,7 @@ public struct ConferenceConfiguration {
     public let alias: String
 
     var apiURL: URL {
-        ConferenceConfiguration.apiURL(forNode: nodeAddress)
+        APIConfiguration.apiURL(forNode: nodeAddress)
     }
 
     var conferenceBaseURL: URL {

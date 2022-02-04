@@ -1,6 +1,6 @@
 import Foundation
 
-public struct ConferenceURI: RawRepresentable, Hashable {
+public struct ConferenceName: RawRepresentable, Hashable {
     public let rawValue: String
     public let alias: String
     public let domain: String

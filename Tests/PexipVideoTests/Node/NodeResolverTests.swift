@@ -15,7 +15,8 @@ final class NodeResolverTests: XCTestCase {
         statusClient = NodeStatusClientMock()
         resolver = NodeResolver(
             dnsLookupClient: dnsLookupClient,
-            statusClient: statusClient
+            statusClient: statusClient,
+            logger: .stub
         )
     }
 
@@ -35,7 +36,7 @@ final class NodeResolverTests: XCTestCase {
 
         XCTAssertEqual(
             dnsLookupClient.steps,
-            [.srvRecordsLookup(service: "pexapp", proto: "tcp", name: "vc.example.com")]
+            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com")]
         )
         XCTAssertEqual(address, URL(string: "http://px01.vc.example.com:1720")!)
     }
@@ -54,7 +55,7 @@ final class NodeResolverTests: XCTestCase {
 
         XCTAssertEqual(
             dnsLookupClient.steps,
-            [.srvRecordsLookup(service: "pexapp", proto: "tcp", name: "vc.example.com")]
+            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com")]
         )
         XCTAssertEqual(address, URL(string: "https://px01.vc.example.com")!)
     }
@@ -73,7 +74,7 @@ final class NodeResolverTests: XCTestCase {
 
         XCTAssertEqual(
             dnsLookupClient.steps,
-            [.srvRecordsLookup(service: "pexapp", proto: "tcp", name: "vc.example.com")]
+            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com")]
         )
         XCTAssertEqual(address, URL(string: "http://px01.vc.example.com")!)
     }
@@ -101,7 +102,7 @@ final class NodeResolverTests: XCTestCase {
 
         XCTAssertEqual(
             dnsLookupClient.steps,
-            [.srvRecordsLookup(service: "pexapp", proto: "tcp", name: "vc.example.com")]
+            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com")]
         )
         // recordB
         XCTAssertEqual(address, URL(string: "http://px02.vc.example.com:1721")!)
@@ -120,7 +121,7 @@ final class NodeResolverTests: XCTestCase {
 
         XCTAssertEqual(
             dnsLookupClient.steps,
-            [.srvRecordsLookup(service: "pexapp", proto: "tcp", name: "vc.example.com")]
+            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com")]
         )
     }
 
@@ -145,7 +146,7 @@ final class NodeResolverTests: XCTestCase {
 
         XCTAssertEqual(
             dnsLookupClient.steps,
-            [.srvRecordsLookup(service: "pexapp", proto: "tcp", name: "vc.example.com")]
+            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com")]
         )
     }
 
@@ -161,7 +162,7 @@ final class NodeResolverTests: XCTestCase {
         XCTAssertEqual(
             dnsLookupClient.steps,
             [
-                .srvRecordsLookup(service: "pexapp", proto: "tcp", name: "example.com"),
+                .srvRecordsLookup(name: "_pexapp._tcp.example.com"),
                 .aRecordsLookup(name: "example.com")
             ]
         )
@@ -181,7 +182,7 @@ final class NodeResolverTests: XCTestCase {
         XCTAssertEqual(
             dnsLookupClient.steps,
             [
-                .srvRecordsLookup(service: "pexapp", proto: "tcp", name: "vc.example.com"),
+                .srvRecordsLookup(name: "_pexapp._tcp.vc.example.com"),
                 .aRecordsLookup(name: "vc.example.com")
             ]
         )
@@ -203,7 +204,7 @@ final class NodeResolverTests: XCTestCase {
         XCTAssertEqual(
             dnsLookupClient.steps,
             [
-                .srvRecordsLookup(service: "pexapp", proto: "tcp", name: "vc.example.com"),
+                .srvRecordsLookup(name: "_pexapp._tcp.vc.example.com"),
                 .aRecordsLookup(name: "vc.example.com")
             ]
         )
@@ -226,7 +227,7 @@ final class NodeResolverTests: XCTestCase {
         XCTAssertEqual(
             dnsLookupClient.steps,
             [
-                .srvRecordsLookup(service: "pexapp", proto: "tcp", name: "vc.example.com"),
+                .srvRecordsLookup(name: "_pexapp._tcp.vc.example.com"),
                 .aRecordsLookup(name: "vc.example.com")
             ]
         )
@@ -248,7 +249,7 @@ final class NodeResolverTests: XCTestCase {
         XCTAssertEqual(
             dnsLookupClient.steps,
             [
-                .srvRecordsLookup(service: "pexapp", proto: "tcp", name: "vc.example.com"),
+                .srvRecordsLookup(name: "_pexapp._tcp.vc.example.com"),
                 .aRecordsLookup(name: "vc.example.com")
             ]
         )
@@ -259,7 +260,7 @@ final class NodeResolverTests: XCTestCase {
 
 private final class DNSLookupClientMock: DNSLookupClientProtocol {
     enum Step: Equatable {
-        case srvRecordsLookup(service: String, proto: String, name: String)
+        case srvRecordsLookup(name: String)
         case aRecordsLookup(name: String)
     }
 
@@ -267,8 +268,8 @@ private final class DNSLookupClientMock: DNSLookupClientProtocol {
     var aRecords: Result<[ARecord], Error> = .success([])
     private(set) var steps = [Step]()
 
-    func resolveSRVRecords(service: String, proto: String, name: String) async throws -> [SRVRecord] {
-        steps.append(.srvRecordsLookup(service: service, proto: proto, name: name))
+    func resolveSRVRecords(for name: String) async throws -> [SRVRecord] {
+        steps.append(.srvRecordsLookup(name: name))
         return try srvRecords.get()
     }
 

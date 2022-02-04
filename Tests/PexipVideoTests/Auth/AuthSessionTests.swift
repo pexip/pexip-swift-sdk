@@ -37,6 +37,7 @@ final class AuthSessionTests: XCTestCase {
         session = AuthSession(
             client: client,
             storage: storage,
+            logger: .stub,
             currentDateProvider: { [unowned self] in
                 self.currentDate
             }
@@ -60,7 +61,7 @@ final class AuthSessionTests: XCTestCase {
         let tokenFromStorage = try await storage.authToken()
         let connectionDetailsFromStorage = await storage.connectionDetails()
 
-        XCTAssertTrue(storage.isClearCalled)
+        XCTAssertFalse(storage.isClearCalled)
         XCTAssertEqual(tokenFromStorage, token)
         XCTAssertEqual(connectionDetailsFromStorage, connectionDetails)
         XCTAssertTrue(isRefreshScheduled)
@@ -109,7 +110,7 @@ final class AuthSessionTests: XCTestCase {
         let tokenFromStorage = try await storage.authToken()
         let connectionDetailsFromStorage = await storage.connectionDetails()
 
-        XCTAssertTrue(storage.isClearCalled)
+        XCTAssertFalse(storage.isClearCalled)
         XCTAssertNil(tokenFromStorage)
         XCTAssertNil(connectionDetailsFromStorage)
         XCTAssertFalse(isRefreshScheduled)
@@ -135,7 +136,7 @@ final class AuthSessionTests: XCTestCase {
         let tokenFromStorage = try await storage.authToken()
         let connectionDetailsFromStorage = await storage.connectionDetails()
 
-        XCTAssertTrue(storage.isClearCalled)
+        XCTAssertFalse(storage.isClearCalled)
         XCTAssertNil(tokenFromStorage)
         XCTAssertNil(connectionDetailsFromStorage)
         XCTAssertFalse(isRefreshScheduled)

@@ -29,15 +29,18 @@ struct NodeResolver: NodeResolverProtocol {
 
     private let dnsLookupClient: DNSLookupClientProtocol
     private let statusClient: NodeStatusClientProtocol
+    private let logger: CategoryLogger
 
     // MARK: - Init
 
     init(
         dnsLookupClient: DNSLookupClientProtocol,
-        statusClient: NodeStatusClientProtocol
+        statusClient: NodeStatusClientProtocol,
+        logger: CategoryLogger
     ) {
         self.dnsLookupClient = dnsLookupClient
         self.statusClient = statusClient
+        self.logger = logger
     }
 
     // MARK: - Lookup
@@ -48,20 +51,32 @@ struct NodeResolver: NodeResolverProtocol {
         } else if let address = try await resolveARecord(for: host) {
             return address
         } else {
+            logger.error("No SRV or A records were found for \(host)")
             throw NodeError.nodeNotFound
         }
     }
 
     private func resolveSRVRecord(for host: String) async throws -> URL? {
-        let addresses = try await dnsLookupClient.resolveSRVRecords(
-            service: Constants.service,
-            proto: Constants.proto,
-            name: host
-        ).compactMap(\.nodeAddress)
+        let name = "_\(Constants.service)._\(Constants.proto).\(host)"
+
+        logger.debug(
+            """
+            Performing a look up for \(name) to see if there are any
+            SRV records available for \(host)
+            """
+        )
+
+        let addresses = try await dnsLookupClient
+            .resolveSRVRecords(for: name)
+            .compactMap(\.nodeAddress)
         return try await firstActiveAddress(from: addresses)
     }
 
     private func resolveARecord(for host: String) async throws -> URL? {
+        logger.debug(
+            "Checking if there are any A records available for \(host)"
+        )
+
         let addresses = try await dnsLookupClient
             .resolveARecords(for: host)
             .compactMap(\.nodeAddress)

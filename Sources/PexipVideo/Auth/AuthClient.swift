@@ -36,7 +36,7 @@ protocol AuthClientProtocol {
 // MARK: - Implementation
 
 struct AuthClient: AuthClientProtocol {
-    private let urlSession: URLSession
+    private let httpSession: HTTPSession
     private let requestFactory: HTTPRequestFactory
     private let decoder = JSONDecoder()
 
@@ -44,10 +44,10 @@ struct AuthClient: AuthClientProtocol {
 
     init(
         apiConfiguration: APIConfiguration,
-        urlSession: URLSession,
+        httpSession: HTTPSession,
         authStorage: AuthStorage
     ) {
-        self.urlSession = urlSession
+        self.httpSession = httpSession
         self.requestFactory = HTTPRequestFactory(
             baseURL: apiConfiguration.conferenceBaseURL,
             authTokenProvider: authStorage
@@ -73,7 +73,7 @@ struct AuthClient: AuthClientProtocol {
         }
 
         do {
-            let (data, response) = try await urlSession.http.data(for: request, validate: false)
+            let (data, response) = try await httpSession.data(for: request, validate: false)
 
             switch response.statusCode {
             case 200:
@@ -109,12 +109,12 @@ struct AuthClient: AuthClientProtocol {
 
     func refreshToken() async throws -> AuthToken {
         let request = try await requestFactory.request(withName: "refresh_token", method: .POST)
-        return try await urlSession.http.json(for: request, decoder: decoder)
+        return try await httpSession.json(for: request, decoder: decoder)
     }
 
     func releaseToken() async throws {
         let request = try await requestFactory.request(withName: "release_token", method: .POST)
-        _ = try await urlSession.http.data(for: request)
+        _ = try await httpSession.data(for: request)
     }
 }
 

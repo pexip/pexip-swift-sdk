@@ -32,8 +32,12 @@ struct AuthToken: Hashable {
         createdAt.addingTimeInterval(expires)
     }
 
+    var refreshInterval: TimeInterval {
+        expires / 2
+    }
+
     var refreshDate: Date {
-        createdAt.addingTimeInterval(expires / 2)
+        createdAt.addingTimeInterval(refreshInterval)
     }
 
     func isExpired(currentDate: Date = .init()) -> Bool {

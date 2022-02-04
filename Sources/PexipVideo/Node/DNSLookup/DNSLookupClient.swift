@@ -4,12 +4,7 @@ import dnssd
 // MARK: - Protocol
 
 protocol DNSLookupClientProtocol {
-    func resolveSRVRecords(
-        service: String,
-        proto: String,
-        name: String
-    ) async throws -> [SRVRecord]
-
+    func resolveSRVRecords(for name: String) async throws -> [SRVRecord]
     func resolveARecords(for name: String) async throws -> [ARecord]
 }
 
@@ -35,12 +30,7 @@ final class DNSLookupClient: DNSLookupClientProtocol {
 
     // MARK: - Lookup
 
-    func resolveSRVRecords(
-        service: String,
-        proto: String,
-        name: String
-    ) async throws -> [SRVRecord] {
-        let name = "_\(service)._\(proto).\(name)"
+    func resolveSRVRecords(for name: String) async throws -> [SRVRecord] {
         let records: [SRVRecord] = try await resolveRecords(forName: name)
 
         // RFC 2782: if there is precisely one SRV RR, and its Target is "."

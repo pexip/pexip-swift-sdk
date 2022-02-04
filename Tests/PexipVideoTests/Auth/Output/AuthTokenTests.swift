@@ -30,6 +30,7 @@ final class AuthTokenTests: XCTestCase {
 
         XCTAssertEqual(token.value, "SE9TVAltZ...etc...zNiZjlmNjFhMTlmMTJiYTE%3D")
         XCTAssertEqual(token.expires, 120)
+        XCTAssertEqual(token.refreshInterval, 60)
         XCTAssertEqual(token.role, .host)
         XCTAssertFalse(token.isExpired())
     }

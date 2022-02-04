@@ -1,14 +1,16 @@
 import Foundation
 
 struct ServiceLocator {
+    let logger: LoggerProtocol
     let apiConfiguration: APIConfiguration
     let authStorage = AuthStorage()
     var urlProtocolClasses = [AnyClass]()
 
-    static func makeNodeResolver() -> NodeResolverProtocol {
+    static func makeNodeResolver(logger: LoggerProtocol) -> NodeResolverProtocol {
         NodeResolver(
             dnsLookupClient: DNSLookupClient(),
-            statusClient: NodeStatusClient(urlSession: .ephemeral())
+            statusClient: NodeStatusClient(httpSession: HTTPSession(logger: logger[.http])),
+            logger: logger[.dnsLookup]
         )
     }
 
@@ -16,10 +18,11 @@ struct ServiceLocator {
         return AuthSession(
             client: AuthClient(
                 apiConfiguration: apiConfiguration,
-                urlSession: makeURLSession(),
+                httpSession: makeHTTPSession(),
                 authStorage: authStorage
             ),
-            storage: authStorage
+            storage: authStorage,
+            logger: logger[.auth]
         )
     }
 
@@ -27,11 +30,12 @@ struct ServiceLocator {
         SSEClient(
             apiConfiguration: apiConfiguration,
             authStorage: authStorage,
+            logger: logger[.sse],
             urlProtocolClasses: urlProtocolClasses
         )
     }
 
-    private func makeURLSession() -> URLSession {
-        URLSession.ephemeral(protocolClasses: urlProtocolClasses)
+    private func makeHTTPSession() -> HTTPSession {
+        HTTPSession(protocolClasses: urlProtocolClasses, logger: logger[.http])
     }
 }

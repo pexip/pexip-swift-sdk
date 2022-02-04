@@ -36,9 +36,7 @@ final class DNSLookupClientTests: XCTestCase {
         task.result = [root.data, record.data]
 
         let records = try await client.resolveSRVRecords(
-            service: "h323cs",
-            proto: "tcp",
-            name: "vc.example.com"
+            for: "_h323cs._tcp.vc.example.com"
         )
 
         XCTAssertEqual(task.steps, [.prepare, .start, .cancel])
@@ -53,9 +51,7 @@ final class DNSLookupClientTests: XCTestCase {
         task.result = [record.data]
 
         let records = try await client.resolveSRVRecords(
-            service: "h323cs",
-            proto: "tcp",
-            name: "vc.example.com"
+            for: "_h323cs._tcp.vc.example.com"
         )
 
         XCTAssertEqual(task.steps, [.prepare, .start, .cancel])
@@ -69,9 +65,7 @@ final class DNSLookupClientTests: XCTestCase {
 
         do {
             _ = try await client.resolveSRVRecords(
-                service: "h323cs",
-                proto: "tcp",
-                name: "vc.example.com"
+                for: "_h323cs._tcp.vc.example.com"
             )
             XCTFail("Should fail with error")
         } catch {
@@ -88,9 +82,7 @@ final class DNSLookupClientTests: XCTestCase {
 
         do {
             _ = try await client.resolveSRVRecords(
-                service: "h323cs",
-                proto: "tcp",
-                name: "vc.example.com"
+                for: "_h323cs._tcp.vc.example.com"
             )
             XCTFail("Should fail with error")
         } catch {
@@ -110,9 +102,7 @@ final class DNSLookupClientTests: XCTestCase {
 
         do {
             _ = try await client.resolveSRVRecords(
-                service: "h323cs",
-                proto: "tcp",
-                name: "vc.example.com"
+                for: "_h323cs._tcp.vc.example.com"
             )
             XCTFail("Should fail with error")
         } catch {
@@ -132,9 +122,7 @@ final class DNSLookupClientTests: XCTestCase {
 
         do {
             _ = try await client.resolveSRVRecords(
-                service: "h323cs",
-                proto: "tcp",
-                name: "vc.example.com"
+                for: "_h323cs._tcp.vc.example.com"
             )
             XCTFail("Should fail with error")
         } catch {
