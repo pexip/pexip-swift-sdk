@@ -12,7 +12,7 @@ struct AuthForbiddenError: LocalizedError, Decodable, Hashable {
         // you must still provide a "pin" header, with a value of "none".
         case `optional`
     }
-    
+
     /// Pexip Virtual Reception options
     enum ConferenceExtension: String, Decodable, Hashable {
         /// For a regular, Microsoft Teams or Google Meet Virtual Reception
@@ -20,18 +20,18 @@ struct AuthForbiddenError: LocalizedError, Decodable, Hashable {
         /// for a Lync / Skype for Business Virtual Reception.
         case mssip
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case guestPin = "guest_pin"
         case hostPin = "pin"
         case conferenceExtension = "conference_extension"
     }
-    
+
     private enum StatusValue: String, Decodable {
         case `none`
         case `required`
     }
-    
+
     /// Whether the conference is PIN-protected or not for Guests and Hosts
     let pinStatus: PinStatus
     /// Present only if this is a call to a Pexip Virtual Reception,
@@ -42,12 +42,12 @@ struct AuthForbiddenError: LocalizedError, Decodable, Hashable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let guestPin = try container.decodeIfPresent(StatusValue.self, forKey: .guestPin) ?? .none
         let hostPin = try container.decodeIfPresent(StatusValue.self, forKey: .hostPin) ?? .none
-        
+
         conferenceExtension = try container.decodeIfPresent(
             ConferenceExtension.self,
             forKey: .conferenceExtension
         )
-        
+
         switch (guestPin, hostPin) {
         case (.none, .none):
             self.pinStatus = .none

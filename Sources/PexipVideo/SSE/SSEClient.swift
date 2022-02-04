@@ -19,9 +19,9 @@ actor SSEClient: SSEClientProtocol {
     private var lastEventId: String?
     private var eventSourceTask: Task<Void, Error>?
     private var subscribers = [AsyncStream<ConferenceEvent>.Continuation]()
-    
+
     // MARK: - Init
-    
+
     init(
         apiConfiguration: APIConfiguration,
         authStorage: AuthStorage,
@@ -33,21 +33,21 @@ actor SSEClient: SSEClientProtocol {
             authTokenProvider: authStorage
         )
     }
-    
+
     // MARK: - Internal methods
-    
+
     func connect() async throws {
         eventSourceTask = Task {
             do {
                 let stream = try await makeEventSourceStream()
-                
+
                 for try await event in stream {
                     lastEventId = event.id
-                    
+
                     if let reconnectionTime = event.reconnectionTime {
                         self.reconnectionTime = reconnectionTime
                     }
-                    
+
                     if let conferenceEvent = conferenceEvent(from: event) {
                         for subscriber in subscribers {
                             subscriber.yield(conferenceEvent)
@@ -59,24 +59,24 @@ actor SSEClient: SSEClientProtocol {
             }
         }
     }
-    
+
     func disconnect() async {
         for subscriber in subscribers {
             subscriber.finish()
         }
-        
+
         subscribers.removeAll()
         eventSourceTask?.cancel()
     }
-    
+
     func eventStream() async -> AsyncStream<ConferenceEvent> {
         AsyncStream<ConferenceEvent> { continuation in
             subscribers.append(continuation)
         }
     }
-    
+
     // MARK: - Private methods
-    
+
     private func makeEventSourceStream() async throws -> AsyncThrowingStream<MessageEvent, Error> {
         EventSource.eventStream(
             withRequest: try await requestFactory.request(
@@ -87,14 +87,14 @@ actor SSEClient: SSEClientProtocol {
             urlProtocolClasses: urlProtocolClasses
         )
     }
-    
+
     private func conferenceEvent(from event: MessageEvent) -> ConferenceEvent? {
         guard let name = event.name else {
             return nil
         }
-        
+
         let data = event.data?.data(using: .utf8)
-        
+
         do {
             switch name {
             case "message_received":
@@ -113,7 +113,7 @@ actor SSEClient: SSEClientProtocol {
 // MARK: - Private extensions
 
 private extension JSONDecoder {
-    func decode<T>(_ type: T.Type, from data: Data?) throws -> T where T : Decodable {
+    func decode<T>(_ type: T.Type, from data: Data?) throws -> T where T: Decodable {
         try decode(type, from: data.orThrow(HTTPError.noDataInResponse))
     }
 }

@@ -6,7 +6,7 @@ struct ConnectionDetails: Decodable, Hashable {
         case gateway
         case testCall = "test_call"
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case participantUUID = "participant_uuid"
         case serviceType = "service_type"

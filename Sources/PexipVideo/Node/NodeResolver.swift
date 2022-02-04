@@ -29,9 +29,9 @@ struct NodeResolver: NodeResolverProtocol {
 
     private let dnsLookupClient: DNSLookupClientProtocol
     private let statusClient: NodeStatusClientProtocol
-    
+
     // MARK: - Init
-    
+
     init(
         dnsLookupClient: DNSLookupClientProtocol,
         statusClient: NodeStatusClientProtocol
@@ -39,9 +39,9 @@ struct NodeResolver: NodeResolverProtocol {
         self.dnsLookupClient = dnsLookupClient
         self.statusClient = statusClient
     }
-    
+
     // MARK: - Lookup
-    
+
     func resolveNodeAddress(for host: String) async throws -> URL {
         if let address = try await resolveSRVRecord(for: host) {
             return address
@@ -51,7 +51,7 @@ struct NodeResolver: NodeResolverProtocol {
             throw NodeError.nodeNotFound
         }
     }
-    
+
     private func resolveSRVRecord(for host: String) async throws -> URL? {
         let addresses = try await dnsLookupClient.resolveSRVRecords(
             service: Constants.service,
@@ -60,14 +60,14 @@ struct NodeResolver: NodeResolverProtocol {
         ).compactMap(\.nodeAddress)
         return try await firstActiveAddress(from: addresses)
     }
-    
+
     private func resolveARecord(for host: String) async throws -> URL? {
         let addresses = try await dnsLookupClient
             .resolveARecords(for: host)
             .compactMap(\.nodeAddress)
         return try await firstActiveAddress(from: addresses)
     }
-    
+
     private func firstActiveAddress(from addresses: [URL]) async throws -> URL? {
         try await addresses.asyncFirst(where: {
             // Select the first Conferencing Node which is not in maintenance mode
@@ -80,7 +80,7 @@ struct NodeResolver: NodeResolverProtocol {
 
 private extension SRVRecord {
     private typealias Constants = NodeResolver.Constants
-    
+
     var nodeAddress: URL? {
         let scheme = self.port == Constants.httpsPort
             ? Constants.httpsScheme
@@ -94,7 +94,7 @@ private extension SRVRecord {
 
 private extension ARecord {
     private typealias Constants = NodeResolver.Constants
-    
+
     var nodeAddress: URL? {
         URL(string: "\(Constants.httpsScheme)://\(ipv4Address)")
     }

@@ -18,13 +18,13 @@ protocol NodeStatusClientProtocol {
 
 struct NodeStatusClient: NodeStatusClientProtocol {
     private let urlSession: URLSession
-    
+
     // MARK: - Init
-    
+
     init(urlSession: URLSession) {
         self.urlSession = urlSession
     }
-    
+
     // MARK: - API
 
     func isInMaintenanceMode(nodeAddress: URL) async throws -> Bool {
@@ -32,7 +32,7 @@ struct NodeStatusClient: NodeStatusClientProtocol {
             for: URLRequest(url: nodeAddress, httpMethod: .GET),
             validate: false
         )
-        
+
         switch response.statusCode {
         case 200:
             return false

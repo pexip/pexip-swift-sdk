@@ -31,7 +31,7 @@ final class EventSource {
              eventSource.open()
          }
     }
-    
+
     private var onReceive: ((MessageEvent) -> Void)?
     private var onComplete: ((HTTPURLResponse?, Error?) -> Void)?
     private let configuration: URLSessionConfiguration
@@ -39,9 +39,9 @@ final class EventSource {
     private var urlSession: URLSession?
     private let dataTaskDelegate = DataTaskDelegate()
     private let parser = EventStreamParser()
-    
+
     // MARK: - Init
-    
+
     private init(
         request: URLRequest,
         lastEventId: String? = nil,
@@ -49,24 +49,24 @@ final class EventSource {
     ) {
         configuration = URLSessionConfiguration.eventSourceDefault
         configuration.protocolClasses = urlProtocolClasses
-        
+
         var request = request
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         request.timeoutInterval = TimeInterval(INT_MAX)
         request.setValue(lastEventId, forHTTPHeaderField: "Last-Event-Id")
-        
+
         self.request = request
         setupDataTaskDelegate()
     }
-    
+
     deinit {
         onReceive = nil
         onComplete = nil
         close()
     }
-    
+
     // MARK: - Private methods
-    
+
     private func open() {
         close()
         urlSession = URLSession(
@@ -76,11 +76,11 @@ final class EventSource {
         )
         urlSession?.dataTask(with: request).resume()
     }
-    
+
     private func close() {
         urlSession?.invalidateAndCancel()
     }
-        
+
     private func setupDataTaskDelegate() {
         dataTaskDelegate.onReceive = { [weak self] data in
             guard let self = self else { return }
@@ -88,7 +88,7 @@ final class EventSource {
                 self.onReceive?(event)
             }
         }
-        
+
         dataTaskDelegate.onComplete = { [weak self] response, error in
             self?.close()
             self?.onComplete?(response, error)
@@ -108,12 +108,12 @@ struct EventSourceError: Error {
 private final class DataTaskDelegate: NSObject, URLSessionDataDelegate {
     var onReceive: ((Data) -> Void)?
     var onComplete: ((HTTPURLResponse?, Error?) -> Void)?
-    
+
     deinit {
         onReceive = nil
         onComplete = nil
     }
-    
+
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         onReceive?(data)
     }

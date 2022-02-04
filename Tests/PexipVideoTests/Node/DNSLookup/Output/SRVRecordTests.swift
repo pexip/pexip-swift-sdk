@@ -6,12 +6,12 @@ final class SRVRecordTests: XCTestCase {
     func testServiceType() {
         XCTAssertEqual(SRVRecord.serviceType, kDNSServiceType_SRV)
     }
-    
+
     func testInit() throws {
         let record = SRVRecord.Stub.default
         XCTAssertEqual(try SRVRecord(data: record.data), record.instance)
     }
-    
+
     func testInitWithInvalidData() throws {
         for count in 1...6 {
             let bytes = [UInt8](repeating: 100, count: count)
@@ -20,18 +20,18 @@ final class SRVRecordTests: XCTestCase {
             }
         }
     }
-    
+
     func testSorting() {
         let recordA = SRVRecord(priority: 2, weight: 10, port: 1720, target: "px01.vc.example.com")
         let recordB = SRVRecord(priority: 1, weight: 10, port: 1720, target: "px02.vc.example.com")
         let recordC = SRVRecord(priority: 2, weight: 20, port: 1720, target: "px03.vc.example.com")
-            
+
         let records = [
             recordA,
             recordB,
             recordC
         ]
-        
+
         XCTAssertEqual(records.sorted(), [recordB, recordC, recordA])
     }
 }
@@ -42,7 +42,7 @@ extension SRVRecord {
     struct Stub {
         let instance: SRVRecord
         let data: Data
-        
+
         // Name:        vc.example.com
         // Service:     h323cs
         // Protocol:    tcp
@@ -68,7 +68,7 @@ extension SRVRecord {
                 0x00 // null
             ])
         )
-        
+
         // Name:        vc.example.com
         // Service:     h323cs
         // Protocol:    tcp

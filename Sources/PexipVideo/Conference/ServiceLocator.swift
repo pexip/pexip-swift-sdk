@@ -4,14 +4,14 @@ struct ServiceLocator {
     let apiConfiguration: APIConfiguration
     let authStorage = AuthStorage()
     var urlProtocolClasses = [AnyClass]()
-    
+
     static func makeNodeResolver() -> NodeResolverProtocol {
         NodeResolver(
             dnsLookupClient: DNSLookupClient(),
             statusClient: NodeStatusClient(urlSession: .ephemeral())
         )
     }
-    
+
     func makeAuthSession() -> AuthSession {
         return AuthSession(
             client: AuthClient(
@@ -22,7 +22,7 @@ struct ServiceLocator {
             storage: authStorage
         )
     }
-    
+
     func makeEventSourceClient() -> SSEClientProtocol {
         SSEClient(
             apiConfiguration: apiConfiguration,
@@ -30,7 +30,7 @@ struct ServiceLocator {
             urlProtocolClasses: urlProtocolClasses
         )
     }
-    
+
     private func makeURLSession() -> URLSession {
         URLSession.ephemeral(protocolClasses: urlProtocolClasses)
     }

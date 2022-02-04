@@ -5,7 +5,8 @@ final class EventSourceTests: XCTestCase {
     private let url = URL(string: "https://test.example.org")!
 
     // MARK: - Tests
-        
+
+    // swiftlint:disable function_body_length
     func testEventStream() async throws {
         // 1. Prepare
         let stream = EventSource.eventStream(
@@ -25,16 +26,16 @@ final class EventSourceTests: XCTestCase {
         event: test
         id: 22
         retry: 2000
-        
+
 
         """
         let data = try XCTUnwrap(string.data(using: .utf8))
-        
+
         URLProtocolMock.makeResponse = { request in
             createdRequest = request
             return .init(statusCode: 200, data: data)
         }
-        
+
         // 2. Receive events from the stream
         do {
             for try await event in stream {
@@ -46,15 +47,15 @@ final class EventSourceTests: XCTestCase {
             XCTAssertTrue(error.response?.allHeaderFields.isEmpty == true)
             XCTAssertNil(error.dataStreamError)
         }
-        
+
         // 3. Assert
         XCTAssertEqual(
             createdRequest?.value(forHTTPHeaderField: "Last-Event-Id"),
             "11"
         )
-        
+
         XCTAssertEqual(receivedEvents.count, 2)
-        
+
         let event1 = receivedEvents[0]
         XCTAssertEqual(event1.id, "1")
         XCTAssertNil(event1.name)
@@ -67,7 +68,7 @@ final class EventSourceTests: XCTestCase {
         XCTAssertEqual(event2.data, "second event")
         XCTAssertEqual(event2.retry, "2000")
     }
-    
+
     func testEventStreamWithErrors() async throws {
         // 1. Prepare
         let stream = EventSource.eventStream(
@@ -77,12 +78,12 @@ final class EventSourceTests: XCTestCase {
         )
         var createdRequest: URLRequest?
         var receivedEvents = [MessageEvent]()
-        
+
         URLProtocolMock.makeResponse = { request in
             createdRequest = request
             throw URLError(.badURL)
         }
-        
+
         // 2. Receive events from the stream
         do {
             for try await event in stream {
@@ -92,7 +93,7 @@ final class EventSourceTests: XCTestCase {
             XCTAssertNil(error.response)
             XCTAssertEqual((error.dataStreamError as? URLError)?.code, .badURL)
         }
-        
+
         // 3. Assert
         XCTAssertNil(createdRequest?.value(forHTTPHeaderField: "Last-Event-Id"))
         XCTAssertTrue(receivedEvents.isEmpty)

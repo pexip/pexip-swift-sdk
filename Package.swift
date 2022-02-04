@@ -13,7 +13,7 @@ let package = Package(
         .library(
             name: "PexipVideo",
             targets: ["PexipVideo", "WebRTC"]
-        ),
+        )
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -33,6 +33,6 @@ let package = Package(
         .testTarget(
             name: "PexipVideoTests",
             dependencies: ["PexipVideo"]
-        ),
+        )
     ]
 )

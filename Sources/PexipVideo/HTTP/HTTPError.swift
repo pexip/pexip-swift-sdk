@@ -7,7 +7,7 @@ enum HTTPError: LocalizedError {
     case unacceptableContentType(String?)
     case unauthorized
     case resourceNotFound(String)
-    
+
     var errorDescription: String {
         switch self {
         case .invalidHTTPResponse:

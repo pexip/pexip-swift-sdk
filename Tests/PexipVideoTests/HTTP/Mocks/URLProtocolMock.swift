@@ -5,11 +5,11 @@ final class URLProtocolMock: URLProtocol {
         let statusCode: Int
         let data: Data
     }
-    
+
     static var makeResponse: (URLRequest) throws -> Response = { _ in
         Response(statusCode: 200, data: Data())
     }
-    
+
     override class func canInit(with request: URLRequest) -> Bool {
         true
     }
@@ -48,4 +48,3 @@ final class URLProtocolMock: URLProtocol {
         // no-op.
     }
 }
-

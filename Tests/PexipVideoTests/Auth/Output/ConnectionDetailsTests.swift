@@ -18,7 +18,7 @@ final class ConnectionDetailsTests: XCTestCase {
             }
         }
         """
-        
+
         let data = try XCTUnwrap(json.data(using: .utf8))
         let response = try JSONDecoder().decode(
             ResponseContainer<ConnectionDetails>.self,

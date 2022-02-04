@@ -11,12 +11,12 @@ final class AuthStorageTests: XCTestCase {
         participantUUID: UUID(),
         serviceType: .conference
     )
-    
+
     // MARK: - Setup
-    
+
     override func setUpWithError() throws {
         try super.setUpWithError()
-        
+
         calendar = Calendar.current
         calendar.timeZone = try XCTUnwrap(TimeZone(abbreviation: "GMT"))
         createdAt = try XCTUnwrap(
@@ -34,26 +34,26 @@ final class AuthStorageTests: XCTestCase {
             self.currentDate
         })
     }
-    
+
     // MARK: - Tests
-    
+
     func testAuthToken() async throws {
         let token = AuthToken.randomToken(createdAt: createdAt)
-        
+
         currentDate = createdAt.addingTimeInterval(60)
         try await storage.storeToken(token)
         let tokenFromStorage = try await storage.authToken()
-        
+
         XCTAssertEqual(tokenFromStorage, token)
     }
-    
+
     func testAuthTokenWithNewTokenTask() async throws {
         let token = AuthToken.randomToken(createdAt: createdAt)
         let newToken = AuthToken.randomToken(createdAt: createdAt)
-        
+
         currentDate = createdAt.addingTimeInterval(60)
         try await storage.storeToken(token)
-        
+
         let newTokenTask = Task<AuthToken, Error> {
             try await Task.sleep(seconds: 0.1)
             return newToken
@@ -63,34 +63,33 @@ final class AuthStorageTests: XCTestCase {
 
         XCTAssertEqual(tokenFromStorage, newToken)
     }
-    
-        
+
     func testStoreConnectionDetails() async {
         await storage.storeConnectionDetails(connectionDetails)
         let connectionDetailsFromStorage = await storage.connectionDetails()
-        
+
         XCTAssertEqual(connectionDetailsFromStorage, connectionDetails)
     }
-    
+
     func testClear() async throws {
         try await storage.storeToken(.randomToken(createdAt: createdAt))
         await storage.storeConnectionDetails(connectionDetails)
-        
+
         let newTokenTask = Task<AuthToken, Error> {
             try await Task.sleep(seconds: 0.1)
             return .randomToken(createdAt: createdAt)
         }
 
         try await storage.storeToken(withTask: newTokenTask)
-            
+
         await storage.clear()
-        
+
         let tokenFromStorage = try await storage.authToken()
         XCTAssertNil(tokenFromStorage)
-        
+
         let connectionDetailsFromStorage = await storage.connectionDetails()
         XCTAssertNil(connectionDetailsFromStorage)
-        
+
         XCTAssertTrue(newTokenTask.isCancelled)
     }
 }

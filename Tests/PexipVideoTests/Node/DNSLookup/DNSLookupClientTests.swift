@@ -5,34 +5,34 @@ import dnssd
 final class DNSLookupClientTests: XCTestCase {
     private var client: DNSLookupClient!
     private var task: DNSLookupTaskMock!
-    
+
     // MARK: - Setup
-    
+
     override func setUp() {
         super.setUp()
-        
+
         let task = DNSLookupTaskMock()
         self.task = task
-        
+
         client = DNSLookupClient(timeout: 0.1, makeLookupTask: { query in
             task.query = query
             return task
         })
     }
-    
+
     // MARK: - Tests
-    
+
     func testInit() {
         // Default timeout
         XCTAssertEqual(DNSLookupClient().timeout, 5)
         // Custom timeout
         XCTAssertEqual(DNSLookupClient(timeout: 10).timeout, 10)
     }
-    
+
     func testResolveSRVRecords() async throws {
         let root = SRVRecord.Stub.root
         let record = SRVRecord.Stub.default
-        
+
         task.result = [root.data, record.data]
 
         let records = try await client.resolveSRVRecords(
@@ -47,7 +47,7 @@ final class DNSLookupClientTests: XCTestCase {
         // Sorted records
         XCTAssertEqual(records, [record.instance, root.instance])
     }
-    
+
     func testResolveSRVRecordsWithRootDomain() async throws {
         let record = SRVRecord.Stub.root
         task.result = [record.data]
@@ -63,7 +63,7 @@ final class DNSLookupClientTests: XCTestCase {
         XCTAssertEqual(task.query.serviceType, kDNSServiceType_SRV)
         XCTAssertTrue(records.isEmpty)
     }
-    
+
     func testResolveSRVRecordsWithInvalidData() async throws {
         task.result = [try XCTUnwrap("test".data(using: .utf8))]
 
@@ -104,7 +104,7 @@ final class DNSLookupClientTests: XCTestCase {
         XCTAssertEqual(task.query.domain, "_h323cs._tcp.vc.example.com")
         XCTAssertEqual(task.query.serviceType, kDNSServiceType_SRV)
     }
-    
+
     func testResolveSRVRecordsWithErrorInProcessing() async throws {
         task.processingErrorCode = Int32(kDNSServiceErr_NotPermitted)
 
@@ -126,10 +126,10 @@ final class DNSLookupClientTests: XCTestCase {
         XCTAssertEqual(task.query.domain, "_h323cs._tcp.vc.example.com")
         XCTAssertEqual(task.query.serviceType, kDNSServiceType_SRV)
     }
-    
+
     func testResolveSRVRecordsWithTimeoutError() async throws {
         task.startDelay = 10
-        
+
         do {
             _ = try await client.resolveSRVRecords(
                 service: "h323cs",
@@ -153,7 +153,7 @@ final class DNSLookupClientTests: XCTestCase {
         let records = try await client.resolveARecords(
             for: "px01.vc.example.com"
         )
-        
+
         XCTAssertEqual(task.steps, [.prepare, .start, .cancel])
         XCTAssertEqual(task.query.domain, "px01.vc.example.com")
         XCTAssertEqual(task.query.serviceType, kDNSServiceType_A)
@@ -177,7 +177,7 @@ final class DNSLookupClientTests: XCTestCase {
         XCTAssertEqual(task.query.domain, "px01.vc.example.com")
         XCTAssertEqual(task.query.serviceType, kDNSServiceType_A)
     }
-    
+
     func testResolveARecordsWithInvalidData() async throws {
         task.result = [try XCTUnwrap("invalid data string".data(using: .utf8))]
 
@@ -202,13 +202,13 @@ private final class DNSLookupTaskMock: DNSLookupTaskProtocol {
         case start
         case cancel
     }
-    
+
     var startDelay: TimeInterval = 0
     var query: DNSLookupQuery!
     var result = [Data]()
     var preparationErrorCode: DNSServiceErrorType = Int32(kDNSServiceErr_NoError)
     var processingErrorCode: DNSServiceErrorType = Int32(kDNSServiceErr_NoError)
-    
+
     private(set) var steps = [Step]()
     private var startTask: Task<DNSServiceErrorType, Never>?
 
@@ -238,12 +238,12 @@ private final class DNSLookupTaskMock: DNSLookupTaskProtocol {
                     &query.result
                 )
             }
-            
+
             return processingErrorCode
         }
-        
+
         self.startTask = startTask
-        
+
         return await startTask.value
     }
 

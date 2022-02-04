@@ -11,12 +11,12 @@ struct ARecord: Hashable {
 
 extension ARecord: DNSRecord {
     static var serviceType = kDNSServiceType_A
-    
+
     init(data: Data) throws {
         guard data.count == 4 else {
             throw ARecordError()
         }
-        
+
         ipv4Address = "\(data[0]).\(data[1]).\(data[2]).\(data[3])"
     }
 }

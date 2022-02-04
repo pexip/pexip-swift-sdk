@@ -9,10 +9,10 @@ final class MessageEventTests: XCTestCase {
             data: nil,
             retry: "1000"
         )
-        
+
         XCTAssertEqual(event.reconnectionTime, 1)
     }
-    
+
     func testReconnectionTimeWithInvalidRetryField() {
         let event = MessageEvent(
             id: nil,
@@ -20,7 +20,7 @@ final class MessageEventTests: XCTestCase {
             data: nil,
             retry: "string"
         )
-        
+
         XCTAssertNil(event.reconnectionTime)
     }
 }

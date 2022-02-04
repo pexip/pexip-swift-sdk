@@ -15,7 +15,7 @@ struct DNSLookupTask: DNSLookupTaskProtocol {
     private let sdRef: UnsafeMutablePointer<OpaquePointer?> = .allocate(
         capacity: MemoryLayout<OpaquePointer>.size
     )
-    
+
     func prepare() -> DNSServiceErrorType {
         DNSServiceQueryRecord(
             sdRef,
@@ -28,11 +28,11 @@ struct DNSLookupTask: DNSLookupTaskProtocol {
             &query.result
         )
     }
-    
+
     func start() async -> DNSServiceErrorType {
         DNSServiceProcessResult(sdRef.pointee)
     }
-    
+
     func cancel() {
         DNSServiceRefDeallocate(sdRef.pointee)
     }

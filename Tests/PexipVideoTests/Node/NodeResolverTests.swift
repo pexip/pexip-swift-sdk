@@ -6,9 +6,9 @@ final class NodeResolverTests: XCTestCase {
     private var resolver: NodeResolver!
     private var dnsLookupClient: DNSLookupClientMock!
     private var statusClient: NodeStatusClientMock!
-    
+
     // MARK: - Setup
-    
+
     override func setUp() {
         super.setUp()
         dnsLookupClient = DNSLookupClientMock()
@@ -18,7 +18,7 @@ final class NodeResolverTests: XCTestCase {
             statusClient: statusClient
         )
     }
-    
+
     // MARK: - SRV records
 
     func testResolveNodeAddressWithSRVRecord() async throws {
@@ -39,7 +39,7 @@ final class NodeResolverTests: XCTestCase {
         )
         XCTAssertEqual(address, URL(string: "http://px01.vc.example.com:1720")!)
     }
-    
+
     func testResolveNodeAddressWithSRVRecordAndDefaultHTTPSPort() async throws {
         let record = SRVRecord(
             priority: 10,
@@ -58,7 +58,7 @@ final class NodeResolverTests: XCTestCase {
         )
         XCTAssertEqual(address, URL(string: "https://px01.vc.example.com")!)
     }
-    
+
     func testResolveNodeAddressWithSRVRecordAndDefaultHTTPPort() async throws {
         let record = SRVRecord(
             priority: 10,
@@ -77,7 +77,7 @@ final class NodeResolverTests: XCTestCase {
         )
         XCTAssertEqual(address, URL(string: "http://px01.vc.example.com")!)
     }
-    
+
     func testResolveNodeAddressWithSRVRecordInMaintenanceMode() async throws {
         let recordA = SRVRecord(
             priority: 5,
@@ -85,14 +85,14 @@ final class NodeResolverTests: XCTestCase {
             port: 1720,
             target: "px01.vc.example.com"
         )
-        
+
         let recordB = SRVRecord(
             priority: 10,
             weight: 20,
             port: 1721,
             target: "px02.vc.example.com"
         )
-        
+
         dnsLookupClient.srvRecords = .success([recordA, recordB])
         dnsLookupClient.aRecords = .success([])
         statusClient.targetsInMaintenance = [recordA.target]
@@ -106,7 +106,7 @@ final class NodeResolverTests: XCTestCase {
         // recordB
         XCTAssertEqual(address, URL(string: "http://px02.vc.example.com:1721")!)
     }
-    
+
     func testResolveNodeAddressWithSRVRecordLookupError() async throws {
         dnsLookupClient.srvRecords = .failure(DNSLookupError.timeout)
         dnsLookupClient.aRecords = .success([])
@@ -123,7 +123,7 @@ final class NodeResolverTests: XCTestCase {
             [.srvRecordsLookup(service: "pexapp", proto: "tcp", name: "vc.example.com")]
         )
     }
-    
+
     func testResolveNodeAddressWithSRVRecordAndStatusClientError() async throws {
         let record = SRVRecord(
             priority: 10,
@@ -131,7 +131,7 @@ final class NodeResolverTests: XCTestCase {
             port: 1720,
             target: "px01.vc.example.com"
         )
-        
+
         dnsLookupClient.srvRecords = .success([record])
         dnsLookupClient.aRecords = .success([])
         statusClient.error = URLError(.badURL)
@@ -148,7 +148,7 @@ final class NodeResolverTests: XCTestCase {
             [.srvRecordsLookup(service: "pexapp", proto: "tcp", name: "vc.example.com")]
         )
     }
-    
+
     // MARK: - A records
 
     func testResolveNodeAddressWithARecord() async throws {
@@ -167,11 +167,11 @@ final class NodeResolverTests: XCTestCase {
         )
         XCTAssertEqual(address, URL(string: "https://198.51.100.40")!)
     }
-    
+
     func testResolveNodeAddressWithARecordInMaintenanceMode() async throws {
         let recordA = ARecord(ipv4Address: "198.51.100.40")
         let recordB = ARecord(ipv4Address: "198.51.100.41")
-        
+
         dnsLookupClient.srvRecords = .success([])
         dnsLookupClient.aRecords = .success([recordA, recordB])
         statusClient.targetsInMaintenance = [recordA.ipv4Address]
@@ -208,10 +208,10 @@ final class NodeResolverTests: XCTestCase {
             ]
         )
     }
-    
+
     func testResolveNodeAddressWithARecordAndStatusClientError() async throws {
         let record = ARecord(ipv4Address: "198.51.100.40")
-        
+
         dnsLookupClient.srvRecords = .success([])
         dnsLookupClient.aRecords = .success([record])
         statusClient.error = URLError(.badURL)
@@ -231,20 +231,20 @@ final class NodeResolverTests: XCTestCase {
             ]
         )
     }
-    
+
     // MARK: - Errors
-    
+
     func testResolveNodeAddressWithNoRecordsFound() async throws {
         dnsLookupClient.srvRecords = .success([])
         dnsLookupClient.aRecords = .success([])
-        
+
         do {
             _ = try await resolver.resolveNodeAddress(for: "vc.example.com")
             XCTFail("Should fail with error")
         } catch {
             XCTAssertEqual(error as? NodeError, .nodeNotFound)
         }
-        
+
         XCTAssertEqual(
             dnsLookupClient.steps,
             [
@@ -262,11 +262,11 @@ private final class DNSLookupClientMock: DNSLookupClientProtocol {
         case srvRecordsLookup(service: String, proto: String, name: String)
         case aRecordsLookup(name: String)
     }
-    
+
     var srvRecords: Result<[SRVRecord], Error> = .success([])
     var aRecords: Result<[ARecord], Error> = .success([])
     private(set) var steps = [Step]()
-    
+
     func resolveSRVRecords(service: String, proto: String, name: String) async throws -> [SRVRecord] {
         steps.append(.srvRecordsLookup(service: service, proto: proto, name: name))
         return try srvRecords.get()
@@ -281,12 +281,12 @@ private final class DNSLookupClientMock: DNSLookupClientProtocol {
 private final class NodeStatusClientMock: NodeStatusClientProtocol {
     var error: Error?
     var targetsInMaintenance = Set<String>()
-    
+
     func isInMaintenanceMode(nodeAddress: URL) async throws -> Bool {
         if let error = error {
             throw error
         }
-        
+
         return targetsInMaintenance.contains(where: {
             nodeAddress.absoluteString.contains($0)
         })

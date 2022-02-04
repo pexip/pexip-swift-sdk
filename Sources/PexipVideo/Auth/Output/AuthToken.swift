@@ -6,12 +6,12 @@ struct AuthToken: Hashable {
         case expires
         case role
     }
-    
+
     enum Role: String, Decodable, Hashable {
         case host = "HOST"
         case guest = "GUEST"
     }
-    
+
     /// The authentication token for future requests.
     let value: String
     /// Validity lifetime in seconds.
@@ -20,22 +20,22 @@ struct AuthToken: Hashable {
     let role: Role
     /// Date when the token was requested
     private(set) var createdAt = Date()
-    
+
     init(value: String, expires: String, role: Role, createdAt: Date = .init()) {
         self.value = value
         self.expires = TimeInterval(expires) ?? 0
         self.role = role
         self.createdAt = createdAt
     }
-    
+
     var expiresAt: Date {
         createdAt.addingTimeInterval(expires)
     }
-    
+
     var refreshDate: Date {
         createdAt.addingTimeInterval(expires / 2)
     }
-    
+
     func isExpired(currentDate: Date = .init()) -> Bool {
         currentDate >= expiresAt
     }

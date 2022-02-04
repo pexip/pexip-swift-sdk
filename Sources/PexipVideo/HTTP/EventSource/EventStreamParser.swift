@@ -7,15 +7,15 @@ final class EventStreamParser {
     private let delimeters = Delimiter.stringValues.compactMap {
         "\($0)\($0)".data(using: .utf8)
     }
-    
+
     // MARK: - Internal methods
-    
+
     func events(from data: Data) -> [MessageEvent] {
         buffer.append(data)
-        
+
         var events = [String]()
         var searchRange = buffer.startIndex..<buffer.endIndex
-        
+
         while let delimiterRange = buffer.delimiterRange(
             in: searchRange,
             possibleDelimeters: delimeters
@@ -29,16 +29,16 @@ final class EventStreamParser {
 
             searchRange = delimiterRange.endIndex..<buffer.endIndex
         }
-        
+
         buffer.removeSubrange(buffer.startIndex..<searchRange.startIndex)
 
         return events.compactMap(EventStreamParser.messageEvent(from:))
     }
-    
+
     func clear() {
         buffer = Data()
     }
-    
+
     static func messageEvent(from string: String) -> MessageEvent? {
         guard !string.hasPrefix(":") else {
             return nil
@@ -64,28 +64,28 @@ final class EventStreamParser {
             retry: event[.retry] ?? nil
         )
     }
-    
+
     // MARK: - Private methods
-    
+
     private static func field(from string: String) -> Field? {
         let scanner = Scanner(string: string)
         let keyString = scanner.scanUpToString(":")
-                    
+
         guard let key = keyString.flatMap(Field.Key.init(rawValue:)) else {
             return nil
         }
-        
+
         _ = scanner.scanString(":")
-        
+
         var value = key != .event ? "" : nil
-        
+
         for newline in Delimiter.stringValues {
             if let scanResult = scanner.scanUpToString(newline) {
                 value = scanResult
                 break
             }
         }
-        
+
         return Field(key: key, value: value)
     }
 }
@@ -96,7 +96,7 @@ private enum Delimiter: String, CaseIterable {
     case carriageReturn = "\r"
     case lineFeed = "\n"
     case pair  = "\r\n"
-    
+
     static let stringValues = allCases.map(\.rawValue)
 }
 
@@ -107,7 +107,7 @@ private struct Field {
         case data
         case retry
     }
-    
+
     let key: Key
     let value: String?
 }

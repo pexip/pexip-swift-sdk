@@ -7,7 +7,7 @@ import Foundation
          func data(
              for request: URLRequest,
              validate: Bool = true
-         ) async throws -> (Data, HTTPURLResponse) {             
+         ) async throws -> (Data, HTTPURLResponse) {
              let (data, response) = try await session.data(for: request)
 
              guard let response = response as? HTTPURLResponse else {

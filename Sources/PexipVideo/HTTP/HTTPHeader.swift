@@ -6,11 +6,11 @@ struct HTTPHeader: Hashable, CustomStringConvertible {
         case contentType = "Content-Type"
         case userAgent = "User-Agent"
     }
-    
+
     let name: String
     let value: String
     var description: String { "\(name): \(value)" }
-    
+
     init(name: String, value: String) {
         self.name = name
         self.value = value
@@ -42,7 +42,7 @@ private extension Bundle {
     var name: String? {
         object(forInfoDictionaryKey: "CFBundleName") as? String
     }
-    
+
     var version: String? {
         object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
     }

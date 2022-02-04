@@ -9,7 +9,7 @@ final class DNSLookupQueryTests: XCTestCase {
             serviceType: kDNSServiceType_A,
             handler: { _, _, _, _, _, _, _, _, _, _, _ in }
         )
-        
+
         XCTAssertEqual(query.domain, "example.org")
         XCTAssertEqual(query.serviceType, kDNSServiceType_A)
     }

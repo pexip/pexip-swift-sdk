@@ -5,7 +5,7 @@ struct MessageEvent: Hashable {
     let name: String?
     let data: String?
     let retry: String?
-    
+
     // Reconnection time in seconds
     var reconnectionTime: TimeInterval? {
         retry.flatMap {

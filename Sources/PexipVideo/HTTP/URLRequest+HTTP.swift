@@ -5,15 +5,15 @@ extension URLRequest {
         self.init(url: url)
         self.httpMethod = httpMethod.rawValue
     }
-    
+
     mutating func setHTTPHeader(_ header: HTTPHeader) {
         setValue(header.value, forHTTPHeaderField: header.name)
     }
-    
+
     func value(forHTTPHeaderName name: HTTPHeader.Name) -> String? {
         value(forHTTPHeaderField: name.rawValue)
     }
-    
+
     mutating func setQueryItems(_ queryItems: [URLQueryItem]) {
         if let url = url, !queryItems.isEmpty {
             var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
@@ -21,7 +21,7 @@ extension URLRequest {
             self.url = components?.url
         }
     }
-    
+
     mutating func setJSONBody<Input: Encodable>(
         _ parameters: Input,
         encoder: JSONEncoder = .init()

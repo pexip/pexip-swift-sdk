@@ -5,14 +5,14 @@ final class DNSLookupQuery {
     final class Result {
         var records = [Data]()
     }
-    
+
     let domain: String
     let serviceType: Int
     let handler: DNSServiceQueryRecordReply
     var result = Result()
-    
+
     // MARK: - Init
-    
+
     init(
         domain: String,
         serviceType: Int,

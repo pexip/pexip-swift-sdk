@@ -3,14 +3,14 @@ import XCTest
 
 final class EventStreamParserTests: XCTestCase {
     private var parser: EventStreamParser!
-    
+
     // MARK: - Setup
-    
+
     override func setUp() {
         super.setUp()
         parser = EventStreamParser()
     }
-    
+
     // MARK: - Stream parsing
 
     /// Test samples from
@@ -111,7 +111,7 @@ final class EventStreamParserTests: XCTestCase {
         """
         let data = try XCTUnwrap(string.data(using: .utf8))
         let events = parser.events(from: data)
-        
+
         XCTAssertEqual(events.count, 2)
 
         let event1 = events[0]
@@ -121,7 +121,7 @@ final class EventStreamParserTests: XCTestCase {
         XCTAssertNil(event1.name)
         XCTAssertEqual(event1.data, "test")
         XCTAssertNil(event1.retry)
-        
+
         XCTAssertEqual(event1, event2)
     }
 
@@ -134,7 +134,7 @@ final class EventStreamParserTests: XCTestCase {
         """
         let data = try XCTUnwrap(string.data(using: .utf8))
         let events = parser.events(from: data)
-        
+
         XCTAssertEqual(events.count, 1)
 
         let event = events[0]
@@ -144,7 +144,7 @@ final class EventStreamParserTests: XCTestCase {
         XCTAssertEqual(event.data, "test")
         XCTAssertNil(event.retry)
     }
-    
+
     func testClear() throws {
         let string = """
         data: test
@@ -152,16 +152,16 @@ final class EventStreamParserTests: XCTestCase {
         """
         let data = try XCTUnwrap(string.data(using: .utf8))
         let events = parser.events(from: data)
-        
+
         XCTAssertTrue(events.isEmpty)
         XCTAssertEqual(parser.bufferString, string)
-    
+
         parser.clear()
         XCTAssertEqual(parser.bufferString, String(data: Data(), encoding: .utf8))
     }
-    
+
     // MARK: - Event parsing
-    
+
     func testMessageEventFromString() {
         let string = """
         id: 1
@@ -171,26 +171,26 @@ final class EventStreamParserTests: XCTestCase {
         retry: 2000
         """
         let event = EventStreamParser.messageEvent(from: string)
-        
+
         XCTAssertEqual(event?.id, "1")
         XCTAssertEqual(event?.name, "test")
         XCTAssertEqual(event?.data, "data1\ndata2")
         XCTAssertEqual(event?.retry, "2000")
     }
-    
+
     func testMessageEventFromStringWithComment() {
         XCTAssertNil(EventStreamParser.messageEvent(from: ":comment"))
         XCTAssertNil(EventStreamParser.messageEvent(from: ": comment"))
         XCTAssertNil(EventStreamParser.messageEvent(from: ": comment : comment"))
     }
-    
+
     func testMessageEventFromStringWithNoId() {
         let string = """
         event: test
         data: first event
         """
         let event = EventStreamParser.messageEvent(from: string)
-        
+
         XCTAssertNil(event?.id)
         XCTAssertEqual(event?.name, "test")
         XCTAssertEqual(event?.data, "first event")
