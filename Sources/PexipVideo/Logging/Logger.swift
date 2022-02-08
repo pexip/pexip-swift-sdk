@@ -76,6 +76,7 @@ private extension OSLog {
     static let conference = OSLog(subsystem: subsystem, category: LogCategory.conference.rawValue)
     static let dnsLookup = OSLog(subsystem: subsystem, category: LogCategory.dnsLookup.rawValue)
     static let http = OSLog(subsystem: subsystem, category: LogCategory.http.rawValue)
+    static let media = OSLog(subsystem: subsystem, category: LogCategory.media.rawValue)
 
     static func logContainer(for category: LogCategory) -> OSLog {
         switch category {
@@ -89,6 +90,8 @@ private extension OSLog {
             return .dnsLookup
         case .http:
             return .http
+        case .media:
+            return .media
         }
     }
 }
