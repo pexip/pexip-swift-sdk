@@ -1,8 +1,8 @@
 import Foundation
 
-struct AuthForbiddenError: LocalizedError, Decodable, Hashable {
+public struct AuthForbiddenError: LocalizedError, Decodable, Hashable {
     /// PIN requirement status
-    enum PinStatus: Hashable {
+    public enum PinStatus: Hashable {
         /// No PIN required
         case `none`
         /// PIN is required
@@ -14,7 +14,7 @@ struct AuthForbiddenError: LocalizedError, Decodable, Hashable {
     }
 
     /// Pexip Virtual Reception options
-    enum ConferenceExtension: String, Decodable, Hashable {
+    public enum ConferenceExtension: String, Decodable, Hashable {
         /// For a regular, Microsoft Teams or Google Meet Virtual Reception
         case standard
         /// for a Lync / Skype for Business Virtual Reception.
@@ -33,12 +33,12 @@ struct AuthForbiddenError: LocalizedError, Decodable, Hashable {
     }
 
     /// Whether the conference is PIN-protected or not for Guests and Hosts
-    let pinStatus: PinStatus
+    public let pinStatus: PinStatus
     /// Present only if this is a call to a Pexip Virtual Reception,
     /// where a target extension needs to be specified in the call to `connect`
-    let conferenceExtension: ConferenceExtension?
+    public let conferenceExtension: ConferenceExtension?
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let guestPin = try container.decodeIfPresent(StatusValue.self, forKey: .guestPin) ?? .none
         let hostPin = try container.decodeIfPresent(StatusValue.self, forKey: .hostPin) ?? .none

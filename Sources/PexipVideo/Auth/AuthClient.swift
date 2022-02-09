@@ -100,7 +100,8 @@ struct AuthClient: AuthClientProtocol {
             default:
                 throw HTTPError.unacceptableStatusCode(response.statusCode)
             }
-        } catch is DecodingError {
+        } catch let error as DecodingError {
+            print(error)
             throw AuthError.decodingFailed
         } catch {
             throw error

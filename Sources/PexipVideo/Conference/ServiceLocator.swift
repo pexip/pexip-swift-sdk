@@ -35,6 +35,25 @@ struct ServiceLocator {
         )
     }
 
+    func makeParticipantClient(withUUID uuid: UUID) -> ParticipantClientProtocol {
+        ParticipantClient(
+            participantUUID: uuid,
+            apiConfiguration: apiConfiguration,
+            httpSession: makeHTTPSession(),
+            authTokenProvider: authStorage
+        )
+    }
+
+    func makeCallClient(participantUUID: UUID, callUUID: UUID) -> CallClientProtocol {
+        CallClient(
+            participantUUID: participantUUID,
+            callUUID: callUUID,
+            apiConfiguration: apiConfiguration,
+            httpSession: makeHTTPSession(),
+            authTokenProvider: authStorage
+        )
+    }
+
     private func makeHTTPSession() -> HTTPSession {
         HTTPSession(protocolClasses: urlProtocolClasses, logger: logger[.http])
     }

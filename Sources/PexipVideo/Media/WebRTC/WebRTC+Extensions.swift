@@ -34,7 +34,6 @@ extension RTCConfiguration {
     static func configuration(withIceServers iceServers: [String]) -> RTCConfiguration {
         let configuration = RTCConfiguration()
         configuration.iceServers = [RTCIceServer(urlStrings: iceServers)]
-        configuration.continualGatheringPolicy = .gatherContinually // ??
         configuration.sdpSemantics = .unifiedPlan
         configuration.bundlePolicy = .balanced
         configuration.iceTransportPolicy = iceServers.isEmpty ? .all : .relay

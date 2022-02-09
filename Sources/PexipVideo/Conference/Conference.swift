@@ -28,6 +28,7 @@ public final class Conference {
     private let name: String
     private let serviceLocator: ServiceLocator
     private let session: AuthSession
+    private let authStorage: AuthStorage
     private let eventSourceClient: SSEClientProtocol
     private let logger: CategoryLogger
     private var eventStreamTask: Task<Void, Never>?
@@ -38,6 +39,7 @@ public final class Conference {
         self.name = serviceLocator.apiConfiguration.alias
         self.serviceLocator = serviceLocator
         self.session = serviceLocator.makeAuthSession()
+        self.authStorage = serviceLocator.authStorage
         self.eventSourceClient = serviceLocator.makeEventSourceClient()
         self.logger = serviceLocator.logger[.conference]
     }
@@ -79,6 +81,27 @@ public final class Conference {
         await eventSourceClient.disconnect()
     }
 
+    @MainActor
+    public func makeCall() async throws {
+        guard let connectionDetails = await authStorage.connectionDetails() else {
+            throw ConferenceError.notConnectedToConferencingNode
+        }
+
+        let iceServers = connectionDetails.iceServers
+        let rtcClient = WebRTCClient(iceServers: iceServers, logger: serviceLocator.logger)
+        let sdp = try await rtcClient.createOffer()
+        let participantClient = serviceLocator.makeParticipantClient(
+            withUUID: connectionDetails.participantUUID
+        )
+        let call = try await participantClient.makeCall(sdp: sdp, present: nil)
+        try await rtcClient.setRemoteSessionDescription(call.sdp)
+        let callClient = serviceLocator.makeCallClient(
+            participantUUID: connectionDetails.participantUUID,
+            callUUID: call.uuid
+        )
+        _ = try await callClient.ack()
+    }
+
     // MARK: - Private methods
 
     private func handleEvent(_ event: ConferenceEvent) {
@@ -87,4 +110,10 @@ public final class Conference {
             break
         }
     }
+}
+
+// MARK: - Errors
+
+enum ConferenceError: LocalizedError {
+    case notConnectedToConferencingNode
 }
