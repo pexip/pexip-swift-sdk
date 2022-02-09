@@ -21,10 +21,6 @@ struct NodeResolver: NodeResolverProtocol {
     fileprivate enum Constants {
         static let service = "pexapp"
         static let proto = "tcp"
-        static let httpScheme = "http"
-        static let httpPort: UInt16 = 80
-        static let httpsScheme = "https"
-        static let httpsPort: UInt16 = 443
     }
 
     private let dnsLookupClient: DNSLookupClientProtocol
@@ -46,10 +42,19 @@ struct NodeResolver: NodeResolverProtocol {
     // MARK: - Lookup
 
     func resolveNodeAddress(for host: String) async throws -> URL {
+        var result: URL?
+
         if let address = try await resolveSRVRecord(for: host) {
-            return address
+            result = address
         } else if let address = try await resolveARecord(for: host) {
-            return address
+            result = address
+        }
+
+        if let result = result {
+            logger.info(
+                "Found a conferencing node with address: \(result.absoluteString)"
+            )
+            return result
         } else {
             logger.error("No SRV or A records were found for \(host)")
             throw NodeError.nodeNotFound
@@ -94,23 +99,20 @@ struct NodeResolver: NodeResolverProtocol {
 // MARK: - Private extensions
 
 private extension SRVRecord {
-    private typealias Constants = NodeResolver.Constants
-
     var nodeAddress: URL? {
-        let scheme = self.port == Constants.httpsPort
-            ? Constants.httpsScheme
-            : Constants.httpScheme
-        let port = [Constants.httpPort, Constants.httpsPort].contains(self.port)
-            ? ""
-            : ":\(self.port)"
-        return URL(string: "\(scheme)://\(target)\(port)")
+        var components = URLComponents()
+        components.scheme = port == 443 ? "https" : "http"
+        components.host = target
+        components.port = Int(port)
+        return components.url
     }
 }
 
 private extension ARecord {
-    private typealias Constants = NodeResolver.Constants
-
     var nodeAddress: URL? {
-        URL(string: "\(Constants.httpsScheme)://\(ipv4Address)")
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = ipv4Address
+        return components.url
     }
 }

@@ -11,11 +11,6 @@ public final class Conference {
     ) async throws -> Conference {
         let nodeResolver = ServiceLocator.makeNodeResolver(logger: logger)
         let nodeAddress = try await nodeResolver.resolveNodeAddress(for: name.domain)
-
-        logger[.dnsLookup].info(
-            "Found a conferencing node with address: \(nodeAddress.absoluteString)"
-        )
-
         let configuration = APIConfiguration(nodeAddress: nodeAddress, alias: name.alias)
         let serviceLocator = ServiceLocator(
             logger: logger,
@@ -76,9 +71,9 @@ public final class Conference {
 
     public func disconnect() async throws {
         logger.info("Leaving \(name)")
-        try await session.deactivate()
         eventStreamTask?.cancel()
         await eventSourceClient.disconnect()
+        try await session.deactivate()
     }
 
     @MainActor
@@ -93,11 +88,11 @@ public final class Conference {
         let participantClient = serviceLocator.makeParticipantClient(
             withUUID: connectionDetails.participantUUID
         )
-        let call = try await participantClient.makeCall(sdp: sdp, present: nil)
-        try await rtcClient.setRemoteSessionDescription(call.sdp)
+        let callDetails = try await participantClient.makeCall(sdp: sdp, present: nil)
+        try await rtcClient.setRemoteSessionDescription(callDetails.sdp)
         let callClient = serviceLocator.makeCallClient(
             participantUUID: connectionDetails.participantUUID,
-            callUUID: call.uuid
+            callUUID: callDetails.uuid
         )
         _ = try await callClient.ack()
     }

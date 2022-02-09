@@ -57,7 +57,7 @@ final class NodeResolverTests: XCTestCase {
             dnsLookupClient.steps,
             [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com")]
         )
-        XCTAssertEqual(address, URL(string: "https://px01.vc.example.com")!)
+        XCTAssertEqual(address, URL(string: "https://px01.vc.example.com:443")!)
     }
 
     func testResolveNodeAddressWithSRVRecordAndDefaultHTTPPort() async throws {
@@ -76,7 +76,7 @@ final class NodeResolverTests: XCTestCase {
             dnsLookupClient.steps,
             [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com")]
         )
-        XCTAssertEqual(address, URL(string: "http://px01.vc.example.com")!)
+        XCTAssertEqual(address, URL(string: "http://px01.vc.example.com:80")!)
     }
 
     func testResolveNodeAddressWithSRVRecordInMaintenanceMode() async throws {

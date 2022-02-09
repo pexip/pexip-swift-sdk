@@ -1,4 +1,4 @@
-struct Call: Decodable, Hashable {
+struct CallDetails: Decodable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case sdp
         case uuid = "call_uuid"

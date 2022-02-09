@@ -12,7 +12,7 @@ protocol ParticipantClientProtocol {
     ///              to act as a presentation stream rather than a main audio/video stream.
     /// - Returns: Information about the service you are connecting to
     /// - Throws: `HTTPError` if a network error was encountered during operation
-    func makeCall(sdp: String, present: String?) async throws -> Call
+    func makeCall(sdp: String, present: String?) async throws -> CallDetails
 }
 
 // MARK: - Implementation
@@ -39,7 +39,7 @@ struct ParticipantClient: ParticipantClientProtocol {
 
     // MARK: - API
 
-    func makeCall(sdp: String, present: String?) async throws -> Call {
+    func makeCall(sdp: String, present: String?) async throws -> CallDetails {
         var request = try await requestFactory.request(withName: "calls", method: .POST)
         try request.setJSONBody([
             "call_type": "WEBRTC",

@@ -332,12 +332,12 @@ private final class AuthClientMock: AuthClientProtocol {
         return try requestTokenResult.get()
     }
 
-    func refreshToken() async throws -> AuthToken {
+    func refreshToken(_ token: AuthToken) async throws -> AuthToken {
         steps.append(.refreshToken)
         return try refreshTokenResult.get()
     }
 
-    func releaseToken() async throws {
+    func releaseToken(_ token: AuthToken) async throws {
         steps.append(.releaseToken)
         try releaseTokenResult.get()
     }
