@@ -62,9 +62,9 @@ actor AuthSession {
         let token = try await storage.authToken()
         await storage.clear()
 
-        if token?.isExpired(currentDate: currentDate()) == false {
+        if let token = token, !token.isExpired(currentDate: currentDate()) {
             logger.debug("Releasing the token...")
-            try await client.releaseToken()
+            try await client.releaseToken(token)
         }
 
         logger.info("Auth session deactivated ⛔️")
@@ -86,9 +86,10 @@ actor AuthSession {
                 logger.debug("Scheduling token refresh in \(timeInterval)")
 
                 try await Task.sleep(seconds: timeInterval)
+
                 try await storage.storeToken(withTask: Task {
                     logger.debug("Refreshing a token to get a new one...")
-                    let newAuthToken = try await client.refreshToken()
+                    let newAuthToken = try await client.refreshToken(authToken)
                     logger.debug("New token received 👌")
 
                     scheduleRefresh(for: newAuthToken)

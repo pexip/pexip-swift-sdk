@@ -11,7 +11,10 @@ final class AuthSessionTests: XCTestCase {
     private var currentDate = Date()
     private let connectionDetails = ConnectionDetails(
         participantUUID: UUID(),
-        serviceType: .conference
+        displayName: "Test",
+        serviceType: .conference,
+        conferenceName: "Test",
+        stun: nil
     )
 
     // MARK: - Setup

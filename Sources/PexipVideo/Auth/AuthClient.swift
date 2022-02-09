@@ -26,11 +26,11 @@ protocol AuthClientProtocol {
     ///
     /// - Returns: New authentication token
     /// - Throws: `HTTPError` if a network error was encountered during operation
-    func refreshToken() async throws -> AuthToken
+    func refreshToken(_ token: AuthToken) async throws -> AuthToken
 
     /// Releases the token (effectively a disconnect for the participant).
     /// - Throws: `HTTPError` if a network error was encountered during operation
-    func releaseToken() async throws
+    func releaseToken(_ token: AuthToken) async throws
 }
 
 // MARK: - Implementation
@@ -108,13 +108,25 @@ struct AuthClient: AuthClientProtocol {
         }
     }
 
-    func refreshToken() async throws -> AuthToken {
-        let request = try await requestFactory.request(withName: "refresh_token", method: .POST)
-        return try await httpSession.json(for: request, decoder: decoder)
+    func refreshToken(_ token: AuthToken) async throws -> AuthToken {
+        let request = try await requestFactory.request(
+            withName: "refresh_token",
+            method: .POST,
+            token: token
+        )
+        let container: ResponseContainer<AuthToken> = try await httpSession.json(
+            for: request,
+            decoder: decoder
+        )
+        return container.result
     }
 
-    func releaseToken() async throws {
-        let request = try await requestFactory.request(withName: "release_token", method: .POST)
+    func releaseToken(_ token: AuthToken) async throws {
+        let request = try await requestFactory.request(
+            withName: "release_token",
+            method: .POST,
+            token: token
+        )
         _ = try await httpSession.data(for: request)
     }
 }

@@ -9,6 +9,7 @@ final class ConnectionDetailsTests: XCTestCase {
             "result": {
                 "participant_uuid": "2c34f35f-1060-438c-9e87-6c2dffbc9980",
                 "display_name": "Alice",
+                "conference_name": "Conference",
                 "stun": [{"url": "stun:stun.l.google.com:19302"}],
                 "analytics_enabled": true,
                 "version": {"pseudo_version": "25010.0.0", "version_id": "10"},

@@ -41,7 +41,9 @@ actor AuthStorage: AuthStorageProtocol {
 
     func authToken() async throws -> AuthToken? {
         if let authTokenTask = authTokenTask {
-            return try await authTokenTask.value
+            let authToken = try await authTokenTask.value
+            self.authTokenTask = nil
+            return authToken
         } else {
             return authToken
         }
@@ -49,11 +51,6 @@ actor AuthStorage: AuthStorageProtocol {
 
     func storeToken(withTask task: Task<AuthToken, Error>) async throws {
         authTokenTask = task
-
-        Task {
-            authToken = try await task.value
-            authTokenTask = nil
-        }
     }
 
     // MARK: - Connection details

@@ -141,7 +141,6 @@ actor SSEClient: SSEClientProtocol {
             }
         } catch {
             logger.error("Failed to decode SSE event: '\(name)', error: \(error)")
-            print()
             return nil
         }
     }

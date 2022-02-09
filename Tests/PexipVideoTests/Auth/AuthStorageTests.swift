@@ -9,7 +9,10 @@ final class AuthStorageTests: XCTestCase {
     private var currentDate = Date()
     private let connectionDetails = ConnectionDetails(
         participantUUID: UUID(),
-        serviceType: .conference
+        displayName: "Test",
+        serviceType: .conference,
+        conferenceName: "Test",
+        stun: nil
     )
 
     // MARK: - Setup
@@ -76,7 +79,7 @@ final class AuthStorageTests: XCTestCase {
         await storage.storeConnectionDetails(connectionDetails)
 
         let newTokenTask = Task<AuthToken, Error> {
-            try await Task.sleep(seconds: 0.1)
+            try await Task.sleep(seconds: 0.4)
             return .randomToken(createdAt: createdAt)
         }
 
