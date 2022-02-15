@@ -12,7 +12,7 @@ final class WebRTCClient: NSObject, CallConnection, RTCPeerConnectionDelegate {
     private let factory: RTCPeerConnectionFactory
     private let peerConnection: RTCPeerConnection
     private let logger: CategoryLogger
-    private let qualityProfile: CallQualityProfile
+    private let qualityProfile: QualityProfile
     private var localOfferContinuation: CheckedContinuation<String, Error>?
     private var setRemoteVideoTrack: ((RTCVideoTrack) -> Void)?
     private let localStreamId = UUID().uuidString
@@ -26,7 +26,7 @@ final class WebRTCClient: NSObject, CallConnection, RTCPeerConnectionDelegate {
 
     required init(
         iceServers: [String],
-        qualityProfile: CallQualityProfile = .high,
+        qualityProfile: QualityProfile,
         supportsAudio: Bool = true,
         supportsVideo: Bool = true,
         factory: RTCPeerConnectionFactory = .default,

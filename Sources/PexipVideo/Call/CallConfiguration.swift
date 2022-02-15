@@ -7,7 +7,7 @@ public struct CallConfiguration {
         "stun:stun4.l.google.com:19302"
     ]
 
-    public var qualityProfile: CallQualityProfile
+    public var qualityProfile: QualityProfile
     public var supportsAudio: Bool
     public var supportsVideo: Bool
     public var useGoogleStunServersAsBackup: Bool
@@ -17,7 +17,7 @@ public struct CallConfiguration {
     }
 
     public init(
-        qualityProfile: CallQualityProfile = .medium,
+        qualityProfile: QualityProfile = .medium,
         supportsAudio: Bool = true,
         supportsVideo: Bool = true,
         useGoogleStunServersAsBackup: Bool = true
