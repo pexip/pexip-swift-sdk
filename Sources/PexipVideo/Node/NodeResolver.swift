@@ -3,16 +3,16 @@ import Foundation
 // MARK: - Protocol
 
 /// Discovers the Pexip service via DNS SRV
-protocol NodeResolverProtocol {
-    /// Resolves the node address for the provided [host]. Implementations should consult with
-    /// (documentation)[https://docs.pexip.com/clients/configuring_dns_pexip_app.htm#next_gen_mobile]
-    /// for the recommended flow.
-    ///
-    /// - Parameter host: A host to use to resolve the best node address (e.g. example.com)
-    /// - Returns: A node address in the form of https://example.com
-    /// - Throws: `NodeError.nodeNotFound` if the node address cannot be resolved
-    /// - Throws: `Error` if an error was encountered during operation
-    func resolveNodeAddress(for host: String) async throws -> URL
+public protocol NodeResolverProtocol {
+    /**
+     Resolves the node address for the provided `host`.
+
+     - Parameter host: A host to use to resolve the best node address
+     - Returns: A node address in the form of https://example.com or null if node was not found
+     - Throws: `DNSError` if DNS lookup failed
+     - Throws: `Error` if a network error was encountered
+     */
+    func resolveNodeAddress(for host: String) async throws -> URL?
 }
 
 // MARK: - Implementation
@@ -25,6 +25,7 @@ struct NodeResolver: NodeResolverProtocol {
 
     private let dnsLookupClient: DNSLookupClientProtocol
     private let statusClient: NodeStatusClientProtocol
+    private let dnssec: Bool
     private let logger: CategoryLogger
 
     // MARK: - Init
@@ -32,16 +33,18 @@ struct NodeResolver: NodeResolverProtocol {
     init(
         dnsLookupClient: DNSLookupClientProtocol,
         statusClient: NodeStatusClientProtocol,
+        dnssec: Bool,
         logger: CategoryLogger
     ) {
         self.dnsLookupClient = dnsLookupClient
         self.statusClient = statusClient
+        self.dnssec = dnssec
         self.logger = logger
     }
 
     // MARK: - Lookup
 
-    func resolveNodeAddress(for host: String) async throws -> URL {
+    func resolveNodeAddress(for host: String) async throws -> URL? {
         var result: URL?
 
         if let address = try await resolveSRVRecord(for: host) {
@@ -54,11 +57,11 @@ struct NodeResolver: NodeResolverProtocol {
             logger.info(
                 "Found a conferencing node with address: \(result.absoluteString)"
             )
-            return result
         } else {
-            logger.error("No SRV or A records were found for \(host)")
-            throw NodeError.nodeNotFound
+            logger.warn("No SRV or A records were found for \(host)")
         }
+
+        return result
     }
 
     private func resolveSRVRecord(for host: String) async throws -> URL? {
@@ -72,7 +75,7 @@ struct NodeResolver: NodeResolverProtocol {
         )
 
         let addresses = try await dnsLookupClient
-            .resolveSRVRecords(for: name)
+            .resolveSRVRecords(for: name, dnssec: dnssec)
             .compactMap(\.nodeAddress)
         return try await firstActiveAddress(from: addresses)
     }
@@ -83,7 +86,7 @@ struct NodeResolver: NodeResolverProtocol {
         )
 
         let addresses = try await dnsLookupClient
-            .resolveARecords(for: host)
+            .resolveARecords(for: host, dnssec: dnssec)
             .compactMap(\.nodeAddress)
         return try await firstActiveAddress(from: addresses)
     }

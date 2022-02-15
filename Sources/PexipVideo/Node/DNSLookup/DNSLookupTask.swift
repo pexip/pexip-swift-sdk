@@ -3,7 +3,7 @@ import dnssd
 // MARK: - Protocol
 
 protocol DNSLookupTaskProtocol {
-    func prepare() -> DNSServiceErrorType
+    func prepare(withFlags flags: DNSServiceFlags) -> DNSServiceErrorType
     func start() async -> DNSServiceErrorType
     func cancel()
 }
@@ -16,10 +16,10 @@ struct DNSLookupTask: DNSLookupTaskProtocol {
         capacity: MemoryLayout<OpaquePointer>.size
     )
 
-    func prepare() -> DNSServiceErrorType {
+    func prepare(withFlags flags: DNSServiceFlags) -> DNSServiceErrorType {
         DNSServiceQueryRecord(
             sdRef,
-            0,
+            flags,
             0,
             query.domain,
             UInt16(query.serviceType),

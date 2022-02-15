@@ -4,54 +4,78 @@ import Foundation
 
 /// Pexip client REST API v2.
 protocol CallClientProtocol {
-    /// Starts media for the specified call (WebRTC calls only).
-    ///
-    /// - Returns: The result is true if successful, false otherwise.
-    /// - Throws: `HTTPError` if a network error was encountered during operation
-    func ack() async throws -> Bool
+    /**
+     Upgrades this connection to have an audio/video call element.
 
-    /// Disconnects the specified call.
-    ///
-    /// - Returns: The result is true if successful, false otherwise.
-    /// - Throws: `HTTPError` if a network error was encountered during operation
-    func disconnect() async throws -> Bool
+     - Parameters:
+        - participantId: The ID of the participant
+        - sdp: Contains the SDP of the sender
+        - present: Optional field. Contains "send" or "receive"
+                   to act as a presentation stream rather than a main audio/video stream.
+     - Returns: Information about the service you are connecting to
+     - Throws: `HTTPError` if a network error was encountered during operation
+     */
+    func makeCall(
+        participantId: UUID,
+        sdp: String,
+        present: String?
+    ) async throws -> CallDetails
+
+    /**
+     Starts media for the specified call (WebRTC calls only).
+     - Parameters:
+        - participantId: The ID of the participant
+        - callId: The ID of the call
+     - Returns: The result is true if successful, false otherwise.
+     - Throws: `HTTPError` if a network error was encountered during operation
+     */
+    func ack(participantId: UUID, callId: UUID) async throws -> Bool
+
+    /**
+     Disconnects the specified call.
+     - Parameters:
+        - participantId: The ID of the participant
+        - callId: The ID of the call
+     - Returns: The result is true if successful, false otherwise.
+     - Throws: `HTTPError` if a network error was encountered during operation
+     */
+    func disconnect(participantId: UUID, callId: UUID) async throws -> Bool
 }
 
 // MARK: - Implementation
 
-struct CallClient: CallClientProtocol {
-    private let httpSession: HTTPSession
-    private let requestFactory: HTTPRequestFactory
-    private let decoder = JSONDecoder()
-
-    // MARK: - Init
-
-    init(
-        participantUUID: UUID,
-        callUUID: UUID,
-        apiConfiguration: APIConfiguration,
-        httpSession: HTTPSession,
-        authTokenProvider: AuthTokenProvider
-    ) {
-        self.httpSession = httpSession
-        self.requestFactory = HTTPRequestFactory(
-            baseURL: apiConfiguration.callBaseURL(
-                participantUUID: participantUUID,
-                callUUID: callUUID
-            ),
-            authTokenProvider: authTokenProvider
+extension InfinityClient: CallClientProtocol {
+    func makeCall(
+        participantId: UUID,
+        sdp: String,
+        present: String?
+    ) async throws -> CallDetails {
+        var request = try await request(
+            withMethod: .POST,
+            path: .participant(id: participantId),
+            name: "calls"
         )
+        try request.setJSONBody([
+            "call_type": "WEBRTC",
+            "sdp": sdp,
+            "present": present
+        ])
+        return try await json(for: request)
     }
 
-    // MARK: - API
-
-    func ack() async throws -> Bool {
-        let request = try await requestFactory.request(withName: "ack", method: .POST)
-        return try await httpSession.json(for: request, decoder: decoder)
+    func ack(participantId: UUID, callId: UUID) async throws -> Bool {
+        try await json(for: try await request(
+            withMethod: .POST,
+            path: .call(participantId: participantId, callId: callId),
+            name: "ack"
+        ))
     }
 
-    func disconnect() async throws -> Bool {
-        let request = try await requestFactory.request(withName: "disconnect", method: .POST)
-        return try await httpSession.json(for: request, decoder: decoder)
+    func disconnect(participantId: UUID, callId: UUID) async throws -> Bool {
+        try await json(for: try await request(
+            withMethod: .POST,
+            path: .call(participantId: participantId, callId: callId),
+            name: "disconnect"
+        ))
     }
 }

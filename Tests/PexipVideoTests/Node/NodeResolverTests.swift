@@ -16,6 +16,7 @@ final class NodeResolverTests: XCTestCase {
         resolver = NodeResolver(
             dnsLookupClient: dnsLookupClient,
             statusClient: statusClient,
+            dnssec: false,
             logger: .stub
         )
     }
@@ -36,7 +37,7 @@ final class NodeResolverTests: XCTestCase {
 
         XCTAssertEqual(
             dnsLookupClient.steps,
-            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com")]
+            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com", dnssec: false)]
         )
         XCTAssertEqual(address, URL(string: "http://px01.vc.example.com:1720")!)
     }
@@ -55,7 +56,7 @@ final class NodeResolverTests: XCTestCase {
 
         XCTAssertEqual(
             dnsLookupClient.steps,
-            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com")]
+            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com", dnssec: false)]
         )
         XCTAssertEqual(address, URL(string: "https://px01.vc.example.com:443")!)
     }
@@ -74,7 +75,7 @@ final class NodeResolverTests: XCTestCase {
 
         XCTAssertEqual(
             dnsLookupClient.steps,
-            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com")]
+            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com", dnssec: false)]
         )
         XCTAssertEqual(address, URL(string: "http://px01.vc.example.com:80")!)
     }
@@ -102,7 +103,7 @@ final class NodeResolverTests: XCTestCase {
 
         XCTAssertEqual(
             dnsLookupClient.steps,
-            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com")]
+            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com", dnssec: false)]
         )
         // recordB
         XCTAssertEqual(address, URL(string: "http://px02.vc.example.com:1721")!)
@@ -121,7 +122,7 @@ final class NodeResolverTests: XCTestCase {
 
         XCTAssertEqual(
             dnsLookupClient.steps,
-            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com")]
+            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com", dnssec: false)]
         )
     }
 
@@ -146,7 +147,7 @@ final class NodeResolverTests: XCTestCase {
 
         XCTAssertEqual(
             dnsLookupClient.steps,
-            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com")]
+            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com", dnssec: false)]
         )
     }
 
@@ -162,8 +163,8 @@ final class NodeResolverTests: XCTestCase {
         XCTAssertEqual(
             dnsLookupClient.steps,
             [
-                .srvRecordsLookup(name: "_pexapp._tcp.example.com"),
-                .aRecordsLookup(name: "example.com")
+                .srvRecordsLookup(name: "_pexapp._tcp.example.com", dnssec: false),
+                .aRecordsLookup(name: "example.com", dnssec: false)
             ]
         )
         XCTAssertEqual(address, URL(string: "https://198.51.100.40")!)
@@ -182,8 +183,8 @@ final class NodeResolverTests: XCTestCase {
         XCTAssertEqual(
             dnsLookupClient.steps,
             [
-                .srvRecordsLookup(name: "_pexapp._tcp.vc.example.com"),
-                .aRecordsLookup(name: "vc.example.com")
+                .srvRecordsLookup(name: "_pexapp._tcp.vc.example.com", dnssec: false),
+                .aRecordsLookup(name: "vc.example.com", dnssec: false)
             ]
         )
         // recordB
@@ -204,8 +205,8 @@ final class NodeResolverTests: XCTestCase {
         XCTAssertEqual(
             dnsLookupClient.steps,
             [
-                .srvRecordsLookup(name: "_pexapp._tcp.vc.example.com"),
-                .aRecordsLookup(name: "vc.example.com")
+                .srvRecordsLookup(name: "_pexapp._tcp.vc.example.com", dnssec: false),
+                .aRecordsLookup(name: "vc.example.com", dnssec: false)
             ]
         )
     }
@@ -227,8 +228,8 @@ final class NodeResolverTests: XCTestCase {
         XCTAssertEqual(
             dnsLookupClient.steps,
             [
-                .srvRecordsLookup(name: "_pexapp._tcp.vc.example.com"),
-                .aRecordsLookup(name: "vc.example.com")
+                .srvRecordsLookup(name: "_pexapp._tcp.vc.example.com", dnssec: false),
+                .aRecordsLookup(name: "vc.example.com", dnssec: false)
             ]
         )
     }
@@ -239,18 +240,14 @@ final class NodeResolverTests: XCTestCase {
         dnsLookupClient.srvRecords = .success([])
         dnsLookupClient.aRecords = .success([])
 
-        do {
-            _ = try await resolver.resolveNodeAddress(for: "vc.example.com")
-            XCTFail("Should fail with error")
-        } catch {
-            XCTAssertEqual(error as? NodeError, .nodeNotFound)
-        }
+        let address = try await resolver.resolveNodeAddress(for: "vc.example.com")
+        XCTAssertNil(address)
 
         XCTAssertEqual(
             dnsLookupClient.steps,
             [
-                .srvRecordsLookup(name: "_pexapp._tcp.vc.example.com"),
-                .aRecordsLookup(name: "vc.example.com")
+                .srvRecordsLookup(name: "_pexapp._tcp.vc.example.com", dnssec: false),
+                .aRecordsLookup(name: "vc.example.com", dnssec: false)
             ]
         )
     }
@@ -260,21 +257,21 @@ final class NodeResolverTests: XCTestCase {
 
 private final class DNSLookupClientMock: DNSLookupClientProtocol {
     enum Step: Equatable {
-        case srvRecordsLookup(name: String)
-        case aRecordsLookup(name: String)
+        case srvRecordsLookup(name: String, dnssec: Bool)
+        case aRecordsLookup(name: String, dnssec: Bool)
     }
 
     var srvRecords: Result<[SRVRecord], Error> = .success([])
     var aRecords: Result<[ARecord], Error> = .success([])
     private(set) var steps = [Step]()
 
-    func resolveSRVRecords(for name: String) async throws -> [SRVRecord] {
-        steps.append(.srvRecordsLookup(name: name))
+    func resolveSRVRecords(for name: String, dnssec: Bool) async throws -> [SRVRecord] {
+        steps.append(.srvRecordsLookup(name: name, dnssec: dnssec))
         return try srvRecords.get()
     }
 
-    func resolveARecords(for name: String) async throws -> [ARecord] {
-        steps.append(.aRecordsLookup(name: name))
+    func resolveARecords(for name: String, dnssec: Bool) async throws -> [ARecord] {
+        steps.append(.aRecordsLookup(name: name, dnssec: dnssec))
         return try aRecords.get()
     }
 }

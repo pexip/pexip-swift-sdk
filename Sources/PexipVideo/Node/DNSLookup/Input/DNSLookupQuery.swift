@@ -4,6 +4,7 @@ import dnssd
 final class DNSLookupQuery {
     final class Result {
         var records = [Data]()
+        var flags: DNSServiceFlags = 0
     }
 
     let domain: String

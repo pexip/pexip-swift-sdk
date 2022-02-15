@@ -1,6 +1,5 @@
 import Foundation
 
-enum NodeError: Hashable, LocalizedError {
-    case invalidNodeURL(String)
+public enum NodeError: Hashable, LocalizedError {
     case nodeNotFound
 }

@@ -66,6 +66,14 @@ public struct DefaultLogger: LoggerProtocol {
     }
 }
 
+public struct SilentLogger: LoggerProtocol {
+    public init() {}
+
+    public func log(_ message: String, category: LogCategory, level: LogLevel) {
+        // Silence...
+    }
+}
+
 // MARK: - Private extensions
 
 private extension OSLog {

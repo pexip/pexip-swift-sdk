@@ -17,20 +17,26 @@ protocol NodeStatusClientProtocol {
 // MARK: - Implementation
 
 struct NodeStatusClient: NodeStatusClientProtocol {
-    private let httpSession: HTTPSession
+    private let urlSession: URLSession
+    private let logger: CategoryLogger
 
     // MARK: - Init
 
-    init(httpSession: HTTPSession) {
-        self.httpSession = httpSession
+    init(urlSession: URLSession, logger: CategoryLogger) {
+        self.urlSession = urlSession
+        self.logger = logger
     }
 
     // MARK: - API
 
     func isInMaintenanceMode(nodeAddress: URL) async throws -> Bool {
-        let (_, response) = try await httpSession.data(
-            for: URLRequest(url: nodeAddress, httpMethod: .GET),
-            validate: false
+        var request = URLRequest(url: nodeAddress, httpMethod: .GET)
+        request.setHTTPHeader(.defaultUserAgent)
+
+        let (_, response) = try await urlSession.data(
+            for: request,
+            validate: false,
+            logger: logger
         )
 
         switch response.statusCode {
