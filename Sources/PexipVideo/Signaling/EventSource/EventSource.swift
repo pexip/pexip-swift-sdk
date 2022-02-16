@@ -161,10 +161,14 @@ private final class DataTaskDelegate: NSObject, URLSessionDataDelegate {
         didReceive challenge: URLAuthenticationChallenge,
         completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
     ) {
-        urlSessionDelegate?.urlSession?(
-            session,
-            didReceive: challenge,
-            completionHandler: completionHandler
-        )
+        if urlSessionDelegate?.responds(to: #selector(urlSession(_:didReceive:completionHandler:))) == true {
+            urlSessionDelegate?.urlSession?(
+                session,
+                didReceive: challenge,
+                completionHandler: completionHandler
+            )
+        } else {
+            completionHandler(.performDefaultHandling, nil)
+        }
     }
 }

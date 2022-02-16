@@ -50,7 +50,10 @@ struct InfinityClient {
         name: String,
         token tokenStrategy: TokenStrategy = .fromStorage
     ) async throws -> URLRequest {
-        var request = URLRequest(url: url(for: path), httpMethod: method)
+        var request = URLRequest(
+            url: url(for: path).appendingPathComponent(name),
+            httpMethod: method
+        )
         request.setHTTPHeader(.defaultUserAgent)
 
         switch tokenStrategy {

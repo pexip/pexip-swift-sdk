@@ -18,7 +18,7 @@ protocol CallClientProtocol {
     func makeCall(
         participantId: UUID,
         sdp: String,
-        present: String?
+        presentation: CallPresentationKind?
     ) async throws -> CallDetails
 
     /**
@@ -40,6 +40,21 @@ protocol CallClientProtocol {
      - Throws: `HTTPError` if a network error was encountered during operation
      */
     func disconnect(participantId: UUID, callId: UUID) async throws -> Bool
+
+    /**
+     Sends a new ICE candidate if doing trickle ICE.
+     - Parameters:
+        - participantId: The ID of the participant
+        - callId: The ID of the call
+        - iceCandidate: The ICE candidate to send
+     - Returns: The result is true if successful, false otherwise.
+     - Throws: `HTTPError` if a network error was encountered during operation
+     */
+    func newCandidate(
+        participantId: UUID,
+        callId: UUID,
+        iceCandidate: IceCandidate
+    ) async throws
 }
 
 // MARK: - Implementation
@@ -48,17 +63,18 @@ extension InfinityClient: CallClientProtocol {
     func makeCall(
         participantId: UUID,
         sdp: String,
-        present: String?
+        presentation: CallPresentationKind?
     ) async throws -> CallDetails {
         var request = try await request(
             withMethod: .POST,
             path: .participant(id: participantId),
             name: "calls"
         )
+        request.timeoutInterval = 62
         try request.setJSONBody([
             "call_type": "WEBRTC",
             "sdp": sdp,
-            "present": present
+            "present": presentation?.rawValue
         ])
         return try await json(for: request)
     }
@@ -77,5 +93,19 @@ extension InfinityClient: CallClientProtocol {
             path: .call(participantId: participantId, callId: callId),
             name: "disconnect"
         ))
+    }
+
+    func newCandidate(
+        participantId: UUID,
+        callId: UUID,
+        iceCandidate: IceCandidate
+    ) async throws {
+        var request = try await request(
+            withMethod: .POST,
+            path: .call(participantId: participantId, callId: callId),
+            name: "new_candidate"
+        )
+        try request.setJSONBody(iceCandidate)
+        _ = try await data(for: request)
     }
 }

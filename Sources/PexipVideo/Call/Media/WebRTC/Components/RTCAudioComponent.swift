@@ -29,7 +29,9 @@ final class RTCAudioComponent: AudioComponent {
     }
 
     deinit {
-        cleanResources()
+        if let trackSender = trackSender {
+            _ = trackManager?.removeTrack(trackSender)
+        }
     }
 
     // MARK: - Internal methods
@@ -40,12 +42,6 @@ final class RTCAudioComponent: AudioComponent {
 
     func speakerOff() {
         overrideOutputAudioPort(.none)
-    }
-
-    private func cleanResources() {
-        if let trackSender = trackSender {
-            _ = trackManager?.removeTrack(trackSender)
-        }
     }
 
     // MARK: - Private methods

@@ -36,7 +36,7 @@ extension RTCConfiguration {
         configuration.iceServers = [RTCIceServer(urlStrings: iceServers)]
         configuration.sdpSemantics = .unifiedPlan
         configuration.bundlePolicy = .balanced
-        configuration.iceTransportPolicy = iceServers.isEmpty ? .all : .relay
+        configuration.continualGatheringPolicy = .gatherContinually
         configuration.rtcpMuxPolicy = .require
         configuration.tcpCandidatePolicy = .enabled
         configuration.disableLinkLocalNetworks = true
@@ -67,5 +67,72 @@ extension RTCMediaConstraints {
                 "DtlsSrtpKeyAgreement": kRTCMediaConstraintsValueTrue
             ]
         )
+    }
+}
+
+// MARK: - Signaling State
+
+extension RTCSignalingState {
+    var debugDescription: String {
+        switch self {
+        case .stable:
+            return "Stable"
+        case .haveLocalOffer:
+            return "HaveLocalOffer"
+        case .haveLocalPrAnswer:
+            return "HaveLocalPrAnswer"
+        case .haveRemoteOffer:
+            return "HaveRemoteOffer"
+        case .haveRemotePrAnswer:
+            return "HaveRemotePrAnswer"
+        case .closed:
+            return "Closed"
+        @unknown default:
+            return "Unknown"
+        }
+    }
+}
+
+// MARL - Connection State
+
+extension RTCIceConnectionState {
+    var debugDescription: String {
+        switch self {
+        case .new:
+            return "New"
+        case .checking:
+            return "Checking"
+        case .connected:
+            return "Connected"
+        case .completed:
+            return "Completed"
+        case .failed:
+            return "Failed"
+        case .disconnected:
+            return "Disconnected"
+        case .closed:
+            return "Closed"
+        case .count:
+            return "Count"
+        @unknown default:
+            return "Unknown"
+        }
+    }
+}
+
+// MARK: - Ice Gathering State
+
+extension RTCIceGatheringState {
+    var debugDescription: String {
+        switch self {
+        case .new:
+            return "New"
+        case .gathering:
+            return "Gathering"
+        case .complete:
+            return "complete"
+        @unknown default:
+            return "Unknown"
+        }
     }
 }

@@ -38,7 +38,9 @@ final class InfinityClientTests: XCTestCase {
             name: "request"
         )
         var expectedRequest = URLRequest(
-            url: try XCTUnwrap(URL(string: "https://vc.example.com/api/client/v2/conferences/test")),
+            url: try XCTUnwrap(
+                URL(string: "https://vc.example.com/api/client/v2/conferences/test/request")
+            ),
             httpMethod: .GET
         )
         expectedRequest.setHTTPHeader(.defaultUserAgent)
@@ -58,7 +60,9 @@ final class InfinityClientTests: XCTestCase {
             token: .value(customToken)
         )
         var expectedRequest = URLRequest(
-            url: try XCTUnwrap(URL(string: "https://vc.example.com/api/client/v2/conferences/test")),
+            url: try XCTUnwrap(
+                URL(string: "https://vc.example.com/api/client/v2/conferences/test/request")
+            ),
             httpMethod: .GET
         )
         expectedRequest.setHTTPHeader(.defaultUserAgent)
@@ -77,7 +81,9 @@ final class InfinityClientTests: XCTestCase {
             token: .none
         )
         var expectedRequest = URLRequest(
-            url: try XCTUnwrap(URL(string: "https://vc.example.com/api/client/v2/conferences/test")),
+            url: try XCTUnwrap(
+                URL(string: "https://vc.example.com/api/client/v2/conferences/test/request")
+            ),
             httpMethod: .GET
         )
         expectedRequest.setHTTPHeader(.defaultUserAgent)
@@ -94,7 +100,8 @@ final class InfinityClientTests: XCTestCase {
             token: .none
         )
         let expectedUrlString = "https://vc.example.com/api/client/v2/conferences/test/"
-            + "participants/\(participantId.uuidString.lowercased())"
+            + "participants/\(participantId.uuidString.lowercased())/"
+            + "request"
         var expectedRequest = URLRequest(
             url: try XCTUnwrap(URL(string: expectedUrlString)),
             httpMethod: .POST
@@ -115,7 +122,8 @@ final class InfinityClientTests: XCTestCase {
         )
         let expectedUrlString = "https://vc.example.com/api/client/v2/conferences/test/"
             + "participants/\(participantId.uuidString.lowercased())/"
-            + "calls/\(callId.uuidString.lowercased())"
+            + "calls/\(callId.uuidString.lowercased())/"
+            + "request"
         var expectedRequest = URLRequest(
             url: try XCTUnwrap(URL(string: expectedUrlString)),
             httpMethod: .POST

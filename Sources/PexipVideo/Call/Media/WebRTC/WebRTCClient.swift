@@ -1,9 +1,11 @@
 import Foundation
 import WebRTC
+import Combine
 
 final class WebRTCClient: NSObject, CallConnection, RTCPeerConnectionDelegate {
     let supportsAudio: Bool
     let supportsVideo: Bool
+    var iceCandidate: AnyPublisher<IceCandidate, Never> { iceCandidateSubject.eraseToAnyPublisher() }
 
     private(set) var camera: CameraComponent?
     private(set) var audio: AudioComponent?
@@ -13,9 +15,10 @@ final class WebRTCClient: NSObject, CallConnection, RTCPeerConnectionDelegate {
     private let peerConnection: RTCPeerConnection
     private let logger: CategoryLogger
     private let qualityProfile: QualityProfile
-    private var localOfferContinuation: CheckedContinuation<String, Error>?
     private var setRemoteVideoTrack: ((RTCVideoTrack) -> Void)?
     private let localStreamId = UUID().uuidString
+    private var icePwd: String?
+    private let iceCandidateSubject = PassthroughSubject<IceCandidate, Never>()
 
     // MARK: - Init
 
@@ -82,12 +85,10 @@ final class WebRTCClient: NSObject, CallConnection, RTCPeerConnectionDelegate {
 
     func createOffer() async throws -> String {
         let constrains = RTCMediaConstraints.constraints(withEnabledVideo: true, audio: true)
-        let sdp = try await peerConnection.offer(for: constrains)
-        try await peerConnection.setLocalDescription(sdp)
-
-        return try await withCheckedThrowingContinuation { continuation in
-            self.localOfferContinuation = continuation
-        }
+        let offer = try await peerConnection.offer(for: constrains)
+        icePwd = IceCandidate.pwd(from: offer.sdp)
+        try await peerConnection.setLocalDescription(offer)
+        return offer.sdp
     }
 
     func setRemoteDescription(_ sdp: SessionDescription) async throws {
@@ -102,7 +103,7 @@ final class WebRTCClient: NSObject, CallConnection, RTCPeerConnectionDelegate {
     // MARK: - RTCPeerConnectionDelegate
 
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {
-        logger.debug("Peer connection - new signaling state: \(stateChanged)")
+        logger.debug("Peer connection - new signaling state: \(stateChanged.debugDescription)")
     }
 
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
@@ -118,22 +119,21 @@ final class WebRTCClient: NSObject, CallConnection, RTCPeerConnectionDelegate {
     }
 
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
-        logger.debug("Peer connection - new connection state: \(newState)")
+        logger.debug("Peer connection - new connection state: \(newState.debugDescription)")
     }
 
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {
-        logger.debug("Peer connection - new gathering state: \(newState)")
-        if newState == .complete {
-            if let localDescription = peerConnection.localDescription {
-                localOfferContinuation?.resume(returning: localDescription.sdp)
-            } else {
-                localOfferContinuation?.resume(throwing: MediaError.iceGatheringFailed)
-            }
-        }
+        logger.debug("Peer connection - new gathering state: \(newState.debugDescription)")
     }
 
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
         logger.debug("Peer connection - did generate local candidate")
+        let candidate = IceCandidate(
+            candidate: candidate.sdp,
+            mid: candidate.sdpMid,
+            pwd: icePwd
+        )
+        iceCandidateSubject.send(candidate)
     }
 
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove candidates: [RTCIceCandidate]) {

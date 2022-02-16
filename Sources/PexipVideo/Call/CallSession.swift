@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 // MARK: - Protocol
 
@@ -11,24 +12,30 @@ protocol CallSessionProtocol {
 
 final class CallSession: CallSessionProtocol {
     typealias APIClient = CallClientProtocol
+    private typealias CallDetailsTask = Task<CallDetails, Error>
 
     private let participantId: UUID
     private let configuration: CallConfiguration
+    private let isPresentation: Bool
     private let apiClient: APIClient
     private let rtcClient: WebRTCClient
-    private var callId: UUID?
+    private let logger: CategoryLogger
+    private var callDetailsTask: CallDetailsTask?
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
 
     init(
         participantId: UUID,
         configuration: CallConfiguration,
+        isPresentation: Bool = false,
         iceServers: [String],
         apiClient: APIClient,
         logger: LoggerProtocol
     ) {
         self.participantId = participantId
         self.configuration = configuration
+        self.isPresentation = isPresentation
         self.apiClient = apiClient
         self.rtcClient = WebRTCClient(
             iceServers: iceServers.isEmpty
@@ -37,38 +44,88 @@ final class CallSession: CallSessionProtocol {
             qualityProfile: configuration.qualityProfile,
             logger: logger
         )
+        self.logger = logger[.media]
     }
 
     func start() async throws {
-        let sdp = try await rtcClient.createOffer()
-        let offer = SDPMangler(sdp: sdp).sdp(
-            withBandwidth: configuration.qualityProfile.bandwidth,
-            isPresentation: false
-        )
-        let callDetails = try await apiClient.makeCall(
+        let callDetailsTask = CallDetailsTask {
+            let sdp = try await rtcClient.createOffer()
+            let offer = SDPMangler(sdp: sdp).mangle(
+                qualityProfile: configuration.qualityProfile,
+                isPresentation: isPresentation
+            )
+            return try await apiClient.makeCall(
+                participantId: participantId,
+                sdp: offer,
+                presentation: isPresentation ? .receive : nil
+            )
+        }
+        self.callDetailsTask = callDetailsTask
+
+        // Listen for local ICE candidates on the local peer connection
+        rtcClient.iceCandidate
+            .sink { [weak self] candidate in
+                self?.sendNewIceCandidate(
+                    candidate,
+                    callDetailsTask: callDetailsTask
+                )
+            }.store(in: &cancellables)
+
+        try await rtcClient.setRemoteDescription(callDetailsTask.value.sdp)
+
+        let mediaStarted = try await apiClient.ack(
             participantId: participantId,
-            sdp: offer,
-            present: nil
+            callId: callDetailsTask.value.id
         )
 
-        try await rtcClient.setRemoteDescription(callDetails.sdp)
-
-        _ = try await apiClient.ack(
-            participantId: participantId,
-            callId: callDetails.id
-        )
+        if mediaStarted {
+            logger.info("Started media for the call.")
+        } else {
+            logger.warn("Failed to start media for the call.")
+        }
     }
 
     func stop() async throws {
-        guard let callId = callId else {
+        guard let callDetailsTask = callDetailsTask else {
             return
         }
 
+        callDetailsTask.cancel()
+        self.callDetailsTask = nil
         rtcClient.close()
+        cancellables = []
 
-        _ = try await apiClient.disconnect(
+        let disconnected = try await apiClient.disconnect(
             participantId: participantId,
-            callId: callId
+            callId: callDetailsTask.value.id
         )
+
+        if disconnected {
+            logger.info("Disconnected from the call.")
+        } else {
+            logger.warn("Failed to disconnect from the call.")
+        }
+    }
+
+    // MARK: - Private
+
+    private func sendNewIceCandidate(
+        _ iceCandidate: IceCandidate,
+        callDetailsTask: CallDetailsTask
+    ) {
+        Task {
+            do {
+                try await apiClient.newCandidate(
+                    participantId: participantId,
+                    callId: callDetailsTask.value.id,
+                    iceCandidate: iceCandidate
+                )
+                logger.debug("Added new ICE candidate.")
+            } catch {
+                logger.error(
+                    "Failed to send new ICE candidate: \(error.localizedDescription)"
+                )
+            }
+        }
     }
 }

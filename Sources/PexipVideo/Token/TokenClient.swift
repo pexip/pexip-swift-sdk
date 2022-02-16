@@ -47,7 +47,7 @@ extension InfinityClient: TokenRequesterProtocol {
             "conference_extension": parameters.conferenceExtension,
             "chosen_idp": parameters.idp?.uuid,
             "sso_token": parameters.ssoToken
-        ])
+        ].compactMapValues({ $0 }))
 
         if let pin = parameters.pin {
             request.setHTTPHeader(.init(name: "pin", value: pin))

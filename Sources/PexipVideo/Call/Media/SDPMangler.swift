@@ -2,69 +2,103 @@ import Foundation
 
 /// Responsible for mangling the SDP to set bandwidths and resolutions
 struct SDPMangler {
-    enum Pattern: String {
-        case mediaLine = "^m=(\\w*)\\s.*$"
-        case connectionLine = "^c=.*$"
-        case codecH264ProfileLevel52 = "^a=fmtp:.*;profile-level-id=\\w{4}34$"
-    }
-
-    enum Constants {
-        static let videoOrientation = "urn:3gpp:video-orientation"
-        static let endOfLine = "\r\n"
-    }
-
     let sdp: String
 
-    func sdp(withBandwidth bandwidth: UInt, isPresentation: Bool) -> String {
-        let mediaLinePredicate = NSPredicate(pattern: .mediaLine)
-        let connectionLinePredicate = NSPredicate(pattern: .connectionLine)
-        let profileLevelPredicate = NSPredicate(pattern: .codecH264ProfileLevel52)
-        let lines = sdp.components(separatedBy: Constants.endOfLine)
+    func mangle(qualityProfile: QualityProfile, isPresentation: Bool) -> String {
         var modifiedLines = [String]()
-        var section = "global"
+        var section = Constants.sectionGlobal
+        var addBandwidth = true
+        var addContentSlides = isPresentation
+        var opusRtpmap: String?
+        let lines = sdp.components(separatedBy: Constants.delimeter).filter({ !$0.isEmpty })
 
-        for var line in lines {
-            guard line.range(of: Constants.videoOrientation) == nil else {
+        for line in lines {
+            section = Regex.media.matchEntire(line)?.groupValue(at: 1) ?? section
+            opusRtpmap = Regex.opusRtpmap.matchEntire(line)?.groupValue(at: 1) ?? opusRtpmap
+
+            let isVideoSection = section == Constants.sectionVideo
+
+            // swiftlint:disable opening_brace
+            if let rtpmap = opusRtpmap,
+               let opusBitrate = qualityProfile.opusBitrate,
+               line.isMediaFormatParameterLine(rtpmap)
+            {
+                var parameters = line.mediaFormatParameters()
+
+                for (index, parameter) in parameters.enumerated()
+                where parameter.key == Constants.opusMaxAverageBitrate {
+                    parameters[index] = .init(key: parameter.key, value: "\(opusBitrate * 1000)")
+                }
+
+                let modifiedLine = Constants.mediaFormatParameter
+                    + ":\(rtpmap) "
+                    + parameters.map { "\($0.key)=\($0.value)" }.joined(separator: ";")
+
+                modifiedLines.append(modifiedLine)
+                opusRtpmap = nil
+            } else {
+                modifiedLines.append(line)
+            }
+
+            if !line.starts(with: "c=") {
                 continue
             }
 
-            let isVideoSection = section == "video"
-
-            if mediaLinePredicate.evaluate(with: line) {
-                let delimeters = CharacterSet(charactersIn: "= ")
-                let components = line.components(separatedBy: delimeters)
-                if components.count > 1 {
-                    section = components[1]
-                }
+            if addBandwidth && isVideoSection {
+                modifiedLines.append("b=AS:\(qualityProfile.bandwidth)")
+                addBandwidth = false
             }
 
-            // HACK: remove once H264 Level 5.2 is supported in Pexip Infinity v21+ (see MI-1758)
-            if isVideoSection && profileLevelPredicate.evaluate(with: line) {
-                // change 34 to 33 at the end of the line (0x34 = 52 is 5.2, 0x33 = 51 is 5.1)
-                line = line.dropLast(2) + "33"
-            }
-
-            modifiedLines.append(line)
-
-            if isVideoSection && connectionLinePredicate.evaluate(with: line) {
-                if bandwidth != 0 {
-                    modifiedLines.append("b=AS:\(bandwidth)")
-                }
-
-                if isPresentation {
-                    modifiedLines.append("a=content:slides")
-                }
+            if addContentSlides && isVideoSection {
+                modifiedLines.append("a=content:slides")
+                addContentSlides = false
             }
         }
 
-        return modifiedLines.joined(separator: Constants.endOfLine)
+        return modifiedLines
+            .joined(separator: Constants.delimeter)
+            .appending(Constants.delimeter)
     }
+}
+
+// MARK: - Private types
+
+private enum Constants {
+    static let sectionGlobal = "global"
+    static let sectionAudio = "audio"
+    static let sectionVideo = "video"
+    static let mediaFormatParameter = "a=fmtp"
+    static let opusMaxAverageBitrate = "maxaveragebitrate"
+    static let delimeter = "\r\n"
+}
+
+extension Regex {
+    static let media = Regex("^m=(\(Constants.sectionVideo)|\(Constants.sectionAudio)).*$")
+    static let opusRtpmap = Regex("^a=rtpmap:(\\d+)\\s+\\b(opus).*$")
 }
 
 // MARK: - Private extensions
 
-private extension NSPredicate {
-    convenience init(pattern: SDPMangler.Pattern) {
-        self.init(format: "SELF MATCHES %@", pattern.rawValue)
+private extension String {
+    struct MediaFormatParameter {
+        let key: String
+        let value: String
+    }
+
+    func isMediaFormatParameterLine(_ rtpmap: String) -> Bool {
+        rtpmap.isEmpty ? false : starts(with: "\(Constants.mediaFormatParameter):\(rtpmap)")
+    }
+
+    func mediaFormatParameters() -> [MediaFormatParameter] {
+        components(separatedBy: " ")
+            .dropFirst(1)
+            .joined(separator: "")
+            .components(separatedBy: ";")
+            .compactMap {
+                let parts = $0.components(separatedBy: "=")
+                return parts.count == 2
+                    ? MediaFormatParameter(key: parts[0], value: parts[1])
+                    : nil
+            }
     }
 }

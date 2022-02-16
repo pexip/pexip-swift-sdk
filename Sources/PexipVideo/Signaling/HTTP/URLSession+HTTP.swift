@@ -41,7 +41,7 @@ extension URLSession {
         decoder: JSONDecoder,
         logger: CategoryLogger? = nil
     ) async throws -> T {
-        let (data, _) = try await data(for: request, validate: validate)
+        let (data, _) = try await data(for: request, validate: validate, logger: logger)
 
         do {
             return try decoder.decode(T.self, from: data)

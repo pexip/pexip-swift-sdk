@@ -37,7 +37,7 @@ public struct Token: Decodable, Hashable {
     /// The name of the conference
     public let conferenceName: String
     // STUN server configuration from the Pexip Conferencing Node
-    public let stun: [Stun]
+    public let stun: [Stun]?
     /// Validity lifetime in seconds.
     public var expires: TimeInterval {
         TimeInterval(expiresString) ?? 0
@@ -57,7 +57,7 @@ public struct Token: Decodable, Hashable {
     }
 
     var iceServers: [String] {
-        stun.map(\.url)
+        (stun ?? []).map(\.url)
     }
 
     private var expiresString: String

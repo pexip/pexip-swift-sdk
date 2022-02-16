@@ -9,7 +9,7 @@ public protocol ConferenceProtocol {
 
 // MARK: - Implementation
 
-public final class Conference: ConferenceProtocol {
+final class Conference: ConferenceProtocol {
     private let conferenceName: String
     private let userDisplayName: String
     private let tokenSession: TokenSessionProtocol
@@ -39,14 +39,14 @@ public final class Conference: ConferenceProtocol {
 
     // MARK: - Public API
 
-    public func join() async throws {
+    func join() async throws {
         logger[.conference].info(
             "Joining \(conferenceName) as \(userDisplayName)"
         )
         try await callSession.start()
     }
 
-    public func leave() async throws {
+    func leave() async throws {
         logger[.conference].info("Leaving \(conferenceName)")
         eventStreamTask?.cancel()
         await eventSource.close()
