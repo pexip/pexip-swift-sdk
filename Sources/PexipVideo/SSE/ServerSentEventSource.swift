@@ -2,28 +2,28 @@ import Foundation
 
 // MARK: - Protocol
 
-protocol ConferenceEventSourceProtocol {
+protocol ServerSentEventSourceProtocol {
     func open() async throws
     func close() async
-    func eventStream() async -> AsyncStream<ConferenceEvent>
+    func eventStream() async -> AsyncStream<ServerSentEvent>
 }
 
 // MARK: - Implementation
 
-actor ConferenceEventSource: ConferenceEventSourceProtocol {
+actor ServerSentEventSource: ServerSentEventSourceProtocol {
     private let decoder = JSONDecoder()
-    private let client: ConferenceEventClientProtocol
+    private let client: ServerSentEventClientProtocol
     private let logger: CategoryLogger
     private let maxReconnectionTime: TimeInterval = 10
     private var reconnectionTime: TimeInterval = 3
     private var reconnectionAttempts: Int = 0
     private var lastEventId: String?
     private var eventSourceTask: Task<Void, Error>?
-    private var subscribers = [AsyncStream<ConferenceEvent>.Continuation]()
+    private var subscribers = [AsyncStream<ServerSentEvent>.Continuation]()
 
     // MARK: - Init
 
-    init(client: ConferenceEventClientProtocol, logger: LoggerProtocol) {
+    init(client: ServerSentEventClientProtocol, logger: LoggerProtocol) {
         self.client = client
         self.logger = logger[.sse]
     }
@@ -78,8 +78,8 @@ actor ConferenceEventSource: ConferenceEventSourceProtocol {
         eventSourceTask?.cancel()
     }
 
-    func eventStream() async -> AsyncStream<ConferenceEvent> {
-        AsyncStream<ConferenceEvent> { continuation in
+    func eventStream() async -> AsyncStream<ServerSentEvent> {
+        AsyncStream<ServerSentEvent> { continuation in
             subscribers.append(continuation)
         }
     }
@@ -107,7 +107,7 @@ actor ConferenceEventSource: ConferenceEventSourceProtocol {
         }
     }
 
-    private func conferenceEvent(from event: MessageEvent) -> ConferenceEvent? {
+    private func conferenceEvent(from event: MessageEvent) -> ServerSentEvent? {
         guard let name = event.name else {
             logger.debug("Received event without a name")
             return nil
@@ -119,6 +119,10 @@ actor ConferenceEventSource: ConferenceEventSourceProtocol {
             switch name {
             case "message_received":
                 return .chatMessage(try decoder.decode(ChatMessage.self, from: data))
+            case "call_disconnected":
+                return .callDisconnected(try decoder.decode(CallDisconnected.self, from: data))
+            case "disconnect":
+                return .disconnect(try decoder.decode(Disconnect.self, from: data))
             default:
                 logger.debug("SSE event: '\(name)' was not handled")
                 return nil

@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Protocol
 
 /// Pexip client REST API v2.
-protocol ConferenceEventClientProtocol {
+protocol ServerSentEventClientProtocol {
     func eventStream(
         lastEventId: String?
     ) async throws -> AsyncThrowingStream<MessageEvent, Error>
@@ -11,7 +11,7 @@ protocol ConferenceEventClientProtocol {
 
 // MARK: - Implementation
 
-extension InfinityClient: ConferenceEventClientProtocol {
+extension InfinityClient: ServerSentEventClientProtocol {
     func eventStream(
         lastEventId: String?
     ) async throws -> AsyncThrowingStream<MessageEvent, Error> {

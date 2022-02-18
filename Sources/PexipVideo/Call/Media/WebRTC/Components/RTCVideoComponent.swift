@@ -24,7 +24,7 @@ final class RTCVideoComponent: VideoComponent {
 
         let renderer = RTCMTLVideoView(frame: view.frame)
         renderer.translatesAutoresizingMaskIntoConstraints = false
-        renderer.videoContentMode = .scaleAspectFill
+        renderer.videoContentMode = .scaleAspectFit
 
         view.addSubview(renderer)
 

@@ -28,7 +28,7 @@ public struct TokenRequest {
         ssoToken: String? = nil
     ) {
         self.displayName = displayName
-        self.pin = pin
+        self.pin = pin?.isEmpty == true ? "none" : pin
         self.conferenceExtension = conferenceExtension
         self.idp = idp
         self.ssoToken = ssoToken

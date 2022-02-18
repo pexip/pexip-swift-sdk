@@ -6,19 +6,49 @@ import AppKit
 public typealias VideoView = NSView
 #endif
 
-public protocol Call {
+import Combine
+
+enum CallConnectionEvent {
+    case connected
+    case disconnected
+    case failed
+    case newIceCandidate(IceCandidate)
+}
+
+protocol CallConnection {
+    typealias SessionDescription = String
+
     var camera: CameraComponent? { get }
     var audio: AudioComponent? { get }
     var remoteVideo: VideoComponent? { get }
+    var eventPublisher: AnyPublisher<CallConnectionEvent, Never> { get }
 
     func close()
-}
-
-protocol CallConnection: Call {
-    typealias SessionDescription = String
 
     func createOffer() async throws -> SessionDescription
     func setRemoteDescription(_ sdp: SessionDescription) async throws
+}
+
+import SwiftUI
+
+public struct PXVideoView: UIViewRepresentable {
+    private let video: VideoComponent
+
+    public init(video: VideoComponent) {
+        self.video = video
+    }
+
+    public func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.backgroundColor = .black
+        return view
+    }
+
+    public func updateUIView(_ uiView: UIView, context: Context) {
+        Task {
+            video.render(to: uiView)
+        }
+    }
 }
 
 // protocol MediaConnection {

@@ -3,16 +3,33 @@ import Combine
 
 // MARK: - Protocol
 
+enum CallEvent {
+    case mediaStarted
+    case mediaEnded
+}
+
 protocol CallSessionProtocol {
     func start() async throws
     func stop() async throws
+    var camera: CameraComponent? { get }
+    var audio: AudioComponent? { get }
+    var remoteVideo: VideoComponent? { get }
+    var eventPublisher: AnyPublisher<CallEvent, Never> { get }
 }
 
 // MARK: - Implementation
 
 final class CallSession: CallSessionProtocol {
-    typealias APIClient = CallClientProtocol
+    typealias APIClient = CallClientProtocol & ParticipantClientProtocol
     private typealias CallDetailsTask = Task<CallDetails, Error>
+
+    var camera: CameraComponent? { rtcClient.camera }
+    var audio: AudioComponent? { rtcClient.audio }
+    var remoteVideo: VideoComponent? { rtcClient.remoteVideo }
+
+    var eventPublisher: AnyPublisher<CallEvent, Never> {
+        eventSubject.eraseToAnyPublisher()
+    }
 
     private let participantId: UUID
     private let configuration: CallConfiguration
@@ -21,6 +38,7 @@ final class CallSession: CallSessionProtocol {
     private let rtcClient: WebRTCClient
     private let logger: CategoryLogger
     private var callDetailsTask: CallDetailsTask?
+    private var eventSubject = PassthroughSubject<CallEvent, Never>()
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
@@ -42,6 +60,8 @@ final class CallSession: CallSessionProtocol {
                 ? configuration.backupIceServers
                 : iceServers,
             qualityProfile: configuration.qualityProfile,
+            supportsAudio: configuration.supportsAudio,
+            supportsVideo: configuration.supportsVideo,
             logger: logger
         )
         self.logger = logger[.media]
@@ -62,13 +82,10 @@ final class CallSession: CallSessionProtocol {
         }
         self.callDetailsTask = callDetailsTask
 
-        // Listen for local ICE candidates on the local peer connection
-        rtcClient.iceCandidate
-            .sink { [weak self] candidate in
-                self?.sendNewIceCandidate(
-                    candidate,
-                    callDetailsTask: callDetailsTask
-                )
+        // Listen for connection events
+        rtcClient.eventPublisher
+            .sink { [weak self] event in
+                self?.handleEvent(event)
             }.store(in: &cancellables)
 
         try await rtcClient.setRemoteDescription(callDetailsTask.value.sdp)
@@ -109,23 +126,39 @@ final class CallSession: CallSessionProtocol {
 
     // MARK: - Private
 
-    private func sendNewIceCandidate(
-        _ iceCandidate: IceCandidate,
-        callDetailsTask: CallDetailsTask
-    ) {
+    private func handleEvent(_ event: CallConnectionEvent) {
         Task {
-            do {
-                try await apiClient.newCandidate(
-                    participantId: participantId,
-                    callId: callDetailsTask.value.id,
-                    iceCandidate: iceCandidate
-                )
-                logger.debug("Added new ICE candidate.")
-            } catch {
-                logger.error(
-                    "Failed to send new ICE candidate: \(error.localizedDescription)"
-                )
+            switch event {
+            case .connected:
+                eventSubject.send(.mediaStarted)
+            case .disconnected:
+                eventSubject.send(.mediaEnded)
+            case .failed:
+                logger.error("Peer connection failed")
+            case .newIceCandidate(let iceCandidate):
+                await sendNewIceCandidate(iceCandidate)
             }
+        }
+    }
+
+    /// Listen for local ICE candidates on the local peer connection
+    private func sendNewIceCandidate(_ iceCandidate: IceCandidate) async {
+        guard let callDetailsTask = callDetailsTask else {
+            logger.warn("Tried to send a new ICE candidate before starting a call")
+            return
+        }
+
+        do {
+            try await apiClient.newCandidate(
+                participantId: participantId,
+                callId: callDetailsTask.value.id,
+                iceCandidate: iceCandidate
+            )
+            logger.debug("Added new ICE candidate.")
+        } catch {
+            logger.error(
+                "Failed to send new ICE candidate: \(error.localizedDescription)"
+            )
         }
     }
 }

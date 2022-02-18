@@ -89,7 +89,7 @@ public struct ConferenceFactory {
                 apiClient: apiClient,
                 logger: logger
             ),
-            eventSource: ConferenceEventSource(
+            eventSource: ServerSentEventSource(
                 client: apiClient,
                 logger: logger
             ),

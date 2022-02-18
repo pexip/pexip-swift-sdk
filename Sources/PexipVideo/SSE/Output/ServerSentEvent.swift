@@ -1,5 +1,7 @@
-enum ConferenceEvent {
+enum ServerSentEvent {
     case chatMessage(ChatMessage)
+    case callDisconnected(CallDisconnected)
+    case disconnect(Disconnect)
 }
 
 // MARK: - Events
@@ -13,4 +15,18 @@ public struct ChatMessage: Decodable {
     let type: String
     /// Message contents.
     let payload: String
+}
+
+struct CallDisconnected: Decodable {
+    private enum CodingKeys: String, CodingKey {
+        case callId = "call_uuid"
+        case reason
+    }
+
+    let callId: UUID
+    let reason: String
+}
+
+struct Disconnect: Decodable {
+    let reason: String
 }
