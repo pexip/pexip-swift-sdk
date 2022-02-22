@@ -1,9 +1,12 @@
 import WebRTC
 
-final class RTCAudioComponent: AudioComponent {
-    var isMuted = false {
-        didSet(value) {
-            track.isEnabled = value
+final class WebRTCAudioTrack: AudioTrackProtocol {
+    var isEnabled: Bool {
+        get {
+            track.isEnabled
+        }
+        set {
+            track.isEnabled = newValue
         }
     }
 
@@ -20,11 +23,10 @@ final class RTCAudioComponent: AudioComponent {
         trackManager: RTCTrackManager,
         streamId: String
     ) {
-        let audioSource = factory.audioSource(with: .empty)
-        self.track = factory.audioTrack(with: audioSource, trackId: UUID().uuidString)
+        self.track = factory.audioTrack(withTrackId: UUID().uuidString)
+        self.track.isEnabled = true
         self.trackSender = trackManager.add(track, streamIds: [streamId])
         self.trackManager = trackManager
-
         configureAudioSession()
     }
 

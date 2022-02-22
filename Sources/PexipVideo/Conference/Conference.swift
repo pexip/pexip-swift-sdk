@@ -4,18 +4,18 @@ import Combine
 // MARK: - Protocol
 
 public protocol ConferenceProtocol {
-    func join() async throws
-    func leave() async throws
-
     var mediaDelegate: ConferenceMediaDelegate? { get set }
     var mediaEventPublisher: AnyPublisher<ConferenceMediaEvent, Never> { get }
 
     var callDelegate: ConferenceCallDelegate? { get set }
     var callEventPublisher: AnyPublisher<ConferenceCallEvent, Never> { get }
 
-    var camera: CameraComponent? { get }
-    var audio: AudioComponent? { get }
-    var remoteVideo: VideoComponent? { get }
+    var audioTrack: AudioTrackProtocol? { get }
+    var localVideoTrack: LocalVideoTrackProtocol? { get }
+    var remoteVideoTrack: VideoTrackProtocol? { get }
+
+    func join() async throws
+    func leave() async throws
 }
 
 // MARK: - Implementation
@@ -31,9 +31,9 @@ final class Conference: ConferenceProtocol {
         callEventSubject.eraseToAnyPublisher()
     }
 
-    var camera: CameraComponent? { callSession.camera }
-    var audio: AudioComponent? { callSession.audio }
-    var remoteVideo: VideoComponent? { callSession.remoteVideo }
+    var audioTrack: AudioTrackProtocol? { callSession.audioTrack }
+    var localVideoTrack: LocalVideoTrackProtocol? { callSession.localVideoTrack }
+    var remoteVideoTrack: VideoTrackProtocol? { callSession.remoteVideoTrack }
 
     private let conferenceName: String
     private let userDisplayName: String
@@ -62,29 +62,11 @@ final class Conference: ConferenceProtocol {
         self.callSession = callSession
         self.eventSource = eventSource
         self.logger = logger
-        setup()
     }
 
     // MARK: - Public API
 
     func join() async throws {
-        logger[.conference].info(
-            "Joining \(conferenceName) as \(userDisplayName)"
-        )
-        try await callSession.start()
-    }
-
-    func leave() async throws {
-        logger[.conference].info("Leaving \(conferenceName)")
-        eventStreamTask?.cancel()
-        await eventSource.close()
-        try await callSession.stop()
-        try await tokenSession.deactivate()
-    }
-
-    // MARK: - Private methods
-
-    private func setup() {
         Task {
             try await tokenSession.activate()
             try await eventSource.open()
@@ -102,7 +84,22 @@ final class Conference: ConferenceProtocol {
                 self?.handleCallEvent(event)
             }
             .store(in: &cancellables)
+
+        logger[.conference].info(
+            "Joining \(conferenceName) as \(userDisplayName)"
+        )
+        try await callSession.start()
     }
+
+    func leave() async throws {
+        logger[.conference].info("Leaving \(conferenceName)")
+        eventStreamTask?.cancel()
+        await eventSource.close()
+        try await callSession.stop()
+        try await tokenSession.deactivate()
+    }
+
+    // MARK: - Private methods
 
     @MainActor
     private func handleConferenceEvent(_ event: ServerSentEvent) {

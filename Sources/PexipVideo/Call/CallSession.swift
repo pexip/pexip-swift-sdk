@@ -9,12 +9,13 @@ enum CallEvent {
 }
 
 protocol CallSessionProtocol {
+    var audioTrack: AudioTrackProtocol? { get }
+    var localVideoTrack: LocalVideoTrackProtocol? { get }
+    var remoteVideoTrack: VideoTrackProtocol? { get }
+    var eventPublisher: AnyPublisher<CallEvent, Never> { get }
+
     func start() async throws
     func stop() async throws
-    var camera: CameraComponent? { get }
-    var audio: AudioComponent? { get }
-    var remoteVideo: VideoComponent? { get }
-    var eventPublisher: AnyPublisher<CallEvent, Never> { get }
 }
 
 // MARK: - Implementation
@@ -23,9 +24,9 @@ final class CallSession: CallSessionProtocol {
     typealias APIClient = CallClientProtocol & ParticipantClientProtocol
     private typealias CallDetailsTask = Task<CallDetails, Error>
 
-    var camera: CameraComponent? { rtcClient.camera }
-    var audio: AudioComponent? { rtcClient.audio }
-    var remoteVideo: VideoComponent? { rtcClient.remoteVideo }
+    var audioTrack: AudioTrackProtocol? { rtcClient.audioTrack }
+    var localVideoTrack: LocalVideoTrackProtocol? { rtcClient.localVideoTrack }
+    var remoteVideoTrack: VideoTrackProtocol? { rtcClient.remoteVideoTrack }
 
     var eventPublisher: AnyPublisher<CallEvent, Never> {
         eventSubject.eraseToAnyPublisher()
@@ -112,16 +113,12 @@ final class CallSession: CallSessionProtocol {
         rtcClient.close()
         cancellables = []
 
-        let disconnected = try await apiClient.disconnect(
+        try await apiClient.disconnect(
             participantId: participantId,
             callId: callDetailsTask.value.id
         )
 
-        if disconnected {
-            logger.info("Disconnected from the call.")
-        } else {
-            logger.warn("Failed to disconnect from the call.")
-        }
+        logger.info("Disconnected from the call.")
     }
 
     // MARK: - Private

@@ -1,11 +1,20 @@
 import WebRTC
 
-final class RTCCameraComponent: CameraComponent {
+final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
+    var isEnabled: Bool {
+        get { videoTrack.isEnabled }
+        set {
+            guard videoTrack.isEnabled != newValue else {
+                return
+            }
+            setEnabled(newValue)
+        }
+    }
+
     private weak var trackManager: RTCTrackManager?
     private let capturer: RTCCameraVideoCapturer
     private var trackSender: RTCRtpSender?
-    @MainActor private let videoComponent: RTCVideoComponent
-    @MainActor private var isMuted = false
+    @MainActor private let videoTrack: WebRTCVideoTrack
     @MainActor private var cameraPosition: AVCaptureDevice.Position = .front
 
     // MARK: - Init
@@ -19,7 +28,7 @@ final class RTCCameraComponent: CameraComponent {
         let track = factory.videoTrack(with: videoSource, trackId: UUID().uuidString)
         track.isEnabled = false
 
-        self.videoComponent = RTCVideoComponent(track: track)
+        self.videoTrack = WebRTCVideoTrack(track: track)
         self.capturer = RTCCameraVideoCapturer(delegate: videoSource)
         self.trackSender = trackManager.add(track, streamIds: [streamId])
         self.trackManager = trackManager
@@ -30,53 +39,49 @@ final class RTCCameraComponent: CameraComponent {
             _ = trackManager?.removeTrack(trackSender)
         }
 
-        if videoComponent.isEnabled {
-            videoComponent.isEnabled = false
-            capturer.stopCapture { [weak videoComponent] in
-                videoComponent?.renderEmptyFrame()
+        if videoTrack.isEnabled {
+            videoTrack.isEnabled = false
+            capturer.stopCapture { [weak videoTrack] in
+                videoTrack?.renderEmptyFrame()
             }
         }
     }
 
     // MARK: - Internal methods
 
-    func render(to view: VideoView) {
-        videoComponent.render(to: view)
+    func render(to view: VideoView, aspectFit: Bool) {
+        videoTrack.render(to: view, aspectFit: aspectFit)
     }
 
-    @MainActor
-    func mute(_ isMuted: Bool) async throws {
-        guard self.isMuted != isMuted else {
+    func toggleCamera() {
+        guard isEnabled else {
             return
         }
 
-        if isMuted {
+        Task { @MainActor in
+            cameraPosition = cameraPosition == .front ? .back : .front
+            // Restart the video capturing using another camera
             try await stopCapture()
-        } else {
             try await startCapture()
         }
-
-        self.isMuted = isMuted
-    }
-
-    @MainActor
-    func toggleCamera() async throws {
-        cameraPosition = cameraPosition == .front ? .back : .front
-
-        // Restart the video capturing using another camera
-        try await stopCapture()
-        isMuted = true
-        try await mute(false)
     }
 
     // MARK: - Private methods
 
+    private func setEnabled(_ enabled: Bool) {
+        videoTrack.isEnabled = enabled
+
+        Task { @MainActor in
+            if enabled {
+                try await startCapture()
+            } else {
+                try await stopCapture()
+            }
+        }
+    }
+
     @MainActor
     private func startCapture() async throws {
-        guard !videoComponent.isEnabled, !isMuted else {
-            return
-        }
-
         guard let config = config else {
             return
         }
@@ -86,21 +91,13 @@ final class RTCCameraComponent: CameraComponent {
             format: config.format,
             fps: Int(config.fps.maxFrameRate)
         )
-
-        videoComponent.isEnabled = true
     }
 
     @MainActor
     private func stopCapture() async throws {
-        guard videoComponent.isEnabled else {
-            return
-        }
-
-        videoComponent.isEnabled = false
-
         try await Task.sleep(seconds: 0.1)
         await capturer.stopCapture()
-        videoComponent.renderEmptyFrame()
+        videoTrack.renderEmptyFrame()
     }
 
     @MainActor

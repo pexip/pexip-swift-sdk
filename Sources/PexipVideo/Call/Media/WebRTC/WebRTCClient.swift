@@ -7,9 +7,9 @@ final class WebRTCClient: NSObject, CallConnection, RTCPeerConnectionDelegate {
         eventSubject.eraseToAnyPublisher()
     }
 
-    private(set) var camera: CameraComponent?
-    private(set) var audio: AudioComponent?
-    private(set) var remoteVideo: VideoComponent?
+    private(set) var audioTrack: AudioTrackProtocol?
+    private(set) var localVideoTrack: LocalVideoTrackProtocol?
+    private(set) var remoteVideoTrack: VideoTrackProtocol?
 
     private let supportsAudio: Bool
     private let supportsVideo: Bool
@@ -65,7 +65,7 @@ final class WebRTCClient: NSObject, CallConnection, RTCPeerConnectionDelegate {
 
     private func setupMedia() {
         if supportsAudio {
-            self.audio = RTCAudioComponent(
+            self.audioTrack = WebRTCAudioTrack(
                 factory: factory,
                 trackManager: peerConnection,
                 streamId: localStreamId
@@ -74,7 +74,7 @@ final class WebRTCClient: NSObject, CallConnection, RTCPeerConnectionDelegate {
 
         if supportsVideo {
             #if !targetEnvironment(simulator)
-            self.camera = RTCCameraComponent(
+            self.localVideoTrack = WebRTCLocalVideoTrack(
                 factory: factory,
                 trackManager: peerConnection,
                 streamId: localStreamId
@@ -82,11 +82,11 @@ final class WebRTCClient: NSObject, CallConnection, RTCPeerConnectionDelegate {
             #endif
         }
 
-        let remoteVideo = RTCVideoComponent(track: nil)
+        let remoteVideoTrack = WebRTCVideoTrack(track: nil)
         self.setRemoteVideoTrack = {
-            remoteVideo.setTrack($0)
+            remoteVideoTrack.setTrack($0)
         }
-        self.remoteVideo = remoteVideo
+        self.remoteVideoTrack = remoteVideoTrack
     }
 
     // MARK: - Signaling
@@ -135,6 +135,11 @@ final class WebRTCClient: NSObject, CallConnection, RTCPeerConnectionDelegate {
         switch newState {
         case .connected:
             eventSubject.send(.connected)
+            if supportsVideo {
+                audioTrack?.speakerOn()
+            } else {
+                audioTrack?.speakerOff()
+            }
         case .disconnected:
             eventSubject.send(.disconnected)
         case .failed:

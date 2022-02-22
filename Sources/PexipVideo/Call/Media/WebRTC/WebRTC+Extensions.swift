@@ -6,8 +6,8 @@ extension RTCPeerConnectionFactory {
     static let `default`: RTCPeerConnectionFactory = {
         RTCInitializeSSL()
         #if targetEnvironment(simulator)
-        let videoEncoderFactory = RTCVideoEncoderFactoryVP8()
-        let videoDecoderFactory = RTCVideoDecoderFactoryVP8()
+        let videoEncoderFactory = WebRTCVideoEncoderFactoryVP8()
+        let videoDecoderFactory = WebRTCVideoDecoderFactoryVP8()
         #else
         let videoEncoderFactory = RTCVideoEncoderFactoryH264()
         let videoDecoderFactory = RTCVideoDecoderFactoryH264()

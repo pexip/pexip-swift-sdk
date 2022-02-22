@@ -118,7 +118,7 @@ struct InfinityClient {
         case .conference:
             return InfinityClient
                 .apiURL(forNode: nodeAddress)
-                .appendingPathComponent("conferences/\(alias.alias)")
+                .appendingPathComponent("conferences/\(alias.uri)")
         case .participant(let id):
             return url(for: .conference)
                 .appendingPathComponent("participants")

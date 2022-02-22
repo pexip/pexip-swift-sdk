@@ -2,7 +2,7 @@
 
 import WebRTC
 
-final class RTCVideoDecoderFactoryVP8: NSObject, RTCVideoDecoderFactory {
+final class WebRTCVideoDecoderFactoryVP8: NSObject, RTCVideoDecoderFactory {
     func createDecoder(_ info: RTCVideoCodecInfo) -> RTCVideoDecoder? {
         info.name == kRTCVideoCodecVp8Name ? RTCVideoDecoderVP8.vp8Decoder() : nil
     }

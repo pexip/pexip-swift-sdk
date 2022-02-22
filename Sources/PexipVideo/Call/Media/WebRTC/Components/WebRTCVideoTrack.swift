@@ -1,13 +1,19 @@
 import WebRTC
 
-final class RTCVideoComponent: VideoComponent {
+final class WebRTCVideoTrack: VideoTrackProtocol {
     private var track: RTCVideoTrack?
     private weak var renderer: RTCVideoRenderer?
 
     var isEnabled: Bool {
-        get { track?.isEnabled ?? false }
-        set { track?.isEnabled = newValue }
+        get {
+            track?.isEnabled ?? false
+        }
+        set {
+            track?.isEnabled = newValue
+        }
     }
+
+    // MARK: - Init
 
     init(track: RTCVideoTrack?) {
         self.track = track
@@ -17,14 +23,12 @@ final class RTCVideoComponent: VideoComponent {
         removeCurrentRenderer()
     }
 
-    // MARK: - Internal methods
-
-    func render(to view: VideoView) {
+    func render(to view: VideoView, aspectFit: Bool) {
         removeCurrentRenderer()
 
         let renderer = RTCMTLVideoView(frame: view.frame)
         renderer.translatesAutoresizingMaskIntoConstraints = false
-        renderer.videoContentMode = .scaleAspectFit
+        renderer.videoContentMode = aspectFit ? .scaleAspectFit : .scaleAspectFill
 
         view.addSubview(renderer)
 
@@ -37,10 +41,6 @@ final class RTCVideoComponent: VideoComponent {
 
         track?.add(renderer)
         self.renderer = renderer
-    }
-
-    func mute(_ isMuted: Bool) async throws {
-        isEnabled = isMuted
     }
 
     func renderEmptyFrame() {

@@ -36,10 +36,9 @@ protocol CallClientProtocol {
      - Parameters:
         - participantId: The ID of the participant
         - callId: The ID of the call
-     - Returns: The result is true if successful, false otherwise.
      - Throws: `HTTPError` if a network error was encountered during operation
      */
-    func disconnect(participantId: UUID, callId: UUID) async throws -> Bool
+    func disconnect(participantId: UUID, callId: UUID) async throws
 
     /**
      Sends a new ICE candidate if doing trickle ICE.
@@ -87,12 +86,13 @@ extension InfinityClient: CallClientProtocol {
         ))
     }
 
-    func disconnect(participantId: UUID, callId: UUID) async throws -> Bool {
-        try await json(for: try await request(
+    func disconnect(participantId: UUID, callId: UUID) async throws {
+        let request = try await request(
             withMethod: .POST,
             path: .call(participantId: participantId, callId: callId),
             name: "disconnect"
-        ))
+        )
+        _ = try await data(for: request)
     }
 
     func newCandidate(
