@@ -3,8 +3,13 @@ import Foundation
 // MARK: - Protocol
 
 protocol TokenSessionProtocol {
-    func activate() async throws
-    func deactivate() async throws
+    @discardableResult
+    func activate() async -> Bool
+
+    @discardableResult
+    func deactivate(releaseToken: Bool) async -> Bool
+
+    var isActive: Bool { get async }
 }
 
 // MARK: - Implementaion
@@ -15,7 +20,12 @@ actor TokenSession: TokenSessionProtocol {
     private let logger: CategoryLogger
     private var tokenRefreshTask: Task<Void, Error>?
     private let currentDate: () -> Date
-    private var isDeactivated = false
+
+    var isActive: Bool {
+        get async {
+            return tokenRefreshTask != nil
+        }
+    }
 
     var isRefreshScheduled: Bool {
         tokenRefreshTask?.isCancelled == false
@@ -41,36 +51,55 @@ actor TokenSession: TokenSessionProtocol {
 
     // MARK: - Session management
 
-    func activate() async throws {
-        guard let token = try await storage.token(), !isDeactivated else {
-            throw TokenSessionError.cannotActivateDeactivatedSession
-        }
+    @discardableResult
+    func activate() async -> Bool {
+        do {
+            guard let token = try await storage.token() else {
+                throw TokenSessionError.noToken
+            }
 
-        guard tokenRefreshTask == nil else {
-            throw TokenSessionError.sessionAlreadyActive
-        }
+            guard await !isActive else {
+                throw TokenSessionError.sessionAlreadyActive
+            }
 
-        logger.info("Token session activated ✅")
-        scheduleRefresh(for: token)
+            logger.info("Token session activated ✅")
+            scheduleRefresh(for: token)
+            return true
+        } catch {
+            logger.warn("Wrong use of TokenSession.activate: \(error)")
+            return false
+        }
     }
 
-    func deactivate() async throws {
-        guard !isDeactivated else {
-            throw TokenSessionError.cannotDeactivateDeactivatedSession
+    @discardableResult
+    func deactivate(releaseToken: Bool) async -> Bool {
+        do {
+            guard await isActive else {
+                throw TokenSessionError.sessionAlreadyInactive
+            }
+
+            stopRefreshTask()
+
+            let token = try await storage.token()
+            await storage.clear()
+
+            if releaseToken {
+                if let token = token, !token.isExpired(currentDate: currentDate()) {
+                    logger.debug("Releasing the token...")
+                    do {
+                        try await client.releaseToken(token)
+                    } catch {
+                        logger.error("Release token request failed: \(error)")
+                    }
+                }
+            }
+
+            logger.info("Token session deactivated ⛔️")
+            return true
+        } catch {
+            logger.warn("Wrong use of TokenSession.deactivate: \(error)")
+            return false
         }
-
-        stopRefreshTask()
-
-        let token = try await storage.token()
-        await storage.clear()
-
-        if let token = token, !token.isExpired(currentDate: currentDate()) {
-            logger.debug("Releasing the token...")
-            try await client.releaseToken(token)
-        }
-
-        isDeactivated = true
-        logger.info("Token session deactivated ⛔️")
     }
 
     // MARK: - Token refresh flow
@@ -114,19 +143,19 @@ actor TokenSession: TokenSessionProtocol {
 
 // MARK: - Errors
 
-enum TokenSessionError: LocalizedError {
+private enum TokenSessionError: LocalizedError, CustomStringConvertible {
+    case noToken
     case sessionAlreadyActive
-    case cannotActivateDeactivatedSession
-    case cannotDeactivateDeactivatedSession
+    case sessionAlreadyInactive
 
-    var errorDescription: String? {
+    var description: String {
         switch self {
+        case .noToken:
+            return "No token"
         case .sessionAlreadyActive:
             return "Session is already active"
-        case .cannotActivateDeactivatedSession:
-            return "Cannot activate deactivated token session"
-        case .cannotDeactivateDeactivatedSession:
-            return "Cannot deactivate already deactivated token session"
+        case .sessionAlreadyInactive:
+            return "Session is already inactive"
         }
     }
 }

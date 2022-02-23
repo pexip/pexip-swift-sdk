@@ -1,0 +1,28 @@
+import XCTest
+@testable import PexipVideo
+
+class APIClientTestCase<T>: XCTestCase {
+    let nodeAddress = URL(string: "https://test.example.com")!
+    let alias = ConferenceAlias(uri: "conference@example.com")!
+    private(set) var tokenProvider: TokenProviderMock!
+    private(set) var client: T!
+
+    // MARK: - Setup
+
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        let urlSessionConfiguration = URLSessionConfiguration.ephemeral
+        urlSessionConfiguration.protocolClasses = [URLProtocolMock.self]
+        let urlSession = URLSession(configuration: urlSessionConfiguration)
+
+        tokenProvider = TokenProviderMock()
+        let client = InfinityClient(
+            nodeAddress: nodeAddress,
+            alias: alias,
+            urlSession: urlSession,
+            tokenProvider: tokenProvider,
+            logger: SilentLogger()
+        )
+        self.client = try XCTUnwrap(client as? T)
+    }
+}

@@ -74,6 +74,15 @@ public struct ConferenceFactory {
             tokenProvider: tokenStorage,
             logger: logger
         )
+        let mediaConnection = WebRTCConnection(
+            iceServers: token.iceServers.isEmpty
+                ? callConfiguration.backupIceServers
+                : token.iceServers,
+            qualityProfile: callConfiguration.qualityProfile,
+            supportsAudio: callConfiguration.supportsAudio,
+            supportsVideo: callConfiguration.supportsVideo,
+            logger: logger
+        )
         return Conference(
             conferenceName: token.conferenceName,
             userDisplayName: token.displayName,
@@ -84,8 +93,8 @@ public struct ConferenceFactory {
             ),
             callSession: CallSession(
                 participantId: token.participantId,
-                configuration: callConfiguration,
-                iceServers: token.iceServers,
+                qualityProfile: callConfiguration.qualityProfile,
+                mediaConnection: mediaConnection,
                 apiClient: apiClient,
                 logger: logger
             ),

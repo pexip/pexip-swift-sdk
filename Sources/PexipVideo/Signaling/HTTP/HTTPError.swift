@@ -1,6 +1,6 @@
 import Foundation
 
-enum HTTPError: LocalizedError {
+enum HTTPError: LocalizedError, CustomStringConvertible, Hashable {
     case invalidHTTPResponse
     case noDataInResponse
     case unacceptableStatusCode(Int)
@@ -8,7 +8,7 @@ enum HTTPError: LocalizedError {
     case unauthorized
     case resourceNotFound(String)
 
-    var errorDescription: String {
+    var description: String {
         switch self {
         case .invalidHTTPResponse:
             return "No HTTP response received"

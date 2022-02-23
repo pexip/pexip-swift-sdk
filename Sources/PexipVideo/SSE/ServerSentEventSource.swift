@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Protocol
 
 protocol ServerSentEventSourceProtocol {
-    func open() async throws
+    func open() async
     func close() async
     func eventStream() async -> AsyncStream<ServerSentEvent>
 }
@@ -30,7 +30,7 @@ actor ServerSentEventSource: ServerSentEventSourceProtocol {
 
     // MARK: - Internal methods
 
-    func open() async throws {
+    func open() async {
         logger.info("Subscribing to the event stream")
 
         eventSourceTask = Task {
@@ -60,8 +60,13 @@ actor ServerSentEventSource: ServerSentEventSourceProtocol {
 
                 Task {
                     try await Task.sleep(seconds: seconds)
-                    reconnectionAttempts += 1
-                    try await open()
+
+                    if eventSourceTask?.isCancelled == false {
+                        reconnectionAttempts += 1
+                        await open()
+                    } else {
+                        reconnectionAttempts = 0
+                    }
                 }
             }
         }

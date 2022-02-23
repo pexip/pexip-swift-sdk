@@ -4,6 +4,7 @@ final class URLProtocolMock: URLProtocol {
     struct Response {
         let statusCode: Int
         let data: Data
+        var headerFields: [String: String]?
     }
 
     static var makeResponse: (URLRequest) throws -> Response = { _ in
@@ -15,7 +16,13 @@ final class URLProtocolMock: URLProtocol {
     }
 
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-        request
+        var request = request
+        if let httpBodyStream = request.httpBodyStream {
+            let data = Data(reading: httpBodyStream)
+            request.httpBodyStream = nil
+            request.httpBody = data
+        }
+        return request
     }
 
     override func startLoading() {
@@ -28,7 +35,7 @@ final class URLProtocolMock: URLProtocol {
                     url: XCTUnwrap(request.url),
                     statusCode: response.statusCode,
                     httpVersion: "HTTP/1.1",
-                    headerFields: nil
+                    headerFields: response.headerFields
                 )
             )
 
@@ -46,5 +53,22 @@ final class URLProtocolMock: URLProtocol {
 
     override func stopLoading() {
         // no-op.
+    }
+}
+
+private extension Data {
+    init(reading input: InputStream) {
+        self.init()
+        input.open()
+
+        let bufferSize = 1024
+        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+        while input.hasBytesAvailable {
+            let read = input.read(buffer, maxLength: bufferSize)
+            self.append(buffer, count: read)
+        }
+        buffer.deallocate()
+
+        input.close()
     }
 }

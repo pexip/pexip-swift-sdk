@@ -67,14 +67,16 @@ final class Conference: ConferenceProtocol {
     // MARK: - Public API
 
     func join() async throws {
-        Task {
-            try await tokenSession.activate()
-            try await eventSource.open()
+        guard await !tokenSession.isActive else {
+            throw ConferenceError.cannotJoinActiveConference
+        }
 
-            eventStreamTask = Task {
-                for await event in await eventSource.eventStream() {
-                    await handleConferenceEvent(event)
-                }
+        await tokenSession.activate()
+        await eventSource.open()
+
+        eventStreamTask = Task {
+            for await event in await eventSource.eventStream() {
+                await handleConferenceEvent(event)
             }
         }
 
@@ -88,30 +90,40 @@ final class Conference: ConferenceProtocol {
         logger[.conference].info(
             "Joining \(conferenceName) as \(userDisplayName)"
         )
-        try await callSession.start()
+
+        do {
+            try await callSession.start()
+        } catch {
+            await cleanup(releaseToken: true)
+            throw error
+        }
     }
 
     func leave() async throws {
+        guard await tokenSession.isActive else {
+            throw ConferenceError.cannotLeaveInactiveConference
+        }
+
         logger[.conference].info("Leaving \(conferenceName)")
-        eventStreamTask?.cancel()
-        await eventSource.close()
-        try await callSession.stop()
-        try await tokenSession.deactivate()
+        await cleanup(releaseToken: true)
     }
 
     // MARK: - Private methods
 
     @MainActor
     private func handleConferenceEvent(_ event: ServerSentEvent) {
-        switch event {
-        case .chatMessage:
-            logger[.conference].debug("Chat message received")
-        case .callDisconnected(let info):
-            logger[.conference].debug("Call disconnected, reason: \(info.reason)")
-        case .disconnect(let info):
-            callDelegate?.conferenceDidDisconnect(self)
-            callEventSubject.send(.disconnected)
-            logger[.conference].debug("Participant disconnected, reason: \(info.reason)")
+        Task {
+            switch event {
+            case .chatMessage:
+                logger[.conference].debug("Chat message received")
+            case .callDisconnected(let info):
+                logger[.conference].debug("Call disconnected, reason: \(info.reason)")
+            case .disconnect(let info):
+                await cleanup(releaseToken: false)
+                callDelegate?.conferenceDidDisconnect(self)
+                callEventSubject.send(.disconnected)
+                logger[.conference].debug("Participant disconnected, reason: \(info.reason)")
+            }
         }
     }
 
@@ -123,6 +135,29 @@ final class Conference: ConferenceProtocol {
         case .mediaEnded:
             mediaDelegate?.conferenceDidEndMedia(self)
             mediaEventSubject.send(.ended)
+        }
+    }
+
+    private func cleanup(releaseToken: Bool) async {
+        eventStreamTask?.cancel()
+        await eventSource.close()
+        await tokenSession.deactivate(releaseToken: releaseToken)
+        await callSession.stop()
+    }
+}
+
+// MARK: - Errors
+
+public enum ConferenceError: LocalizedError, CustomStringConvertible {
+    case cannotJoinActiveConference
+    case cannotLeaveInactiveConference
+
+    public var description: String {
+        switch self {
+        case .cannotJoinActiveConference:
+            return "Cannot join already active conference"
+        case .cannotLeaveInactiveConference:
+            return "Cannot leave already inactive conference"
         }
     }
 }

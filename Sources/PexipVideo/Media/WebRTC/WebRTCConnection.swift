@@ -2,8 +2,8 @@ import Foundation
 import WebRTC
 import Combine
 
-final class WebRTCClient: NSObject, CallConnection, RTCPeerConnectionDelegate {
-    var eventPublisher: AnyPublisher<CallConnectionEvent, Never> {
+final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelegate {
+    var eventPublisher: AnyPublisher<MediaConnectionEvent, Never> {
         eventSubject.eraseToAnyPublisher()
     }
 
@@ -20,7 +20,7 @@ final class WebRTCClient: NSObject, CallConnection, RTCPeerConnectionDelegate {
     private var setRemoteVideoTrack: ((RTCVideoTrack) -> Void)?
     private let localStreamId = UUID().uuidString
     private var icePwd: String?
-    private let eventSubject = PassthroughSubject<CallConnectionEvent, Never>()
+    private let eventSubject = PassthroughSubject<MediaConnectionEvent, Never>()
 
     // MARK: - Init
 

@@ -47,7 +47,7 @@ final class TokenSessionTests: XCTestCase {
         currentDate = updatedAt.addingTimeInterval(60)
 
         try await storage.updateToken(token)
-        try await session.activate()
+        await session.activate()
 
         let isRefreshScheduled = await session.isRefreshScheduled
         let tokenFromStorage = try await storage.token()
@@ -58,44 +58,25 @@ final class TokenSessionTests: XCTestCase {
     }
 
     func testActivateWithoutToken() async throws {
-        do {
-            try await session.activate()
-            XCTFail("Should fail with error")
-        } catch {
-            XCTAssertEqual(
-                error as? TokenSessionError,
-                .cannotActivateDeactivatedSession
-            )
-        }
+        let activated = await session.activate()
+        XCTAssertFalse(activated)
     }
 
     func testActivateWhenDeactivated() async throws {
-        do {
-            try await storage.updateToken(Token.randomToken())
-            try await session.activate()
-            try await session.deactivate()
-            try await session.activate()
-            XCTFail("Should fail with error")
-        } catch {
-            XCTAssertEqual(
-                error as? TokenSessionError,
-                .cannotActivateDeactivatedSession
-            )
-        }
+        try await storage.updateToken(Token.randomToken())
+        await session.activate()
+        await session.deactivate(releaseToken: true)
+        let activated = await session.activate()
+
+        XCTAssertFalse(activated)
     }
 
     func testActivateWhenActive() async throws {
-        do {
-            try await storage.updateToken(Token.randomToken())
-            try await session.activate()
-            try await session.activate()
-            XCTFail("Should fail with error")
-        } catch {
-            XCTAssertEqual(
-                error as? TokenSessionError,
-                .sessionAlreadyActive
-            )
-        }
+        try await storage.updateToken(Token.randomToken())
+        await session.activate()
+        let activated = await session.activate()
+
+        XCTAssertFalse(activated)
     }
 
     // MARK: - Token refresh tests
@@ -110,7 +91,7 @@ final class TokenSessionTests: XCTestCase {
 
         // 1. Activate session and schedule token refresh
         try await storage.updateToken(tokenA)
-        try await session.activate()
+        await session.activate()
 
         let tokenFromStorage = try await storage.token()
         let isRefreshScheduled = await session.isRefreshScheduled
@@ -143,7 +124,7 @@ final class TokenSessionTests: XCTestCase {
 
         // 1. Activate session and schedule token refresh
         try await storage.updateToken(tokenA)
-        try await session.activate()
+        await session.activate()
 
         let tokenFromStorage = try await storage.token()
         let isRefreshScheduled = await session.isRefreshScheduled
@@ -176,7 +157,7 @@ final class TokenSessionTests: XCTestCase {
 
         // 1. Activate session and schedule token refresh
         try await storage.updateToken(tokenA)
-        try await session.activate()
+        await session.activate()
 
         let tokenFromStorage = try await storage.token()
         let isRefreshScheduled = await session.isRefreshScheduled
@@ -189,15 +170,15 @@ final class TokenSessionTests: XCTestCase {
 
     func testDeactivateWithExistingValidToken() async throws {
         let token = Token.randomToken(updatedAt: updatedAt)
-
         client.releaseTokenResult = .success(())
         currentDate = updatedAt.addingTimeInterval(60)
 
         try await storage.updateToken(token)
-        try await session.deactivate()
-
+        await session.activate()
+        let deactivated = await session.deactivate(releaseToken: true)
         let isRefreshScheduled = await session.isRefreshScheduled
 
+        XCTAssertTrue(deactivated)
         XCTAssertFalse(isRefreshScheduled)
         XCTAssertTrue(storage.isClearCalled)
         XCTAssertEqual(client.steps, [.releaseToken])
@@ -210,16 +191,11 @@ final class TokenSessionTests: XCTestCase {
         currentDate = updatedAt.addingTimeInterval(60)
 
         try await storage.updateToken(token)
-
-        do {
-            try await session.deactivate()
-            XCTFail("Should fail with error")
-        } catch {
-            XCTAssertEqual((error as? URLError)?.code, .badURL)
-        }
-
+        await session.activate()
+        let deactivated = await session.deactivate(releaseToken: true)
         let isRefreshScheduled = await session.isRefreshScheduled
 
+        XCTAssertTrue(deactivated)
         XCTAssertFalse(isRefreshScheduled)
         XCTAssertTrue(storage.isClearCalled)
         XCTAssertEqual(client.steps, [.releaseToken])
@@ -227,41 +203,51 @@ final class TokenSessionTests: XCTestCase {
 
     func testDeactivateWithExistingExpiredToken() async throws {
         let token = Token.randomToken(updatedAt: updatedAt)
-        currentDate = updatedAt.addingTimeInterval(120)
-
         try await storage.updateToken(token)
-        try await session.deactivate()
-
+        currentDate = updatedAt.addingTimeInterval(60)
+        await session.activate()
+        currentDate = updatedAt.addingTimeInterval(120)
+        let deactivated = await session.deactivate(releaseToken: true)
         let isRefreshScheduled = await session.isRefreshScheduled
 
+        XCTAssertTrue(deactivated)
         XCTAssertFalse(isRefreshScheduled)
         XCTAssertTrue(storage.isClearCalled)
         XCTAssertTrue(client.steps.isEmpty)
     }
 
     func testDeactivateWithoutExistingToken() async throws {
-        try await session.deactivate()
+        try await storage.updateToken(.randomToken())
+        await session.activate()
+        await storage.clear()
 
+        let deactivated = await session.deactivate(releaseToken: true)
         let isRefreshScheduled = await session.isRefreshScheduled
 
+        XCTAssertTrue(deactivated)
         XCTAssertFalse(isRefreshScheduled)
-        XCTAssertTrue(storage.isClearCalled)
         XCTAssertTrue(client.steps.isEmpty)
     }
 
     func testDeactivateWhenDeactivated() async throws {
-        do {
-            try await storage.updateToken(Token.randomToken())
-            try await session.activate()
-            try await session.deactivate()
-            try await session.deactivate()
-            XCTFail("Should fail with error")
-        } catch {
-            XCTAssertEqual(
-                error as? TokenSessionError,
-                .cannotDeactivateDeactivatedSession
-            )
-        }
+        let deactivated = await session.deactivate(releaseToken: true)
+        XCTAssertFalse(deactivated)
+    }
+
+    func testDeactivateWithoutTokenRelease() async throws {
+        let token = Token.randomToken(updatedAt: updatedAt)
+        client.releaseTokenResult = .success(())
+        currentDate = updatedAt.addingTimeInterval(60)
+
+        try await storage.updateToken(token)
+        await session.activate()
+        let deactivated = await session.deactivate(releaseToken: false)
+        let isRefreshScheduled = await session.isRefreshScheduled
+
+        XCTAssertTrue(deactivated)
+        XCTAssertFalse(isRefreshScheduled)
+        XCTAssertTrue(storage.isClearCalled)
+        XCTAssertTrue(client.steps.isEmpty)
     }
 }
 

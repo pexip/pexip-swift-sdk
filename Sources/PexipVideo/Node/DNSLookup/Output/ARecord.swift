@@ -23,6 +23,6 @@ extension ARecord: DNSRecord {
 
 // MARK: - Errors
 
-struct ARecordError: LocalizedError {
-    let errorDescription = "Invalid A record data"
+struct ARecordError: LocalizedError, CustomStringConvertible {
+    let description = "Invalid A record data"
 }

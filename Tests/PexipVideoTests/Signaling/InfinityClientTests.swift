@@ -39,7 +39,7 @@ final class InfinityClientTests: XCTestCase {
         )
         var expectedRequest = URLRequest(
             url: try XCTUnwrap(
-                URL(string: "https://vc.example.com/api/client/v2/conferences/test/request")
+                URL(string: "https://vc.example.com/api/client/v2/conferences/test@vc.example.com/request")
             ),
             httpMethod: .GET
         )
@@ -61,7 +61,7 @@ final class InfinityClientTests: XCTestCase {
         )
         var expectedRequest = URLRequest(
             url: try XCTUnwrap(
-                URL(string: "https://vc.example.com/api/client/v2/conferences/test/request")
+                URL(string: "https://vc.example.com/api/client/v2/conferences/test@vc.example.com/request")
             ),
             httpMethod: .GET
         )
@@ -82,7 +82,7 @@ final class InfinityClientTests: XCTestCase {
         )
         var expectedRequest = URLRequest(
             url: try XCTUnwrap(
-                URL(string: "https://vc.example.com/api/client/v2/conferences/test/request")
+                URL(string: "https://vc.example.com/api/client/v2/conferences/test@vc.example.com/request")
             ),
             httpMethod: .GET
         )
@@ -99,7 +99,7 @@ final class InfinityClientTests: XCTestCase {
             name: "request",
             token: .none
         )
-        let expectedUrlString = "https://vc.example.com/api/client/v2/conferences/test/"
+        let expectedUrlString = "https://vc.example.com/api/client/v2/conferences/test@vc.example.com/"
             + "participants/\(participantId.uuidString.lowercased())/"
             + "request"
         var expectedRequest = URLRequest(
@@ -120,7 +120,7 @@ final class InfinityClientTests: XCTestCase {
             name: "request",
             token: .none
         )
-        let expectedUrlString = "https://vc.example.com/api/client/v2/conferences/test/"
+        let expectedUrlString = "https://vc.example.com/api/client/v2/conferences/test@vc.example.com/"
             + "participants/\(participantId.uuidString.lowercased())/"
             + "calls/\(callId.uuidString.lowercased())/"
             + "request"

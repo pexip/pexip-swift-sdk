@@ -15,7 +15,7 @@ protocol CallSessionProtocol {
     var eventPublisher: AnyPublisher<CallEvent, Never> { get }
 
     func start() async throws
-    func stop() async throws
+    func stop() async
 }
 
 // MARK: - Implementation
@@ -24,21 +24,22 @@ final class CallSession: CallSessionProtocol {
     typealias APIClient = CallClientProtocol & ParticipantClientProtocol
     private typealias CallDetailsTask = Task<CallDetails, Error>
 
-    var audioTrack: AudioTrackProtocol? { rtcClient.audioTrack }
-    var localVideoTrack: LocalVideoTrackProtocol? { rtcClient.localVideoTrack }
-    var remoteVideoTrack: VideoTrackProtocol? { rtcClient.remoteVideoTrack }
+    var audioTrack: AudioTrackProtocol? { mediaConnection.audioTrack }
+    var localVideoTrack: LocalVideoTrackProtocol? { mediaConnection.localVideoTrack }
+    var remoteVideoTrack: VideoTrackProtocol? { mediaConnection.remoteVideoTrack }
 
     var eventPublisher: AnyPublisher<CallEvent, Never> {
         eventSubject.eraseToAnyPublisher()
     }
 
     private let participantId: UUID
-    private let configuration: CallConfiguration
+    private let qualityProfile: QualityProfile
     private let isPresentation: Bool
     private let apiClient: APIClient
-    private let rtcClient: WebRTCClient
+    private let mediaConnection: MediaConnection
     private let logger: CategoryLogger
     private var callDetailsTask: CallDetailsTask?
+    private var isMediaStarted = false
     private var eventSubject = PassthroughSubject<CallEvent, Never>()
     private var cancellables = Set<AnyCancellable>()
 
@@ -46,33 +47,25 @@ final class CallSession: CallSessionProtocol {
 
     init(
         participantId: UUID,
-        configuration: CallConfiguration,
+        qualityProfile: QualityProfile,
         isPresentation: Bool = false,
-        iceServers: [String],
+        mediaConnection: MediaConnection,
         apiClient: APIClient,
         logger: LoggerProtocol
     ) {
         self.participantId = participantId
-        self.configuration = configuration
+        self.qualityProfile = qualityProfile
         self.isPresentation = isPresentation
         self.apiClient = apiClient
-        self.rtcClient = WebRTCClient(
-            iceServers: iceServers.isEmpty
-                ? configuration.backupIceServers
-                : iceServers,
-            qualityProfile: configuration.qualityProfile,
-            supportsAudio: configuration.supportsAudio,
-            supportsVideo: configuration.supportsVideo,
-            logger: logger
-        )
+        self.mediaConnection = mediaConnection
         self.logger = logger[.media]
     }
 
     func start() async throws {
         let callDetailsTask = CallDetailsTask {
-            let sdp = try await rtcClient.createOffer()
+            let sdp = try await mediaConnection.createOffer()
             let offer = SDPMangler(sdp: sdp).mangle(
-                qualityProfile: configuration.qualityProfile,
+                qualityProfile: qualityProfile,
                 isPresentation: isPresentation
             )
             return try await apiClient.makeCall(
@@ -84,46 +77,53 @@ final class CallSession: CallSessionProtocol {
         self.callDetailsTask = callDetailsTask
 
         // Listen for connection events
-        rtcClient.eventPublisher
+        mediaConnection.eventPublisher
             .sink { [weak self] event in
                 self?.handleEvent(event)
             }.store(in: &cancellables)
 
-        try await rtcClient.setRemoteDescription(callDetailsTask.value.sdp)
+        try await mediaConnection.setRemoteDescription(callDetailsTask.value.sdp)
 
-        let mediaStarted = try await apiClient.ack(
+        isMediaStarted = try await apiClient.ack(
             participantId: participantId,
             callId: callDetailsTask.value.id
         )
 
-        if mediaStarted {
+        if isMediaStarted {
             logger.info("Started media for the call.")
         } else {
             logger.warn("Failed to start media for the call.")
         }
     }
 
-    func stop() async throws {
+    func stop() async {
         guard let callDetailsTask = callDetailsTask else {
             return
         }
 
         callDetailsTask.cancel()
         self.callDetailsTask = nil
-        rtcClient.close()
+        mediaConnection.close()
         cancellables = []
 
-        try await apiClient.disconnect(
-            participantId: participantId,
-            callId: callDetailsTask.value.id
-        )
+        if isMediaStarted {
+            isMediaStarted = false
+            do {
+                try await apiClient.disconnect(
+                    participantId: participantId,
+                    callId: callDetailsTask.value.id
+                )
+            } catch {
+                logger.error("Call disconnect request failed with error: \(error)")
+            }
+        }
 
         logger.info("Disconnected from the call.")
     }
 
     // MARK: - Private
 
-    private func handleEvent(_ event: CallConnectionEvent) {
+    private func handleEvent(_ event: MediaConnectionEvent) {
         Task {
             switch event {
             case .connected:
@@ -154,7 +154,7 @@ final class CallSession: CallSessionProtocol {
             logger.debug("Added new ICE candidate.")
         } catch {
             logger.error(
-                "Failed to send new ICE candidate: \(error.localizedDescription)"
+                "Failed to send new ICE candidate: \(error)"
             )
         }
     }

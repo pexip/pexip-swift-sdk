@@ -1,5 +1,5 @@
 /// Call quality profile.
-public struct QualityProfile {
+public struct QualityProfile: Hashable {
     public static let veryHigh = QualityProfile(
         width: 1920,
         height: 1080,

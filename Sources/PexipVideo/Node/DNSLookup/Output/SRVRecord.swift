@@ -60,6 +60,6 @@ extension SRVRecord: DNSRecord {
 
 // MARK: - Errors
 
-struct SRVRecordError: LocalizedError {
-    let errorDescription = "Invalid SRV record data"
+struct SRVRecordError: LocalizedError, CustomStringConvertible {
+    let description = "Invalid SRV record data"
 }
