@@ -38,15 +38,15 @@ public struct ConferenceFactory {
 
     /**
      - Parameters:
-        - nodeAddress: The address of a Conferencing Node in the form
+        - node: A Conferencing node
         - alias: An alias of the conference you are connecting to
      */
     public func tokenRequester(
-        nodeAddress: URL,
+        node: Node,
         alias: ConferenceAlias
     ) -> TokenRequesterProtocol {
         InfinityClient(
-            nodeAddress: nodeAddress,
+            node: node,
             alias: alias,
             urlSession: urlSession,
             tokenProvider: nil,
@@ -61,23 +61,24 @@ public struct ConferenceFactory {
         - token: A valid unexpired API token requested by `TokenRequesterProtocol`
      */
     public func conference(
-        nodeAddress: URL,
+        node: Node,
         alias: ConferenceAlias,
         token: Token,
         callConfiguration: CallConfiguration = .init()
     ) -> ConferenceProtocol {
         let tokenStorage = TokenStorage(token: token)
         let apiClient = InfinityClient(
-            nodeAddress: nodeAddress,
+            node: node,
             alias: alias,
             urlSession: urlSession,
             tokenProvider: tokenStorage,
             logger: logger
         )
         let mediaConnection = WebRTCConnection(
-            iceServers: token.iceServers.isEmpty
-                ? callConfiguration.backupIceServers
-                : token.iceServers,
+            iceServers: iceServers(
+                fromToken: token,
+                callConfiguration: callConfiguration
+            ),
             qualityProfile: callConfiguration.qualityProfile,
             supportsAudio: callConfiguration.supportsAudio,
             supportsVideo: callConfiguration.supportsVideo,
@@ -98,11 +99,22 @@ public struct ConferenceFactory {
                 apiClient: apiClient,
                 logger: logger
             ),
-            eventSource: ServerSentEventSource(
+            serverEventSession: ServerEventSession(
                 client: apiClient,
                 logger: logger
             ),
             logger: logger
         )
+    }
+
+    // MARK: - Internal
+
+    func iceServers(
+        fromToken token: Token,
+        callConfiguration: CallConfiguration
+    ) -> [String] {
+        token.iceServers.isEmpty
+            ? callConfiguration.backupIceServers
+            : token.iceServers
     }
 }

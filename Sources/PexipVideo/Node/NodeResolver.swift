@@ -12,7 +12,7 @@ public protocol NodeResolverProtocol {
      - Throws: `DNSError` if DNS lookup failed
      - Throws: `Error` if a network error was encountered
      */
-    func resolveNodeAddress(for host: String) async throws -> URL?
+    func resolveNode(for host: String) async throws -> Node?
 }
 
 // MARK: - Implementation
@@ -44,24 +44,24 @@ struct NodeResolver: NodeResolverProtocol {
 
     // MARK: - Lookup
 
-    func resolveNodeAddress(for host: String) async throws -> URL? {
-        var result: URL?
+    func resolveNode(for host: String) async throws -> Node? {
+        var url: URL?
 
         if let address = try await resolveSRVRecord(for: host) {
-            result = address
+            url = address
         } else if let address = try await resolveARecord(for: host) {
-            result = address
+            url = address
         }
 
-        if let result = result {
+        if let url = url {
             logger.info(
-                "Found a conferencing node with address: \(result.absoluteString)"
+                "Found a conferencing node with address: \(url.absoluteString)"
             )
         } else {
             logger.warn("No SRV or A records were found for \(host)")
         }
 
-        return result
+        return url.map(Node.init(address:))
     }
 
     private func resolveSRVRecord(for host: String) async throws -> URL? {

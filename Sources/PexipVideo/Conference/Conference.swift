@@ -39,7 +39,7 @@ final class Conference: ConferenceProtocol {
     private let userDisplayName: String
     private let tokenSession: TokenSessionProtocol
     private let callSession: CallSessionProtocol
-    private let eventSource: ServerSentEventSourceProtocol
+    private let serverEventSession: ServerEventSession
     private let logger: LoggerProtocol
     private var eventStreamTask: Task<Void, Never>?
     private var mediaEventSubject = PassthroughSubject<ConferenceMediaEvent, Never>()
@@ -53,14 +53,14 @@ final class Conference: ConferenceProtocol {
         userDisplayName: String,
         tokenSession: TokenSessionProtocol,
         callSession: CallSessionProtocol,
-        eventSource: ServerSentEventSourceProtocol,
+        serverEventSession: ServerEventSession,
         logger: LoggerProtocol
     ) {
         self.conferenceName = conferenceName
         self.userDisplayName = userDisplayName
         self.tokenSession = tokenSession
         self.callSession = callSession
-        self.eventSource = eventSource
+        self.serverEventSession = serverEventSession
         self.logger = logger
     }
 
@@ -72,11 +72,11 @@ final class Conference: ConferenceProtocol {
         }
 
         await tokenSession.activate()
-        await eventSource.open()
+        await serverEventSession.open()
 
         eventStreamTask = Task {
-            for await event in await eventSource.eventStream() {
-                await handleConferenceEvent(event)
+            for await message in await serverEventSession.messages() {
+                await handleServerMessage(message)
             }
         }
 
@@ -111,10 +111,10 @@ final class Conference: ConferenceProtocol {
     // MARK: - Private methods
 
     @MainActor
-    private func handleConferenceEvent(_ event: ServerSentEvent) {
+    private func handleServerMessage(_ message: ServerEvent.Message) {
         Task {
-            switch event {
-            case .chatMessage:
+            switch message {
+            case .chat:
                 logger[.conference].debug("Chat message received")
             case .callDisconnected(let info):
                 logger[.conference].debug("Call disconnected, reason: \(info.reason)")
@@ -140,7 +140,7 @@ final class Conference: ConferenceProtocol {
 
     private func cleanup(releaseToken: Bool) async {
         eventStreamTask?.cancel()
-        await eventSource.close()
+        await serverEventSession.close()
         await tokenSession.deactivate(releaseToken: releaseToken)
         await callSession.stop()
     }

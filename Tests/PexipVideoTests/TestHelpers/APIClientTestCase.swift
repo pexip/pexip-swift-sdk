@@ -17,7 +17,7 @@ class APIClientTestCase<T>: XCTestCase {
 
         tokenProvider = TokenProviderMock()
         let client = InfinityClient(
-            nodeAddress: nodeAddress,
+            node: Node(address: nodeAddress),
             alias: alias,
             urlSession: urlSession,
             tokenProvider: tokenProvider,

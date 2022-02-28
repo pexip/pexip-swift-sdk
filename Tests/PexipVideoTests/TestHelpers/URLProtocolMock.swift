@@ -1,14 +1,14 @@
 import XCTest
 
 final class URLProtocolMock: URLProtocol {
-    struct Response {
-        let statusCode: Int
-        let data: Data
-        var headerFields: [String: String]?
+    enum Response {
+        case http(statusCode: Int, data: Data, headers: [String: String]?)
+        case url(Data)
+        case error(Error)
     }
 
     static var makeResponse: (URLRequest) throws -> Response = { _ in
-        Response(statusCode: 200, data: Data())
+        .http(statusCode: 200, data: Data(), headers: nil)
     }
 
     override class func canInit(with request: URLRequest) -> Bool {
@@ -29,21 +29,32 @@ final class URLProtocolMock: URLProtocol {
         guard let client = client else { return }
 
         do {
-            let response = try URLProtocolMock.makeResponse(request)
-            let httpResponse = try XCTUnwrap(
-                HTTPURLResponse(
-                    url: XCTUnwrap(request.url),
-                    statusCode: response.statusCode,
-                    httpVersion: "HTTP/1.1",
-                    headerFields: response.headerFields
+            let response: URLResponse
+            let responseData: Data
+
+            switch try URLProtocolMock.makeResponse(request) {
+            case .http(let statusCode, let data, let headers):
+                response = try XCTUnwrap(
+                    HTTPURLResponse(
+                        url: XCTUnwrap(request.url),
+                        statusCode: statusCode,
+                        httpVersion: "HTTP/1.1",
+                        headerFields: headers
+                    )
                 )
-            )
+                responseData = data
+            case .url(let data):
+                response = URLResponse()
+                responseData = data
+            case .error(let error):
+                throw error
+            }
 
             client.urlProtocol(self,
-                didReceive: httpResponse,
+                didReceive: response,
                 cacheStoragePolicy: .notAllowed
             )
-            client.urlProtocol(self, didLoad: response.data)
+            client.urlProtocol(self, didLoad: responseData)
         } catch {
             client.urlProtocol(self, didFailWithError: error)
         }
