@@ -1,5 +1,6 @@
 /// Call quality profile.
 public struct QualityProfile: Hashable {
+    /// 1920x1080 (16:9)
     public static let veryHigh = QualityProfile(
         width: 1920,
         height: 1080,
@@ -8,6 +9,7 @@ public struct QualityProfile: Hashable {
         opusBitrate: 64
     )
 
+    /// 1280x720 (16:9)
     public static let high = QualityProfile(
         width: 1280,
         height: 720,
@@ -16,15 +18,17 @@ public struct QualityProfile: Hashable {
         opusBitrate: 64
     )
 
+    /// 960x540 (16:9)
     public static let medium = QualityProfile(
-        width: 720,
-        height: 480,
+        width: 960,
+        height: 540,
         fps: 25,
         bandwidth: 768
     )
 
+    /// 480x360 (4:3)
     public static let low = QualityProfile(
-        width: 640,
+        width: 480,
         height: 360,
         fps: 15,
         bandwidth: 384
@@ -60,7 +64,7 @@ public struct QualityProfile: Hashable {
         bandwidth: UInt,
         opusBitrate: UInt? = nil
     ) {
-        precondition((640...1920).contains(width))
+        precondition((480...1920).contains(width))
         precondition((360...1080).contains(height))
         precondition((1...60).contains(fps))
         precondition((384...2880).contains(bandwidth))

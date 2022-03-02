@@ -41,8 +41,8 @@ final class QualityProfileTests: XCTestCase {
     func testMedium() {
         let qualityProfile = QualityProfile.medium
 
-        XCTAssertEqual(qualityProfile.width, 720)
-        XCTAssertEqual(qualityProfile.height, 480)
+        XCTAssertEqual(qualityProfile.width, 960)
+        XCTAssertEqual(qualityProfile.height, 540)
         XCTAssertEqual(qualityProfile.fps, 25)
         XCTAssertEqual(qualityProfile.bandwidth, 768)
         XCTAssertNil(qualityProfile.opusBitrate)
@@ -51,7 +51,7 @@ final class QualityProfileTests: XCTestCase {
     func testLow() {
         let qualityProfile = QualityProfile.low
 
-        XCTAssertEqual(qualityProfile.width, 640)
+        XCTAssertEqual(qualityProfile.width, 480)
         XCTAssertEqual(qualityProfile.height, 360)
         XCTAssertEqual(qualityProfile.fps, 15)
         XCTAssertEqual(qualityProfile.bandwidth, 384)

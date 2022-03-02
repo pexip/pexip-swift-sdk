@@ -77,6 +77,7 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
             self.localVideoTrack = WebRTCLocalVideoTrack(
                 factory: factory,
                 trackManager: peerConnection,
+                qualityProfile: qualityProfile,
                 streamId: localStreamId
             )
             #endif

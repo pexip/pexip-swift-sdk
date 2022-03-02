@@ -4,15 +4,15 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
     var isEnabled: Bool {
         get { videoTrack.isEnabled }
         set {
-            guard videoTrack.isEnabled != newValue else {
-                return
+            if videoTrack.isEnabled != newValue {
+                setEnabled(newValue)
             }
-            setEnabled(newValue)
         }
     }
 
     private weak var trackManager: RTCTrackManager?
     private let capturer: RTCCameraVideoCapturer
+    private let qualityProfile: QualityProfile
     private var trackSender: RTCRtpSender?
     @MainActor private let videoTrack: WebRTCVideoTrack
     @MainActor private var cameraPosition: AVCaptureDevice.Position = .front
@@ -22,6 +22,7 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
     init(
         factory: RTCPeerConnectionFactory,
         trackManager: RTCTrackManager,
+        qualityProfile: QualityProfile,
         streamId: String
     ) {
         let videoSource = factory.videoSource()
@@ -32,6 +33,7 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
         self.capturer = RTCCameraVideoCapturer(delegate: videoSource)
         self.trackSender = trackManager.add(track, streamIds: [streamId])
         self.trackManager = trackManager
+        self.qualityProfile = qualityProfile
     }
 
     deinit {
@@ -82,14 +84,26 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
 
     @MainActor
     private func startCapture() async throws {
-        guard let config = config else {
+        guard let device = AVCaptureDevice.videoCaptureDevices(
+            withPosition: cameraPosition
+        ).first else {
             return
         }
 
+        guard let format = RTCCameraVideoCapturer.supportedFormats(
+            for: device
+        ).bestFormat(for: qualityProfile) else {
+            return
+        }
+
+        let fps = format
+            .videoSupportedFrameRateRanges
+            .bestFrameRate(for: qualityProfile)
+
         try await capturer.startCapture(
-            with: config.device,
-            format: config.format,
-            fps: Int(config.fps.maxFrameRate)
+            with: device,
+            format: format,
+            fps: Int(fps)
         )
     }
 
@@ -99,41 +113,4 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
         await capturer.stopCapture()
         videoTrack.renderEmptyFrame()
     }
-
-    @MainActor
-    private var config: CaptureConfig? {
-        let captureDevices = RTCCameraVideoCapturer.captureDevices()
-
-        guard let device = captureDevices.first(where: {
-            $0.position == cameraPosition
-        }) else {
-            return nil
-        }
-
-        let supportedFormats = RTCCameraVideoCapturer.supportedFormats(for: device)
-
-        guard let format = supportedFormats.sorted(by: {
-            let width1 = CMVideoFormatDescriptionGetDimensions($0.formatDescription).width
-            let width2 = CMVideoFormatDescriptionGetDimensions($1.formatDescription).width
-            return width1 < width2
-        }).last else {
-            return nil
-        }
-
-        guard let fps = (format.videoSupportedFrameRateRanges.sorted {
-            $0.maxFrameRate < $1.maxFrameRate
-        }).last else {
-            return nil
-        }
-
-        return CaptureConfig(device: device, format: format, fps: fps)
-    }
-}
-
-// MARK: - Private types
-
-private struct CaptureConfig {
-    let device: AVCaptureDevice
-    let format: AVCaptureDevice.Format
-    let fps: AVFrameRateRange
 }

@@ -93,7 +93,7 @@ extension RTCSignalingState {
     }
 }
 
-// MARL - Connection State
+// MARK: - Connection State
 
 extension RTCIceConnectionState {
     var debugDescription: String {
@@ -130,7 +130,7 @@ extension RTCIceGatheringState {
         case .gathering:
             return "Gathering"
         case .complete:
-            return "complete"
+            return "Complete"
         @unknown default:
             return "Unknown"
         }
