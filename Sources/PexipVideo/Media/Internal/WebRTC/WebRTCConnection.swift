@@ -7,7 +7,7 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
         eventSubject.eraseToAnyPublisher()
     }
 
-    private(set) var audioTrack: AudioTrackProtocol?
+    private(set) var audioTrack: LocalAudioTrackProtocol?
     private(set) var localVideoTrack: LocalVideoTrackProtocol?
     private(set) var remoteVideoTrack: VideoTrackProtocol?
 
@@ -68,6 +68,7 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
             self.audioTrack = WebRTCAudioTrack(
                 factory: factory,
                 trackManager: peerConnection,
+                capturePermission: .audio,
                 streamId: localStreamId
             )
         }
@@ -77,6 +78,7 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
             self.localVideoTrack = WebRTCLocalVideoTrack(
                 factory: factory,
                 trackManager: peerConnection,
+                capturePermission: .video,
                 qualityProfile: qualityProfile,
                 streamId: localStreamId
             )
@@ -136,7 +138,7 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
         switch newState {
         case .connected:
             eventSubject.send(.connected)
-            if supportsVideo {
+            if supportsAudio {
                 audioTrack?.speakerOn()
             } else {
                 audioTrack?.speakerOff()

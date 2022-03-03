@@ -1,15 +1,7 @@
 import WebRTC
 
 final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
-    var isEnabled: Bool {
-        get { videoTrack.isEnabled }
-        set {
-            if videoTrack.isEnabled != newValue {
-                setEnabled(newValue)
-            }
-        }
-    }
-
+    private(set) var capturePermission: MediaCapturePermission
     private weak var trackManager: RTCTrackManager?
     private let capturer: RTCCameraVideoCapturer
     private let qualityProfile: QualityProfile
@@ -22,6 +14,7 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
     init(
         factory: RTCPeerConnectionFactory,
         trackManager: RTCTrackManager,
+        capturePermission: MediaCapturePermission,
         qualityProfile: QualityProfile,
         streamId: String
     ) {
@@ -34,6 +27,7 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
         self.trackSender = trackManager.add(track, streamIds: [streamId])
         self.trackManager = trackManager
         self.qualityProfile = qualityProfile
+        self.capturePermission = capturePermission
     }
 
     deinit {
@@ -42,14 +36,46 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
         }
 
         if videoTrack.isEnabled {
-            videoTrack.isEnabled = false
+            videoTrack.setEnabled(false)
             capturer.stopCapture { [weak videoTrack] in
                 videoTrack?.renderEmptyFrame()
             }
         }
     }
 
-    // MARK: - Internal methods
+    // MARK: - Internal
+
+    var isEnabled: Bool {
+        videoTrack.isEnabled && capturePermission.isAuthorized
+    }
+
+    @MainActor
+    @discardableResult
+    func setEnabled(_ enabled: Bool) async -> Bool {
+        guard isEnabled != enabled else {
+            return isEnabled
+        }
+
+        videoTrack.setEnabled(enabled)
+
+        if enabled {
+            await capturePermission.requestAccess(openSettingsIfNeeded: true)
+        }
+
+        guard isEnabled else {
+            return false
+        }
+
+        _ = await Task { @MainActor in
+            if enabled {
+                try await startCapture()
+            } else {
+                try await stopCapture()
+            }
+        }.result
+
+        return videoTrack.isEnabled
+    }
 
     func render(to view: VideoView, aspectFit: Bool) {
         videoTrack.render(to: view, aspectFit: aspectFit)
@@ -69,18 +95,6 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
     }
 
     // MARK: - Private methods
-
-    private func setEnabled(_ enabled: Bool) {
-        videoTrack.isEnabled = enabled
-
-        Task { @MainActor in
-            if enabled {
-                try await startCapture()
-            } else {
-                try await stopCapture()
-            }
-        }
-    }
 
     @MainActor
     private func startCapture() async throws {

@@ -4,15 +4,6 @@ final class WebRTCVideoTrack: VideoTrackProtocol {
     private var track: RTCVideoTrack?
     private weak var renderer: RTCVideoRenderer?
 
-    var isEnabled: Bool {
-        get {
-            track?.isEnabled ?? false
-        }
-        set {
-            track?.isEnabled = newValue
-        }
-    }
-
     // MARK: - Init
 
     init(track: RTCVideoTrack?) {
@@ -21,6 +12,16 @@ final class WebRTCVideoTrack: VideoTrackProtocol {
 
     deinit {
         removeCurrentRenderer()
+    }
+
+    // MARK: - Internal
+
+    var isEnabled: Bool {
+        track?.isEnabled ?? false
+    }
+
+    func setEnabled(_ enabled: Bool) {
+        track?.isEnabled = enabled
     }
 
     func render(to view: VideoView, aspectFit: Bool) {

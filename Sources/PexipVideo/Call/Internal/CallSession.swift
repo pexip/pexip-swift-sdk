@@ -9,7 +9,7 @@ enum CallEvent {
 }
 
 protocol CallSessionProtocol {
-    var audioTrack: AudioTrackProtocol? { get }
+    var audioTrack: LocalAudioTrackProtocol? { get }
     var localVideoTrack: LocalVideoTrackProtocol? { get }
     var remoteVideoTrack: VideoTrackProtocol? { get }
     var eventPublisher: AnyPublisher<CallEvent, Never> { get }
@@ -24,7 +24,7 @@ final class CallSession: CallSessionProtocol {
     typealias APIClient = CallClientProtocol & ParticipantClientProtocol
     private typealias CallDetailsTask = Task<CallDetails, Error>
 
-    var audioTrack: AudioTrackProtocol? { mediaConnection.audioTrack }
+    var audioTrack: LocalAudioTrackProtocol? { mediaConnection.audioTrack }
     var localVideoTrack: LocalVideoTrackProtocol? { mediaConnection.localVideoTrack }
     var remoteVideoTrack: VideoTrackProtocol? { mediaConnection.remoteVideoTrack }
 

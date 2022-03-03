@@ -1,15 +1,7 @@
 import WebRTC
 
-final class WebRTCAudioTrack: AudioTrackProtocol {
-    var isEnabled: Bool {
-        get {
-            track.isEnabled
-        }
-        set {
-            track.isEnabled = newValue
-        }
-    }
-
+final class WebRTCAudioTrack: LocalAudioTrackProtocol {
+    private(set) var capturePermission: MediaCapturePermission
     private weak var trackManager: RTCTrackManager?
     private let track: RTCAudioTrack
     private let audioSession = RTCAudioSession.sharedInstance()
@@ -21,12 +13,13 @@ final class WebRTCAudioTrack: AudioTrackProtocol {
     init(
         factory: RTCPeerConnectionFactory,
         trackManager: RTCTrackManager,
+        capturePermission: MediaCapturePermission,
         streamId: String
     ) {
         self.track = factory.audioTrack(withTrackId: UUID().uuidString)
-        self.track.isEnabled = true
         self.trackSender = trackManager.add(track, streamIds: [streamId])
         self.trackManager = trackManager
+        self.capturePermission = capturePermission
         configureAudioSession()
     }
 
@@ -36,7 +29,26 @@ final class WebRTCAudioTrack: AudioTrackProtocol {
         }
     }
 
-    // MARK: - Internal methods
+    // MARK: - Internal
+
+    var isEnabled: Bool {
+        track.isEnabled && capturePermission.isAuthorized
+    }
+
+    @MainActor
+    @discardableResult
+    func setEnabled(_ enabled: Bool) async -> Bool {
+        guard isEnabled != enabled else {
+            return isEnabled
+        }
+
+        track.isEnabled = enabled
+        if enabled {
+            await capturePermission.requestAccess(openSettingsIfNeeded: true)
+        }
+
+        return isEnabled
+    }
 
     func speakerOn() {
         overrideOutputAudioPort(.speaker)

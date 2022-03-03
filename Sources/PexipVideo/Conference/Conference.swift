@@ -10,7 +10,7 @@ public protocol ConferenceProtocol {
     var callDelegate: ConferenceCallDelegate? { get set }
     var callEventPublisher: AnyPublisher<ConferenceCallEvent, Never> { get }
 
-    var audioTrack: AudioTrackProtocol? { get }
+    var audioTrack: LocalAudioTrackProtocol? { get }
     var localVideoTrack: LocalVideoTrackProtocol? { get }
     var remoteVideoTrack: VideoTrackProtocol? { get }
 
@@ -31,7 +31,7 @@ final class Conference: ConferenceProtocol {
         callEventSubject.eraseToAnyPublisher()
     }
 
-    var audioTrack: AudioTrackProtocol? { callSession.audioTrack }
+    var audioTrack: LocalAudioTrackProtocol? { callSession.audioTrack }
     var localVideoTrack: LocalVideoTrackProtocol? { callSession.localVideoTrack }
     var remoteVideoTrack: VideoTrackProtocol? { callSession.remoteVideoTrack }
 

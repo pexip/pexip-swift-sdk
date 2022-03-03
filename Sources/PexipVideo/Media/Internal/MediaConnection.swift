@@ -10,7 +10,7 @@ enum MediaConnectionEvent {
 protocol MediaConnection {
     typealias SessionDescription = String
 
-    var audioTrack: AudioTrackProtocol? { get }
+    var audioTrack: LocalAudioTrackProtocol? { get }
     var localVideoTrack: LocalVideoTrackProtocol? { get }
     var remoteVideoTrack: VideoTrackProtocol? { get }
     var eventPublisher: AnyPublisher<MediaConnectionEvent, Never> { get }
