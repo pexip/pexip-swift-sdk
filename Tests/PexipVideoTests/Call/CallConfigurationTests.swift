@@ -3,24 +3,22 @@ import XCTest
 
 final class CallConfigurationTests: XCTestCase {
     func testInit() {
+        let mediaFeatures = MediaFeature.all
         let configuration = CallConfiguration(
             qualityProfile: .medium,
-            supportsAudio: true,
-            supportsVideo: false,
+            mediaFeatures: mediaFeatures,
             useGoogleStunServersAsBackup: true
         )
 
         XCTAssertEqual(configuration.qualityProfile, .medium)
-        XCTAssertTrue(configuration.supportsAudio)
-        XCTAssertFalse(configuration.supportsVideo)
+        XCTAssertEqual(configuration.mediaFeatures, mediaFeatures)
         XCTAssertTrue(configuration.useGoogleStunServersAsBackup)
     }
 
     func testBackupIceServers() {
         var configuration = CallConfiguration(
             qualityProfile: .medium,
-            supportsAudio: true,
-            supportsVideo: false,
+            mediaFeatures: [.receiveVideo, .receiveAudio],
             useGoogleStunServersAsBackup: true
         )
         XCTAssertFalse(configuration.backupIceServers.isEmpty)

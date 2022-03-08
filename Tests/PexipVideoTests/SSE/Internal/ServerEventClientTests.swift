@@ -8,7 +8,7 @@ final class ServerEventClientTests: APIClientTestCase<ServerEventClientProtocol>
         var createdRequest: URLRequest?
         var receivedEvents = [ServerEvent]()
         let token = Token.randomToken()
-        let message = ServerEvent.Disconnect(reason: "Test")
+        let message = ParticipantDisconnectDetails(reason: "Test")
         let messageDataString = String(
             data: try JSONEncoder().encode(message),
             encoding: .utf8
@@ -65,7 +65,7 @@ final class ServerEventClientTests: APIClientTestCase<ServerEventClientProtocol>
                     data: "\(messageDataString)",
                     retry: nil
                 ),
-                message: .disconnect(
+                message: .participantDisconnected(
                     .init(reason: "Test")
                 )
             )

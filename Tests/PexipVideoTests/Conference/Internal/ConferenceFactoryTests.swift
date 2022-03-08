@@ -7,8 +7,7 @@ final class ConferenceFactoryTests: XCTestCase {
     private let node = Node(address: URL(string: "https://example.com")!)
     private let callConfiguration = CallConfiguration(
         qualityProfile: .medium,
-        supportsAudio: true,
-        supportsVideo: true,
+        mediaFeatures: .all,
         useGoogleStunServersAsBackup: true
     )
 

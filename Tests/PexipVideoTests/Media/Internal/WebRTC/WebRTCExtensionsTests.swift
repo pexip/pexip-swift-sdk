@@ -50,8 +50,8 @@ final class WebRTCExtensionsTests: XCTestCase {
         ).description
 
         let constraints = RTCMediaConstraints.constraints(
-            withEnabledVideo: true,
-            audio: false
+            receiveVideo: true,
+            receiveAudio: false
         ).description
 
         XCTAssertEqual(constraints, expectedConstraints)

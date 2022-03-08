@@ -9,6 +9,7 @@ enum CallEvent {
 }
 
 protocol CallSessionProtocol {
+    var isPresentation: Bool { get }
     var audioTrack: LocalAudioTrackProtocol? { get }
     var localVideoTrack: LocalVideoTrackProtocol? { get }
     var remoteVideoTrack: VideoTrackProtocol? { get }
@@ -24,6 +25,7 @@ final class CallSession: CallSessionProtocol {
     typealias APIClient = CallClientProtocol & ParticipantClientProtocol
     private typealias CallDetailsTask = Task<CallDetails, Error>
 
+    let isPresentation: Bool
     var audioTrack: LocalAudioTrackProtocol? { mediaConnection.audioTrack }
     var localVideoTrack: LocalVideoTrackProtocol? { mediaConnection.localVideoTrack }
     var remoteVideoTrack: VideoTrackProtocol? { mediaConnection.remoteVideoTrack }
@@ -34,7 +36,6 @@ final class CallSession: CallSessionProtocol {
 
     private let participantId: UUID
     private let qualityProfile: QualityProfile
-    private let isPresentation: Bool
     private let apiClient: APIClient
     private let mediaConnection: MediaConnection
     private let logger: CategoryLogger
@@ -48,17 +49,17 @@ final class CallSession: CallSessionProtocol {
     init(
         participantId: UUID,
         qualityProfile: QualityProfile,
-        isPresentation: Bool = false,
+        isPresentation: Bool,
         mediaConnection: MediaConnection,
         apiClient: APIClient,
-        logger: LoggerProtocol
+        logger: CategoryLogger
     ) {
         self.participantId = participantId
         self.qualityProfile = qualityProfile
         self.isPresentation = isPresentation
         self.apiClient = apiClient
         self.mediaConnection = mediaConnection
-        self.logger = logger[.media]
+        self.logger = logger
     }
 
     func start() async throws {

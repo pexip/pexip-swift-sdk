@@ -52,15 +52,15 @@ extension RTCMediaConstraints {
         optionalConstraints: nil
     )
 
-    static func constraints(withEnabledVideo video: Bool, audio: Bool) -> RTCMediaConstraints {
+    static func constraints(receiveVideo: Bool, receiveAudio: Bool) -> RTCMediaConstraints {
         func mediaConstraintsValue(from bool: Bool) -> String {
             bool ? kRTCMediaConstraintsValueTrue : kRTCMediaConstraintsValueFalse
         }
 
         return RTCMediaConstraints(
             mandatoryConstraints: [
-                kRTCMediaConstraintsOfferToReceiveVideo: mediaConstraintsValue(from: video),
-                kRTCMediaConstraintsOfferToReceiveAudio: mediaConstraintsValue(from: audio)
+                kRTCMediaConstraintsOfferToReceiveVideo: mediaConstraintsValue(from: receiveVideo),
+                kRTCMediaConstraintsOfferToReceiveAudio: mediaConstraintsValue(from: receiveAudio)
             ],
             optionalConstraints: [
                 "internalSctpDataChannels": kRTCMediaConstraintsValueFalse,

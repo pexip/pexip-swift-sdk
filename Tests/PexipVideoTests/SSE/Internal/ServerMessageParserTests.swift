@@ -57,7 +57,7 @@ final class ServerMessageParserTests: APIClientTestCase<ServerEventClientProtoco
     }
 
     func testCallDisconnected() throws {
-        let expectedMessage = ServerEvent.CallDisconnected(
+        let expectedMessage = CallDisconnectDetails(
             callId: UUID(),
             reason: "Test"
         )
@@ -67,16 +67,16 @@ final class ServerMessageParserTests: APIClientTestCase<ServerEventClientProtoco
         XCTAssertEqual(message, .callDisconnected(expectedMessage))
     }
 
-    func testDisconnect() throws {
-        let expectedMessage = ServerEvent.Disconnect(reason: "Test")
+    func testParticipantDisconnected() throws {
+        let expectedMessage = ParticipantDisconnectDetails(reason: "Test")
         let event = try event(for: expectedMessage, name: "disconnect")
         let message = parser.message(from: event)
 
-        XCTAssertEqual(message, .disconnect(expectedMessage))
+        XCTAssertEqual(message, .participantDisconnected(expectedMessage))
     }
 
     func testUnknown() throws {
-        let expectedMessage = ServerEvent.Disconnect(reason: "Test")
+        let expectedMessage = ParticipantDisconnectDetails(reason: "Test")
         let event = try event(for: expectedMessage, name: "unknown")
         let message = parser.message(from: event)
 

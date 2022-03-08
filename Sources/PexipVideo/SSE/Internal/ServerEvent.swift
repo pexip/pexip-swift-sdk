@@ -2,8 +2,10 @@
 struct ServerEvent: Hashable {
     enum Message: Hashable {
         case chat(ChatMessage)
-        case callDisconnected(CallDisconnected)
-        case disconnect(Disconnect)
+        case callDisconnected(CallDisconnectDetails)
+        case participantDisconnected(ParticipantDisconnectDetails)
+        case presentationStarted(PresentationDetails)
+        case presentationStopped
     }
 
     let rawEvent: EventStreamEvent
@@ -16,19 +18,16 @@ struct ServerEvent: Hashable {
 
 // MARK: - Messages
 
-// swiftlint:disable nesting
-extension ServerEvent {
-    struct CallDisconnected: Codable, Hashable {
-        private enum CodingKeys: String, CodingKey {
-            case callId = "call_uuid"
-            case reason
-        }
-
-        let callId: UUID
-        let reason: String
+struct CallDisconnectDetails: Codable, Hashable {
+    private enum CodingKeys: String, CodingKey {
+        case callId = "call_uuid"
+        case reason
     }
 
-    struct Disconnect: Codable, Hashable {
-        let reason: String
-    }
+    let callId: UUID
+    let reason: String
+}
+
+struct ParticipantDisconnectDetails: Codable, Hashable {
+    let reason: String
 }

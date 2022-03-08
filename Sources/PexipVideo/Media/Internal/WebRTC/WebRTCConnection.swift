@@ -11,8 +11,8 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
     private(set) var localVideoTrack: LocalVideoTrackProtocol?
     private(set) var remoteVideoTrack: VideoTrackProtocol?
 
-    private let supportsAudio: Bool
-    private let supportsVideo: Bool
+    private let mediaConstraints: RTCMediaConstraints
+    private let features: MediaFeature
     private let factory: RTCPeerConnectionFactory
     private let peerConnection: RTCPeerConnection
     private let logger: CategoryLogger
@@ -32,27 +32,27 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
     required init(
         iceServers: [String],
         qualityProfile: QualityProfile,
-        supportsAudio: Bool = true,
-        supportsVideo: Bool = true,
+        features: MediaFeature,
         factory: RTCPeerConnectionFactory = .default,
-        logger: LoggerProtocol
+        logger: CategoryLogger
     ) {
+        self.mediaConstraints = .constraints(
+            receiveVideo: features.contains(.receiveAudio),
+            receiveAudio: features.contains(.receiveVideo)
+        )
+
         guard let peerConnection = factory.peerConnection(
             with: .configuration(withIceServers: iceServers),
-            constraints: .constraints(
-                withEnabledVideo: supportsVideo,
-                audio: supportsAudio
-            ),
+            constraints: mediaConstraints,
             delegate: nil
         ) else {
             fatalError("Could not create new RTCPeerConnection")
         }
 
-        self.supportsAudio = supportsAudio
-        self.supportsVideo = supportsVideo
+        self.features = features
         self.factory = factory
         self.peerConnection = peerConnection
-        self.logger = logger[.media]
+        self.logger = logger
         self.qualityProfile = qualityProfile
 
         super.init()
@@ -64,7 +64,7 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
     // MARK: - Setup
 
     private func setupMedia() {
-        if supportsAudio {
+        if features.contains(.sendAudio) {
             self.audioTrack = WebRTCAudioTrack(
                 factory: factory,
                 trackManager: peerConnection,
@@ -73,7 +73,7 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
             )
         }
 
-        if supportsVideo {
+        if features.contains(.sendVideo) {
             #if !targetEnvironment(simulator)
             self.localVideoTrack = WebRTCLocalVideoTrack(
                 factory: factory,
@@ -95,11 +95,7 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
     // MARK: - Signaling
 
     func createOffer() async throws -> String {
-        let constrains = RTCMediaConstraints.constraints(
-            withEnabledVideo: supportsVideo,
-            audio: supportsVideo
-        )
-        let offer = try await peerConnection.offer(for: constrains)
+        let offer = try await peerConnection.offer(for: mediaConstraints)
         icePwd = IceCandidate.pwd(from: offer.sdp)
         try await peerConnection.setLocalDescription(offer)
         return offer.sdp
@@ -138,10 +134,8 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
         switch newState {
         case .connected:
             eventSubject.send(.connected)
-            if supportsAudio {
-                audioTrack?.speakerOn()
-            } else {
-                audioTrack?.speakerOff()
+            if let audioTrack = audioTrack {
+                audioTrack.speakerOn()
             }
         case .disconnected:
             eventSubject.send(.disconnected)

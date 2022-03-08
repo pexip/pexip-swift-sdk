@@ -4,5 +4,6 @@ public enum LogCategory: String, CaseIterable {
     case conference
     case dnsLookup
     case http
-    case media
+    case call
+    case remotePresentation
 }

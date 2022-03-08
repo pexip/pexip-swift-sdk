@@ -8,8 +8,7 @@ public struct CallConfiguration {
     ]
 
     public var qualityProfile: QualityProfile
-    public var supportsAudio: Bool
-    public var supportsVideo: Bool
+    public var mediaFeatures: MediaFeature
     public var useGoogleStunServersAsBackup: Bool
 
     var backupIceServers: [String] {
@@ -18,13 +17,11 @@ public struct CallConfiguration {
 
     public init(
         qualityProfile: QualityProfile = .medium,
-        supportsAudio: Bool = true,
-        supportsVideo: Bool = true,
+        mediaFeatures: MediaFeature = .all,
         useGoogleStunServersAsBackup: Bool = true
     ) {
         self.qualityProfile = qualityProfile
-        self.supportsAudio = supportsAudio
-        self.supportsVideo = supportsVideo
+        self.mediaFeatures = mediaFeatures
         self.useGoogleStunServersAsBackup = useGoogleStunServersAsBackup
     }
 }
