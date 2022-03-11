@@ -74,6 +74,18 @@ public struct ConferenceFactory {
             tokenProvider: tokenStorage,
             logger: logger
         )
+        var chat: Chat?
+
+        if token.chatEnabled {
+            chat = Chat(
+                senderName: token.displayName,
+                senderId: token.participantId,
+                sendMessage: { text in
+                    try await apiClient.sendChatMessage(text)
+                }
+            )
+        }
+
         return Conference(
             conferenceName: token.conferenceName,
             userDisplayName: token.displayName,
@@ -97,6 +109,7 @@ public struct ConferenceFactory {
                 client: apiClient,
                 logger: logger
             ),
+            chat: chat,
             logger: logger
         )
     }

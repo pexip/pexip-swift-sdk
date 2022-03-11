@@ -1,30 +1,19 @@
-// MARK: - Call
+import Combine
 
-public enum ConferenceCallEvent {
-    case started
-    case ended
-}
+// MARK: - Call
 
 public protocol ConferenceCallDelegate: AnyObject {
     func conference(
         _ conference: ConferenceProtocol,
-        didSendCallEvent event: ConferenceCallEvent
+        didReceiveCallEvent event: CallEvent
     )
 }
 
-// MARK: - Remote presentation
-
-public enum ConferencePresentationEvent {
-    case started(
-        track: VideoTrackProtocol,
-        details: PresentationDetails
-    )
-    case stopped
-}
+// MARK: - Presentation
 
 public protocol ConferencePresentationDelegate: AnyObject {
     func conference(
         _ conference: ConferenceProtocol,
-        didSendPresentationEvent event: ConferencePresentationEvent
+        didReceivePresentationEvent event: PresentationEvent
     )
 }

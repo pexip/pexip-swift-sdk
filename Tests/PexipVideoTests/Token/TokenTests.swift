@@ -63,6 +63,7 @@ final class TokenTests: XCTestCase {
                 serviceType: "conference",
                 conferenceName: "Conference",
                 stun: [.init(url: "stun:stun.l.google.com:19302")],
+                chatEnabled: true,
                 expiresString: "120"
             )
         )
@@ -81,6 +82,7 @@ final class TokenTests: XCTestCase {
             serviceType: "conference",
             conferenceName: "Conference",
             stun: [.init(url: "stun:stun.l.google.com:19302")],
+            chatEnabled: true,
             expiresString: "120"
         )
 
@@ -115,6 +117,7 @@ final class TokenTests: XCTestCase {
             serviceType: "conference",
             conferenceName: "Conference",
             stun: [.init(url: "stun:stun.l.google.com:19302")],
+            chatEnabled: true,
             expiresString: "120"
         )
 

@@ -19,6 +19,7 @@ public struct Token: Codable, Hashable {
         case serviceType = "service_type"
         case conferenceName = "conference_name"
         case stun
+        case chatEnabled = "chat_enabled"
     }
 
     /// The authentication token for future requests.
@@ -38,6 +39,8 @@ public struct Token: Codable, Hashable {
     public let conferenceName: String
     // STUN server configuration from the Pexip Conferencing Node
     public let stun: [Stun]?
+    /// true = chat is enabled; false = chat is not enabled
+    public let chatEnabled: Bool
     /// Validity lifetime in seconds.
     public var expires: TimeInterval {
         TimeInterval(expiresString) ?? 0
@@ -73,6 +76,7 @@ public struct Token: Codable, Hashable {
         serviceType: String,
         conferenceName: String,
         stun: [Token.Stun],
+        chatEnabled: Bool,
         expiresString: String
     ) {
         self.value = value
@@ -83,6 +87,7 @@ public struct Token: Codable, Hashable {
         self.serviceType = serviceType
         self.conferenceName = conferenceName
         self.stun = stun
+        self.chatEnabled = chatEnabled
         self.expiresString = expiresString
     }
 

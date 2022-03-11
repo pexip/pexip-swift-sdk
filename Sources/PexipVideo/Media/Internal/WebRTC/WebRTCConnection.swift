@@ -139,6 +139,8 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
             }
         case .disconnected:
             eventSubject.send(.disconnected)
+        case .closed:
+            eventSubject.send(.closed)
         case .failed:
             eventSubject.send(.failed)
         default:

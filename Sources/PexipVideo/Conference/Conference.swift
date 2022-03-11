@@ -5,10 +5,12 @@ import Combine
 
 public protocol ConferenceProtocol {
     var callDelegate: ConferenceCallDelegate? { get set }
-    var callEventPublisher: AnyPublisher<ConferenceCallEvent, Never> { get }
+    var callEventPublisher: AnyPublisher<CallEvent, Never> { get }
 
     var presentationDelegate: ConferencePresentationDelegate? { get set }
-    var presentationEventPublisher: AnyPublisher<ConferencePresentationEvent, Never> { get }
+    var presentationEventPublisher: AnyPublisher<PresentationEvent, Never> { get }
+
+    var chat: Chat? { get }
 
     var audioTrack: LocalAudioTrackProtocol? { get }
     var localVideoTrack: LocalVideoTrackProtocol? { get }
@@ -22,15 +24,16 @@ public protocol ConferenceProtocol {
 
 final class Conference: ConferenceProtocol {
     weak var callDelegate: ConferenceCallDelegate?
-    var callEventPublisher: AnyPublisher<ConferenceCallEvent, Never> {
+    var callEventPublisher: AnyPublisher<CallEvent, Never> {
         callEventSubject.eraseToAnyPublisher()
     }
 
     weak var presentationDelegate: ConferencePresentationDelegate?
-    var presentationEventPublisher: AnyPublisher<ConferencePresentationEvent, Never> {
+    var presentationEventPublisher: AnyPublisher<PresentationEvent, Never> {
         presentationEventSubject.eraseToAnyPublisher()
     }
 
+    let chat: Chat?
     var audioTrack: LocalAudioTrackProtocol? { callTransceiver.audioTrack }
     var localVideoTrack: LocalVideoTrackProtocol? { callTransceiver.localVideoTrack }
     var remoteVideoTrack: VideoTrackProtocol? { callTransceiver.remoteVideoTrack }
@@ -44,8 +47,8 @@ final class Conference: ConferenceProtocol {
     private let serverEventSession: ServerEventSession
     private let logger: LoggerProtocol
     private var eventStreamTask: Task<Void, Never>?
-    private var callEventSubject = PassthroughSubject<ConferenceCallEvent, Never>()
-    private var presentationEventSubject = PassthroughSubject<ConferencePresentationEvent, Never>()
+    private var callEventSubject = PassthroughSubject<CallEvent, Never>()
+    private var presentationEventSubject = PassthroughSubject<PresentationEvent, Never>()
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
@@ -56,6 +59,7 @@ final class Conference: ConferenceProtocol {
         tokenSession: TokenSessionProtocol,
         callSessionFactory: CallSessionFactoryProtocol,
         serverEventSession: ServerEventSession,
+        chat: Chat?,
         logger: LoggerProtocol
     ) {
         self.conferenceName = conferenceName
@@ -65,6 +69,7 @@ final class Conference: ConferenceProtocol {
         self.callTransceiver = callSessionFactory.callTransceiver()
         self.serverEventSession = serverEventSession
         self.logger = logger
+        self.chat = chat
     }
 
     // MARK: - Public API
@@ -109,13 +114,13 @@ final class Conference: ConferenceProtocol {
                 await startPresentationReceiver(details: details)
             case .presentationStopped:
                 await stopPresentationReceiver()
-            case .chat:
+            case .chat(let message):
                 logger[.conference].debug("Chat message received")
+                chat?.appendMessage(message)
             case .callDisconnected(let info):
                 logger[.conference].debug("Call disconnected, reason: \(info.reason)")
             case .participantDisconnected(let info):
                 await cleanup(releaseToken: false)
-                sendCallEvent(.ended)
                 logger[.conference].debug("Participant disconnected, reason: \(info.reason)")
             }
         }
@@ -137,7 +142,7 @@ final class Conference: ConferenceProtocol {
         callTransceiver.eventPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
-                self?.handleCallTransceiverEvent(event)
+                self?.sendCallEvent(event)
             }
             .store(in: &cancellables)
 
@@ -146,16 +151,6 @@ final class Conference: ConferenceProtocol {
         } catch {
             await cleanup(releaseToken: true)
             throw error
-        }
-    }
-
-    private func handleCallTransceiverEvent(_ event: CallEvent) {
-        switch event {
-        case .mediaStarted:
-            sendCallEvent(.started)
-        case .mediaEnded:
-            // TODO: handle event
-            break
         }
     }
 
@@ -183,7 +178,6 @@ final class Conference: ConferenceProtocol {
     private func stopPresentationReceiver() async {
         await presentationReceiver?.stop()
         presentationReceiver = nil
-        sendPresentationEvent(.stopped)
     }
 
     private func handlePresentationReceiverEvent(
@@ -191,28 +185,29 @@ final class Conference: ConferenceProtocol {
         details: PresentationDetails
     ) {
         switch event {
-        case .mediaStarted:
+        case .connected:
             if let track = presentationReceiver?.remoteVideoTrack {
                 sendPresentationEvent(.started(track: track, details: details))
             }
-        case .mediaEnded:
-            // TODO: handle event
-            break
+        case .failed:
+            sendPresentationEvent(.failed)
+        case .disconnected, .closed:
+            sendPresentationEvent(.stopped)
         }
     }
 
     // MARK: - Conference events
 
-    private func sendCallEvent(_ event: ConferenceCallEvent) {
+    private func sendCallEvent(_ event: CallEvent) {
         Task { @MainActor in
-            callDelegate?.conference(self, didSendCallEvent: event)
+            callDelegate?.conference(self, didReceiveCallEvent: event)
             callEventSubject.send(event)
         }
     }
 
-    private func sendPresentationEvent(_ event: ConferencePresentationEvent) {
+    private func sendPresentationEvent(_ event: PresentationEvent) {
         Task { @MainActor in
-            presentationDelegate?.conference(self, didSendPresentationEvent: event)
+            presentationDelegate?.conference(self, didReceivePresentationEvent: event)
             presentationEventSubject.send(event)
         }
     }

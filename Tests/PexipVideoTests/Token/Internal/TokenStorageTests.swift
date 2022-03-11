@@ -68,6 +68,7 @@ extension Token {
             serviceType: "conference",
             conferenceName: "Test",
             stun: stun.map(Token.Stun.init(url:)),
+            chatEnabled: true,
             expiresString: "\(expires)"
         )
     }

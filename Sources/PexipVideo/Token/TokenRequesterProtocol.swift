@@ -1,3 +1,4 @@
+/// Pexip client REST API v2.
 public protocol TokenRequesterProtocol {
     /**
      Requests a new token from the Pexip Conferencing Node.

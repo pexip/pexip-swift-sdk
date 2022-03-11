@@ -3,11 +3,6 @@ import Combine
 
 // MARK: - Protocol
 
-enum CallEvent {
-    case mediaStarted
-    case mediaEnded
-}
-
 protocol CallSessionProtocol {
     var isPresentation: Bool { get }
     var audioTrack: LocalAudioTrackProtocol? { get }
@@ -40,7 +35,7 @@ final class CallSession: CallSessionProtocol {
     private let mediaConnection: MediaConnection
     private let logger: CategoryLogger
     private var callDetailsTask: CallDetailsTask?
-    private var isMediaStarted = false
+    private var isConnected = false
     private var eventSubject = PassthroughSubject<CallEvent, Never>()
     private var cancellables = Set<AnyCancellable>()
 
@@ -63,6 +58,12 @@ final class CallSession: CallSessionProtocol {
     }
 
     func start() async throws {
+        // Listen for connection events
+        mediaConnection.eventPublisher
+            .sink { [weak self] event in
+                self?.handleEvent(event)
+            }.store(in: &cancellables)
+
         let callDetailsTask = CallDetailsTask {
             let sdp = try await mediaConnection.createOffer()
             let offer = SDPMangler(sdp: sdp).mangle(
@@ -77,24 +78,7 @@ final class CallSession: CallSessionProtocol {
         }
         self.callDetailsTask = callDetailsTask
 
-        // Listen for connection events
-        mediaConnection.eventPublisher
-            .sink { [weak self] event in
-                self?.handleEvent(event)
-            }.store(in: &cancellables)
-
         try await mediaConnection.setRemoteDescription(callDetailsTask.value.sdp)
-
-        isMediaStarted = try await apiClient.ack(
-            participantId: participantId,
-            callId: callDetailsTask.value.id
-        )
-
-        if isMediaStarted {
-            logger.info("Started media for the call.")
-        } else {
-            logger.warn("Failed to start media for the call.")
-        }
     }
 
     func stop() async {
@@ -107,8 +91,8 @@ final class CallSession: CallSessionProtocol {
         mediaConnection.close()
         cancellables = []
 
-        if isMediaStarted {
-            isMediaStarted = false
+        if isConnected {
+            isConnected = false
             do {
                 try await apiClient.disconnect(
                     participantId: participantId,
@@ -128,15 +112,42 @@ final class CallSession: CallSessionProtocol {
         Task {
             switch event {
             case .connected:
-                eventSubject.send(.mediaStarted)
+                do {
+                    isConnected = try await startMedia()
+                    eventSubject.send(isConnected ? .connected : .failed)
+                } catch {
+                    eventSubject.send(.failed)
+                }
             case .disconnected:
-                eventSubject.send(.mediaEnded)
+                eventSubject.send(.disconnected)
+            case .closed:
+                eventSubject.send(.closed)
             case .failed:
                 logger.error("Peer connection failed")
             case .newIceCandidate(let iceCandidate):
                 await sendNewIceCandidate(iceCandidate)
             }
         }
+    }
+
+    private func startMedia() async throws -> Bool {
+        guard let callDetailsTask = callDetailsTask else {
+            logger.warn("Tried to start media before starting a call")
+            return false
+        }
+
+        let started = try await apiClient.ack(
+            participantId: participantId,
+            callId: callDetailsTask.value.id
+        )
+
+        if started {
+            logger.info("Started media for the call.")
+        } else {
+            logger.warn("Failed to start media for the call.")
+        }
+
+        return started
     }
 
     /// Listen for local ICE candidates on the local peer connection

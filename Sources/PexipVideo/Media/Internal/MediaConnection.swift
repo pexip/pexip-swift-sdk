@@ -3,6 +3,7 @@ import Combine
 enum MediaConnectionEvent {
     case connected
     case disconnected
+    case closed
     case failed
     case newIceCandidate(IceCandidate)
 }

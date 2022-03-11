@@ -4,6 +4,7 @@ import Foundation
 
 typealias TokenClient = TokenRequesterProtocol & TokenManagerClientProtocol
 
+/// Pexip client REST API v2.
 protocol TokenManagerClientProtocol {
     /**
      Refreshes a token to get a new one.
