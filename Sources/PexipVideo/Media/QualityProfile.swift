@@ -1,3 +1,4 @@
+import CoreGraphics
 /// Call quality profile.
 public struct QualityProfile: Hashable {
     /// 1920x1080 (16:9)
@@ -44,6 +45,10 @@ public struct QualityProfile: Hashable {
     public let bandwidth: UInt
     /// An optional bitrate of an OPUS audio stream (64...510)
     public private(set) var opusBitrate: UInt?
+
+    public var aspectRatio: CGSize {
+        CGSize(width: Int(width), height: Int(height))
+    }
 
     // MARK: - Init
 

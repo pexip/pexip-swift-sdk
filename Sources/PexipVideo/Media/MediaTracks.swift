@@ -1,6 +1,7 @@
 // MARK: - Video
 
 import Combine
+import CoreGraphics
 
 public protocol TrackProtocol: AnyObject {
     /// The enabled state of the track.
@@ -8,13 +9,16 @@ public protocol TrackProtocol: AnyObject {
 }
 
 public protocol VideoTrackProtocol: AnyObject {
+    /// Video aspect ratio (width, heigh)
+    var aspectRatio: CGSize { get }
+
     /**
      Registers a view where all frames received on this track will be rendered.
      - Parameters:
         - view: a view where all frames received on this track will be rendered
         - aspectFit: true/false
      */
-    func render(to view: VideoView, aspectFit: Bool)
+    func setRenderer(_ view: VideoView, aspectFit: Bool)
 }
 
 // MARK: - Local tracks

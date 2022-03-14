@@ -1,13 +1,15 @@
 import WebRTC
 
 final class WebRTCVideoTrack: VideoTrackProtocol {
+    let aspectRatio: CGSize
     private var track: RTCVideoTrack?
     private weak var renderer: RTCVideoRenderer?
 
     // MARK: - Init
 
-    init(track: RTCVideoTrack?) {
+    init(track: RTCVideoTrack?, aspectRatio: CGSize) {
         self.track = track
+        self.aspectRatio = aspectRatio
     }
 
     deinit {
@@ -24,7 +26,7 @@ final class WebRTCVideoTrack: VideoTrackProtocol {
         track?.isEnabled = enabled
     }
 
-    func render(to view: VideoView, aspectFit: Bool) {
+    func setRenderer(_ view: VideoView, aspectFit: Bool) {
         removeCurrentRenderer()
 
         let renderer = RTCMTLVideoView(frame: view.frame)

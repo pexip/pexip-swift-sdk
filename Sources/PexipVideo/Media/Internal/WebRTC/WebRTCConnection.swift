@@ -85,7 +85,10 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
             #endif
         }
 
-        let remoteVideoTrack = WebRTCVideoTrack(track: nil)
+        let remoteVideoTrack = WebRTCVideoTrack(
+            track: nil,
+            aspectRatio: qualityProfile.aspectRatio
+        )
         self.setRemoteVideoTrack = {
             remoteVideoTrack.setTrack($0)
         }

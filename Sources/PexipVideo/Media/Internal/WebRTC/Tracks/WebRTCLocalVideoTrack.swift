@@ -1,6 +1,8 @@
 import WebRTC
 
 final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
+    var aspectRatio: CGSize { qualityProfile.aspectRatio }
+
     private(set) var capturePermission: MediaCapturePermission
     private weak var trackManager: RTCTrackManager?
     private let capturer: RTCCameraVideoCapturer
@@ -22,7 +24,10 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
         let track = factory.videoTrack(with: videoSource, trackId: UUID().uuidString)
         track.isEnabled = false
 
-        self.videoTrack = WebRTCVideoTrack(track: track)
+        self.videoTrack = WebRTCVideoTrack(
+            track: track,
+            aspectRatio: qualityProfile.aspectRatio
+        )
         self.capturer = RTCCameraVideoCapturer(delegate: videoSource)
         self.trackSender = trackManager.add(track, streamIds: [streamId])
         self.trackManager = trackManager
@@ -77,8 +82,8 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
         return videoTrack.isEnabled
     }
 
-    func render(to view: VideoView, aspectFit: Bool) {
-        videoTrack.render(to: view, aspectFit: aspectFit)
+    func setRenderer(_ view: VideoView, aspectFit: Bool) {
+        videoTrack.setRenderer(view, aspectFit: aspectFit)
     }
 
     func toggleCamera() {
