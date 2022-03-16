@@ -5,35 +5,55 @@ struct ServerMessageParser {
     let decoder: JSONDecoder
 
     func message(from event: EventStreamEvent) -> ServerEvent.Message? {
-        guard let name = event.name else {
+        guard let nameString = event.name else {
             logger.debug("Received event without a name")
+            return nil
+        }
+
+        guard let name = ServerEvent.Name(rawValue: nameString) else {
+            logger.debug("SSE event: '\(nameString)' was not handled")
             return nil
         }
 
         let data = event.data?.data(using: .utf8)
 
         do {
-            switch name {
-            case "presentation_start":
-                let message = try decoder.decode(PresentationDetails.self, from: data)
-                return .presentationStarted(message)
-            case "presentation_stop":
-                return .presentationStopped
-            case "message_received":
-                return .chat(try decoder.decode(ChatMessage.self, from: data))
-            case "call_disconnected":
-                let message = try decoder.decode(CallDisconnectDetails.self, from: data)
-                return .callDisconnected(message)
-            case "disconnect":
-                let message = try decoder.decode(ParticipantDisconnectDetails.self, from: data)
-                return .participantDisconnected(message)
-            default:
-                logger.debug("SSE event: '\(name)' was not handled")
-                return nil
-            }
+            return try message(withName: name, data: data)
         } catch {
             logger.error("Failed to decode SSE event: '\(name)', error: \(error)")
             return nil
+        }
+    }
+
+    private func message(
+        withName name: ServerEvent.Name,
+        data: Data?
+    ) throws -> ServerEvent.Message {
+        switch name {
+        case .chat:
+            return .chat(try decoder.decode(ChatMessage.self, from: data))
+        case .presentationStarted:
+            let message = try decoder.decode(PresentationDetails.self, from: data)
+            return .presentationStarted(message)
+        case .presentationStopped:
+            return .presentationStopped
+        case .participantSyncBegan:
+            return .participantSyncBegan
+        case .participantSyncEnded:
+            return .participantSyncEnded
+        case .participantCreated:
+            return .participantCreated(try decoder.decode(Participant.self, from: data))
+        case .participantUpdated:
+            return .participantUpdated(try decoder.decode(Participant.self, from: data))
+        case .participantDeleted:
+            let details = try decoder.decode(ParticipantDeleteDetails.self, from: data)
+            return .participantDeleted(details)
+        case .callDisconnected:
+            let message = try decoder.decode(CallDisconnectDetails.self, from: data)
+            return .callDisconnected(message)
+        case .clientDisconnected:
+            let message = try decoder.decode(ClientDisconnectDetails.self, from: data)
+            return .clientDisconnected(message)
         }
     }
 }

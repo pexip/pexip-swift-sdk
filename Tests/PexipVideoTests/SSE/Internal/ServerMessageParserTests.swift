@@ -44,42 +44,92 @@ final class ServerMessageParserTests: APIClientTestCase<ServerEventClientProtoco
     }
 
     func testChatMessage() throws {
-        let expectedMessage = ChatMessage(
-            origin: "User",
-            uuid: UUID(),
+        let chatMessage = ChatMessage(
+            senderName: "User",
+            senderId: UUID(),
             type: "message",
             payload: "Test"
         )
-        let event = try event(for: expectedMessage, name: "message_received")
+        let event = try event(for: chatMessage, name: "message_received")
         let message = parser.message(from: event)
 
-        XCTAssertEqual(message, .chat(expectedMessage))
+        switch message {
+        case .chat(let message):
+            XCTAssertEqual(message.senderName, chatMessage.senderName)
+            XCTAssertEqual(message.senderId, chatMessage.senderId)
+            XCTAssertEqual(message.type, chatMessage.type)
+            XCTAssertEqual(message.payload, chatMessage.payload)
+        default:
+            XCTFail("Unexpected message type")
+        }
+    }
+
+    func testPresentationStarted() throws {
+        let details = PresentationDetails(presenterName: "Name", presenterUri: "URI")
+        let event = try event(for: details, name: "presentation_start")
+        let message = parser.message(from: event)
+        XCTAssertEqual(message, .presentationStarted(details))
+    }
+
+    func testPresentationStopped() throws {
+        let event = EventStreamEvent(id: "1", name: "presentation_stop")
+        let message = parser.message(from: event)
+        XCTAssertEqual(message, .presentationStopped)
+    }
+
+    func testParticipantSyncBegan() throws {
+        let event = EventStreamEvent(id: "1", name: "participant_sync_begin")
+        let message = parser.message(from: event)
+        XCTAssertEqual(message, .participantSyncBegan)
+    }
+
+    func testParticipantSyncEnded() throws {
+        let event = EventStreamEvent(id: "1", name: "participant_sync_end")
+        let message = parser.message(from: event)
+        XCTAssertEqual(message, .participantSyncEnded)
+    }
+
+    func testParticipantCreated() throws {
+        let participant = Participant.stub(withId: UUID(), displayName: "Guest")
+        let event = try event(for: participant, name: "participant_create")
+        let message = parser.message(from: event)
+        XCTAssertEqual(message, .participantCreated(participant))
+    }
+
+    func testParticipantUpdated() throws {
+        let participant = Participant.stub(withId: UUID(), displayName: "Guest")
+        let event = try event(for: participant, name: "participant_update")
+        let message = parser.message(from: event)
+        XCTAssertEqual(message, .participantUpdated(participant))
+    }
+
+    func testParticipantDeleted() throws {
+        let details = ParticipantDeleteDetails(uuid: UUID())
+        let event = try event(for: details, name: "participant_delete")
+        let message = parser.message(from: event)
+        XCTAssertEqual(message, .participantDeleted(details))
     }
 
     func testCallDisconnected() throws {
-        let expectedMessage = CallDisconnectDetails(
-            callId: UUID(),
-            reason: "Test"
-        )
-        let event = try event(for: expectedMessage, name: "call_disconnected")
+        let details = CallDisconnectDetails(callId: UUID(), reason: "Test")
+        let event = try event(for: details, name: "call_disconnected")
         let message = parser.message(from: event)
-
-        XCTAssertEqual(message, .callDisconnected(expectedMessage))
+        XCTAssertEqual(message, .callDisconnected(details))
     }
 
-    func testParticipantDisconnected() throws {
-        let expectedMessage = ParticipantDisconnectDetails(reason: "Test")
-        let event = try event(for: expectedMessage, name: "disconnect")
+    func testClientDisconnected() throws {
+        let details = ClientDisconnectDetails(reason: "Test")
+        let event = try event(for: details, name: "disconnect")
         let message = parser.message(from: event)
-
-        XCTAssertEqual(message, .participantDisconnected(expectedMessage))
+        XCTAssertEqual(message, .clientDisconnected(details))
     }
 
     func testUnknown() throws {
-        let expectedMessage = ParticipantDisconnectDetails(reason: "Test")
-        let event = try event(for: expectedMessage, name: "unknown")
+        let event = try event(
+            for: ClientDisconnectDetails(reason: "Test"),
+            name: "unknown"
+        )
         let message = parser.message(from: event)
-
         XCTAssertNil(message)
     }
 

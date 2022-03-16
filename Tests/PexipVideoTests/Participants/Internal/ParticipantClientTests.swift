@@ -2,6 +2,16 @@ import XCTest
 @testable import PexipVideo
 
 final class ParticipantClientTests: APIClientTestCase<ParticipantClientProtocol> {
+    func testAvatarURL() throws {
+        let id = UUID()
+        let expectedUrlString = "\(nodeAddress)/api/client/v2/conferences/\(alias.uri)/"
+            + "participants/\(id.uuidString.lowercased())/"
+            + "avatar.jpg"
+        let expectedURL = try XCTUnwrap(URL(string: expectedUrlString))
+
+        XCTAssertEqual(client.avatarURL(participantId: id), expectedURL)
+    }
+
     func testMuteVideo() async throws {
         let token = Token.randomToken()
         let participantId = UUID()

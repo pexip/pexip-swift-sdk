@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Protocols
 
 /// Pexip client REST API v2.
-protocol ChatClient {
+protocol ChatClientProtocol {
     /**
      Sends a message to all participants in the conference.
      - Parameter message: Text message
@@ -15,7 +15,7 @@ protocol ChatClient {
 
 // MARK: - Implementation
 
-extension InfinityClient: ChatClient {
+extension InfinityClient: ChatClientProtocol {
     func sendChatMessage(_ message: String) async throws -> Bool {
         var request = try await request(
             withMethod: .POST,

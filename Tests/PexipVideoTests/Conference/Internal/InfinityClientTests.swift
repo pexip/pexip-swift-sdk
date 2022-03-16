@@ -124,4 +124,28 @@ final class InfinityClientTests: XCTestCase {
 
         XCTAssertEqual(request, expectedRequest)
     }
+
+    func testUrlForPath() {
+        // 1. Conference path
+        let apiUrlString = "https://vc.example.com/api/client/v2"
+        let conferenceUrlString = apiUrlString + "/conferences/test@vc.example.com"
+        XCTAssertEqual(client.url(for: .conference), URL(string: conferenceUrlString))
+
+        // 2. Participants path
+        let participantId = UUID()
+        let participantsUrlString = conferenceUrlString
+            + "/participants/\(participantId.uuidString.lowercased())"
+        XCTAssertEqual(
+            client.url(for: .participant(id: participantId)),
+            URL(string: participantsUrlString)
+        )
+
+        // 3. Call path
+        let callId = UUID()
+        let callUrlString = participantsUrlString + "/calls/\(callId.uuidString.lowercased())"
+        XCTAssertEqual(
+            client.url(for: .call(participantId: participantId, callId: callId)),
+            URL(string: callUrlString)
+        )
+    }
 }

@@ -11,6 +11,7 @@ public protocol ConferenceProtocol {
     var presentationEventPublisher: AnyPublisher<PresentationEvent, Never> { get }
 
     var chat: Chat? { get }
+    var rosterList: RosterList { get }
 
     var audioTrack: LocalAudioTrackProtocol? { get }
     var localVideoTrack: LocalVideoTrackProtocol? { get }
@@ -34,6 +35,7 @@ final class Conference: ConferenceProtocol {
     }
 
     let chat: Chat?
+    let rosterList: RosterList
     var audioTrack: LocalAudioTrackProtocol? { callTransceiver.audioTrack }
     var localVideoTrack: LocalVideoTrackProtocol? { callTransceiver.localVideoTrack }
     var remoteVideoTrack: VideoTrackProtocol? { callTransceiver.remoteVideoTrack }
@@ -60,6 +62,7 @@ final class Conference: ConferenceProtocol {
         callSessionFactory: CallSessionFactoryProtocol,
         serverEventSession: ServerEventSession,
         chat: Chat?,
+        rosterList: RosterList,
         logger: LoggerProtocol
     ) {
         self.conferenceName = conferenceName
@@ -70,6 +73,7 @@ final class Conference: ConferenceProtocol {
         self.serverEventSession = serverEventSession
         self.logger = logger
         self.chat = chat
+        self.rosterList = rosterList
     }
 
     // MARK: - Public API
@@ -116,12 +120,27 @@ final class Conference: ConferenceProtocol {
                 await stopPresentationReceiver()
             case .chat(let message):
                 logger[.conference].debug("Chat message received")
-                chat?.appendMessage(message)
-            case .callDisconnected(let info):
-                logger[.conference].debug("Call disconnected, reason: \(info.reason)")
-            case .participantDisconnected(let info):
+                await chat?.addMessage(message)
+            case .participantSyncBegan:
+                logger[.conference].debug("Participant sync began")
+                await rosterList.setSyncing(true)
+            case .participantSyncEnded:
+                logger[.conference].debug("Participant sync ended")
+                await rosterList.setSyncing(false)
+            case .participantCreated(let participant):
+                logger[.conference].debug("Participant added")
+                await rosterList.addParticipant(participant)
+            case .participantUpdated(let participant):
+                logger[.conference].debug("Participant updated")
+                await rosterList.updateParticipant(participant)
+            case .participantDeleted(let details):
+                logger[.conference].debug("Participant deleted")
+                await rosterList.removeParticipant(withId: details.uuid)
+            case .callDisconnected(let details):
+                logger[.conference].debug("Call disconnected, reason: \(details.reason)")
+            case .clientDisconnected(let details):
                 await cleanup(releaseToken: false)
-                logger[.conference].debug("Participant disconnected, reason: \(info.reason)")
+                logger[.conference].debug("Participant disconnected, reason: \(details.reason)")
             }
         }
     }
@@ -130,6 +149,8 @@ final class Conference: ConferenceProtocol {
 
     private func cleanup(releaseToken: Bool) async {
         eventStreamTask?.cancel()
+        await chat?.clear()
+        await rosterList.clear()
         await serverEventSession.close()
         await callTransceiver.stop()
         await presentationReceiver?.stop()

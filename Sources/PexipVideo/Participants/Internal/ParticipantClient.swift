@@ -5,6 +5,14 @@ import Foundation
 /// Pexip client REST API v2.
 protocol ParticipantClientProtocol {
     /**
+     Returns the image url of a conference participant or directory contact.
+     - Parameters:
+        - participantId: The ID of the participant
+     - Returns: The image url of a conference participant or directory contact.
+     */
+    func avatarURL(participantId: UUID) -> URL
+
+    /**
      Mutes a participant's video.
      - Parameters:
         - participantId: The ID of the participant
@@ -28,6 +36,11 @@ protocol ParticipantClientProtocol {
 // MARK: - Implementation
 
 extension InfinityClient: ParticipantClientProtocol {
+    func avatarURL(participantId: UUID) -> URL {
+        url(for: .participant(id: participantId))
+            .appendingPathComponent("avatar.jpg")
+    }
+
     @discardableResult
     func muteVideo(participantId: UUID) async throws -> Bool {
         let request = try await request(

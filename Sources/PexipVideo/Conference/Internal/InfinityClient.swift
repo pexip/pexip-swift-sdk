@@ -66,6 +66,22 @@ struct InfinityClient {
         return request
     }
 
+    func url(for path: Path) -> URL {
+        switch path {
+        case .conference:
+            return node.address.appendingPathComponent("api/client/v2")
+                .appendingPathComponent("conferences/\(alias.uri)")
+        case .participant(let id):
+            return url(for: .conference)
+                .appendingPathComponent("participants")
+                .appendingPathComponent(id.uuidString.lowercased())
+        case .call(let participantId, let callId):
+            return url(for: .participant(id: participantId))
+                .appendingPathComponent("calls")
+                .appendingPathComponent(callId.uuidString.lowercased())
+        }
+    }
+
     // MARK: - Requests
 
     func data(
@@ -101,22 +117,6 @@ struct InfinityClient {
     }
 
     // MARK: - Private methods
-
-    private func url(for path: Path) -> URL {
-        switch path {
-        case .conference:
-            return node.address.appendingPathComponent("api/client/v2")
-                .appendingPathComponent("conferences/\(alias.uri)")
-        case .participant(let id):
-            return url(for: .conference)
-                .appendingPathComponent("participants")
-                .appendingPathComponent(id.uuidString.lowercased())
-        case .call(let participantId, let callId):
-            return url(for: .participant(id: participantId))
-                .appendingPathComponent("calls")
-                .appendingPathComponent(callId.uuidString.lowercased())
-        }
-    }
 
     private func setToken(_ token: Token, to request: inout URLRequest) {
         request.setHTTPHeader(.init(name: "token", value: token.value))

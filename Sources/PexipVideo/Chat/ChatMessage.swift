@@ -15,7 +15,7 @@ public struct ChatMessage: Codable, Hashable {
     /// Message contents.
     public let payload: String
     /// Date when the message was received
-    public let receivedAt = Date()
+    public private(set) var receivedAt = Date()
 
     /**
      - Parameters:
@@ -23,16 +23,19 @@ public struct ChatMessage: Codable, Hashable {
         - senderId: UUID of the sending participant
         - type: MIME content-type of the message, usually text/plain
         - payload: Message contents
+        - receivedAt: Date and time when the message was received
      */
     public init(
         senderName: String,
         senderId: UUID,
         type: String = "text/plain",
-        payload: String
+        payload: String,
+        receivedAt: Date = .init()
     ) {
         self.senderName = senderName
         self.senderId = senderId
         self.type = type
         self.payload = payload
+        self.receivedAt = receivedAt
     }
 }

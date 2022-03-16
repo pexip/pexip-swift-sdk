@@ -110,6 +110,9 @@ public struct ConferenceFactory {
                 logger: logger
             ),
             chat: chat,
+            rosterList: RosterList(avatarURL: { id in
+                apiClient.avatarURL(participantId: id)
+            }),
             logger: logger
         )
     }

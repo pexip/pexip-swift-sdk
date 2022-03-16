@@ -1,28 +1,22 @@
 import Combine
 
-// MARK: - Protocols
+// MARK: - Delegate
 
 public protocol ChatDelegate: AnyObject {
-    func chat(
-        _ chat: Chat,
-        didReceiveMessage message: ChatMessage
-    )
+    func chat(_ chat: Chat, didReceiveMessage message: ChatMessage)
+    func chatDidClearMessages(_ chat: Chat)
 }
 
 // MARK: - Chat
 
-public final class Chat {
+public final class Chat: ObservableObject {
     public typealias SendMessage = (String) async throws -> Bool
-
+    /// The object that acts as the delegate of the chat.
     public weak var delegate: ChatDelegate?
-    public var publisher: AnyPublisher<ChatMessage, Never> {
-        subject.eraseToAnyPublisher()
-    }
-    public private(set) var messages = [ChatMessage]()
+    @Published public private(set) var messages = [ChatMessage]()
+    public let senderName: String
+    public let senderId: UUID
 
-    private let subject = PassthroughSubject<ChatMessage, Never>()
-    private let senderName: String
-    private let senderId: UUID
     private let _sendMessage: SendMessage
 
     // MARK: - Init
@@ -42,30 +36,33 @@ public final class Chat {
     // MARK: - Public
 
     public func sendMessage(_ text: String) async throws -> Bool {
-        if try await _sendMessage(text) {
-            let message = ChatMessage(
-                senderName: senderName,
-                senderId: senderId,
-                payload: text
-            )
-            appendMessage(message)
-            return true
-        } else {
+        guard try await _sendMessage(text) else {
             return false
         }
+
+        let message = ChatMessage(
+            senderName: senderName,
+            senderId: senderId,
+            payload: text
+        )
+        await addMessage(message)
+
+        return true
     }
 
     // MARK: - Internal
 
-    func appendMessage(_ message: ChatMessage) {
-        Task { @MainActor in
-            self.messages.append(message)
+    func addMessage(_ message: ChatMessage) async {
+        await MainActor.run {
+            messages.append(message)
             delegate?.chat(self, didReceiveMessage: message)
-            subject.send(message)
         }
     }
 
-    func clear() {
-        messages.removeAll()
+    func clear() async {
+        await MainActor.run {
+            messages.removeAll()
+            delegate?.chatDidClearMessages(self)
+        }
     }
 }
