@@ -65,7 +65,7 @@ final class ParticipantTests: XCTestCase {
             isDisconnectSupported: true,
             isFeccSupported: false,
             isAudioOnlyCall: false,
-            isMuted: false,
+            isAudioMuted: false,
             isPresenting: false,
             isVideoCall: true,
             isMuteSupported: true,

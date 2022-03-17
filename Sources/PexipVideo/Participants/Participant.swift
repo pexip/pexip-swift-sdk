@@ -1,13 +1,12 @@
 import Foundation
 
 // swiftlint:disable identifier_name
-public struct Participant: Codable, Hashable {
+public struct Participant: Codable, Hashable, Identifiable {
     public init(
         id: UUID,
         displayName: String,
         localAlias: String = "",
         overlayText: String = "",
-        avatarURL: URL? = nil,
         role: Participant.Role,
         serviceType: Participant.ServiceType,
         buzzTime: TimeInterval = 0,
@@ -38,7 +37,6 @@ public struct Participant: Codable, Hashable {
         self.displayName = displayName
         self.localAlias = localAlias
         self.overlayText = overlayText
-        self.avatarURL = avatarURL
         self.role = role
         self.serviceType = serviceType
         self.buzzTime = buzzTime
@@ -133,8 +131,6 @@ public struct Participant: Codable, Hashable {
     public let uri: String?
     /// The vendor identifier of the browser/endpoint with which the participant is connecting.
     public let vendor: String?
-    /// The image representing a conference participant.
-    public var avatarURL: URL?
 
     // MARK: - Booleans
 

@@ -1,48 +1,73 @@
 import Combine
+import Foundation
 
 // MARK: - Delegate
 
-public protocol RosterListDelegate: AnyObject {
-    func rosterList(
-        _ rosterList: RosterList,
-        didAddParticipant participant: Participant
-    )
-
-    func rosterList(
-        _ rosterList: RosterList,
-        didUpdateParticipant participant: Participant
-    )
-
-    func rosterList(
-        _ rosterList: RosterList,
-        didRemoveParticipant participant: Participant
-    )
-
-    func rosterList(
-        _ rosterList: RosterList,
-        didReloadParticipants participants: [Participant]
-    )
+public protocol RosterDelegate: AnyObject {
+    func roster(_ roster: Roster, didAddParticipant participant: Participant)
+    func roster(_ roster: Roster, didUpdateParticipant participant: Participant)
+    func roster(_ roster: Roster, didRemoveParticipant participant: Participant)
+    func roster(_ roster: Roster, didReloadParticipants participants: [Participant])
 }
 
 // MARK: - Roster list
 
-public final class RosterList: ObservableObject {
+public final class Roster: ObservableObject {
+    public typealias ReloadParticipants = () async throws -> [Participant]
+
+    /// The display name of the current participant.
+    @Published public private(set) var currentParticipantName: String
     /// The full participant list of the conference.
     @Published public private(set) var participants = [Participant]()
+    /// The UUID of the current participant.
+    public let currentParticipantId: UUID
     /// The object that acts as the delegate of the roster list.
-    public weak var delegate: RosterListDelegate?
+    public weak var delegate: RosterDelegate?
     private let storage: Storage
-    private let avatarURL: (UUID) -> URL?
+    private let _avatarURL: (UUID) -> URL?
 
     // MARK: - Init
 
     public init(
+        currentParticipantId: UUID,
+        currentParticipantName: String,
         participants: [Participant] = [],
         avatarURL: @escaping (UUID) -> URL?
     ) {
+        self.currentParticipantId = currentParticipantId
+        self.currentParticipantName = currentParticipantName
         self.storage = Storage(participants: participants)
         self.participants = participants
-        self.avatarURL = avatarURL
+        self._avatarURL = avatarURL
+    }
+
+    // MARK: - Public
+
+    /**
+     Checks if the given participant is the current user
+     - Parameters:
+        - participant: A participant from the participant list
+     - Returns: true if the given participant is the current user
+     */
+    public func isCurrentParticipant(_ participant: Participant) -> Bool {
+        participant.id == currentParticipantId
+    }
+
+    /**
+     Returns the image representing the current participant.
+     */
+    public var currentParticipantavatarURL: URL? {
+        _avatarURL(currentParticipantId)
+    }
+
+    /**
+     Returns the image url of a conference participant or directory contact.
+     - Parameters:
+        - participant: A participant from the participant list
+     - Returns: The image url of a conference participant or directory contact.
+     */
+    public func avatarURL(for participant: Participant) -> URL? {
+        _avatarURL(participant.id)
     }
 
     // MARK: - Internal
@@ -55,30 +80,35 @@ public final class RosterList: ObservableObject {
     }
 
     func addParticipant(_ participant: Participant) async {
-        let participant = participantWithAvatar(from: participant)
         await storage.addParticipant(participant)
+
+        if isCurrentParticipant(participant) {
+            currentParticipantName = participant.displayName
+        }
 
         if await !storage.isSyncing {
             let participants = await storage.participants
             await MainActor.run {
                 self.participants = participants
-                delegate?.rosterList(self, didAddParticipant: participant)
+                delegate?.roster(self, didAddParticipant: participant)
             }
         }
     }
 
     func updateParticipant(_ participant: Participant) async {
-        let participant = participantWithAvatar(from: participant)
-
         guard await storage.updateParticipant(participant) else {
             return
+        }
+
+        if isCurrentParticipant(participant) {
+            currentParticipantName = participant.displayName
         }
 
         if await !storage.isSyncing {
             let participants = await storage.participants
             await MainActor.run {
                 self.participants = participants
-                delegate?.rosterList(self, didUpdateParticipant: participant)
+                delegate?.roster(self, didUpdateParticipant: participant)
             }
         }
     }
@@ -92,7 +122,7 @@ public final class RosterList: ObservableObject {
             let participants = await storage.participants
             await MainActor.run {
                 self.participants = participants
-                delegate?.rosterList(self, didRemoveParticipant: participant)
+                delegate?.roster(self, didRemoveParticipant: participant)
             }
         }
     }
@@ -108,20 +138,14 @@ public final class RosterList: ObservableObject {
         let participants = await storage.participants
         await MainActor.run {
             self.participants = participants
-            delegate?.rosterList(self, didReloadParticipants: participants)
+            delegate?.roster(self, didReloadParticipants: participants)
         }
-    }
-
-    private func participantWithAvatar(from participant: Participant) -> Participant {
-        var participant = participant
-        participant.avatarURL = avatarURL(participant.id)
-        return participant
     }
 }
 
 // MARK: - Private types
 
-private extension RosterList {
+private extension Roster {
     actor Storage {
         private(set) var participants = [Participant]()
         private(set) var isSyncing = false

@@ -2,20 +2,29 @@ import XCTest
 import Combine
 @testable import PexipVideo
 
-final class RosterListTests: XCTestCase {
-    private var rosterList: RosterList!
-    private var delegate: RosterListDelegateMock!
+// swiftlint:disable type_body_length
+// swiftlint:disable file_length
+final class RosterTests: XCTestCase {
+    private let currentParticipantId = UUID()
+    private let currentParticipantName = "My User"
+    private var roster: Roster!
+    private var delegate: RosterDelegateMock!
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Setup
 
     override func setUp() {
         super.setUp()
-        delegate = RosterListDelegateMock()
-        rosterList = RosterList(participants: [], avatarURL: { id in
-            Participant.avatarURL(id: id)
-        })
-        rosterList.delegate = delegate
+        delegate = RosterDelegateMock()
+        roster = Roster(
+            currentParticipantId: currentParticipantId,
+            currentParticipantName: currentParticipantName,
+            participants: [],
+            avatarURL: { id in
+                Participant.avatarURL(id: id)
+            }
+        )
+        roster.delegate = delegate
     }
 
     override func tearDown() {
@@ -30,8 +39,63 @@ final class RosterListTests: XCTestCase {
             Participant.stub(withId: UUID(), displayName: "GuestA"),
             Participant.stub(withId: UUID(), displayName: "GuestB")
         ]
-        rosterList = RosterList(participants: participants, avatarURL: { _ in nil })
-        XCTAssertEqual(rosterList.participants, participants)
+        roster = Roster(
+            currentParticipantId: currentParticipantId,
+            currentParticipantName: currentParticipantName,
+            participants: participants,
+            avatarURL: { _ in nil }
+        )
+        XCTAssertEqual(roster.participants, participants)
+        XCTAssertEqual(roster.currentParticipantId, currentParticipantId)
+        XCTAssertEqual(roster.currentParticipantName, currentParticipantName)
+    }
+
+    func testIsCurrentParticipant() {
+        let participantA = Participant.stub(
+            withId: currentParticipantId,
+            displayName: "Test"
+        )
+        XCTAssertTrue(roster.isCurrentParticipant(participantA))
+
+        let participantB = Participant.stub(
+            withId: UUID(),
+            displayName: "Test"
+        )
+        XCTAssertFalse(roster.isCurrentParticipant(participantB))
+    }
+
+    func testCurrentParticipantavatarURL() {
+        XCTAssertEqual(
+            roster.currentParticipantavatarURL,
+            Participant.avatarURL(id: currentParticipantId)
+        )
+    }
+
+    func testAvatarURLForParticipant() {
+        let participant = Participant.stub(
+            withId: UUID(),
+            displayName: "Test"
+        )
+        XCTAssertEqual(
+            roster.avatarURL(for: participant),
+            Participant.avatarURL(id: participant.id)
+        )
+    }
+
+    func testCurrentParticipantNameUpdate() async {
+        XCTAssertEqual(roster.currentParticipantName, "My User")
+
+        // 1. Change currentParticipantName on add
+        await roster.addParticipant(
+            .stub(withId: currentParticipantId, displayName: "My User 1")
+        )
+        XCTAssertEqual(roster.currentParticipantName, "My User 1")
+
+        // 1. Change currentParticipantName on update
+        await roster.updateParticipant(
+            .stub(withId: currentParticipantId, displayName: "My User 2")
+        )
+        XCTAssertEqual(roster.currentParticipantName, "My User 2")
     }
 
     func testSetSyncing() async {
@@ -49,38 +113,38 @@ final class RosterListTests: XCTestCase {
         ]
         let participantsToRemove = [participantsToAdd[0]]
         let expectedParticipants = [
-            participantsToUpdate[0].withAvatarURL(),
-            participantsToAdd[2].withAvatarURL()
+            participantsToUpdate[0],
+            participantsToAdd[2]
         ]
         var publishCount = 0
         var publishedParticipants = [[Participant]]()
 
         // 2. Subscibe to updates
-        rosterList.$participants.sink { participants in
+        roster.$participants.sink { participants in
             publishedParticipants.append(participants)
             publishCount += 1
         }.store(in: &cancellables)
 
         // 3. Start syncing
-        await rosterList.setSyncing(true)
+        await roster.setSyncing(true)
 
         for participant in participantsToAdd {
-            await rosterList.addParticipant(participant)
+            await roster.addParticipant(participant)
         }
 
         for participant in participantsToUpdate {
-            await rosterList.updateParticipant(participant)
+            await roster.updateParticipant(participant)
         }
 
         for participant in participantsToRemove {
-            await rosterList.removeParticipant(withId: participant.id)
+            await roster.removeParticipant(withId: participant.id)
         }
 
-        await rosterList.setSyncing(false)
+        await roster.setSyncing(false)
 
         // 4. Assert
 
-        XCTAssertEqual(rosterList.participants, expectedParticipants)
+        XCTAssertEqual(roster.participants, expectedParticipants)
         XCTAssertEqual(delegate.actions, [.reload(expectedParticipants)])
         XCTAssertEqual(publishedParticipants, [[], expectedParticipants])
         XCTAssertEqual(publishCount, 2)
@@ -93,35 +157,35 @@ final class RosterListTests: XCTestCase {
         var publishCount = 0
         var publishedParticipants = [[Participant]]()
         let expectedParticipants = [
-            participantA.withAvatarURL(),
-            participantB.withAvatarURL()
+            participantA,
+            participantB
         ]
 
         // 2. Subscibe to updates
-        rosterList.$participants.sink { participants in
+        roster.$participants.sink { participants in
             publishedParticipants.append(participants)
             publishCount += 1
         }.store(in: &cancellables)
 
         // 3. Add participant
-        await rosterList.addParticipant(participantA)
-        await rosterList.addParticipant(participantB)
+        await roster.addParticipant(participantA)
+        await roster.addParticipant(participantB)
 
         // 4. Assert
-        XCTAssertEqual(rosterList.participants, expectedParticipants)
+        XCTAssertEqual(roster.participants, expectedParticipants)
         XCTAssertEqual(
             delegate.actions,
             [
-                .add(participantA.withAvatarURL()),
-                .add(participantB.withAvatarURL())
+                .add(participantA),
+                .add(participantB)
             ]
         )
         XCTAssertEqual(
             publishedParticipants,
             [
                 [],
-                [participantA.withAvatarURL()],
-                [participantA.withAvatarURL(), participantB.withAvatarURL()]
+                [participantA],
+                [participantA, participantB]
             ]
         )
         XCTAssertEqual(publishCount, 3)
@@ -133,27 +197,27 @@ final class RosterListTests: XCTestCase {
         let participantB = Participant.stub(withId: participantA.id, displayName: "GuestB")
         var publishCount = 0
         var publishedParticipants = [[Participant]]()
-        let expectedParticipants = [participantB.withAvatarURL()]
+        let expectedParticipants = [participantB]
 
         // 2. Subscibe to updates
-        rosterList.$participants.sink { participants in
+        roster.$participants.sink { participants in
             publishedParticipants.append(participants)
             publishCount += 1
         }.store(in: &cancellables)
 
         // 3. Add and update participant
-        await rosterList.addParticipant(participantA)
-        await rosterList.updateParticipant(participantB)
+        await roster.addParticipant(participantA)
+        await roster.updateParticipant(participantB)
 
         // 4. Assert
-        XCTAssertEqual(rosterList.participants, expectedParticipants)
+        XCTAssertEqual(roster.participants, expectedParticipants)
         XCTAssertEqual(
             delegate.actions,
-            [.add(participantA.withAvatarURL()), .update(participantB.withAvatarURL())]
+            [.add(participantA), .update(participantB)]
         )
         XCTAssertEqual(
             publishedParticipants,
-            [[], [participantA.withAvatarURL()], [participantB.withAvatarURL()]]
+            [[], [participantA], [participantB]]
         )
         XCTAssertEqual(publishCount, 3)
     }
@@ -164,22 +228,22 @@ final class RosterListTests: XCTestCase {
         let participantB = Participant.stub(withId: UUID(), displayName: "GuestB")
         var publishCount = 0
         var publishedParticipants = [[Participant]]()
-        let expectedParticipants = [participantA.withAvatarURL()]
+        let expectedParticipants = [participantA]
 
         // 2. Subscibe to updates
-        rosterList.$participants.sink { participants in
+        roster.$participants.sink { participants in
             publishedParticipants.append(participants)
             publishCount += 1
         }.store(in: &cancellables)
 
         // 3. Add and update participant
-        await rosterList.addParticipant(participantA)
-        await rosterList.updateParticipant(participantB)
+        await roster.addParticipant(participantA)
+        await roster.updateParticipant(participantB)
 
         // 4. Assert
-        XCTAssertEqual(rosterList.participants, expectedParticipants)
-        XCTAssertEqual(delegate.actions, [.add(participantA.withAvatarURL())])
-        XCTAssertEqual(publishedParticipants, [[], [participantA.withAvatarURL()]])
+        XCTAssertEqual(roster.participants, expectedParticipants)
+        XCTAssertEqual(delegate.actions, [.add(participantA)])
+        XCTAssertEqual(publishedParticipants, [[], [participantA]])
         XCTAssertEqual(publishCount, 2)
     }
 
@@ -189,36 +253,36 @@ final class RosterListTests: XCTestCase {
         let participantB = Participant.stub(withId: UUID(), displayName: "GuestB")
         var publishCount = 0
         var publishedParticipants = [[Participant]]()
-        let expectedParticipants = [participantB.withAvatarURL()]
+        let expectedParticipants = [participantB]
 
         // 2. Subscibe to updates
-        rosterList.$participants.sink { participants in
+        roster.$participants.sink { participants in
             publishedParticipants.append(participants)
             publishCount += 1
         }.store(in: &cancellables)
 
         // 3. Add and remove participants
-        await rosterList.addParticipant(participantA)
-        await rosterList.addParticipant(participantB)
-        await rosterList.removeParticipant(withId: participantA.id)
+        await roster.addParticipant(participantA)
+        await roster.addParticipant(participantB)
+        await roster.removeParticipant(withId: participantA.id)
 
         // 4. Assert
-        XCTAssertEqual(rosterList.participants, expectedParticipants)
+        XCTAssertEqual(roster.participants, expectedParticipants)
         XCTAssertEqual(
             delegate.actions,
             [
-                .add(participantA.withAvatarURL()),
-                .add(participantB.withAvatarURL()),
-                .remove(participantA.withAvatarURL())
+                .add(participantA),
+                .add(participantB),
+                .remove(participantA)
             ]
         )
         XCTAssertEqual(
             publishedParticipants,
             [
                 [],
-                [participantA.withAvatarURL()],
-                [participantA.withAvatarURL(), participantB.withAvatarURL()],
-                [participantB.withAvatarURL()]
+                [participantA],
+                [participantA, participantB],
+                [participantB]
             ]
         )
         XCTAssertEqual(publishCount, 4)
@@ -229,22 +293,22 @@ final class RosterListTests: XCTestCase {
         let participant = Participant.stub(withId: UUID(), displayName: "GuestA")
         var publishCount = 0
         var publishedParticipants = [[Participant]]()
-        let expectedParticipants = [participant.withAvatarURL()]
+        let expectedParticipants = [participant]
 
         // 2. Subscibe to updates
-        rosterList.$participants.sink { participants in
+        roster.$participants.sink { participants in
             publishedParticipants.append(participants)
             publishCount += 1
         }.store(in: &cancellables)
 
         // 3. Add and remove participants
-        await rosterList.addParticipant(participant)
-        await rosterList.removeParticipant(withId: UUID())
+        await roster.addParticipant(participant)
+        await roster.removeParticipant(withId: UUID())
 
         // 4. Assert
-        XCTAssertEqual(rosterList.participants, expectedParticipants)
-        XCTAssertEqual(delegate.actions, [.add(participant.withAvatarURL())])
-        XCTAssertEqual(publishedParticipants, [[], [participant.withAvatarURL()]])
+        XCTAssertEqual(roster.participants, expectedParticipants)
+        XCTAssertEqual(delegate.actions, [.add(participant)])
+        XCTAssertEqual(publishedParticipants, [[], [participant]])
         XCTAssertEqual(publishCount, 2)
     }
 
@@ -255,27 +319,27 @@ final class RosterListTests: XCTestCase {
         var publishedParticipants = [[Participant]]()
 
         // 2. Subscibe to updates
-        rosterList.$participants.sink { participants in
+        roster.$participants.sink { participants in
             publishedParticipants.append(participants)
             publishCount += 1
         }.store(in: &cancellables)
 
         // 3. Add and clear participants
-        await rosterList.addParticipant(participant)
-        await rosterList.clear()
+        await roster.addParticipant(participant)
+        await roster.clear()
 
         // 4. Assert
-        XCTAssertTrue(rosterList.participants.isEmpty)
+        XCTAssertTrue(roster.participants.isEmpty)
         XCTAssertEqual(
             delegate.actions,
             [
-                .add(participant.withAvatarURL()),
+                .add(participant),
                 .reload([])
             ]
         )
         XCTAssertEqual(
             publishedParticipants,
-            [[], [participant.withAvatarURL()], []]
+            [[], [participant], []]
         )
         XCTAssertEqual(publishCount, 3)
     }
@@ -304,24 +368,18 @@ extension Participant {
             isDisconnectSupported: true,
             isFeccSupported: false,
             isAudioOnlyCall: false,
-            isMuted: false,
+            isAudioMuted: false,
             isPresenting: false,
             isVideoCall: true,
             isMuteSupported: true,
             isTransferSupported: true
         )
     }
-
-    func withAvatarURL() -> Participant {
-        var participant = self
-        participant.avatarURL = Participant.avatarURL(id: id)
-        return participant
-    }
 }
 
 // MARK: - Mocks
 
-private final class RosterListDelegateMock: RosterListDelegate {
+private final class RosterDelegateMock: RosterDelegate {
     enum Action: Equatable {
         case add(Participant)
         case update(Participant)
@@ -331,31 +389,19 @@ private final class RosterListDelegateMock: RosterListDelegate {
 
     private(set) var actions = [Action]()
 
-    func rosterList(
-        _ rosterList: RosterList,
-        didAddParticipant participant: Participant
-    ) {
+    func roster(_ roster: Roster, didAddParticipant participant: Participant) {
         actions.append(.add(participant))
     }
 
-    func rosterList(
-        _ rosterList: RosterList,
-        didUpdateParticipant participant: Participant
-    ) {
+    func roster(_ roster: Roster, didUpdateParticipant participant: Participant) {
         actions.append(.update(participant))
     }
 
-    func rosterList(
-        _ rosterList: RosterList,
-        didRemoveParticipant participant: Participant
-    ) {
+    func roster(_ roster: Roster, didRemoveParticipant participant: Participant) {
         actions.append(.remove(participant))
     }
 
-    func rosterList(
-        _ rosterList: RosterList,
-        didReloadParticipants participants: [Participant]
-    ) {
+    func roster(_ roster: Roster, didReloadParticipants participants: [Participant]) {
         actions.append(.reload(participants))
     }
 }

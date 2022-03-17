@@ -110,9 +110,7 @@ public struct ConferenceFactory {
                 logger: logger
             ),
             chat: chat,
-            rosterList: RosterList(avatarURL: { id in
-                apiClient.avatarURL(participantId: id)
-            }),
+            roster: roster(token: token, apiClient: apiClient),
             logger: logger
         )
     }
@@ -126,5 +124,17 @@ public struct ConferenceFactory {
         token.iceServers.isEmpty
             ? callConfiguration.backupIceServers
             : token.iceServers
+    }
+
+    // MARK: - Private
+
+    private func roster(token: Token, apiClient: InfinityClient) -> Roster {
+        Roster(
+            currentParticipantId: token.participantId,
+            currentParticipantName: token.displayName,
+            avatarURL: { id in
+                apiClient.avatarURL(participantId: id)
+            }
+        )
     }
 }
