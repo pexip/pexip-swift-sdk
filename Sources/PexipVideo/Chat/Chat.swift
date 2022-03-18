@@ -4,19 +4,21 @@ import Combine
 
 public protocol ChatDelegate: AnyObject {
     func chat(_ chat: Chat, didReceiveMessage message: ChatMessage)
-    func chatDidClearMessages(_ chat: Chat)
 }
 
 // MARK: - Chat
 
-public final class Chat: ObservableObject {
+public final class Chat {
     public typealias SendMessage = (String) async throws -> Bool
     /// The object that acts as the delegate of the chat.
     public weak var delegate: ChatDelegate?
-    @Published public private(set) var messages = [ChatMessage]()
+    public var publisher: AnyPublisher<ChatMessage, Never> {
+        subject.eraseToAnyPublisher()
+    }
     public let senderName: String
     public let senderId: UUID
 
+    private let subject = PassthroughSubject<ChatMessage, Never>()
     private let _sendMessage: SendMessage
 
     // MARK: - Init
@@ -24,12 +26,10 @@ public final class Chat: ObservableObject {
     public init(
         senderName: String,
         senderId: UUID,
-        messages: [ChatMessage] = [],
         sendMessage: @escaping SendMessage
     ) {
         self.senderName = senderName
         self.senderId = senderId
-        self.messages = messages
         self._sendMessage = sendMessage
     }
 
@@ -54,15 +54,8 @@ public final class Chat: ObservableObject {
 
     func addMessage(_ message: ChatMessage) async {
         await MainActor.run {
-            messages.append(message)
+            subject.send(message)
             delegate?.chat(self, didReceiveMessage: message)
-        }
-    }
-
-    func clear() async {
-        await MainActor.run {
-            messages.removeAll()
-            delegate?.chatDidClearMessages(self)
         }
     }
 }

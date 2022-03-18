@@ -149,7 +149,6 @@ final class Conference: ConferenceProtocol {
 
     private func cleanup(releaseToken: Bool) async {
         eventStreamTask?.cancel()
-        await chat?.clear()
         await roster.clear()
         await serverEventSession.close()
         await callTransceiver.stop()

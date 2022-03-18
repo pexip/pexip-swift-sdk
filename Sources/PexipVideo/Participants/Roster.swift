@@ -3,11 +3,15 @@ import Foundation
 
 // MARK: - Delegate
 
+public enum ParticipantEvent: Hashable {
+    case added(Participant)
+    case updated(Participant)
+    case deleted(Participant)
+    case reloaded([Participant])
+}
+
 public protocol RosterDelegate: AnyObject {
-    func roster(_ roster: Roster, didAddParticipant participant: Participant)
-    func roster(_ roster: Roster, didUpdateParticipant participant: Participant)
-    func roster(_ roster: Roster, didRemoveParticipant participant: Participant)
-    func roster(_ roster: Roster, didReloadParticipants participants: [Participant])
+    func roster(_ roster: Roster, didReceiveParticipantEvent event: ParticipantEvent)
 }
 
 // MARK: - Roster list
@@ -19,10 +23,15 @@ public final class Roster: ObservableObject {
     @Published public private(set) var currentParticipantName: String
     /// The full participant list of the conference.
     @Published public private(set) var participants = [Participant]()
+    /// Roster event publisher (participant added, updated, deleted, etc).
+    public var eventPublisher: AnyPublisher<ParticipantEvent, Never> {
+        eventSubject.eraseToAnyPublisher()
+    }
     /// The UUID of the current participant.
     public let currentParticipantId: UUID
     /// The object that acts as the delegate of the roster list.
     public weak var delegate: RosterDelegate?
+    private let eventSubject = PassthroughSubject<ParticipantEvent, Never>()
     private let storage: Storage
     private let _avatarURL: (UUID) -> URL?
 
@@ -88,10 +97,7 @@ public final class Roster: ObservableObject {
 
         if await !storage.isSyncing {
             let participants = await storage.participants
-            await MainActor.run {
-                self.participants = participants
-                delegate?.roster(self, didAddParticipant: participant)
-            }
+            await publishParticipants(participants, event: .added(participant))
         }
     }
 
@@ -106,10 +112,7 @@ public final class Roster: ObservableObject {
 
         if await !storage.isSyncing {
             let participants = await storage.participants
-            await MainActor.run {
-                self.participants = participants
-                delegate?.roster(self, didUpdateParticipant: participant)
-            }
+            await publishParticipants(participants, event: .updated(participant))
         }
     }
 
@@ -120,10 +123,7 @@ public final class Roster: ObservableObject {
 
         if await !storage.isSyncing {
             let participants = await storage.participants
-            await MainActor.run {
-                self.participants = participants
-                delegate?.roster(self, didRemoveParticipant: participant)
-            }
+            await publishParticipants(participants, event: .deleted(participant))
         }
     }
 
@@ -136,9 +136,17 @@ public final class Roster: ObservableObject {
 
     private func onReload() async {
         let participants = await storage.participants
+        await publishParticipants(participants, event: .reloaded(participants))
+    }
+
+    private func publishParticipants(
+        _ participants: [Participant],
+        event: ParticipantEvent
+    ) async {
         await MainActor.run {
             self.participants = participants
-            delegate?.roster(self, didReloadParticipants: participants)
+            eventSubject.send(event)
+            delegate?.roster(self, didReceiveParticipantEvent: event)
         }
     }
 }

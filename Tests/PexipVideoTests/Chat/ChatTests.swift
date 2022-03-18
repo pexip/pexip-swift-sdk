@@ -19,7 +19,6 @@ final class ChatTests: XCTestCase {
         chat = Chat(
             senderName: senderName,
             senderId: senderId,
-            messages: [],
             sendMessage: { [weak self] message in
                 return self?.messageSender.sendMessage(message) == true
             })
@@ -43,13 +42,11 @@ final class ChatTests: XCTestCase {
         let messageA = "Message A"
         let messageB = "Message B"
         let messageC = "Message C"
-        var publishCount = 0
-        var publishedMessages = [[ChatMessage]]()
+        var publishedMessages = [ChatMessage]()
 
         // 2. Subscibe to updates
-        chat.$messages.sink { messages in
-            publishedMessages.append(messages)
-            publishCount += 1
+        chat.publisher.sink { message in
+            publishedMessages.append(message)
         }.store(in: &cancellables)
 
         // 3. Send messages with success
@@ -65,18 +62,13 @@ final class ChatTests: XCTestCase {
         XCTAssertTrue(sentMessageA)
         XCTAssertTrue(sentMessageB)
         XCTAssertFalse(sentMessageC)
-        XCTAssertEqual(
-            publishedMessages,
-            [[], [chat.messages[0]], [chat.messages[0], chat.messages[1]]]
-        )
-        XCTAssertEqual(publishCount, 3)
-        XCTAssertEqual(chat.messages.count, 2)
-        XCTAssertTrue(chat.messages.allSatisfy { $0.senderName == senderName })
-        XCTAssertTrue(chat.messages.allSatisfy { $0.senderId == senderId })
-        XCTAssertTrue(chat.messages.allSatisfy { $0.type == "text/plain" })
-        XCTAssertEqual(chat.messages[0].payload, messageA)
-        XCTAssertEqual(chat.messages[1].payload, messageB)
-        XCTAssertEqual(delegate.messages, chat.messages)
+        XCTAssertEqual(publishedMessages.count, 2)
+        XCTAssertTrue(publishedMessages.allSatisfy { $0.senderName == senderName })
+        XCTAssertTrue(publishedMessages.allSatisfy { $0.senderId == senderId })
+        XCTAssertTrue(publishedMessages.allSatisfy { $0.type == "text/plain" })
+        XCTAssertEqual(publishedMessages[0].payload, messageA)
+        XCTAssertEqual(publishedMessages[1].payload, messageB)
+        XCTAssertEqual(delegate.messages, publishedMessages)
         XCTAssertEqual(messageSender.messages, [messageA, messageB, messageC])
     }
 
@@ -84,14 +76,12 @@ final class ChatTests: XCTestCase {
         // 1. Prepare test data
         let messageA = ChatMessage.stub()
         let messageB = ChatMessage.stub()
-        var publishCount = 0
-        var publishedMessages = [[ChatMessage]]()
+        var publishedMessages = [ChatMessage]()
         let expectedMessages = [messageA, messageB]
 
         // 2. Subscibe to updates
-        chat.$messages.sink { messages in
-            publishedMessages.append(messages)
-            publishCount += 1
+        chat.publisher.sink { message in
+            publishedMessages.append(message)
         }.store(in: &cancellables)
 
         // 3. Add messages
@@ -99,41 +89,8 @@ final class ChatTests: XCTestCase {
         await chat.addMessage(messageB)
 
         // 4. Assert
-        XCTAssertEqual(
-            publishedMessages,
-            [[], [messageA], [messageA, messageB]]
-        )
-        XCTAssertEqual(publishCount, 3)
-        XCTAssertEqual(chat.messages, expectedMessages)
+        XCTAssertEqual(publishedMessages, expectedMessages)
         XCTAssertEqual(delegate.messages, expectedMessages)
-    }
-
-    func testClear() async {
-        // 1. Prepare test data
-        let messageA = ChatMessage.stub()
-        let messageB = ChatMessage.stub()
-        var publishCount = 0
-        var publishedMessages = [[ChatMessage]]()
-
-        // 2. Subscibe to updates
-        chat.$messages.sink { messages in
-            publishedMessages.append(messages)
-            publishCount += 1
-        }.store(in: &cancellables)
-
-        // 3. Add messages
-        await chat.addMessage(messageA)
-        await chat.addMessage(messageB)
-        await chat.clear()
-
-        // 4. Assert
-        XCTAssertEqual(
-            publishedMessages,
-            [[], [messageA], [messageA, messageB], []]
-        )
-        XCTAssertEqual(publishCount, 4)
-        XCTAssertTrue(chat.messages.isEmpty)
-        XCTAssertTrue(delegate.messages.isEmpty)
     }
 }
 
@@ -152,10 +109,6 @@ private final class ChatDelegateMock: ChatDelegate {
 
     func chat(_ chat: Chat, didReceiveMessage message: ChatMessage) {
         messages.append(message)
-    }
-
-    func chatDidClearMessages(_ chat: Chat) {
-        messages = []
     }
 }
 
