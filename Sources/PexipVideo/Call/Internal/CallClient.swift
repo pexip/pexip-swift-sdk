@@ -8,17 +8,16 @@ protocol CallClientProtocol {
      Upgrades this connection to have an audio/video call element.
 
      - Parameters:
+        - kind: The type of the call
         - participantId: The ID of the participant
         - sdp: Contains the SDP of the sender
-        - present: Optional field. Contains "send" or "receive"
-                   to act as a presentation stream rather than a main audio/video stream.
      - Returns: Information about the service you are connecting to
      - Throws: `HTTPError` if a network error was encountered during operation
      */
     func makeCall(
+        kind: CallKind,
         participantId: UUID,
-        sdp: String,
-        presentation: CallPresentationKind?
+        sdp: String
     ) async throws -> CallDetails
 
     /**
@@ -60,9 +59,9 @@ protocol CallClientProtocol {
 
 extension InfinityClient: CallClientProtocol {
     func makeCall(
+        kind: CallKind,
         participantId: UUID,
-        sdp: String,
-        presentation: CallPresentationKind?
+        sdp: String
     ) async throws -> CallDetails {
         var request = try await request(
             withMethod: .POST,
@@ -70,11 +69,27 @@ extension InfinityClient: CallClientProtocol {
             name: "calls"
         )
         request.timeoutInterval = 62
-        try request.setJSONBody([
+
+        var parameters = [
             "call_type": "WEBRTC",
-            "sdp": sdp,
-            "present": presentation?.rawValue
-        ])
+            "sdp": sdp
+        ]
+        var present: String?
+
+        switch kind {
+        case .call(let presentationInMix):
+            present = presentationInMix ? "main" : nil
+        case .presentationReceiver:
+            present = "receive"
+        case .presentationSender:
+            present = "send"
+        }
+
+        if let present = present {
+            parameters["present"] = present
+        }
+
+        try request.setJSONBody(parameters)
         return try await json(for: request)
     }
 

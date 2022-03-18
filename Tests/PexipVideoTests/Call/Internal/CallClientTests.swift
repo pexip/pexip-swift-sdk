@@ -8,7 +8,6 @@ final class CallClientTests: APIClientTestCase<CallClientProtocol> {
         let participantId = UUID()
         let callId = UUID()
         let inputSDP = UUID().uuidString
-        let presentation: CallPresentationKind = .receive
         let outputSDP = UUID().uuidString
         let json = """
         {
@@ -36,9 +35,9 @@ final class CallClientTests: APIClientTestCase<CallClientProtocol> {
 
         // 2. Make request
         let callDetails = try await client.makeCall(
+            kind: .call(presentationInMix: false),
             participantId: participantId,
-            sdp: inputSDP,
-            presentation: presentation
+            sdp: inputSDP
         )
 
         // 3. Assert request
@@ -54,7 +53,7 @@ final class CallClientTests: APIClientTestCase<CallClientProtocol> {
         XCTAssertEqual(createdRequest?.httpMethod, "POST")
         XCTAssertEqual(parameters["call_type"], "WEBRTC")
         XCTAssertEqual(parameters["sdp"], inputSDP)
-        XCTAssertEqual(parameters["present"], presentation.rawValue)
+        XCTAssertNil(parameters["present"])
         XCTAssertEqual(createdRequest?.timeoutInterval, 62)
         XCTAssertEqual(
             createdRequest?.value(forHTTPHeaderField: "Content-Type"),
@@ -71,6 +70,21 @@ final class CallClientTests: APIClientTestCase<CallClientProtocol> {
 
         // 4. Assert result
         XCTAssertEqual(callDetails, CallDetails(sdp: outputSDP, id: callId))
+    }
+
+    func testMakeCallWithPresentationInMix() async throws {
+        let parameters = try await parametersForCall(withKind: .call(presentationInMix: true))
+        XCTAssertEqual(parameters["present"], "main")
+    }
+
+    func testMakeCallWithPresentationReceiver() async throws {
+        let parameters = try await parametersForCall(withKind: .presentationReceiver)
+        XCTAssertEqual(parameters["present"], "receive")
+    }
+
+    func testMakeCallWithPresentationSender() async throws {
+        let parameters = try await parametersForCall(withKind: .presentationSender)
+        XCTAssertEqual(parameters["present"], "send")
     }
 
     func testAck() async throws {
@@ -210,5 +224,29 @@ final class CallClientTests: APIClientTestCase<CallClientProtocol> {
             createdRequest?.value(forHTTPHeaderField: "token"),
             token.value
         )
+    }
+
+    // MARK: - Helpers
+
+    private func parametersForCall(withKind kind: CallKind) async throws -> [String: String] {
+        var createdRequest: URLRequest?
+
+        // 1. Mock response
+        URLProtocolMock.makeResponse = { request in
+            createdRequest = request
+            return .http(statusCode: 401, data: Data(), headers: [:])
+        }
+
+        // 2. Make request
+        do {
+            let sdp = UUID().uuidString
+            _ = try await client.makeCall(kind: kind, participantId: UUID(), sdp: sdp)
+            return [:]
+        } catch {
+            return try JSONDecoder().decode(
+                [String: String].self,
+                from: try XCTUnwrap(createdRequest?.httpBody)
+            )
+        }
     }
 }

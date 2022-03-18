@@ -102,6 +102,7 @@ public struct ConferenceFactory {
                 ),
                 qualityProfile: callConfiguration.qualityProfile,
                 callMediaFeatures: callConfiguration.mediaFeatures,
+                showPresentationInMix: callConfiguration.showPresentationInMix,
                 apiClient: apiClient,
                 logger: logger
             ),
@@ -109,6 +110,7 @@ public struct ConferenceFactory {
                 client: apiClient,
                 logger: logger
             ),
+            showPresentationInMix: callConfiguration.showPresentationInMix,
             chat: chat,
             roster: roster(token: token, apiClient: apiClient),
             logger: logger

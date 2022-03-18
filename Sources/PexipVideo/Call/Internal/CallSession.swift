@@ -4,7 +4,7 @@ import Combine
 // MARK: - Protocol
 
 protocol CallSessionProtocol {
-    var isPresentation: Bool { get }
+    var kind: CallKind { get }
     var audioTrack: LocalAudioTrackProtocol? { get }
     var localVideoTrack: LocalVideoTrackProtocol? { get }
     var remoteVideoTrack: VideoTrackProtocol? { get }
@@ -20,7 +20,7 @@ final class CallSession: CallSessionProtocol {
     typealias APIClient = CallClientProtocol & ParticipantClientProtocol
     private typealias CallDetailsTask = Task<CallDetails, Error>
 
-    let isPresentation: Bool
+    let kind: CallKind
     var audioTrack: LocalAudioTrackProtocol? { mediaConnection.audioTrack }
     var localVideoTrack: LocalVideoTrackProtocol? { mediaConnection.localVideoTrack }
     var remoteVideoTrack: VideoTrackProtocol? { mediaConnection.remoteVideoTrack }
@@ -42,16 +42,16 @@ final class CallSession: CallSessionProtocol {
     // MARK: - Init
 
     init(
+        kind: CallKind,
         participantId: UUID,
         qualityProfile: QualityProfile,
-        isPresentation: Bool,
         mediaConnection: MediaConnection,
         apiClient: APIClient,
         logger: CategoryLogger
     ) {
+        self.kind = kind
         self.participantId = participantId
         self.qualityProfile = qualityProfile
-        self.isPresentation = isPresentation
         self.apiClient = apiClient
         self.mediaConnection = mediaConnection
         self.logger = logger
@@ -68,12 +68,12 @@ final class CallSession: CallSessionProtocol {
             let sdp = try await mediaConnection.createOffer()
             let offer = SDPMangler(sdp: sdp).mangle(
                 qualityProfile: qualityProfile,
-                isPresentation: isPresentation
+                isPresentation: kind.isPresentation
             )
             return try await apiClient.makeCall(
+                kind: kind,
                 participantId: participantId,
-                sdp: offer,
-                presentation: isPresentation ? .receive : nil
+                sdp: offer
             )
         }
         self.callDetailsTask = callDetailsTask

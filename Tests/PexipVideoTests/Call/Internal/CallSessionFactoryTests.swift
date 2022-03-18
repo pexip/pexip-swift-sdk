@@ -21,6 +21,7 @@ final class CallSessionFactoryTests: XCTestCase {
             iceServers: ["stun:stun.l.google.com:19302"],
             qualityProfile: .medium,
             callMediaFeatures: .all,
+            showPresentationInMix: true,
             apiClient: InfinityClient(
                 node: Node(address: try XCTUnwrap(URL(string: "https://example.com"))),
                 alias: try XCTUnwrap(.init(uri: "test@example.com")),
@@ -36,11 +37,11 @@ final class CallSessionFactoryTests: XCTestCase {
 
     func testCallTransceiver() throws {
         let callSession = factory.callTransceiver()
-        XCTAssertFalse(try XCTUnwrap(callSession as? CallSession).isPresentation)
+        XCTAssertEqual(try XCTUnwrap(callSession as? CallSession).kind, .call(presentationInMix: true))
     }
 
     func testPresentationReceiver() throws {
         let callSession = factory.presentationReceiver()
-        XCTAssertTrue(try XCTUnwrap(callSession as? CallSession).isPresentation)
+        XCTAssertEqual(try XCTUnwrap(callSession as? CallSession).kind, .presentationReceiver)
     }
 }

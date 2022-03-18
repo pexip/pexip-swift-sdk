@@ -12,6 +12,7 @@ struct CallSessionFactory: CallSessionFactoryProtocol {
     let iceServers: [String]
     let qualityProfile: QualityProfile
     let callMediaFeatures: MediaFeature
+    let showPresentationInMix: Bool
     let apiClient: CallSession.APIClient
     let logger: LoggerProtocol
 
@@ -20,9 +21,9 @@ struct CallSessionFactory: CallSessionFactoryProtocol {
     func callTransceiver() -> CallSessionProtocol {
         let logger = self.logger[.call]
         return CallSession(
+            kind: .call(presentationInMix: showPresentationInMix),
             participantId: participantId,
             qualityProfile: qualityProfile,
-            isPresentation: false,
             mediaConnection: mediaConnection(
                 withFeatures: callMediaFeatures,
                 logger: logger
@@ -35,9 +36,9 @@ struct CallSessionFactory: CallSessionFactoryProtocol {
     func presentationReceiver() -> CallSessionProtocol {
         let logger = self.logger[.remotePresentation]
         return CallSession(
+            kind: .presentationReceiver,
             participantId: participantId,
             qualityProfile: qualityProfile,
-            isPresentation: true,
             mediaConnection: mediaConnection(
                 withFeatures: [.receiveVideo],
                 logger: logger
@@ -56,7 +57,7 @@ struct CallSessionFactory: CallSessionFactoryProtocol {
         WebRTCConnection(
             iceServers: iceServers,
             qualityProfile: qualityProfile,
-            features: callMediaFeatures,
+            features: features,
             logger: logger
         )
     }

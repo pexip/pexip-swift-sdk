@@ -47,6 +47,7 @@ final class Conference: ConferenceProtocol {
     private let callTransceiver: CallSessionProtocol
     private var presentationReceiver: CallSessionProtocol?
     private let serverEventSession: ServerEventSession
+    private let showPresentationInMix: Bool
     private let logger: LoggerProtocol
     private var eventStreamTask: Task<Void, Never>?
     private var callEventSubject = PassthroughSubject<CallEvent, Never>()
@@ -61,6 +62,7 @@ final class Conference: ConferenceProtocol {
         tokenSession: TokenSessionProtocol,
         callSessionFactory: CallSessionFactoryProtocol,
         serverEventSession: ServerEventSession,
+        showPresentationInMix: Bool,
         chat: Chat?,
         roster: Roster,
         logger: LoggerProtocol
@@ -71,6 +73,7 @@ final class Conference: ConferenceProtocol {
         self.callSessionFactory = callSessionFactory
         self.callTransceiver = callSessionFactory.callTransceiver()
         self.serverEventSession = serverEventSession
+        self.showPresentationInMix = showPresentationInMix
         self.logger = logger
         self.chat = chat
         self.roster = roster
@@ -177,6 +180,10 @@ final class Conference: ConferenceProtocol {
     // MARK: - Remote presentation
 
     private func startPresentationReceiver(details: PresentationDetails) async {
+        guard !showPresentationInMix else {
+            return
+        }
+
         let presentationReceiver = callSessionFactory.presentationReceiver()
         self.presentationReceiver = presentationReceiver
 
@@ -196,6 +203,10 @@ final class Conference: ConferenceProtocol {
     }
 
     private func stopPresentationReceiver() async {
+        guard !showPresentationInMix else {
+            return
+        }
+
         await presentationReceiver?.stop()
         presentationReceiver = nil
     }
