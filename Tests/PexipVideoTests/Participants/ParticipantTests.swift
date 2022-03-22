@@ -74,4 +74,114 @@ final class ParticipantTests: XCTestCase {
 
         XCTAssertEqual(participant, expectedParticipant)
     }
+
+    func testInit1() {
+        let id = UUID()
+        let participant = Participant(
+            id: id,
+            displayName: "Test",
+            role: .chair,
+            serviceType: .conference,
+            callDirection: .inbound,
+            hasMedia: true,
+            isExternal: false,
+            isStreamingConference: false,
+            isVideoMuted: false,
+            canReceivePresentation: true,
+            isConnectionEncrypted: true,
+            isDisconnectSupported: true,
+            isFeccSupported: false,
+            isAudioOnlyCall: false,
+            isAudioMuted: false,
+            isPresenting: false,
+            isVideoCall: false,
+            isMuteSupported: true,
+            isTransferSupported: true
+        )
+
+        XCTAssertEqual(participant.id, id)
+        XCTAssertEqual(participant.displayName, "Test")
+        XCTAssertTrue(participant.localAlias.isEmpty)
+        XCTAssertTrue(participant.overlayText.isEmpty)
+        XCTAssertEqual(participant.role, .chair)
+        XCTAssertEqual(participant.serviceType, .conference)
+        XCTAssertEqual(participant.buzzTime, 0)
+        XCTAssertEqual(participant.callDirection, .inbound)
+        XCTAssertNil(participant.callTag)
+        XCTAssertNil(participant.externalNodeId)
+        XCTAssertNil(participant.callProtocol)
+        XCTAssertEqual(participant.spotlightTime, 0)
+        XCTAssertEqual(participant.startTime, 0)
+        XCTAssertNil(participant.uri)
+        XCTAssertNil(participant.vendor)
+        XCTAssertTrue(participant.hasMedia)
+        XCTAssertFalse(participant.isExternal)
+        XCTAssertFalse(participant.isStreamingConference)
+        XCTAssertFalse(participant.isVideoMuted)
+        XCTAssertTrue(participant.canReceivePresentation)
+        XCTAssertTrue(participant.isConnectionEncrypted)
+        XCTAssertTrue(participant.isDisconnectSupported)
+        XCTAssertFalse(participant.isFeccSupported)
+        XCTAssertFalse(participant.isAudioOnlyCall)
+        XCTAssertFalse(participant.isAudioMuted)
+        XCTAssertFalse(participant.isPresenting)
+        XCTAssertFalse(participant.isVideoCall)
+        XCTAssertTrue(participant.isMuteSupported)
+        XCTAssertTrue(participant.isTransferSupported)
+    }
+
+    func testInit2() {
+        let id = UUID()
+        let participant = Participant(
+            id: id,
+            displayName: "Test",
+            role: .chair,
+            serviceType: .conference,
+            callDirection: .inbound,
+            hasMedia: false,
+            isExternal: true,
+            isStreamingConference: true,
+            isVideoMuted: true,
+            canReceivePresentation: false,
+            isConnectionEncrypted: false,
+            isDisconnectSupported: false,
+            isFeccSupported: true,
+            isAudioOnlyCall: true,
+            isAudioMuted: true,
+            isPresenting: true,
+            isVideoCall: true,
+            isMuteSupported: false,
+            isTransferSupported: false
+        )
+
+        XCTAssertEqual(participant.id, id)
+        XCTAssertEqual(participant.displayName, "Test")
+        XCTAssertTrue(participant.localAlias.isEmpty)
+        XCTAssertTrue(participant.overlayText.isEmpty)
+        XCTAssertEqual(participant.role, .chair)
+        XCTAssertEqual(participant.serviceType, .conference)
+        XCTAssertEqual(participant.buzzTime, 0)
+        XCTAssertEqual(participant.callDirection, .inbound)
+        XCTAssertNil(participant.callTag)
+        XCTAssertNil(participant.externalNodeId)
+        XCTAssertNil(participant.callProtocol)
+        XCTAssertEqual(participant.spotlightTime, 0)
+        XCTAssertEqual(participant.startTime, 0)
+        XCTAssertNil(participant.uri)
+        XCTAssertNil(participant.vendor)
+        XCTAssertFalse(participant.hasMedia)
+        XCTAssertTrue(participant.isExternal)
+        XCTAssertTrue(participant.isStreamingConference)
+        XCTAssertTrue(participant.isVideoMuted)
+        XCTAssertFalse(participant.canReceivePresentation)
+        XCTAssertFalse(participant.isConnectionEncrypted)
+        XCTAssertFalse(participant.isDisconnectSupported)
+        XCTAssertTrue(participant.isFeccSupported)
+        XCTAssertTrue(participant.isAudioOnlyCall)
+        XCTAssertTrue(participant.isAudioMuted)
+        XCTAssertTrue(participant.isPresenting)
+        XCTAssertTrue(participant.isVideoCall)
+        XCTAssertFalse(participant.isMuteSupported)
+        XCTAssertFalse(participant.isTransferSupported)
+    }
 }

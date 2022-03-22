@@ -147,4 +147,55 @@ final class TokenTests: XCTestCase {
             )
         )
     }
+
+    func testTokenWrongExpiresString() {
+        let token = Token(
+            value: UUID().uuidString,
+            participantId: UUID(),
+            role: .guest,
+            displayName: "Name",
+            serviceType: "test",
+            conferenceName: "Conference",
+            stun: [],
+            chatEnabled: false,
+            expiresString: "test"
+        )
+        XCTAssertEqual(token.expires, 0)
+    }
+
+    func testIceServers() {
+        let token = Token(
+            value: UUID().uuidString,
+            participantId: UUID(),
+            role: .guest,
+            displayName: "Name",
+            serviceType: "test",
+            conferenceName: "Conference",
+            stun: [
+                .init(url: "stun:stun.l.google.com:19302"),
+                .init(url: "stun:stun1.l.google.com:19302")
+            ],
+            chatEnabled: false,
+            expiresString: "test"
+        )
+        XCTAssertEqual(token.iceServers, [
+            "stun:stun.l.google.com:19302",
+            "stun:stun1.l.google.com:19302"
+        ])
+    }
+
+    func testIceServersWithoutStun() {
+        let token = Token(
+            value: UUID().uuidString,
+            participantId: UUID(),
+            role: .guest,
+            displayName: "Name",
+            serviceType: "test",
+            conferenceName: "Conference",
+            stun: nil,
+            chatEnabled: false,
+            expiresString: "test"
+        )
+        XCTAssertTrue(token.iceServers.isEmpty)
+    }
 }

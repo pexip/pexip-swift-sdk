@@ -197,6 +197,19 @@ final class EventStreamParserTests: XCTestCase {
         XCTAssertNil(event?.retry)
     }
 
+    func testEventFromStringWithData() {
+        let string = """
+        id: 1
+        event: test
+        """
+        let event = EventStreamParser.event(from: string)
+
+        XCTAssertEqual(event?.id, "1")
+        XCTAssertEqual(event?.name, "test")
+        XCTAssertNil(event?.data)
+        XCTAssertNil(event?.retry)
+    }
+
     func testEventFromStringWithEmptyFields() {
         let string = """
         id

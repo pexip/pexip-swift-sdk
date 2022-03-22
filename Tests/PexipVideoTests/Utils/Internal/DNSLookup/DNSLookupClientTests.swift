@@ -26,6 +26,13 @@ final class DNSLookupClientTests: XCTestCase {
     // MARK: - Test init
 
     func testInit() {
+        // Default task
+        let query = DNSLookupQuery(
+            domain: "example.org",
+            serviceType: kDNSServiceType_A,
+            handler: { _, _, _, _, _, _, _, _, _, _, _ in }
+        )
+        XCTAssertTrue(DNSLookupClient().makeLookupTask(query) is DNSLookupTask)
         // Default timeout
         XCTAssertEqual(DNSLookupClient().timeout, 5)
         // Custom timeout

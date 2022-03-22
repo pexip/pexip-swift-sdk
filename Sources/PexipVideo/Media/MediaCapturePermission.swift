@@ -3,6 +3,24 @@ import AVFoundation
 import UIKit
 #endif
 
+// MARK: - Protocols
+
+protocol SettingsOpener {
+    static var openSettingsURLString: String { get }
+
+    func open(
+        _ url: URL,
+        options: [UIApplication.OpenExternalURLOptionsKey: Any],
+        completionHandler completion: ((Bool) -> Void)?
+    )
+}
+
+#if os(iOS)
+extension UIApplication: SettingsOpener {}
+#endif
+
+// MARK: - Implementation
+
 public struct MediaCapturePermission {
     /// The media type, either video or audio
     public enum MediaType {
@@ -20,20 +38,23 @@ public struct MediaCapturePermission {
 
     let mediaType: AVMediaType
     private let captureDevice: AVCaptureDevice.Type
-    private let openSettings: () -> Void
+    private let settingsOpener: SettingsOpener
 
     // MARK: - Init
+
+    #if os(iOS)
+    init(mediaType: MediaType) {
+        self.init(
+            mediaType: mediaType,
+            settingsOpener: UIApplication.shared
+        )
+    }
+    #endif
 
     init(
         mediaType: MediaType,
         captureDeviceType: AVCaptureDevice.Type = AVCaptureDevice.self,
-        openSettings: @escaping () -> Void = {
-            #if os(iOS)
-            if let url = URL(string: UIApplication.openSettingsURLString) {
-                UIApplication.shared.open(url, options: [:], completionHandler: nil)
-            }
-            #endif
-        }
+        settingsOpener: SettingsOpener
     ) {
         switch mediaType {
         case .audio:
@@ -43,7 +64,7 @@ public struct MediaCapturePermission {
         }
 
         self.captureDevice = captureDeviceType
-        self.openSettings = openSettings
+        self.settingsOpener = settingsOpener
     }
 
     // MARK: - Public
@@ -75,5 +96,11 @@ public struct MediaCapturePermission {
         }
 
         return authorizationStatus
+    }
+
+    private func openSettings() {
+        if let url = URL(string: type(of: settingsOpener).openSettingsURLString) {
+            settingsOpener.open(url, options: [:], completionHandler: nil)
+        }
     }
 }

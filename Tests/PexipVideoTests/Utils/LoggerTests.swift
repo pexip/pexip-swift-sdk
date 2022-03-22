@@ -1,4 +1,5 @@
 import XCTest
+import os.log
 @testable import PexipVideo
 
 final class LoggerTests: XCTestCase {
@@ -17,13 +18,15 @@ final class LoggerTests: XCTestCase {
         var logger = DefaultLogger()
         var loggedMessage: String?
 
-        logger.onLog = {
-            loggedMessage = $0
+        logger.onLog = { message in
+            loggedMessage = message
         }
 
         for level in LogLevel.allCases {
-            logger.log("Test", category: .conference, level: level)
-            XCTAssertEqual(loggedMessage, "\(level.rawValue) Test")
+            for category in LogCategory.allCases {
+                logger.log("Test", category: category, level: level)
+                XCTAssertEqual(loggedMessage, "\(level.rawValue) Test")
+            }
         }
     }
 

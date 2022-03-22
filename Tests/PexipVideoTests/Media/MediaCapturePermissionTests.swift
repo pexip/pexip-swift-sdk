@@ -4,20 +4,18 @@ import WebRTC
 
 final class MediaCapturePermissionTests: XCTestCase {
     private var permission: MediaCapturePermission!
-    private var openSettingsCalled: Bool!
+    private var settingsOpener: SettingsOpenerMock!
 
     // MARK: - Setup
 
     override func setUp() {
         super.setUp()
         CaptureDevice.status = .notDetermined
-        openSettingsCalled = false
+        settingsOpener = SettingsOpenerMock()
         permission = MediaCapturePermission(
             mediaType: .video,
             captureDeviceType: CaptureDevice.self,
-            openSettings: { [weak self] in
-                self?.openSettingsCalled = true
-            }
+            settingsOpener: settingsOpener
         )
     }
 
@@ -82,7 +80,13 @@ final class MediaCapturePermissionTests: XCTestCase {
     func testRequestAccessOpenSettingsIfNeeded() async throws {
         CaptureDevice.status = .denied
         await permission.requestAccess(openSettingsIfNeeded: true)
-        XCTAssertTrue(openSettingsCalled)
+
+        XCTAssertEqual(
+            settingsOpener.url?.absoluteString,
+            SettingsOpenerMock.openSettingsURLString
+        )
+        XCTAssertTrue(settingsOpener.options.isEmpty)
+        XCTAssertNil(settingsOpener.completionHandler)
     }
 }
 
@@ -97,5 +101,23 @@ private final class CaptureDevice: AVCaptureDevice {
 
     override class func requestAccess(for mediaType: AVMediaType) async -> Bool {
         return status == .authorized
+    }
+}
+
+private final class SettingsOpenerMock: SettingsOpener {
+    static var openSettingsURLString: String { "settings://test" }
+
+    var url: URL?
+    var options = [UIApplication.OpenExternalURLOptionsKey: Any]()
+    var completionHandler: ((Bool) -> Void)?
+
+    func open(
+        _ url: URL,
+        options: [UIApplication.OpenExternalURLOptionsKey: Any],
+        completionHandler completion: ((Bool) -> Void)?
+    ) {
+        self.url = url
+        self.options = options
+        self.completionHandler = completion
     }
 }

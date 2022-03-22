@@ -75,7 +75,7 @@ public struct Token: Codable, Hashable {
         displayName: String,
         serviceType: String,
         conferenceName: String,
-        stun: [Token.Stun],
+        stun: [Token.Stun]?,
         chatEnabled: Bool,
         expiresString: String
     ) {

@@ -36,13 +36,13 @@ actor TokenStorage: TokenStorageProtocol {
     // MARK: - Auth token
 
     func token() async throws -> Token? {
-        if let updateTask = updateTask {
-            let token = try await updateTask.value
-            self.updateTask = nil
-            return token
-        } else {
+        guard let updateTask = updateTask else {
             return token
         }
+
+        let token = try await updateTask.value
+        self.updateTask = nil
+        return token
     }
 
     func updateToken(withTask task: Task<Token, Error>) async throws {

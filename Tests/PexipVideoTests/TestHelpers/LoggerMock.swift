@@ -1,3 +1,5 @@
+@testable import PexipVideo
+
 final class LoggerMock: LoggerProtocol {
     private(set) var message = ""
     private(set) var category: LogCategory?

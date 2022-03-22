@@ -43,9 +43,9 @@ final class DNSLookupClient: DNSLookupClientProtocol {
         // (the root domain), abort."
         if records.first?.target == ".", records.count == 1 {
             return []
-        } else {
-            return records.sorted()
         }
+
+        return records.sorted()
     }
 
     func resolveARecords(
@@ -83,9 +83,9 @@ final class DNSLookupClient: DNSLookupClientProtocol {
 
             if dnssec && !isSecure {
                 throw DNSLookupError.responseNotSecuredWithDNSSEC
-            } else {
-                return try query.result.records.compactMap(T.init)
             }
+
+            return try query.result.records.compactMap(T.init)
         }
 
         return try await task.value
