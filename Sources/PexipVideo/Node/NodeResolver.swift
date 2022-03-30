@@ -74,10 +74,15 @@ struct NodeResolver: NodeResolverProtocol {
             """
         )
 
-        let addresses = try await dnsLookupClient
-            .resolveSRVRecords(for: name, dnssec: dnssec)
-            .compactMap(\.nodeAddress)
-        return try await firstActiveAddress(from: addresses)
+        do {
+            let addresses = try await dnsLookupClient
+                .resolveSRVRecords(for: name, dnssec: dnssec)
+                .compactMap(\.nodeAddress)
+            return try await firstActiveAddress(from: addresses)
+        } catch {
+            logger.error("SRV lookup error: \(error)")
+            return nil
+        }
     }
 
     private func resolveARecord(for host: String) async throws -> URL? {

@@ -1,4 +1,5 @@
 import CoreGraphics
+
 /// Call quality profile.
 public struct QualityProfile: Hashable {
     /// 1920x1080 (16:9)
