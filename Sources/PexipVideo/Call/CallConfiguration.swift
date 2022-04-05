@@ -17,7 +17,7 @@ public struct CallConfiguration {
     public var showPresentationInMix: Bool
 
     var backupIceServers: [String] {
-        useGoogleStunServersAsBackup ? CallConfiguration.googleStunServers : []
+        useGoogleStunServersAsBackup ? Self.googleStunServers : []
     }
 
     /**

@@ -70,7 +70,7 @@ final class InfinityClientTests: XCTestCase {
             withMethod: .GET,
             path: .conference,
             name: "request",
-            token: .none
+            token: .empty
         )
         var expectedRequest = URLRequest(
             url: try XCTUnwrap(
@@ -89,7 +89,7 @@ final class InfinityClientTests: XCTestCase {
             withMethod: .POST,
             path: .participant(id: participantId),
             name: "request",
-            token: .none
+            token: .empty
         )
         let expectedUrlString = "https://vc.example.com/api/client/v2/conferences/test@vc.example.com/"
             + "participants/\(participantId.uuidString.lowercased())/"
@@ -110,7 +110,7 @@ final class InfinityClientTests: XCTestCase {
             withMethod: .POST,
             path: .call(participantId: participantId, callId: callId),
             name: "request",
-            token: .none
+            token: .empty
         )
         let expectedUrlString = "https://vc.example.com/api/client/v2/conferences/test@vc.example.com/"
             + "participants/\(participantId.uuidString.lowercased())/"

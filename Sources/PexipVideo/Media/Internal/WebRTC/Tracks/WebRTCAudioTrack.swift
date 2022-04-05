@@ -72,7 +72,7 @@ final class WebRTCAudioTrack: LocalAudioTrackProtocol {
         do {
             try audioSession.setCategory(AVAudioSession.Category.playAndRecord.rawValue)
             try audioSession.setMode(AVAudioSession.Mode.voiceChat.rawValue)
-        } catch let error {
+        } catch {
             debugPrint("Error changing AVAudioSession category: \(error)")
         }
 
@@ -92,7 +92,7 @@ final class WebRTCAudioTrack: LocalAudioTrackProtocol {
                 try self.audioSession.setCategory(category)
                 try self.audioSession.overrideOutputAudioPort(portOverride)
                 try self.audioSession.setActive(true)
-            } catch let error {
+            } catch {
                 debugPrint("Error setting AVAudioSession category: \(error)")
             }
 

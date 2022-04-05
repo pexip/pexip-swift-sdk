@@ -55,7 +55,7 @@ extension Array where Element: FrameRateRange {
             }
         }
 
-        return selectedFrameRate
+        return selectedFrameRate.map { Swift.min($0, targetFrameRate) }
     }
 }
 

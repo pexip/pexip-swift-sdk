@@ -1,6 +1,7 @@
 import XCTest
 @testable import PexipVideo
 
+// swiftlint:disable test_case_accessibility
 class APIClientTestCase<T>: XCTestCase {
     let nodeAddress = URL(string: "https://test.example.com")!
     let alias = ConferenceAlias(uri: "conference@example.com")!

@@ -92,7 +92,7 @@ private extension String {
     func mediaFormatParameters() -> [MediaFormatParameter] {
         components(separatedBy: " ")
             .dropFirst(1)
-            .joined(separator: "")
+            .joined()
             .components(separatedBy: ";")
             .compactMap {
                 let parts = $0.components(separatedBy: "=")

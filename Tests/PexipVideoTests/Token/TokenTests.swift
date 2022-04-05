@@ -130,7 +130,7 @@ final class TokenTests: XCTestCase {
         // updatedAt + 120/2 seconds
         XCTAssertEqual(
             token.refreshDate,
-            updatedAt.addingTimeInterval(120/2)
+            updatedAt.addingTimeInterval(120 / 2)
         )
 
         // Expired, updatedAt + 240 seconds

@@ -2,7 +2,7 @@ import CoreGraphics
 
 /// Call quality profile.
 public struct QualityProfile: Hashable {
-    public static let `default` = QualityProfile.high
+    public static let `default` = Self.high
 
     /// 1280x720 (16:9)
     public static let high = QualityProfile(

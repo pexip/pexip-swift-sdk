@@ -53,7 +53,7 @@ final class ParticipantTests: XCTestCase {
             externalNodeId: "",
             callProtocol: "api",
             spotlightTime: 0,
-            startTime: 1441720992,
+            startTime: 1_441_720_992,
             uri: "Infinity_Connect_10.44.21.35",
             vendor: "Pexip Infinity Connect/2.0.0-25227.0.0 (Windows NT 6.1; WOW64) nwjs/0.12.2 Chrome/41.0.2272.76",
             hasMedia: false,

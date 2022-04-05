@@ -75,7 +75,7 @@ final class AVFoundationExtensionsTests: XCTestCase {
             FrameRateRangeMock(maxFrameRate: 120)
         ]
 
-        XCTAssertEqual([FrameRateRangeMock]().bestFrameRate(for: .low), 15)
+        XCTAssertNil([FrameRateRangeMock]().bestFrameRate(for: .low))
         XCTAssertEqual(frameRanges.bestFrameRate(for: .low), 15)
         XCTAssertEqual(frameRanges.bestFrameRate(for: .medium), 25)
         XCTAssertEqual(frameRanges.bestFrameRate(for: .high), 30)

@@ -65,7 +65,7 @@ final class DNSLookupClient: DNSLookupClientProtocol {
             let query = DNSLookupQuery(
                 domain: name,
                 serviceType: T.serviceType,
-                handler: DNSLookupClient.queryHandler
+                handler: Self.queryHandler
             )
 
             var flags: DNSServiceFlags = 0
@@ -91,7 +91,6 @@ final class DNSLookupClient: DNSLookupClientProtocol {
         return try await task.value
     }
 
-    // swiftlint:disable closure_parameter_position
     private static let queryHandler: DNSServiceQueryRecordReply = {
         _, flags, _, _, _, _, _, length, bytes, _, context in
 

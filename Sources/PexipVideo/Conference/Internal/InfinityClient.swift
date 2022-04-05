@@ -11,7 +11,7 @@ struct InfinityClient {
     enum TokenStrategy {
         case fromStorage
         case value(Token)
-        case none
+        case empty
     }
 
     let decoder = JSONDecoder()
@@ -59,7 +59,7 @@ struct InfinityClient {
             }
         case .value(let token):
             setToken(token, to: &request)
-        case .none:
+        case .empty:
             break
         }
 
@@ -75,7 +75,7 @@ struct InfinityClient {
             return url(for: .conference)
                 .appendingPathComponent("participants")
                 .appendingPathComponent(id.uuidString.lowercased())
-        case .call(let participantId, let callId):
+        case let .call(participantId, callId):
             return url(for: .participant(id: participantId))
                 .appendingPathComponent("calls")
                 .appendingPathComponent(callId.uuidString.lowercased())

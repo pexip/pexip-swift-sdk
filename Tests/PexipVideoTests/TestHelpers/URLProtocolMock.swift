@@ -32,8 +32,8 @@ final class URLProtocolMock: URLProtocol {
             let response: URLResponse
             let responseData: Data
 
-            switch try URLProtocolMock.makeResponse(request) {
-            case .http(let statusCode, let data, let headers):
+            switch try Self.makeResponse(request) {
+            case let .http(statusCode, data, headers):
                 response = try XCTUnwrap(
                     HTTPURLResponse(
                         url: XCTUnwrap(request.url),
@@ -50,10 +50,7 @@ final class URLProtocolMock: URLProtocol {
                 throw error
             }
 
-            client.urlProtocol(self,
-                didReceive: response,
-                cacheStoragePolicy: .notAllowed
-            )
+            client.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
             client.urlProtocol(self, didLoad: responseData)
         } catch {
             client.urlProtocol(self, didFailWithError: error)

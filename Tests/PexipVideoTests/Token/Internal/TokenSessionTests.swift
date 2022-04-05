@@ -12,6 +12,7 @@ final class TokenSessionTests: XCTestCase {
 
     // MARK: - Setup
 
+    // swiftlint:disable unowned_variable_capture
     override func setUpWithError() throws {
         try super.setUpWithError()
 

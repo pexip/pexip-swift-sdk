@@ -82,11 +82,9 @@ final class MediaCapturePermissionTests: XCTestCase {
         await permission.requestAccess(openSettingsIfNeeded: true)
 
         XCTAssertEqual(
-            settingsOpener.url?.absoluteString,
-            SettingsOpenerMock.openSettingsURLString
+            settingsOpener.url,
+            settingsOpener.openSettingsURL
         )
-        XCTAssertTrue(settingsOpener.options.isEmpty)
-        XCTAssertNil(settingsOpener.completionHandler)
     }
 }
 
@@ -105,19 +103,13 @@ private final class CaptureDevice: AVCaptureDevice {
 }
 
 private final class SettingsOpenerMock: SettingsOpener {
-    static var openSettingsURLString: String { "settings://test" }
+    private(set) var url: URL?
 
-    var url: URL?
-    var options = [UIApplication.OpenExternalURLOptionsKey: Any]()
-    var completionHandler: ((Bool) -> Void)?
+    var openSettingsURL: URL? {
+        URL(string: "settings://test")
+    }
 
-    func open(
-        _ url: URL,
-        options: [UIApplication.OpenExternalURLOptionsKey: Any],
-        completionHandler completion: ((Bool) -> Void)?
-    ) {
+    func open(_ url: URL) {
         self.url = url
-        self.options = options
-        self.completionHandler = completion
     }
 }

@@ -125,16 +125,15 @@ final class NodeResolverTests: XCTestCase {
         dnsLookupClient.srvRecords = .failure(DNSLookupError.timeout)
         dnsLookupClient.aRecords = .success([])
 
-        do {
-            _ = try await resolver.resolveNode(for: "vc.example.com")
-            XCTFail("Should fail with error")
-        } catch {
-            XCTAssertEqual(error as? DNSLookupError, .timeout)
-        }
+        let node = try await resolver.resolveNode(for: "vc.example.com")
 
+        XCTAssertNil(node)
         XCTAssertEqual(
             dnsLookupClient.steps,
-            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com", dnssec: false)]
+            [
+                .srvRecordsLookup(name: "_pexapp._tcp.vc.example.com", dnssec: false),
+                .aRecordsLookup(name: "vc.example.com", dnssec: false)
+            ]
         )
     }
 
@@ -150,16 +149,15 @@ final class NodeResolverTests: XCTestCase {
         dnsLookupClient.aRecords = .success([])
         statusClient.error = URLError(.badURL)
 
-        do {
-            _ = try await resolver.resolveNode(for: "vc.example.com")
-            XCTFail("Should fail with error")
-        } catch {
-            XCTAssertEqual((error as? URLError)?.code, .badURL)
-        }
+        let node = try await resolver.resolveNode(for: "vc.example.com")
+        XCTAssertNil(node)
 
         XCTAssertEqual(
             dnsLookupClient.steps,
-            [.srvRecordsLookup(name: "_pexapp._tcp.vc.example.com", dnssec: false)]
+            [
+                .srvRecordsLookup(name: "_pexapp._tcp.vc.example.com", dnssec: false),
+                .aRecordsLookup(name: "vc.example.com", dnssec: false)
+            ]
         )
     }
 

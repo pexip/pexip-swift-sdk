@@ -30,7 +30,7 @@ extension InfinityClient: TokenRequesterProtocol {
             withMethod: .POST,
             path: .conference,
             name: "request_token",
-            token: .none
+            token: .empty
         )
 
         try request.setJSONBody([

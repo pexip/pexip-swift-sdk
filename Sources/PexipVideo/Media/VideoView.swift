@@ -55,7 +55,6 @@ public struct VideoComponent: View {
         } else {
             videoView
         }
-
     }
 
     private var videoView: some View {
@@ -78,7 +77,7 @@ public final class VideoView: UIView {
         }
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         setup()
     }
@@ -131,7 +130,7 @@ public final class VideoView: NSView {
         }
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         setup()
     }
@@ -156,7 +155,7 @@ public final class VideoView: NSView {
         }
     }
 
-    public override func setFrameSize(_ newSize: NSSize) {
+    override public func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
         transformIfNeeded()
     }

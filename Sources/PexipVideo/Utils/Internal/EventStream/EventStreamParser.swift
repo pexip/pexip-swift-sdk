@@ -32,7 +32,7 @@ final class EventStreamParser {
 
         buffer.removeSubrange(buffer.startIndex..<searchRange.startIndex)
 
-        return events.compactMap(EventStreamParser.event(from:))
+        return events.compactMap(Self.event(from:))
     }
 
     func clear() {
@@ -95,7 +95,7 @@ final class EventStreamParser {
 private enum Delimiter: String, CaseIterable {
     case carriageReturn = "\r"
     case lineFeed = "\n"
-    case pair  = "\r\n"
+    case pair = "\r\n"
 
     static let stringValues = allCases.map(\.rawValue)
 }
