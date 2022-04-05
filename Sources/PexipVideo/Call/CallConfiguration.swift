@@ -29,7 +29,7 @@ public struct CallConfiguration {
         - showPresentationInMix: Show presentation-in-mix instead of separate presentation streams.
      */
     public init(
-        qualityProfile: QualityProfile = .medium,
+        qualityProfile: QualityProfile = .default,
         mediaFeatures: MediaFeature = .all,
         useGoogleStunServersAsBackup: Bool = true,
         showPresentationInMix: Bool = false

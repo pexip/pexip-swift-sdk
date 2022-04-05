@@ -123,5 +123,69 @@ private struct VideoViewWrapper: UIViewRepresentable {
 
 #elseif os(macOS)
 import AppKit
-public typealias VideoView = NSView
+
+public final class VideoView: NSView {
+    public var isMirrored = false {
+        didSet {
+            transformIfNeeded()
+        }
+    }
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        setup()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setup()
+    }
+
+    private func setup() {
+        wantsLayer = true
+        layer?.backgroundColor = .black
+    }
+
+    private func transformIfNeeded() {
+        layer?.sublayerTransform = CATransform3DIdentity
+
+        if isMirrored {
+            let translate = CATransform3DMakeTranslation(frame.width, 0, 0)
+            let scale = CATransform3DMakeScale(-1, 1, 1)
+            layer?.sublayerTransform = CATransform3DConcat(scale, translate)
+        }
+    }
+
+    public override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        transformIfNeeded()
+    }
+}
+
+private struct VideoViewWrapper: NSViewRepresentable {
+    private let track: VideoTrackProtocol
+    private let aspectFit: Bool
+    private let isMirrored: Bool
+
+    init(
+        track: VideoTrackProtocol,
+        isMirrored: Bool,
+        aspectFit: Bool
+    ) {
+        self.track = track
+        self.isMirrored = isMirrored
+        self.aspectFit = aspectFit
+    }
+
+    func makeNSView(context: Context) -> VideoView {
+        let view = VideoView()
+        return view
+    }
+
+    func updateNSView(_ view: VideoView, context: Context) {
+        track.setRenderer(view, aspectFit: aspectFit)
+        view.isMirrored = isMirrored
+    }
+}
+
 #endif

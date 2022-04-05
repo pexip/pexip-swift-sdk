@@ -29,9 +29,14 @@ final class WebRTCVideoTrack: VideoTrackProtocol {
     func setRenderer(_ view: VideoView, aspectFit: Bool) {
         removeCurrentRenderer()
 
+        #if os(iOS)
         let renderer = RTCMTLVideoView(frame: view.frame)
-        renderer.translatesAutoresizingMaskIntoConstraints = false
         renderer.videoContentMode = aspectFit ? .scaleAspectFit : .scaleAspectFill
+        #else
+        let renderer = RTCMTLNSVideoView(frame: view.frame)
+        renderer.wantsLayer = true
+        #endif
+        renderer.translatesAutoresizingMaskIntoConstraints = false
 
         view.addSubview(renderer)
 

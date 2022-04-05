@@ -6,17 +6,20 @@ import UIKit
 // MARK: - Protocols
 
 protocol SettingsOpener {
-    static var openSettingsURLString: String { get }
-
-    func open(
-        _ url: URL,
-        options: [UIApplication.OpenExternalURLOptionsKey: Any],
-        completionHandler completion: ((Bool) -> Void)?
-    )
+    var openSettingsURL: URL? { get }
+    func open(_ url: URL)
 }
 
 #if os(iOS)
-extension UIApplication: SettingsOpener {}
+extension UIApplication: SettingsOpener {
+    var openSettingsURL: URL? {
+        URL(string: UIApplication.openSettingsURLString)
+    }
+
+    func open(_ url: URL) {
+        open(url, options: [:], completionHandler: nil)
+    }
+}
 #endif
 
 // MARK: - Implementation
@@ -38,23 +41,27 @@ public struct MediaCapturePermission {
 
     let mediaType: AVMediaType
     private let captureDevice: AVCaptureDevice.Type
-    private let settingsOpener: SettingsOpener
+    private let settingsOpener: SettingsOpener?
 
     // MARK: - Init
 
-    #if os(iOS)
+    #if os(iOS) && !targetEnvironment(macCatalyst)
     init(mediaType: MediaType) {
         self.init(
             mediaType: mediaType,
             settingsOpener: UIApplication.shared
         )
     }
+    #else
+    init(mediaType: MediaType) {
+        self.init(mediaType: mediaType, settingsOpener: nil)
+    }
     #endif
 
     init(
         mediaType: MediaType,
         captureDeviceType: AVCaptureDevice.Type = AVCaptureDevice.self,
-        settingsOpener: SettingsOpener
+        settingsOpener: SettingsOpener?
     ) {
         switch mediaType {
         case .audio:
@@ -81,7 +88,9 @@ public struct MediaCapturePermission {
 
     @MainActor
     @discardableResult
-    public func requestAccess(openSettingsIfNeeded: Bool = false) async -> AVAuthorizationStatus {
+    public func requestAccess(
+        openSettingsIfNeeded: Bool = false
+    ) async -> AVAuthorizationStatus {
         switch authorizationStatus {
         case .notDetermined:
             await captureDevice.requestAccess(for: mediaType)
@@ -99,8 +108,8 @@ public struct MediaCapturePermission {
     }
 
     private func openSettings() {
-        if let url = URL(string: type(of: settingsOpener).openSettingsURLString) {
-            settingsOpener.open(url, options: [:], completionHandler: nil)
+        if let url = settingsOpener?.openSettingsURL {
+            settingsOpener?.open(url)
         }
     }
 }

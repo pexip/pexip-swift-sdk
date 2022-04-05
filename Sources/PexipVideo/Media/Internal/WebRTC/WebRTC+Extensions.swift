@@ -5,7 +5,7 @@ import WebRTC
 extension RTCPeerConnectionFactory {
     static let `default`: RTCPeerConnectionFactory = {
         RTCInitializeSSL()
-        #if targetEnvironment(simulator)
+        #if targetEnvironment(simulator) || os(macOS)
         let videoEncoderFactory = WebRTCVideoEncoderFactoryVP8()
         let videoDecoderFactory = WebRTCVideoDecoderFactoryVP8()
         #else

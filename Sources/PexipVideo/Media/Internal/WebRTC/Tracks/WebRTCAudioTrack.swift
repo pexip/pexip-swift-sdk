@@ -4,7 +4,9 @@ final class WebRTCAudioTrack: LocalAudioTrackProtocol {
     private(set) var capturePermission: MediaCapturePermission
     private weak var trackManager: RTCTrackManager?
     private let track: RTCAudioTrack
+    #if os(iOS)
     private let audioSession = RTCAudioSession.sharedInstance()
+    #endif
     private let audioQueue = DispatchQueue(label: "audio")
     private var trackSender: RTCRtpSender?
 
@@ -20,7 +22,9 @@ final class WebRTCAudioTrack: LocalAudioTrackProtocol {
         self.trackSender = trackManager.add(track, streamIds: [streamId])
         self.trackManager = trackManager
         self.capturePermission = capturePermission
+        #if os(iOS)
         configureAudioSession()
+        #endif
     }
 
     deinit {
@@ -49,6 +53,8 @@ final class WebRTCAudioTrack: LocalAudioTrackProtocol {
 
         return isEnabled
     }
+
+    #if os(iOS)
 
     func speakerOn() {
         overrideOutputAudioPort(.speaker)
@@ -93,4 +99,6 @@ final class WebRTCAudioTrack: LocalAudioTrackProtocol {
             self.audioSession.unlockForConfiguration()
         }
     }
+
+    #endif
 }

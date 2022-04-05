@@ -2,14 +2,7 @@ import CoreGraphics
 
 /// Call quality profile.
 public struct QualityProfile: Hashable {
-    /// 1920x1080 (16:9)
-    public static let veryHigh = QualityProfile(
-        width: 1920,
-        height: 1080,
-        fps: 30,
-        bandwidth: 2880,
-        opusBitrate: 64
-    )
+    public static let `default` = QualityProfile.high
 
     /// 1280x720 (16:9)
     public static let high = QualityProfile(
@@ -17,6 +10,17 @@ public struct QualityProfile: Hashable {
         height: 720,
         fps: 30,
         bandwidth: 1280,
+        opusBitrate: 64
+    )
+
+    #if os(iOS)
+
+    /// 1920x1080 (16:9)
+    public static let veryHigh = QualityProfile(
+        width: 1920,
+        height: 1080,
+        fps: 30,
+        bandwidth: 2880,
         opusBitrate: 64
     )
 
@@ -35,6 +39,18 @@ public struct QualityProfile: Hashable {
         fps: 15,
         bandwidth: 384
     )
+
+    #else
+
+    /// 640x480 (4:3)
+    public static let medium = QualityProfile(
+        width: 640,
+        height: 480,
+        fps: 30,
+        bandwidth: 768
+    )
+
+    #endif
 
     /// The width of a video stream (640...1920)
     public let width: UInt

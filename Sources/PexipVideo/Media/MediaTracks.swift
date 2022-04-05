@@ -33,20 +33,23 @@ public protocol LocalTrackProtocol: TrackProtocol {
      - Parameter enabled: The enabled state of the track
      - Returns: The enabled state of the track
      */
-    @MainActor
     @discardableResult
     func setEnabled(_ enabled: Bool) async -> Bool
 }
 
 public protocol LocalVideoTrackProtocol: LocalTrackProtocol, VideoTrackProtocol {
+    #if os(iOS)
     /// Toggles front/back camera.
     func toggleCamera()
+    #endif
 }
 
 public protocol LocalAudioTrackProtocol: LocalTrackProtocol {
+    #if os(iOS)
     /// Route audio output to speaker.
     func speakerOn()
 
     /// Set audio routing to the default state for the current audio category.
     func speakerOff()
+    #endif
 }

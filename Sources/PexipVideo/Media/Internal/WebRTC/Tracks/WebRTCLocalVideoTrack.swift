@@ -71,13 +71,11 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
             return false
         }
 
-        _ = await Task { @MainActor in
-            if enabled {
-                try await startCapture()
-            } else {
-                try await stopCapture()
-            }
-        }.result
+        if enabled {
+            try? await startCapture()
+        } else {
+            try? await stopCapture()
+        }
 
         return videoTrack.isEnabled
     }
@@ -86,6 +84,7 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
         videoTrack.setRenderer(view, aspectFit: aspectFit)
     }
 
+    #if os(iOS)
     func toggleCamera() {
         guard isEnabled else {
             return
@@ -98,6 +97,7 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
             try await startCapture()
         }
     }
+    #endif
 
     // MARK: - Private methods
 
@@ -115,9 +115,11 @@ final class WebRTCLocalVideoTrack: LocalVideoTrackProtocol {
             return
         }
 
-        let fps = format
-            .videoSupportedFrameRateRanges
-            .bestFrameRate(for: qualityProfile)
+        guard let fps = format.videoSupportedFrameRateRanges.bestFrameRate(
+            for: qualityProfile
+        ) else {
+            return
+        }
 
         try await capturer.startCapture(
             with: device,

@@ -87,7 +87,7 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
 
         let remoteVideoTrack = WebRTCVideoTrack(
             track: nil,
-            aspectRatio: qualityProfile.aspectRatio
+            aspectRatio: CGSize(width: 16, height: 9)
         )
         self.setRemoteVideoTrack = {
             remoteVideoTrack.setTrack($0)
@@ -138,7 +138,9 @@ final class WebRTCConnection: NSObject, MediaConnection, RTCPeerConnectionDelega
         case .connected:
             eventSubject.send(.connected)
             if let audioTrack = audioTrack {
+                #if os(iOS)
                 audioTrack.speakerOn()
+                #endif
             }
         case .disconnected:
             eventSubject.send(.disconnected)

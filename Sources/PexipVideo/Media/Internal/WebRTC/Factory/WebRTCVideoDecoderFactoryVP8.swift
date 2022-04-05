@@ -1,15 +1,11 @@
-#if targetEnvironment(simulator)
-
 import WebRTC
 
 final class WebRTCVideoDecoderFactoryVP8: NSObject, RTCVideoDecoderFactory {
     func createDecoder(_ info: RTCVideoCodecInfo) -> RTCVideoDecoder? {
-        info.name == kRTCVideoCodecVp8Name ? RTCVideoDecoderVP8.vp8Decoder() : nil
+        info.name == kRTCVp8CodecName ? RTCVideoDecoderVP8.vp8Decoder() : nil
     }
 
     func supportedCodecs() -> [RTCVideoCodecInfo] {
-        [RTCVideoCodecInfo(name: kRTCVideoCodecVp8Name)]
+        [RTCVideoCodecInfo(name: kRTCVp8CodecName)]
     }
 }
-
-#endif

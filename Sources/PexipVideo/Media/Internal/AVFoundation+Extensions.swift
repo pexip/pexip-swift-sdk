@@ -10,14 +10,26 @@ protocol CaptureDeviceFormat {
 
 extension Array where Element: CaptureDeviceFormat {
     func bestFormat(for qualityProfile: QualityProfile) -> Element? {
-        let (width, height) = (Int32(qualityProfile.width), Int32(qualityProfile.height))
-        return self.min(by: {
-            let dimA = CMVideoFormatDescriptionGetDimensions($0.formatDescription)
-            let dimB = CMVideoFormatDescriptionGetDimensions($1.formatDescription)
-            let isWidthIncreasing = abs(dimA.width - width) < abs(dimB.width - width)
-            let isHeightEqualOrIncreasing = abs(dimA.height - height) <= abs(dimB.height - height)
-            return isWidthIncreasing && isHeightEqualOrIncreasing
-        })
+        let targetWidth = Int32(qualityProfile.width)
+        let targetHeight = Int32(qualityProfile.height)
+        var selectedFormat: Element?
+        var currentDiff = Int32.max
+
+        for format in self {
+            let dimension = CMVideoFormatDescriptionGetDimensions(
+                format.formatDescription
+            )
+            let widthDiff = abs(targetWidth - dimension.width)
+            let heightDiff = abs(targetHeight - dimension.height)
+
+            let diff = widthDiff + heightDiff
+            if diff < currentDiff {
+                selectedFormat = format
+                currentDiff = Int32(diff)
+            }
+        }
+
+        return selectedFormat
     }
 }
 
@@ -30,15 +42,20 @@ protocol FrameRateRange {
 }
 
 extension Array where Element: FrameRateRange {
-    func bestFrameRate(for qualityProfile: QualityProfile) -> UInt {
-        guard let closestFrameRate = self.min(by: {
-            let fps = Double(qualityProfile.fps)
-            return abs($0.maxFrameRate - fps) < abs($1.maxFrameRate - fps)
-        }) else {
-            return qualityProfile.fps
+    func bestFrameRate(for qualityProfile: QualityProfile) -> Float64? {
+        let targetFrameRate = Float64(qualityProfile.fps)
+        var selectedFrameRate: Float64?
+        var currentDiff = Float64.greatestFiniteMagnitude
+
+        for frameRateRange in self {
+            let diff = abs(frameRateRange.maxFrameRate - targetFrameRate)
+            if diff < currentDiff {
+                selectedFrameRate = frameRateRange.maxFrameRate
+                currentDiff = diff
+            }
         }
 
-        return Swift.min(qualityProfile.fps, UInt(closestFrameRate.maxFrameRate))
+        return selectedFrameRate
     }
 }
 
