@@ -85,7 +85,10 @@ private extension OSLog {
     static let dnsLookup = OSLog(subsystem: subsystem, category: LogCategory.dnsLookup.rawValue)
     static let http = OSLog(subsystem: subsystem, category: LogCategory.http.rawValue)
     static let call = OSLog(subsystem: subsystem, category: LogCategory.call.rawValue)
-    static let remotePresentation = OSLog(subsystem: subsystem, category: LogCategory.remotePresentation.rawValue)
+    static let remotePresentation = OSLog(
+        subsystem: subsystem,
+        category: LogCategory.remotePresentation.rawValue
+    )
 
     static func logContainer(for category: LogCategory) -> OSLog {
         switch category {
