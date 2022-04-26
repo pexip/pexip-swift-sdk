@@ -1,7 +1,7 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class ConferenceServiceTests: XCTestCase {
+final class ConferenceServiceTests: APITestCase {
     private let baseURL = URL(string: "https://example.com/api/conference/name")!
     private var service: ConferenceService!
 
@@ -9,35 +9,13 @@ final class ConferenceServiceTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.protocolClasses = [URLProtocolMock.self]
-
-        service = DefaultConferenceService(
-            baseURL: baseURL,
-            client: HTTPClient(session: URLSession(configuration: configuration))
-        )
+        service = DefaultConferenceService(baseURL: baseURL, client: client)
     }
 
     // MARK: - Request token
 
     // swiftlint:disable function_body_length
     func testRequestTokenWith200() async throws {
-        let expectedToken = Token.randomToken()
-        let data = try JSONEncoder().encode(Container(result: expectedToken))
-        var createdRequest: URLRequest?
-
-        // 1. Mock response
-        URLProtocolMock.makeResponse = { request in
-            createdRequest = request
-            return .http(
-                statusCode: 200,
-                data: data,
-                headers: ["Content-Type": "application/json"]
-            )
-        }
-
-        // 2. Make request
         let identityProvider = IdentityProvider(name: "Name", id: UUID().uuidString)
         let ssoToken = UUID().uuidString
         let fields = RequestTokenFields(
@@ -47,42 +25,31 @@ final class ConferenceServiceTests: XCTestCase {
             ssoToken: ssoToken
         )
         let pin = "1234"
-        var token = try await service.requestToken(fields: fields, pin: pin)
+        let expectedToken = Token.randomToken()
+        let data = try JSONEncoder().encode(Container(result: expectedToken))
+        let responseJSON = String(data: data, encoding: .utf8)
 
-        // 3. Assert request
-        let expectedURL = baseURL.appendingPathComponent("request_token")
-        let parameters = try JSONDecoder().decode(
-            [String: String].self,
-            from: try XCTUnwrap(createdRequest?.httpBody)
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("request_token"),
+            token: nil,
+            body: try JSONEncoder().encode(fields),
+            responseJSON: responseJSON,
+            assertHTTPErrors: false,
+            execute: { [weak self] in
+                var token = try await service.requestToken(fields: fields, pin: pin)
+                XCTAssertEqual(self?.lastRequest?.value(forHTTPHeaderField: "pin"), pin)
+                XCTAssertEqual(token.value, expectedToken.value)
+                XCTAssertEqual(token.expires, expectedToken.expires)
+                // Update token to have the same `updatedAt` date as in expected token
+                token = token.updating(
+                    value: expectedToken.value,
+                    expires: "\(expectedToken.expires)",
+                    updatedAt: expectedToken.updatedAt
+                )
+                XCTAssertEqual(token, expectedToken)
+            }
         )
-
-        XCTAssertEqual(createdRequest?.url, expectedURL)
-        XCTAssertEqual(createdRequest?.httpMethod, "POST")
-        XCTAssertEqual(parameters["display_name"], fields.displayName)
-        XCTAssertEqual(parameters["conference_extension"], fields.conferenceExtension)
-        XCTAssertEqual(parameters["chosen_idp"], fields.chosenIdpId)
-        XCTAssertEqual(parameters["sso_token"], fields.ssoToken)
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "Content-Type"),
-            "application/json"
-        )
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "User-Agent"),
-            HTTPHeader.defaultUserAgent.value
-        )
-        XCTAssertEqual(createdRequest?.value(forHTTPHeaderField: "pin"), pin)
-        XCTAssertNil(createdRequest?.value(forHTTPHeaderField: "token"))
-
-        // 4. Assert result
-        XCTAssertEqual(token.value, expectedToken.value)
-        XCTAssertEqual(token.expires, expectedToken.expires)
-        // Update token to have the same `updatedAt` date as in expected token
-        token = token.updating(
-            value: expectedToken.value,
-            expires: "\(expectedToken.expires)",
-            updatedAt: expectedToken.updatedAt
-        )
-        XCTAssertEqual(token, expectedToken)
     }
 
     func testRequestTokenWithDecodingError() async throws {
@@ -91,10 +58,9 @@ final class ConferenceServiceTests: XCTestCase {
             .http(statusCode: 200, data: Data(), headers: nil)
         }
 
-        // 2. Make request
-        let fields = RequestTokenFields(displayName: "Guest")
-
         do {
+            // 2. Make request
+            let fields = RequestTokenFields(displayName: "Guest")
             _ = try await service.requestToken(fields: fields, pin: nil)
         } catch {
             // 3. Assert error
@@ -108,10 +74,9 @@ final class ConferenceServiceTests: XCTestCase {
             .http(statusCode: 401, data: Data(), headers: nil)
         }
 
-        // 2. Make request
-        let fields = RequestTokenFields(displayName: "Guest")
-
         do {
+            // 2. Make request
+            let fields = RequestTokenFields(displayName: "Guest")
             _ = try await service.requestToken(fields: fields, pin: nil)
         } catch {
             // 3. Assert error
@@ -135,10 +100,9 @@ final class ConferenceServiceTests: XCTestCase {
             .http(statusCode: 403, data: data, headers: nil)
         }
 
-        // 2. Make request
-        let fields = RequestTokenFields(displayName: "Guest")
-
         do {
+            // 2. Make request
+            let fields = RequestTokenFields(displayName: "Guest")
             _ = try await service.requestToken(fields: fields, pin: nil)
         } catch {
             // 3. Assert error
@@ -163,10 +127,9 @@ final class ConferenceServiceTests: XCTestCase {
             .http(statusCode: 403, data: data, headers: nil)
         }
 
-        // 2. Make request
-        let fields = RequestTokenFields(displayName: "Guest")
-
         do {
+            // 2. Make request
+            let fields = RequestTokenFields(displayName: "Guest")
             _ = try await service.requestToken(fields: fields, pin: nil)
         } catch {
             // 3. Assert error
@@ -191,10 +154,9 @@ final class ConferenceServiceTests: XCTestCase {
             .http(statusCode: 403, data: data, headers: nil)
         }
 
-        // 2. Make request
-        let fields = RequestTokenFields(displayName: "Guest")
-
         do {
+            // 2. Make request
+            let fields = RequestTokenFields(displayName: "Guest")
             _ = try await service.requestToken(fields: fields, pin: "1234")
         } catch {
             // 3. Assert error
@@ -208,10 +170,9 @@ final class ConferenceServiceTests: XCTestCase {
             .http(statusCode: 404, data: Data(), headers: nil)
         }
 
-        // 2. Make request
-        let fields = RequestTokenFields(displayName: "Guest")
-
         do {
+            // 2. Make request
+            let fields = RequestTokenFields(displayName: "Guest")
             _ = try await service.requestToken(fields: fields, pin: nil)
         } catch {
             // 3. Assert error
@@ -225,10 +186,9 @@ final class ConferenceServiceTests: XCTestCase {
             .http(statusCode: 503, data: Data(), headers: nil)
         }
 
-        // 2. Make request
-        let fields = RequestTokenFields(displayName: "Guest")
-
         do {
+            // 2. Make request
+            let fields = RequestTokenFields(displayName: "Guest")
             _ = try await service.requestToken(fields: fields, pin: nil)
         } catch {
             // 3. Assert error
@@ -241,7 +201,7 @@ final class ConferenceServiceTests: XCTestCase {
     func testRefreshToken() async throws {
         let currentToken = Token.randomToken()
         let newTokenValue = UUID().uuidString
-        let json = """
+        let responseJSON = """
         {
             "status": "success",
             "result": {
@@ -250,127 +210,65 @@ final class ConferenceServiceTests: XCTestCase {
             }
         }
         """
-        let data = try XCTUnwrap(json.data(using: .utf8))
-        var createdRequest: URLRequest?
 
-        // 1. Mock response
-        URLProtocolMock.makeResponse = { request in
-            createdRequest = request
-            return .http(
-                statusCode: 200,
-                data: data,
-                headers: ["Content-Type": "application/json"]
-            )
-        }
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("refresh_token"),
+            token: currentToken,
+            body: nil,
+            responseJSON: responseJSON,
+            execute: {
+                let newToken = try await service.refreshToken(currentToken)
+                XCTAssertEqual(newToken.value, newTokenValue)
+                XCTAssertEqual(newToken.expires, 240)
+                XCTAssertTrue(newToken.updatedAt > currentToken.updatedAt)
 
-        // 2. Make request
-        let newToken = try await service.refreshToken(currentToken)
-
-        // 3. Assert request
-        let expectedURL = baseURL.appendingPathComponent("refresh_token")
-        XCTAssertEqual(createdRequest?.url, expectedURL)
-        XCTAssertEqual(createdRequest?.httpMethod, "POST")
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "User-Agent"),
-            HTTPHeader.defaultUserAgent.value
+                var expectedToken = currentToken
+                expectedToken = expectedToken.updating(
+                    value: newTokenValue,
+                    expires: "240",
+                    updatedAt: newToken.updatedAt
+                )
+                XCTAssertEqual(newToken, expectedToken)
+            }
         )
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "token"),
-            currentToken.value
-        )
-
-        // 4. Assert result
-        XCTAssertEqual(newToken.value, newTokenValue)
-        XCTAssertEqual(newToken.expires, 240)
-        XCTAssertTrue(newToken.updatedAt > currentToken.updatedAt)
-
-        var expectedToken = currentToken
-        expectedToken = expectedToken.updating(
-            value: newTokenValue,
-            expires: "240",
-            updatedAt: newToken.updatedAt
-        )
-        XCTAssertEqual(newToken, expectedToken)
     }
 
     func testReleaseToken() async throws {
         let currentToken = Token.randomToken()
-        var createdRequest: URLRequest?
 
-        // 1. Mock response
-        URLProtocolMock.makeResponse = { request in
-            createdRequest = request
-            return .http(
-                statusCode: 200,
-                data: Data(),
-                headers: ["Content-Type": "application/json"]
-            )
-        }
-
-        // 2. Make request
-        try await service.releaseToken(currentToken)
-
-        // 3. Assert request
-        let expectedURL = baseURL.appendingPathComponent("release_token")
-        XCTAssertEqual(createdRequest?.url, expectedURL)
-        XCTAssertEqual(createdRequest?.httpMethod, "POST")
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "User-Agent"),
-            HTTPHeader.defaultUserAgent.value
-        )
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "token"),
-            currentToken.value
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("release_token"),
+            token: currentToken,
+            body: nil,
+            responseJSON: nil,
+            execute: {
+                try await service.releaseToken(currentToken)
+            }
         )
     }
 
     func testMessage() async throws {
         let token = Token.randomToken()
         let message = "Test message"
-        let json = """
+        let responseJSON = """
         {
             "status": "success",
             "result": true
         }
         """
-        let data = try XCTUnwrap(json.data(using: .utf8))
-        var createdRequest: URLRequest?
-
-        // 1. Mock response
-        URLProtocolMock.makeResponse = { request in
-            createdRequest = request
-            return .http(
-                statusCode: 200,
-                data: data,
-                headers: ["Content-Type": "application/json"]
-            )
-        }
-
-        // 2. Make request
-        let result = try await service.message(message, token: token)
-
-        // 3. Assert request
-        let expectedURL = baseURL.appendingPathComponent("message")
-        let parameters = try JSONDecoder().decode(
-            [String: String].self,
-            from: try XCTUnwrap(createdRequest?.httpBody)
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("message"),
+            token: token,
+            body: try JSONEncoder().encode(MessageFields(payload: message)),
+            responseJSON: responseJSON,
+            execute: {
+                let result = try await service.message(message, token: token)
+                XCTAssertTrue(result)
+            }
         )
-
-        XCTAssertEqual(createdRequest?.url, expectedURL)
-        XCTAssertEqual(createdRequest?.httpMethod, "POST")
-        XCTAssertEqual(parameters["type"], "text/plain")
-        XCTAssertEqual(parameters["payload"], message)
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "User-Agent"),
-            HTTPHeader.defaultUserAgent.value
-        )
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "token"),
-            token.value
-        )
-
-        // 4. Assert result
-        XCTAssertTrue(result)
     }
 }
 

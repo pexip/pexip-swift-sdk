@@ -168,6 +168,7 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
 
         mainVideoCaptureDevice = device
         isCapturingMainVideo = true
+        try await signaling.muteVideo(false)
     }
 
     public func stopMainCapture() async throws {
@@ -186,6 +187,7 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
             track?.isEnabled = false
         }
         isCapturingMainVideo = false
+        try await signaling.muteVideo(true)
     }
 
     #if os(iOS)
@@ -203,12 +205,13 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
     }
     #endif
 
-    public func muteAudio(_ muted: Bool) {
+    public func muteAudio(_ muted: Bool) async throws {
         guard muted != isAudioMuted else {
             return
         }
         mainAudioTrack?.isEnabled = muted
         isAudioMuted = muted
+        try await signaling.muteAudio(muted)
     }
 
     public func start() async throws {
@@ -276,7 +279,7 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
             presentationVideoMid: presentationVideoTransceiver?.mid
         )
 
-        let remoteSdp = try await signaling.onOffer(
+        let remoteSdp = try await signaling.sendOffer(
             callType: "WEBRTC",
             description: newLocalSdp,
             presentationType: presentationType
@@ -343,7 +346,7 @@ extension WebRTCMediaConnection: PeerConnectionDelegate {
 
         Task {
             do {
-                try await signaling.onConnected()
+                try await signaling.startMedia()
             } catch {
                 logger?.error(
                     "MediaConnectionSignaling.onConnected failed with error: \(error)"
@@ -358,8 +361,8 @@ extension WebRTCMediaConnection: PeerConnectionDelegate {
     ) {
         Task {
             do {
-                try await signaling.onCandidate(
-                    candidate: candidate.sdp,
+                try await signaling.addCandidate(
+                    sdp: candidate.sdp,
                     mid: candidate.sdpMid
                 )
             } catch {

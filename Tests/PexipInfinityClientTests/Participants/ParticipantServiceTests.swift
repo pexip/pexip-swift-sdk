@@ -1,7 +1,7 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class ParticipantServiceTests: XCTestCase {
+final class ParticipantServiceTests: APITestCase {
     private let baseURL = URL(string: "https://example.com/participants/1")!
     private var service: ParticipantService!
 
@@ -9,15 +9,10 @@ final class ParticipantServiceTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.protocolClasses = [URLProtocolMock.self]
-
-        service = DefaultParticipantService(
-            baseURL: baseURL,
-            client: HTTPClient(session: URLSession(configuration: configuration))
-        )
+        service = DefaultParticipantService(baseURL: baseURL, client: client)
     }
+
+    // MARK: - Tests
 
     // swiftlint:disable function_body_length
     func testCalls() async throws {
@@ -25,7 +20,8 @@ final class ParticipantServiceTests: XCTestCase {
         let callId = UUID()
         let inputSDP = UUID().uuidString
         let outputSDP = UUID().uuidString
-        let json = """
+        let fields = CallsFields(callType: "WEBRTC", sdp: inputSDP, present: nil)
+        let responseJSON = """
         {
             "status": "success",
             "result": {
@@ -34,51 +30,18 @@ final class ParticipantServiceTests: XCTestCase {
             }
         }
         """
-        let data = try XCTUnwrap(json.data(using: .utf8))
-        var createdRequest: URLRequest?
 
-        // 1. Mock response
-        URLProtocolMock.makeResponse = { request in
-            createdRequest = request
-            return .http(
-                statusCode: 200,
-                data: data,
-                headers: ["Content-Type": "application/json"]
-            )
-        }
-
-        // 2. Make request
-        let fields = CallsFields(callType: "WEBRTC", sdp: inputSDP, present: nil)
-        let callDetails = try await service.calls(fields: fields, token: token)
-
-        // 3. Assert request
-        let expectedURL = baseURL.appendingPathComponent("calls")
-        let parameters = try JSONDecoder().decode(
-            [String: String].self,
-            from: try XCTUnwrap(createdRequest?.httpBody)
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("calls"),
+            token: token,
+            body: try JSONEncoder().encode(fields),
+            responseJSON: responseJSON,
+            execute: {
+                let callDetails = try await service.calls(fields: fields, token: token)
+                XCTAssertEqual(callDetails, CallDetails(id: callId, sdp: outputSDP))
+            }
         )
-
-        XCTAssertEqual(createdRequest?.url, expectedURL)
-        XCTAssertEqual(createdRequest?.httpMethod, "POST")
-        XCTAssertEqual(parameters["call_type"], "WEBRTC")
-        XCTAssertEqual(parameters["sdp"], inputSDP)
-        XCTAssertNil(parameters["present"])
-        XCTAssertEqual(createdRequest?.timeoutInterval, 62)
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "Content-Type"),
-            "application/json"
-        )
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "User-Agent"),
-            HTTPHeader.defaultUserAgent.value
-        )
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "token"),
-            token.value
-        )
-
-        // 4. Assert result
-        XCTAssertEqual(callDetails, CallDetails(id: callId, sdp: outputSDP))
     }
 
     func testAvatarURL() throws {
@@ -86,89 +49,87 @@ final class ParticipantServiceTests: XCTestCase {
         XCTAssertEqual(service.avatarURL(), expectedURL)
     }
 
-    func testMuteVideo() async throws {
+    func testMute() async throws {
         let token = Token.randomToken()
-        let json = """
+        let responseJSON = """
         {
             "status": "success",
             "result": true
         }
         """
-        let data = try XCTUnwrap(json.data(using: .utf8))
-        var createdRequest: URLRequest?
-
-        // 1. Mock response
-        URLProtocolMock.makeResponse = { request in
-            createdRequest = request
-            return .http(
-                statusCode: 200,
-                data: data,
-                headers: ["Content-Type": "application/json"]
-            )
-        }
-
-        // 2. Make request
-        let result = try await service.videoMuted(token: token)
-
-        // 3. Assert request
-        let expectedURL = baseURL.appendingPathComponent("video_muted")
-
-        XCTAssertEqual(createdRequest?.url, expectedURL)
-        XCTAssertEqual(createdRequest?.httpMethod, "POST")
-        XCTAssertNil(createdRequest?.httpBody)
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "User-Agent"),
-            HTTPHeader.defaultUserAgent.value
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("mute"),
+            token: token,
+            body: nil,
+            responseJSON: responseJSON,
+            execute: {
+                let result = try await service.mute(token: token)
+                XCTAssertTrue(result)
+            }
         )
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "token"),
-            token.value
-        )
-
-        // 4. Assert result
-        XCTAssertTrue(result)
     }
 
-    func testUnmuteVideo() async throws {
+    func testUnmute() async throws {
         let token = Token.randomToken()
-        let json = """
+        let responseJSON = """
         {
             "status": "success",
             "result": true
         }
         """
-        let data = try XCTUnwrap(json.data(using: .utf8))
-        var createdRequest: URLRequest?
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("unmute"),
+            token: token,
+            body: nil,
+            responseJSON: responseJSON,
+            execute: {
+                let result = try await service.unmute(token: token)
+                XCTAssertTrue(result)
+            }
+        )
+    }
 
-        // 1. Mock response
-        URLProtocolMock.makeResponse = { request in
-            createdRequest = request
-            return .http(
-                statusCode: 200,
-                data: data,
-                headers: ["Content-Type": "application/json"]
-            )
+    func testVideoMuted() async throws {
+        let token = Token.randomToken()
+        let responseJSON = """
+        {
+            "status": "success",
+            "result": true
         }
-
-        // 2. Make request
-        let result = try await service.videoUnmuted(token: token)
-
-        // 3. Assert request
-        let expectedURL = baseURL.appendingPathComponent("video_unmuted")
-
-        XCTAssertEqual(createdRequest?.url, expectedURL)
-        XCTAssertEqual(createdRequest?.httpMethod, "POST")
-        XCTAssertNil(createdRequest?.httpBody)
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "User-Agent"),
-            HTTPHeader.defaultUserAgent.value
+        """
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("video_muted"),
+            token: token,
+            body: nil,
+            responseJSON: responseJSON,
+            execute: {
+                let result = try await service.videoMuted(token: token)
+                XCTAssertTrue(result)
+            }
         )
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "token"),
-            token.value
-        )
+    }
 
-        // 4. Assert result
-        XCTAssertTrue(result)
+    func testVideoUnmuted() async throws {
+        let token = Token.randomToken()
+        let responseJSON = """
+        {
+            "status": "success",
+            "result": true
+        }
+        """
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("video_unmuted"),
+            token: token,
+            body: nil,
+            responseJSON: responseJSON,
+            execute: {
+                let result = try await service.videoUnmuted(token: token)
+                XCTAssertTrue(result)
+            }
+        )
     }
 }

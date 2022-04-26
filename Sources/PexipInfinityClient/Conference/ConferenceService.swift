@@ -136,10 +136,7 @@ struct DefaultConferenceService: ConferenceService {
             httpMethod: .POST
         )
         request.setHTTPHeader(.token(token.value))
-        try request.setJSONBody([
-            "type": "text/plain",
-            "payload": message
-        ])
+        try request.setJSONBody(MessageFields(payload: message))
         return try await client.json(for: request)
     }
 

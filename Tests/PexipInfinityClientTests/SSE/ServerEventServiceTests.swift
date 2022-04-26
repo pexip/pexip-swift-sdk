@@ -1,7 +1,7 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class ServerEventServiceTests: XCTestCase {
+final class ServerEventServiceTests: APITestCase {
     private let baseURL = URL(string: "https://example.com")!
     private var service: ServerEventService!
 
@@ -9,20 +9,12 @@ final class ServerEventServiceTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.protocolClasses = [URLProtocolMock.self]
-
-        service = DefaultServerEventService(
-            baseURL: baseURL,
-            client: HTTPClient(session: URLSession(configuration: configuration))
-        )
+        service = DefaultServerEventService(baseURL: baseURL, client: client)
     }
 
     // swiftlint:disable function_body_length
     func testEventStream() async throws {
         // 1. Prepare
-        var createdRequest: URLRequest?
         var receivedEvents = [ServerEvent]()
         let token = Token.randomToken()
         let message = ClientDisconnectMessage(reason: "Test")
@@ -40,10 +32,7 @@ final class ServerEventServiceTests: XCTestCase {
         let data = try XCTUnwrap(string.data(using: .utf8))
 
         // 2. Mock response
-        URLProtocolMock.makeResponse = { request in
-            createdRequest = request
-            return .http(statusCode: 200, data: data, headers: nil)
-        }
+        try setResponse(statusCode: 200, data: data)
 
         // 2. Receive events from the stream
         do {
@@ -51,23 +40,18 @@ final class ServerEventServiceTests: XCTestCase {
                 receivedEvents.append(event)
             }
         } catch let error as EventSourceError {
-            XCTAssertEqual(error.response?.url, createdRequest?.url)
+            XCTAssertEqual(error.response?.url, lastRequest?.url)
             XCTAssertEqual(error.response?.statusCode, 200)
             XCTAssertTrue(error.response?.allHeaderFields.isEmpty == true)
             XCTAssertNil(error.dataStreamError)
         }
 
         // 3. Assert request
-        let expectedURL = baseURL.appendingPathComponent("events")
-        XCTAssertEqual(createdRequest?.url, expectedURL)
-        XCTAssertEqual(createdRequest?.httpMethod, "GET")
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "User-Agent"),
-            HTTPHeader.defaultUserAgent.value
-        )
-        XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "token"),
-            token.value
+        assertRequest(
+            withMethod: .GET,
+            url: baseURL.appendingPathComponent("events"),
+            token: token,
+            data: nil
         )
 
         // 4. Assert response

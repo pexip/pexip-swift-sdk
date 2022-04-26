@@ -1,7 +1,7 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class InfinityServiceTests: XCTestCase {
+final class InfinityServiceTests: APITestCase {
     private let baseURL = URL(string: "https://example.com")!
     private var service: InfinityService!
 
@@ -9,13 +9,7 @@ final class InfinityServiceTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.protocolClasses = [URLProtocolMock.self]
-
-        service = DefaultInfinityService(
-            client: HTTPClient(session: URLSession(configuration: configuration))
-        )
+        service = DefaultInfinityService(client: client)
     }
 
     // MARK: - Tests

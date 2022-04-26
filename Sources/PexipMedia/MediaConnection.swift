@@ -14,7 +14,7 @@ public protocol MediaConnection {
     func toggleMainCaptureCamera() async throws
     #endif
 
-    func muteAudio(_ muted: Bool)
+    func muteAudio(_ muted: Bool) async throws
 
     func start() async throws
     func stop() async

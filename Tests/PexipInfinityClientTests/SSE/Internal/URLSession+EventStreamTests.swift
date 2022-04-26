@@ -1,18 +1,8 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class URLSessionEventStreamTests: XCTestCase {
+final class URLSessionEventStreamTests: APITestCase {
     private let url = URL(string: "https://test.example.org")!
-    private var urlSession: URLSession!
-
-    // MARK: - Setup
-
-    override func setUp() {
-        super.setUp()
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.protocolClasses = [URLProtocolMock.self]
-        urlSession = URLSession(configuration: configuration)
-    }
 
     // MARK: - Tests
 
@@ -23,7 +13,6 @@ final class URLSessionEventStreamTests: XCTestCase {
             withRequest: URLRequest(url: url, httpMethod: .GET),
             lastEventId: "11"
         )
-        var createdRequest: URLRequest?
         var receivedEvents = [EventSourceEvent]()
         let string = """
         : test stream
@@ -39,11 +28,7 @@ final class URLSessionEventStreamTests: XCTestCase {
 
         """
         let data = try XCTUnwrap(string.data(using: .utf8))
-
-        URLProtocolMock.makeResponse = { request in
-            createdRequest = request
-            return .http(statusCode: 200, data: data, headers: nil)
-        }
+        try setResponse(statusCode: 200, data: data)
 
         // 2. Receive events from the stream
         do {
@@ -59,7 +44,7 @@ final class URLSessionEventStreamTests: XCTestCase {
 
         // 3. Assert
         XCTAssertEqual(
-            createdRequest?.value(forHTTPHeaderField: "Last-Event-Id"),
+            lastRequest?.value(forHTTPHeaderField: "Last-Event-Id"),
             "11"
         )
 
@@ -84,13 +69,9 @@ final class URLSessionEventStreamTests: XCTestCase {
             withRequest: URLRequest(url: url, httpMethod: .GET),
             lastEventId: nil
         )
-        var createdRequest: URLRequest?
         var receivedEvents = [EventSourceEvent]()
 
-        URLProtocolMock.makeResponse = { request in
-            createdRequest = request
-            throw URLError(.badURL)
-        }
+        setResponseError(URLError(.badURL))
 
         // 2. Receive events from the stream
         do {
@@ -103,7 +84,7 @@ final class URLSessionEventStreamTests: XCTestCase {
         }
 
         // 3. Assert
-        XCTAssertNil(createdRequest?.value(forHTTPHeaderField: "Last-Event-Id"))
+        XCTAssertNil(lastRequest?.value(forHTTPHeaderField: "Last-Event-Id"))
         XCTAssertTrue(receivedEvents.isEmpty)
     }
 }

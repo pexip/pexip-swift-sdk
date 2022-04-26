@@ -30,7 +30,7 @@ actor ConferenceSignaling: MediaConnectionSignaling {
 
     // MARK: - MediaConnectionSignaling
 
-    func onOffer(
+    func sendOffer(
         callType: String,
         description: String,
         presentationType: PresentationType?
@@ -58,7 +58,7 @@ actor ConferenceSignaling: MediaConnectionSignaling {
         }
     }
 
-    func onCandidate(candidate: String, mid: String?) async throws {
+    func addCandidate(sdp: String, mid: String?) async throws {
         guard let callService = try await callService else {
             logger?.warn("Tried to send a new ICE candidate before starting a call")
             return
@@ -69,14 +69,14 @@ actor ConferenceSignaling: MediaConnectionSignaling {
             return
         }
 
-        guard let ufrag = candidateUfrag(from: candidate) else {
+        guard let ufrag = candidateUfrag(from: sdp) else {
             logger?.warn("ConferenceSignaling.onCandidate - ufrag are not set")
             return
         }
 
         try await callService.newCandidate(
             iceCandidate: IceCandidate(
-                candidate: candidate,
+                candidate: sdp,
                 mid: mid,
                 ufrag: ufrag,
                 pwd: pwds[ufrag]
@@ -85,12 +85,28 @@ actor ConferenceSignaling: MediaConnectionSignaling {
         )
     }
 
-    func onConnected() async throws {
+    func startMedia() async throws {
         guard let callService = try await callService else {
             logger?.warn("Tried to ack before starting a call")
             return
         }
         isConnected = try await callService.ack(token: await tokenStore.token())
+    }
+
+    func muteVideo(_ muted: Bool) async throws {
+        if muted {
+            try await participantService.videoMuted(token: tokenStore.token())
+        } else {
+            try await participantService.videoUnmuted(token: tokenStore.token())
+        }
+    }
+
+    func muteAudio(_ muted: Bool) async throws {
+        if muted {
+            try await participantService.mute(token: tokenStore.token())
+        } else {
+            try await participantService.unmute(token: tokenStore.token())
+        }
     }
 
     // MARK: - Private

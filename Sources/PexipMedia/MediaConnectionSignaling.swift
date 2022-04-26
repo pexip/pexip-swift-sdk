@@ -4,12 +4,14 @@ public enum PresentationType: String, Encodable {
 }
 
 public protocol MediaConnectionSignaling {
-    func onOffer(
+    func sendOffer(
         callType: String,
         description: String,
         presentationType: PresentationType?
     ) async throws -> String
 
-    func onCandidate(candidate: String, mid: String?) async throws
-    func onConnected() async throws
+    func addCandidate(sdp: String, mid: String?) async throws
+    func startMedia() async throws
+    func muteVideo(_ muted: Bool) async throws
+    func muteAudio(_ muted: Bool) async throws
 }

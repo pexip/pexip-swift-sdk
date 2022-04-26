@@ -1,7 +1,7 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class NodeServiceTests: XCTestCase {
+final class NodeServiceTests: APITestCase {
     private let baseURL = URL(string: "https://example.com")!
     private var service: NodeService!
 
@@ -9,82 +9,58 @@ final class NodeServiceTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.protocolClasses = [URLProtocolMock.self]
-
-        service = DefaultNodeService(
-            baseURL: baseURL,
-            client: HTTPClient(session: URLSession(configuration: configuration))
-        )
+        service = DefaultNodeService(baseURL: baseURL, client: client)
     }
 
     // MARK: - Tests
 
     /// In maintenance mode
     func testStatusWith503() async throws {
-        var createdRequest: URLRequest?
-
-        // 1. Mock response
-        URLProtocolMock.makeResponse = { request in
-            createdRequest = request
-            return .http(statusCode: 503, data: Data(), headers: nil)
-        }
-
-        // 2. Make request
+        try setResponse(statusCode: 503)
         let status = try await service.status()
 
-        // 3. Assert request
-        var expectedRequest = URLRequest(
-            url: baseURL.appendingPathComponent("status"),
-            httpMethod: .GET
-        )
-        expectedRequest.setHTTPHeader(.defaultUserAgent)
-        XCTAssertEqual(createdRequest, expectedRequest)
-
-        // 4. Assert result
         XCTAssertFalse(status)
+        assertStatusRequest()
     }
 
     /// Not in maintenance mode
     func testStatusWith200() async throws {
-        // 1. Mock response
-        URLProtocolMock.makeResponse = { _ in
-            .http(statusCode: 200, data: Data(), headers: nil)
-        }
-
-        // 2. Make request
+        try setResponse(statusCode: 200)
         let status = try await service.status()
 
-        // 3. Assert result
         XCTAssertTrue(status)
+        assertStatusRequest()
     }
 
     func testStatusWith404() async throws {
-        // 1. Mock response
-        URLProtocolMock.makeResponse = { _ in
-            .http(statusCode: 404, data: Data(), headers: nil)
-        }
+        try setResponse(statusCode: 404)
 
-        // 2. Make request
         do {
             _ = try await service.status()
         } catch {
             XCTAssertEqual(error as? HTTPError, .resourceNotFound("Node"))
+            assertStatusRequest()
         }
     }
 
     func testStatusWith401() async throws {
-        // 1. Mock response
-        URLProtocolMock.makeResponse = { _ in
-            .http(statusCode: 401, data: Data(), headers: nil)
-        }
+        try setResponse(statusCode: 401)
 
-        // 2. Make request
         do {
             _ = try await service.status()
         } catch {
             XCTAssertEqual(error as? HTTPError, .unacceptableStatusCode(401))
+            assertStatusRequest()
         }
+    }
+
+    // MARK: - Test helpers
+
+    private func assertStatusRequest() {
+        assertRequest(
+            withMethod: .GET,
+            url: baseURL.appendingPathComponent("status"),
+            data: nil
+        )
     }
 }

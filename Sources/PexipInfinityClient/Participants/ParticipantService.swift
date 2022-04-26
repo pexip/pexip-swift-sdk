@@ -24,6 +24,26 @@ public protocol ParticipantService {
     func avatarURL() -> URL
 
     /**
+     Mutes a participant's audio.
+     - Parameters:
+        - token: Current valid API token
+     - Returns: The result is true if successful, false otherwise.
+     - Throws: `HTTPError` if a network error was encountered during operation
+     */
+    @discardableResult
+    func mute(token: Token) async throws -> Bool
+
+    /**
+     Unmutes a participant's audio.
+     - Parameters:
+        - token: Current valid API token
+     - Returns: The result is true if successful, false otherwise.
+     - Throws: `HTTPError` if a network error was encountered during operation
+     */
+    @discardableResult
+    func unmute(token: Token) async throws -> Bool
+
+    /**
      Mutes a participant's video.
      - Parameters:
         - token: Current valid API token
@@ -74,6 +94,26 @@ struct DefaultParticipantService: ParticipantService {
 
     func avatarURL() -> URL {
         baseURL.appendingPathComponent("avatar.jpg")
+    }
+
+    @discardableResult
+    func mute(token: Token) async throws -> Bool {
+        var request = URLRequest(
+            url: baseURL.appendingPathComponent("mute"),
+            httpMethod: .POST
+        )
+        request.setHTTPHeader(.token(token.value))
+        return try await client.json(for: request)
+    }
+
+    @discardableResult
+    func unmute(token: Token) async throws -> Bool {
+        var request = URLRequest(
+            url: baseURL.appendingPathComponent("unmute"),
+            httpMethod: .POST
+        )
+        request.setHTTPHeader(.token(token.value))
+        return try await client.json(for: request)
     }
 
     @discardableResult
