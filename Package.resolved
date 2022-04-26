@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "WebRTC",
+        "repositoryURL": "https://github.com/pexip/webrtc-ios-builds",
+        "state": {
+          "branch": null,
+          "revision": "6e06fcd68de98689b7e9bd6269c6b7f3742923f6",
+          "version": "100.0.4896"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -4,35 +4,86 @@
 import PackageDescription
 
 let package = Package(
-    name: "PexipVideo",
+    name: "Pexip",
     platforms: [
-        .iOS(.v13)
+        .iOS(.v13),
+        .macOS(.v10_15)
     ],
     products: [
-        // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
-            name: "PexipVideo",
-            targets: ["PexipVideo", "WebRTC"]
+            name: "PexipConference",
+            targets: ["PexipConference"]
+        ),
+        .library(
+            name: "PexipInfinityClient",
+            targets: ["PexipInfinityClient"]
+        ),
+        .library(
+            name: "PexipMedia",
+            targets: ["PexipMedia"]
+        ),
+        .library(
+            name: "PexipRTC",
+            targets: ["PexipRTC"]
+        ),
+        .library(
+            name: "PexipUtils",
+            targets: ["PexipUtils"]
         )
     ],
     dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
+        .package(
+            url: "https://github.com/pexip/webrtc-ios-builds",
+            .upToNextMajor(from: "100.0.0")
+        )
     ],
     targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages this package depends on.
+        // PexipConference
         .target(
-            name: "PexipVideo",
-            dependencies: ["WebRTC"]
-        ),
-        .binaryTarget(
-            name: "WebRTC",
-            path: "Vendor/WebRTC/WebRTC.xcframework"
+            name: "PexipConference",
+            dependencies: ["PexipInfinityClient", "PexipMedia"]
         ),
         .testTarget(
-            name: "PexipVideoTests",
-            dependencies: ["PexipVideo"]
+            name: "PexipConferenceTests",
+            dependencies: ["PexipConference"]
+        ),
+        // PexipInfinityClient
+        .target(
+            name: "PexipInfinityClient",
+            dependencies: ["PexipUtils"]
+        ),
+        .testTarget(
+            name: "PexipInfinityClientTests",
+            dependencies: ["PexipInfinityClient"]
+        ),
+        // PexipMedia
+        .target(
+            name: "PexipMedia"
+        ),
+        .testTarget(
+            name: "PexipMediaTests",
+            dependencies: ["PexipMedia"]
+        ),
+        // PexipRTC
+        .target(
+            name: "PexipRTC",
+            dependencies: [
+                "PexipUtils",
+                "PexipMedia",
+                .product(name: "WebRTC", package: "webrtc-ios-builds")
+            ]
+        ),
+        .testTarget(
+            name: "PexipRTCTests",
+            dependencies: ["PexipRTC"]
+        ),
+        // PexipUtils
+        .target(
+            name: "PexipUtils"
+        ),
+        .testTarget(
+            name: "PexipUtilsTests",
+            dependencies: ["PexipUtils"]
         )
     ]
 )
