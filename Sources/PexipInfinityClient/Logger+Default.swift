@@ -6,7 +6,7 @@ public extension DefaultLogger {
     static let infinityClient = DefaultLogger(
         logContainer: OSLog(
             subsystem: Bundle(
-                for: EventStreamParser.self
+                for: EventSourceParser.self
             ).bundleIdentifier!,
             category: "conference"
         )

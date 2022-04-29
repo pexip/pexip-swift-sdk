@@ -4,6 +4,9 @@ public protocol MediaConnection {
     var isCapturingMainVideo: Bool { get }
     var isAudioMuted: Bool { get }
 
+    func start() async throws
+    func stop() async
+
     func sendMainAudio()
     func sendMainVideo()
 
@@ -14,8 +17,8 @@ public protocol MediaConnection {
     func toggleMainCaptureCamera() async throws
     #endif
 
-    func muteAudio(_ muted: Bool) async throws
+    func startPresentationReceive() throws
+    func stopPresentationReceive() throws
 
-    func start() async throws
-    func stop() async
+    func muteAudio(_ muted: Bool) async throws
 }

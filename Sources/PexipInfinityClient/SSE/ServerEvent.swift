@@ -3,27 +3,27 @@ import Foundation
 @dynamicMemberLookup
 public struct ServerEvent: Hashable {
     public enum Message: Hashable {
-        case chat(ChatMessage)
-        case presentationStarted(PresentationStartMessage)
-        case presentationStopped
-        case participantSyncBegan
-        case participantSyncEnded
-        case participantCreated(Participant)
-        case participantUpdated(Participant)
-        case participantDeleted(ParticipantDeleteMessage)
+        case messageReceived(ChatMessage)
+        case presentationStart(PresentationStartMessage)
+        case presentationStop
+        case participantSyncBegin
+        case participantSyncEnd
+        case participantCreate(Participant)
+        case participantUpdate(Participant)
+        case participantDelete(ParticipantDeleteMessage)
         case callDisconnected(CallDisconnectMessage)
         case clientDisconnected(ClientDisconnectMessage)
     }
 
     enum Name: String {
-        case chat = "message_received"
-        case presentationStarted = "presentation_start"
-        case presentationStopped = "presentation_stop"
-        case participantSyncBegan = "participant_sync_begin"
-        case participantSyncEnded = "participant_sync_end"
-        case participantCreated = "participant_create"
-        case participantUpdated = "participant_update"
-        case participantDeleted = "participant_delete"
+        case messageReceived = "message_received"
+        case presentationStart = "presentation_start"
+        case presentationStop = "presentation_stop"
+        case participantSyncBegin = "participant_sync_begin"
+        case participantSyncEnd = "participant_sync_end"
+        case participantCreate = "participant_create"
+        case participantUpdate = "participant_update"
+        case participantDelete = "participant_delete"
         case callDisconnected = "call_disconnected"
         case clientDisconnected = "disconnect"
     }
@@ -70,4 +70,46 @@ public struct ParticipantDeleteMessage: Codable, Hashable {
     }
 
     public let id: UUID
+}
+
+public struct ChatMessage: Codable, Hashable {
+    private enum CodingKeys: String, CodingKey {
+        case senderName = "origin"
+        case senderId = "uuid"
+        case type
+        case payload
+    }
+
+    /// Name of the sending participant.
+    public let senderName: String
+    /// UUID of the sending participant.
+    public let senderId: UUID
+    /// MIME content-type of the message, usually text/plain.
+    public let type: String
+    /// Message contents.
+    public let payload: String
+    /// Date when the message was received
+    public private(set) var receivedAt = Date()
+
+    /**
+     - Parameters:
+        - senderName: Name of the sending participant
+        - senderId: UUID of the sending participant
+        - type: MIME content-type of the message, usually text/plain
+        - payload: Message contents
+        - receivedAt: Date and time when the message was received
+     */
+    public init(
+        senderName: String,
+        senderId: UUID,
+        type: String = "text/plain",
+        payload: String,
+        receivedAt: Date = .init()
+    ) {
+        self.senderName = senderName
+        self.senderId = senderId
+        self.type = type
+        self.payload = payload
+        self.receivedAt = receivedAt
+    }
 }

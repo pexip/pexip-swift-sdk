@@ -20,7 +20,7 @@ extension URLSession {
         request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
 
         return AsyncThrowingStream { continuation in
-            let parser = EventStreamParser()
+            let parser = EventSourceParser()
             let dataTaskDelegate = DataTaskDelegate()
             dataTaskDelegate.urlSessionDelegate = delegate
 

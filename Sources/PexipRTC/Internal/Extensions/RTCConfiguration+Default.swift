@@ -1,30 +1,20 @@
 import WebRTC
+import PexipMedia
 
 extension RTCConfiguration {
-    static let googleStunServers = [
-        "stun:stun.l.google.com:19302",
-        "stun:stun1.l.google.com:19302",
-        "stun:stun2.l.google.com:19302",
-        "stun:stun3.l.google.com:19302",
-        "stun:stun4.l.google.com:19302"
-    ]
-
     static func defaultConfiguration(
-        withIceServers iceServers: [String],
-        useGoogleStunServersAsBackup: Bool
+        withIceServers iceServers: [IceServer]
     ) -> RTCConfiguration {
-        let iceServers = iceServers.isEmpty && useGoogleStunServersAsBackup
-            ? Self.googleStunServers
-            : iceServers
-
         let configuration = RTCConfiguration()
-        configuration.iceServers = [RTCIceServer(urlStrings: iceServers)]
+        configuration.iceServers = iceServers.map {
+            RTCIceServer(
+                urlStrings: $0.urls,
+                username: $0.username,
+                credential: $0.password
+            )
+        }
         configuration.sdpSemantics = .unifiedPlan
         configuration.continualGatheringPolicy = .gatherContinually
-        configuration.bundlePolicy = .balanced
-        configuration.rtcpMuxPolicy = .require
-        configuration.tcpCandidatePolicy = .enabled
-        configuration.disableLinkLocalNetworks = true
         return configuration
     }
 }

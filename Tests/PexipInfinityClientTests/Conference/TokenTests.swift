@@ -189,7 +189,7 @@ final class TokenTests: XCTestCase {
             chatEnabled: false,
             expiresString: "test"
         )
-        XCTAssertEqual(token.iceServers, [
+        XCTAssertEqual(token.stunUrlStrings, [
             "stun:stun.l.google.com:19302",
             "stun:stun1.l.google.com:19302"
         ])
@@ -207,6 +207,6 @@ final class TokenTests: XCTestCase {
             chatEnabled: false,
             expiresString: "test"
         )
-        XCTAssertTrue(token.iceServers.isEmpty)
+        XCTAssertTrue(token.stunUrlStrings.isEmpty)
     }
 }

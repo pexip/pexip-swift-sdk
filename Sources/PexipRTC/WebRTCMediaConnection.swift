@@ -8,20 +8,18 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
     @Published public private(set) var isAudioMuted = true
     @Published public private(set) var mainLocalVideoTrack: VideoTrack?
     @Published public private(set) var mainRemoteVideoTrack: VideoTrack?
-    @available(*, unavailable)
     @Published public private(set) var presentationRemoteVideoTrack: VideoTrack?
 
     public var statePublisher: AnyPublisher<ConnectionState, Never> {
         stateSubject.eraseToAnyPublisher()
     }
 
+    private let config: MediaConnectionConfig
     private let signaling: MediaConnectionSignaling
     private let factory: RTCPeerConnectionFactory
     private let connection: RTCPeerConnection
     private let connectionDelegateProxy: PeerConnectionDelegateProxy
     private let logger: Logger?
-    private let mainQualityProfile: QualityProfile
-    private let presentationType: PresentationType?
     private var started = Isolated(false)
     private var shouldRenegotiate = Isolated(false)
     private var mainAudioTrack: RTCAudioTrack?
@@ -29,9 +27,9 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
     private var mainVideoTransceiver: RTCRtpTransceiver?
     private var mainVideoCapturer: RTCCameraVideoCapturer?
     private var mainVideoCaptureDevice: AVCaptureDevice?
-    private lazy var presentationVideoTransceiver: RTCRtpTransceiver? = connection
-        .addTransceiver(of: .video, init: .init(direction: .sendOnly))
+    private var presentationVideoTransceiver: RTCRtpTransceiver?
     private let stateSubject = PassthroughSubject<ConnectionState, Never>()
+    private var sendOfferTask: Task<String, Error>?
     #if os(iOS)
     private lazy var audioManager = AudioManager()
     #endif
@@ -39,40 +37,28 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
     // MARK: - Init
 
     public convenience init(
+        config: MediaConnectionConfig,
         signaling: MediaConnectionSignaling,
-        iceServers: [String] = [],
-        useGoogleStunServersAsBackup: Bool = true,
-        mainQualityProfile: QualityProfile = .medium,
-        presentationType: PresentationType? = nil,
         logger: Logger? = DefaultLogger.mediaWebRTC
     ) {
         self.init(
-            factory: .default,
+            config: config,
             signaling: signaling,
-            iceServers: iceServers,
-            useGoogleStunServersAsBackup: useGoogleStunServersAsBackup,
-            mainQualityProfile: mainQualityProfile,
-            presentationType: presentationType,
+            factory: .default,
             logger: logger
         )
     }
 
     init(
-        factory: RTCPeerConnectionFactory,
+        config: MediaConnectionConfig,
         signaling: MediaConnectionSignaling,
-        iceServers: [String],
-        useGoogleStunServersAsBackup: Bool = true,
-        mainQualityProfile: QualityProfile = .medium,
-        presentationType: PresentationType? = nil,
+        factory: RTCPeerConnectionFactory,
         logger: Logger? = nil
     ) {
         connectionDelegateProxy = PeerConnectionDelegateProxy(logger: logger)
 
         guard let connection = factory.peerConnection(
-            with: .defaultConfiguration(
-                withIceServers: iceServers,
-                useGoogleStunServersAsBackup: useGoogleStunServersAsBackup
-            ),
+            with: .defaultConfiguration(withIceServers: config.iceServers),
             constraints: RTCMediaConstraints(
                 mandatoryConstraints: nil,
                 optionalConstraints: nil
@@ -82,11 +68,10 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
             fatalError("Could not create new RTCPeerConnection")
         }
 
+        self.config = config
         self.signaling = signaling
         self.factory = factory
         self.connection = connection
-        self.mainQualityProfile = mainQualityProfile
-        self.presentationType = presentationType
         self.logger = logger
         self.connectionDelegateProxy.delegate = self
     }
@@ -142,14 +127,14 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
             return
         }
 
-        guard let format = mainQualityProfile.bestFormat(
+        guard let format = config.mainQualityProfile.bestFormat(
             from: RTCCameraVideoCapturer.supportedFormats(for: device),
             formatDescription: \.formatDescription
         ) else {
             return
         }
 
-        guard let fps = mainQualityProfile.bestFrameRate(
+        guard let fps = config.mainQualityProfile.bestFrameRate(
             from: format.videoSupportedFrameRateRanges,
             maxFrameRate: \.maxFrameRate
         ) else {
@@ -205,6 +190,43 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
     }
     #endif
 
+    public func startPresentationReceive() throws {
+        guard
+            let transceiver = presentationVideoTransceiver,
+            transceiver.direction != .recvOnly
+        else {
+            return
+        }
+
+        var error: NSError?
+        transceiver.setDirection(.recvOnly, error: &error)
+
+        if let error = error {
+            throw error
+        }
+
+        let track = transceiver.receiver.track as? RTCVideoTrack
+        setPresentationRemoteVideoTrack(track)
+    }
+
+    public func stopPresentationReceive() throws {
+        guard
+            let transceiver = presentationVideoTransceiver,
+            transceiver.direction != .inactive
+        else {
+            return
+        }
+
+        var error: NSError?
+        transceiver.setDirection(.inactive, error: &error)
+
+        if let error = error {
+            throw error
+        }
+
+        setPresentationRemoteVideoTrack(nil)
+    }
+
     public func muteAudio(_ muted: Bool) async throws {
         guard muted != isAudioMuted else {
             return
@@ -219,6 +241,19 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
             return
         }
 
+        // TODO: Temp workaround for MCU bug #28176
+        // Guest gets disconnected after some time without host being present
+        if mainAudioTransceiver == nil {
+            sendMainAudio()
+        }
+
+        if !config.presentationInMain {
+            presentationVideoTransceiver = connection.addTransceiver(
+                of: .video,
+                init: .init(direction: .inactive)
+            )
+        }
+
         await started.setValue(true)
         try await createOffer()
     }
@@ -230,9 +265,15 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
             }
         }
 
-        if let mainVideoTransceiver = mainVideoTransceiver {
-            mainVideoTransceiver.stopInternal()
-            connection.removeTrack(mainVideoTransceiver.sender)
+        let transceivers = [
+            mainAudioTransceiver,
+            mainVideoTransceiver,
+            presentationVideoTransceiver
+        ].compactMap { $0 }
+
+        for transceiver in transceivers {
+            transceiver.stopInternal()
+            connection.removeTrack(transceiver.sender)
         }
 
         connection.close()
@@ -243,6 +284,12 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
         mainVideoCaptureDevice = nil
         mainLocalVideoTrack = nil
         mainRemoteVideoTrack = nil
+        presentationRemoteVideoTrack = nil
+        presentationVideoTransceiver = nil
+
+        Task {
+            await started.setValue(false)
+        }
     }
 
     // MARK: - Private
@@ -262,28 +309,32 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
     }
 
     private func createOffer() async throws {
-        let constraints = RTCMediaConstraints(
-            mandatoryConstraints: nil,
-            optionalConstraints: [
-                "DtlsSrtpKeyAgreement": kRTCMediaConstraintsValueTrue
-            ]
-        )
-        let offer = try await connection.offer(for: constraints)
-        try await connection.setLocalDescription(offer)
+        sendOfferTask = Task {
+            let constraints = RTCMediaConstraints(
+                mandatoryConstraints: nil,
+                optionalConstraints: [
+                    "DtlsSrtpKeyAgreement": kRTCMediaConstraintsValueTrue
+                ]
+            )
+            let offer = try await connection.offer(for: constraints)
+            try await connection.setLocalDescription(offer)
 
-        let mangler = SessionDescriptionMangler(sdp: offer.sdp)
-        let newLocalSdp = mangler.mangle(
-            mainQualityProfile: mainQualityProfile,
-            mainAudioMid: mainAudioTransceiver?.mid,
-            mainVideoMid: mainVideoTransceiver?.mid,
-            presentationVideoMid: presentationVideoTransceiver?.mid
-        )
+            let mangler = SessionDescriptionMangler(sdp: offer.sdp)
+            let newLocalSdp = mangler.mangle(
+                mainQualityProfile: config.mainQualityProfile,
+                mainAudioMid: mainAudioTransceiver?.mid,
+                mainVideoMid: mainVideoTransceiver?.mid,
+                presentationVideoMid: presentationVideoTransceiver?.mid
+            )
 
-        let remoteSdp = try await signaling.sendOffer(
-            callType: "WEBRTC",
-            description: newLocalSdp,
-            presentationType: presentationType
-        )
+            return try await signaling.sendOffer(
+                callType: "WEBRTC",
+                description: newLocalSdp,
+                presentationInMain: config.presentationInMain
+            )
+        }
+
+        let remoteSdp = try await sendOfferTask!.value
         let answer = RTCSessionDescription(type: .answer, sdp: remoteSdp)
         try await connection.setRemoteDescription(answer)
     }
@@ -294,7 +345,7 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
             if let track = track {
                 mainLocalVideoTrack = DefaultVideoTrack(
                     rtcTrack: track,
-                    aspectRatio: mainQualityProfile.aspectRatio
+                    aspectRatio: config.mainQualityProfile.aspectRatio
                 )
             } else {
                 mainLocalVideoTrack = nil
@@ -309,13 +360,22 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
 
     private func setRemoteVideoTrack(_ track: RTCVideoTrack?) {
         Task { @MainActor in
-            if let track = track {
-                mainRemoteVideoTrack = DefaultVideoTrack(
-                    rtcTrack: track,
+            mainRemoteVideoTrack = track.map {
+                DefaultVideoTrack(
+                    rtcTrack: $0,
                     aspectRatio: CGSize(width: 16, height: 9)
                 )
-            } else {
-                mainRemoteVideoTrack = nil
+            }
+        }
+    }
+
+    private func setPresentationRemoteVideoTrack(_ track: RTCVideoTrack?) {
+        Task { @MainActor in
+            presentationRemoteVideoTrack = track.map {
+                DefaultVideoTrack(
+                    rtcTrack: $0,
+                    aspectRatio: CGSize(width: 16, height: 9)
+                )
             }
         }
     }
@@ -325,7 +385,9 @@ public final class WebRTCMediaConnection: MediaConnection, ObservableObject {
 
 extension WebRTCMediaConnection: PeerConnectionDelegate {
     func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {
-        negotiateIfNeeded()
+        if ![.closed, .disconnected].contains(peerConnection.connectionState) {
+            negotiateIfNeeded()
+        }
     }
 
     func peerConnection(
@@ -336,22 +398,10 @@ extension WebRTCMediaConnection: PeerConnectionDelegate {
             stateSubject.send(newState)
         }
 
-        guard newState == .connected else {
-            return
-        }
-
-        #if os(iOS)
-        audioManager.speakerOn()
-        #endif
-
-        Task {
-            do {
-                try await signaling.startMedia()
-            } catch {
-                logger?.error(
-                    "MediaConnectionSignaling.onConnected failed with error: \(error)"
-                )
-            }
+        if newState == .connected {
+            #if os(iOS)
+            audioManager.speakerOn()
+            #endif
         }
     }
 
@@ -359,8 +409,13 @@ extension WebRTCMediaConnection: PeerConnectionDelegate {
         _ peerConnection: RTCPeerConnection,
         didGenerate candidate: RTCIceCandidate
     ) {
+        guard let sendOfferTask = sendOfferTask else {
+            return
+        }
+
         Task {
             do {
+                _ = try await sendOfferTask.value
                 try await signaling.addCandidate(
                     sdp: candidate.sdp,
                     mid: candidate.sdpMid

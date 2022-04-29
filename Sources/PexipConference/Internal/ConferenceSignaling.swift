@@ -8,7 +8,6 @@ actor ConferenceSignaling: MediaConnectionSignaling {
     private let participantService: ParticipantService
     private let tokenStore: TokenStore
     private let logger: Logger?
-    private var isConnected = false
     private var pwds = [String: String]()
     private var callsRequestTask: CallDetailsTask?
 
@@ -33,7 +32,7 @@ actor ConferenceSignaling: MediaConnectionSignaling {
     func sendOffer(
         callType: String,
         description: String,
-        presentationType: PresentationType?
+        presentationInMain: Bool
     ) async throws -> String {
         let token = try await tokenStore.token()
 
@@ -49,11 +48,12 @@ actor ConferenceSignaling: MediaConnectionSignaling {
                     fields: CallsFields(
                         callType: callType,
                         sdp: description,
-                        present: presentationType?.presentField
+                        present: presentationInMain ? .main : nil
                     ),
                     token: token
                 )
             }
+            _ = try await callService?.ack(token: await tokenStore.token())
             return try await callsRequestTask!.value.sdp
         }
     }
@@ -83,14 +83,6 @@ actor ConferenceSignaling: MediaConnectionSignaling {
             ),
             token: await tokenStore.token()
         )
-    }
-
-    func startMedia() async throws {
-        guard let callService = try await callService else {
-            logger?.warn("Tried to ack before starting a call")
-            return
-        }
-        isConnected = try await callService.ack(token: await tokenStore.token())
     }
 
     func muteVideo(_ muted: Bool) async throws {

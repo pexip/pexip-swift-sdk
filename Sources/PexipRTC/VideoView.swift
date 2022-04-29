@@ -109,12 +109,13 @@ private struct VideoViewWrapper: UIViewRepresentable {
 
     func makeUIView(context: Context) -> VideoView {
         let view = VideoView()
+        track.setRenderer(view, aspectFit: aspectFit)
         view.isMirrored = isMirrored
         return view
     }
 
     func updateUIView(_ view: VideoView, context: Context) {
-        track.setRenderer(view, aspectFit: aspectFit)
+        // no-op
     }
 }
 
@@ -178,12 +179,13 @@ private struct VideoViewWrapper: NSViewRepresentable {
 
     func makeNSView(context: Context) -> VideoView {
         let view = VideoView()
+        track.setRenderer(view, aspectFit: aspectFit)
+        view.isMirrored = isMirrored
         return view
     }
 
     func updateNSView(_ view: VideoView, context: Context) {
-        track.setRenderer(view, aspectFit: aspectFit)
-        view.isMirrored = isMirrored
+        // no-op
     }
 }
 

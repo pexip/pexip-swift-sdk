@@ -35,7 +35,7 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
         didChange newState: RTCPeerConnectionState
     ) {
         let state = ConnectionState(newState)
-        logger?.debug("Peer connection - new connection state: \(state)")
+        logger?.debug("Peer connection - new peer connection state: \(state)")
         delegate?.peerConnection(peerConnection, didChange: state)
     }
 
@@ -74,7 +74,7 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
         didChange newState: RTCIceConnectionState
     ) {
         let state = IceConnectionState(newState)
-        logger?.debug("Peer connection - new connection state: \(state)")
+        logger?.debug("Peer connection - new ice connection state: \(state)")
     }
 
     func peerConnection(

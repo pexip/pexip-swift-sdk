@@ -59,7 +59,7 @@ public struct Token: Codable, Hashable {
         currentDate >= expiresAt
     }
 
-    public var iceServers: [String] {
+    public var stunUrlStrings: [String] {
         (stun ?? []).map(\.url)
     }
 

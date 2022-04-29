@@ -43,7 +43,7 @@ final class ServerMessageParserTests: XCTestCase {
         XCTAssertNil(parser.message(from: event))
     }
 
-    func testChatMessage() throws {
+    func testMessageReceived() throws {
         let chatMessage = ChatMessage(
             senderName: "User",
             senderId: UUID(),
@@ -54,7 +54,7 @@ final class ServerMessageParserTests: XCTestCase {
         let message = parser.message(from: event)
 
         switch message {
-        case .chat(let message):
+        case .messageReceived(let message):
             XCTAssertEqual(message.senderName, chatMessage.senderName)
             XCTAssertEqual(message.senderId, chatMessage.senderId)
             XCTAssertEqual(message.type, chatMessage.type)
@@ -64,50 +64,50 @@ final class ServerMessageParserTests: XCTestCase {
         }
     }
 
-    func testPresentationStarted() throws {
+    func testPresentationStart() throws {
         let details = PresentationStartMessage(presenterName: "Name", presenterUri: "URI")
         let event = try event(for: details, name: "presentation_start")
         let message = parser.message(from: event)
-        XCTAssertEqual(message, .presentationStarted(details))
+        XCTAssertEqual(message, .presentationStart(details))
     }
 
-    func testPresentationStopped() throws {
+    func testPresentationStop() throws {
         let event = EventSourceEvent(id: "1", name: "presentation_stop")
         let message = parser.message(from: event)
-        XCTAssertEqual(message, .presentationStopped)
+        XCTAssertEqual(message, .presentationStop)
     }
 
-    func testParticipantSyncBegan() throws {
+    func testParticipantSyncBegin() throws {
         let event = EventSourceEvent(id: "1", name: "participant_sync_begin")
         let message = parser.message(from: event)
-        XCTAssertEqual(message, .participantSyncBegan)
+        XCTAssertEqual(message, .participantSyncBegin)
     }
 
-    func testParticipantSyncEnded() throws {
+    func testParticipantSyncEnd() throws {
         let event = EventSourceEvent(id: "1", name: "participant_sync_end")
         let message = parser.message(from: event)
-        XCTAssertEqual(message, .participantSyncEnded)
+        XCTAssertEqual(message, .participantSyncEnd)
     }
 
-    func testParticipantCreated() throws {
+    func testParticipantCreate() throws {
         let participant = Participant.stub(withId: UUID(), displayName: "Guest")
         let event = try event(for: participant, name: "participant_create")
         let message = parser.message(from: event)
-        XCTAssertEqual(message, .participantCreated(participant))
+        XCTAssertEqual(message, .participantCreate(participant))
     }
 
-    func testParticipantUpdated() throws {
+    func testParticipantUpdate() throws {
         let participant = Participant.stub(withId: UUID(), displayName: "Guest")
         let event = try event(for: participant, name: "participant_update")
         let message = parser.message(from: event)
-        XCTAssertEqual(message, .participantUpdated(participant))
+        XCTAssertEqual(message, .participantUpdate(participant))
     }
 
-    func testParticipantDeleted() throws {
+    func testParticipantDelete() throws {
         let details = ParticipantDeleteMessage(id: UUID())
         let event = try event(for: details, name: "participant_delete")
         let message = parser.message(from: event)
-        XCTAssertEqual(message, .participantDeleted(details))
+        XCTAssertEqual(message, .participantDelete(details))
     }
 
     func testCallDisconnected() throws {

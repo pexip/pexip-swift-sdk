@@ -1,6 +1,6 @@
 import Foundation
 
-final class EventStreamParser {
+final class EventSourceParser {
     var bufferString: String? { String(data: buffer, encoding: .utf8) }
 
     private var buffer = Data()

@@ -10,10 +10,9 @@ public protocol Conference {
     var delegate: ConferenceDelegate? { get set }
     var eventPublisher: AnyPublisher<ConferenceEvent, Never> { get }
     var mainSignaling: MediaConnectionSignaling { get }
-    @available(*, deprecated, message: "Will be deprecated in future version")
-    var presentationSignaling: MediaConnectionSignaling { get }
     var chat: Chat? { get }
     var roster: Roster { get }
+    func join() async
     func leave() async throws
 }
 
@@ -26,8 +25,6 @@ final class InfinityConference: Conference {
     }
 
     let mainSignaling: MediaConnectionSignaling
-    @available(*, deprecated, message: "Will be deprecated in future versions")
-    let presentationSignaling: MediaConnectionSignaling
     let chat: Chat?
     let roster: Roster
 
@@ -35,8 +32,10 @@ final class InfinityConference: Conference {
     private let tokenRefresher: TokenRefresher
     private let eventSource: EventSource
     private let logger: Logger?
-    private var eventStreamTask: Task<Void, Never>?
+    private var eventSourceTask: Task<Void, Never>?
     private var eventSubject = PassthroughSubject<ConferenceEvent, Never>()
+    private var isActive = Isolated(false)
+    private var isClientDisconnected = Isolated(false)
 
     // MARK: - Init
 
@@ -44,7 +43,6 @@ final class InfinityConference: Conference {
         conferenceName: String,
         tokenRefresher: TokenRefresher,
         mainSignaling: MediaConnectionSignaling,
-        presentationSignaling: MediaConnectionSignaling,
         eventSource: EventSource,
         chat: Chat?,
         roster: Roster,
@@ -53,42 +51,52 @@ final class InfinityConference: Conference {
         self.conferenceName = conferenceName
         self.tokenRefresher = tokenRefresher
         self.mainSignaling = mainSignaling
-        self.presentationSignaling = presentationSignaling
         self.eventSource = eventSource
         self.chat = chat
         self.roster = roster
         self.logger = logger
 
         Task {
-            await setup()
+            await tokenRefresher.startRefreshing()
         }
     }
 
     // MARK: - Public API
 
-    func leave() async throws {
-        logger?.info("Leaving \(conferenceName)")
-        await leave(withTokenRelease: true)
-    }
+    func join() async {
+        guard await !isActive.value, await !isClientDisconnected.value else {
+            return
+        }
 
-    // MARK: - Setup
-
-    private func setup() async {
-        await tokenRefresher.startRefreshing()
         await eventSource.open()
-        eventStreamTask = Task {
+        eventSourceTask = Task {
             for await message in await eventSource.messages() {
                 await handleServerMessage(message)
             }
         }
         logger?.info("Joining \(conferenceName)")
+        await isActive.setValue(true)
     }
 
-    private func leave(withTokenRelease: Bool) async {
-        eventStreamTask?.cancel()
+    func leave() async throws {
+        guard await isActive.value else {
+            return
+        }
+
+        logger?.info("Leaving \(conferenceName)")
+        eventSourceTask?.cancel()
         await roster.clear()
         await eventSource.close()
-        await tokenRefresher.endRefreshing(withTokenRelease: withTokenRelease)
+        await tokenRefresher.endRefreshing(
+            withTokenRelease: await !isClientDisconnected.value
+        )
+        await isActive.setValue(false)
+    }
+
+    // MARK: - Private methods
+
+    private func leave(withTokenRelease: Bool) async {
+
     }
 
     // MARK: - Server events
@@ -97,32 +105,33 @@ final class InfinityConference: Conference {
     private func handleServerMessage(_ message: ServerEvent.Message) {
         Task {
             switch message {
-            case .presentationStarted(let details):
-                sendEvent(.presentationStarted(details))
-            case .presentationStopped:
-                sendEvent(.presentationStopped)
-            case .chat(let message):
+            case .presentationStart(let details):
+                sendEvent(.presentationStart(details))
+            case .presentationStop:
+                sendEvent(.presentationStop)
+            case .messageReceived(let message):
                 logger?.debug("Chat message received")
                 await chat?.addMessage(message)
-            case .participantSyncBegan:
+            case .participantSyncBegin:
                 logger?.debug("Participant sync began")
                 await roster.setSyncing(true)
-            case .participantSyncEnded:
+            case .participantSyncEnd:
                 logger?.debug("Participant sync ended")
                 await roster.setSyncing(false)
-            case .participantCreated(let participant):
+            case .participantCreate(let participant):
                 logger?.debug("Participant added")
                 await roster.addParticipant(participant)
-            case .participantUpdated(let participant):
+            case .participantUpdate(let participant):
                 logger?.debug("Participant updated")
                 await roster.updateParticipant(participant)
-            case .participantDeleted(let details):
+            case .participantDelete(let details):
                 logger?.debug("Participant deleted")
                 await roster.removeParticipant(withId: details.id)
             case .callDisconnected(let details):
                 logger?.debug("Call disconnected, reason: \(details.reason)")
             case .clientDisconnected(let details):
-                await leave(withTokenRelease: false)
+                await isClientDisconnected.setValue(true)
+                sendEvent(.clientDisconnected)
                 logger?.debug("Participant disconnected, reason: \(details.reason)")
             }
         }

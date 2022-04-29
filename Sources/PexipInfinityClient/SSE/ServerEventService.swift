@@ -20,6 +20,8 @@ struct DefaultServerEventService: ServerEventService {
         return AsyncThrowingStream { continuation in
             let task = Task {
                 do {
+                    // Skip initial `presentation_stop` event
+                    var skipPresentationStop = true
                     var request = URLRequest(
                         url: baseURL.appendingPathComponent("events"),
                         httpMethod: .GET
@@ -29,12 +31,18 @@ struct DefaultServerEventService: ServerEventService {
                     let events = client.eventSource(withRequest: request)
 
                     for try await event in events {
-                        continuation.yield(
-                            ServerEvent(
-                                rawEvent: event,
-                                message: parser.message(from: event)
-                            )
+                        let serverEvent = ServerEvent(
+                            rawEvent: event,
+                            message: parser.message(from: event)
                         )
+
+                        if case .presentationStart = serverEvent.message {
+                            skipPresentationStop = false
+                        }
+
+                        if !(serverEvent.message == .presentationStop && skipPresentationStop) {
+                            continuation.yield(serverEvent)
+                        }
                     }
                 } catch {
                     continuation.finish(throwing: error)

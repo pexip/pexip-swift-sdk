@@ -34,7 +34,6 @@ public struct ConferenceFactory {
                 logger: logger
             ),
             mainSignaling: signaling(),
-            presentationSignaling: signaling(),
             eventSource: DefaultEventSource(
                 service: service.eventSource(),
                 tokenStore: tokenStore,

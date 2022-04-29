@@ -31,24 +31,24 @@ struct ServerMessageParser {
         data: Data?
     ) throws -> ServerEvent.Message {
         switch name {
-        case .chat:
-            return .chat(try decoder.decode(ChatMessage.self, from: data))
-        case .presentationStarted:
+        case .messageReceived:
+            return .messageReceived(try decoder.decode(ChatMessage.self, from: data))
+        case .presentationStart:
             let message = try decoder.decode(PresentationStartMessage.self, from: data)
-            return .presentationStarted(message)
-        case .presentationStopped:
-            return .presentationStopped
-        case .participantSyncBegan:
-            return .participantSyncBegan
-        case .participantSyncEnded:
-            return .participantSyncEnded
-        case .participantCreated:
-            return .participantCreated(try decoder.decode(Participant.self, from: data))
-        case .participantUpdated:
-            return .participantUpdated(try decoder.decode(Participant.self, from: data))
-        case .participantDeleted:
+            return .presentationStart(message)
+        case .presentationStop:
+            return .presentationStop
+        case .participantSyncBegin:
+            return .participantSyncBegin
+        case .participantSyncEnd:
+            return .participantSyncEnd
+        case .participantCreate:
+            return .participantCreate(try decoder.decode(Participant.self, from: data))
+        case .participantUpdate:
+            return .participantUpdate(try decoder.decode(Participant.self, from: data))
+        case .participantDelete:
             let details = try decoder.decode(ParticipantDeleteMessage.self, from: data)
-            return .participantDeleted(details)
+            return .participantDelete(details)
         case .callDisconnected:
             let message = try decoder.decode(CallDisconnectMessage.self, from: data)
             return .callDisconnected(message)

@@ -1,8 +1,9 @@
 import PexipInfinityClient
 
 public enum ConferenceEvent {
-    case presentationStarted(PresentationStartMessage)
-    case presentationStopped
+    case presentationStart(PresentationStartMessage)
+    case presentationStop
+    case clientDisconnected
 }
 
 public protocol ConferenceDelegate: AnyObject {
