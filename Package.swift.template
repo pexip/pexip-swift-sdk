@@ -45,8 +45,8 @@ let package = Package(
         ),
         .binaryTarget(
             name: "PexipConference",
-            url: "#PexipConference_url",
-            checksum: "#PexipConference_checksum"
+            url: "PexipConference_url",
+            checksum: "PexipConference_checksum"
         ),
         // PexipInfinityClient
         .target(name: "PexipInfinityClientTargets",
@@ -58,8 +58,8 @@ let package = Package(
         ),
         .binaryTarget(
             name: "PexipInfinityClient",
-            url: "#PexipInfinityClient_url",
-            checksum: "#PexipInfinityClient_checksum"
+            url: "PexipInfinityClient_url",
+            checksum: "PexipInfinityClient_checksum"
         ),
         // PexipRTC
         .target(name: "PexipRTCTargets",
@@ -73,26 +73,26 @@ let package = Package(
         ),
         .binaryTarget(
             name: "PexipRTC",
-            url: "#PexipRTC_url",
-            checksum: "#PexipRTC_checksum"
+            url: "PexipRTC_url",
+            checksum: "PexipRTC_checksum"
         ),
         // PexipMedia
         .binaryTarget(
             name: "PexipMedia",
-            url: "#PexipMedia_url",
-            checksum: "#PexipMedia_checksum"
+            url: "PexipMedia_url",
+            checksum: "PexipMedia_checksum"
         ),
         // PexipUtils
         .binaryTarget(
             name: "PexipUtils",
-            url: "#PexipUtils_url",
-            checksum: "#PexipUtils_checksum"
+            url: "PexipUtils_url",
+            checksum: "PexipUtils_checksum"
         ),
         // WebRTC
         .binaryTarget(
             name: "WebRTC",
-            url: "#WebRTC_url",
-            checksum: "#WebRTC_checksum"
+            url: "WebRTC_url",
+            checksum: "WebRTC_checksum"
         )
     ]
 )
