@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
     s.osx.deployment_target = '10.15'
     s.source = {
       http: '',
-      sha1: ''
+      sha256: ''
     }
     s.vendored_frameworks = 'PexipInfinityClient.xcframework'
     s.dependency "PexipInfinityClient", "#{s.version}"
