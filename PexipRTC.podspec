@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
       sha256: "1f8681918fac30b41ad91206d02b03570a460548663c738007adc08ff224fc6b"
     }
     s.vendored_frameworks = 'PexipRTC.xcframework'
-    s.dependency "WebRTC", "100.0.0"
+    s.dependency "WebRTC", "#{s.version}"
     s.dependency "PexipUtils", "#{s.version}"
     s.dependency "PexipMedia", "#{s.version}"
 end
