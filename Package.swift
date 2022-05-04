@@ -45,8 +45,8 @@ let package = Package(
         ),
         .binaryTarget(
             name: "PexipConference",
-            url: "PexipConference_url",
-            checksum: "PexipConference_checksum"
+            url: "https://api.github.com/repos/pexip/pexip-ios-sdk-builds/releases/assets/64440621.zip",
+            checksum: "3df7478f2f3d8353f6ad9659c52fe3eae572d2681c2e802023b6bf11422ad600"
         ),
         // PexipInfinityClient
         .target(name: "PexipInfinityClientTargets",
@@ -58,8 +58,8 @@ let package = Package(
         ),
         .binaryTarget(
             name: "PexipInfinityClient",
-            url: "PexipInfinityClient_url",
-            checksum: "PexipInfinityClient_checksum"
+            url: "https://api.github.com/repos/pexip/pexip-ios-sdk-builds/releases/assets/64440624.zip",
+            checksum: "0932c5c8fb88bd851abc22f5d94287307aa7f04d34e7042814af7e0d154b91d0"
         ),
         // PexipRTC
         .target(name: "PexipRTCTargets",
@@ -73,26 +73,26 @@ let package = Package(
         ),
         .binaryTarget(
             name: "PexipRTC",
-            url: "PexipRTC_url",
-            checksum: "PexipRTC_checksum"
+            url: "https://api.github.com/repos/pexip/pexip-ios-sdk-builds/releases/assets/64440632.zip",
+            checksum: "1f8681918fac30b41ad91206d02b03570a460548663c738007adc08ff224fc6b"
         ),
         // PexipMedia
         .binaryTarget(
             name: "PexipMedia",
-            url: "PexipMedia_url",
-            checksum: "PexipMedia_checksum"
+            url: "https://api.github.com/repos/pexip/pexip-ios-sdk-builds/releases/assets/64440625.zip",
+            checksum: "1a74aa798d7058d1fdd0a42a4a1449fb9616072b0916988fad11f6c1011a28ec"
         ),
         // PexipUtils
         .binaryTarget(
             name: "PexipUtils",
-            url: "PexipUtils_url",
-            checksum: "PexipUtils_checksum"
+            url: "https://api.github.com/repos/pexip/pexip-ios-sdk-builds/releases/assets/64440635.zip",
+            checksum: "f2fa7924f6417c7fc226a7348ca9631c32b30163b3914e5f297d7e7efc02c37f"
         ),
         // WebRTC
         .binaryTarget(
             name: "WebRTC",
-            url: "WebRTC_url",
-            checksum: "WebRTC_checksum"
+            url: "https://api.github.com/repos/pexip/pexip-ios-sdk-builds/releases/assets/64440647.zip",
+            checksum: "ebfcf41e5171fa2c34cf06b6378f499fa41cf96435b4d32446d8cab73fff700a"
         )
     ]
 )

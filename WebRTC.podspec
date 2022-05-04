@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'WebRTC'
-    s.version      = '100.0.0'
+    s.version      = "0.1.0"
     s.summary      = 'WebRTC binaries for Apple platforms'
     s.description  = <<-DESC
                      WebRTC binaries for Apple platforms
@@ -43,8 +43,8 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
     s.source = {
-      http: https://api.github.com/repos/pexip/pexip-ios-sdk-builds/releases/assets/64400607.zip
-      sha256: ebfcf41e5171fa2c34cf06b6378f499fa41cf96435b4d32446d8cab73fff700a
+      http: "https://api.github.com/repos/pexip/pexip-ios-sdk-builds/releases/assets/64440647.zip"
+      sha256: "ebfcf41e5171fa2c34cf06b6378f499fa41cf96435b4d32446d8cab73fff700a"
     }
     s.vendored_frameworks = 'WebRTC.xcframework'
 end
