@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
     s.source = {
-      http: 'https://api.github.com/repos/pexip/pexip-ios-sdk-builds/releases/assets/64440632.zip'
+      http: 'https://api.github.com/repos/pexip/pexip-ios-sdk-builds/releases/assets/64440632.zip',
       sha256: '1f8681918fac30b41ad91206d02b03570a460548663c738007adc08ff224fc6b'
     }
     s.vendored_frameworks = 'PexipRTC.xcframework'
