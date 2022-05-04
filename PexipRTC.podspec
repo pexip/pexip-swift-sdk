@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipRTC'
-    s.version      = '0.1.0'
+    s.version      = '0.1.1'
     s.summary      = 'Pexip WebRTC-based media stack.'
     s.description  = <<-DESC
                      Pexip SDK utilities
@@ -15,11 +15,11 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
     s.source = {
-      http: 'https://api.github.com/repos/pexip/pexip-ios-sdk-builds/releases/assets/64440632.zip',
-      sha256: '1f8681918fac30b41ad91206d02b03570a460548663c738007adc08ff224fc6b'
+      http: 'https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64463032.zip',
+      sha256: 'ad0f6638fbc595f6027b27a444b6c4c96551848d0c943db9241e6b2bc66d0e5d'
     }
     s.vendored_frameworks = 'PexipRTC.xcframework'
-    s.dependency 'WebRTC', ''
+    s.dependency 'WebRTC', '100.0.4896'
     s.dependency 'PexipUtils', "#{s.version}"
     s.dependency 'PexipMedia', "#{s.version}"
 end
