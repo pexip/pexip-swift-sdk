@@ -34,7 +34,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/pexip/webrtc-ios-builds",
-            .exactItem("100.0.4896")
+            .exactItem("96.0.4664")
         )
     ],
     targets: [
