@@ -1,6 +1,24 @@
 .DS_Store
+.envrc
+DebugLocal.xcconfig
+ReleaseLocal.xcconfig
+
+# Swift Package Manager
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 /.build
 /Packages
-xcuserdata/
+
+# Xcode
 DerivedData/
-.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+xcuserdata/
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcworkspace/contents.xcworkspacedata
+/*.gcno
+**/xcshareddata/WorkspaceSettings.xcsettings
+*.xcscmblueprint
+*.xccheckout
+
+# CocoaPods
+Pods
