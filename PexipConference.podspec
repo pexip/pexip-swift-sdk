@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
                      Pexip Apple SDK is designed for use by iOS/macOS voice/video applications 
                      that want to initiate or connect to conferences hosted on the Pexip Infinity platform.
                      DESC
-    s.homepage     = 'https://github.com/pexip/pexip-ios-sdk-builds'
+    s.homepage     = 'https://github.com/pexip'
     s.license      = {
       type: 'The Apache Software License, Version 1.1',
       file: 'LICENSE'
@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
     s.osx.deployment_target = '10.15'
     s.source = {
       http: 'https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64462957.zip',
-      sha256: 'b84379d99379818fc7827892d777cd81ad93fb1da47ee870512350300dbae249'
+      sha256: '28e37d022ac72eb893ecae363a9b5c5b854765e87ca833bd9f7351e7c15d88e9'
     }
     s.vendored_frameworks = 'PexipInfinityClient.xcframework'
     s.dependency 'PexipInfinityClient', "#{s.version}"

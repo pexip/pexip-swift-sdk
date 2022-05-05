@@ -8,4 +8,9 @@ target 'Example' do
 
   # Pods for Example
   pod 'PexipConference', :git => 'git@github.com:pexip/pexip-swift-sdk.git', :branch => 'main'
+  pod 'PexipInfinityClient', :git => 'git@github.com:pexip/pexip-swift-sdk.git', :branch => 'main'
+  pod 'PexipMedia', :git => 'git@github.com:pexip/pexip-swift-sdk.git', :branch => 'main'
+  pod 'PexipRTC', :git => 'git@github.com:pexip/pexip-swift-sdk.git', :branch => 'main'
+  pod 'PexipUtils', :git => 'git@github.com:pexip/pexip-swift-sdk.git', :branch => 'main'
+  pod 'WebRTC', :git => 'git@github.com:pexip/pexip-swift-sdk.git', :branch => 'main'
 end
