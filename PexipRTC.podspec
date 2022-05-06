@@ -8,7 +8,8 @@ Pod::Spec.new do |s|
     s.homepage     = 'https://github.com/pexip'
     s.license      = {
       type: 'The Apache Software License, Version 1.1',
-      file: 'LICENSE'
+      text: <<-LICENSE
+      LICENSE
     }
     s.author       = 'Pexip'
     s.platform     = :ios, :osx

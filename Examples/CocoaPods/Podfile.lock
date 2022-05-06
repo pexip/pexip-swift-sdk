@@ -1,44 +1,38 @@
 PODS:
-  - PexipConference (0.1.1):
-    - PexipInfinityClient (= 0.1.1)
-    - PexipMedia (= 0.1.1)
-  - PexipInfinityClient (0.1.1):
-    - PexipUtils (= 0.1.1)
-  - PexipMedia (0.1.1)
-  - PexipRTC (0.1.1):
-    - PexipMedia (= 0.1.1)
-    - PexipUtils (= 0.1.1)
-    - WebRTC (= 100.0.4896)
-  - PexipUtils (0.1.1)
-  - WebRTC (100.0.4896)
+  - PexipConference (0.1.0):
+    - PexipInfinityClient (= 0.1.0)
+    - PexipMedia (= 0.1.0)
+  - PexipInfinityClient (0.1.0):
+    - PexipUtils (= 0.1.0)
+  - PexipMedia (0.1.0)
+  - PexipRTC (0.1.0):
+    - PexipMedia (= 0.1.0)
+    - PexipUtils (= 0.1.0)
+    - WebRTC (= 96.0.4664)
+  - PexipUtils (0.1.0)
+  - WebRTC (96.0.4664)
 
 DEPENDENCIES:
-  - "PexipConference (from `git@github.com:pexip/pexip-swift-sdk.git`, branch `main`)"
-  - "PexipInfinityClient (from `git@github.com:pexip/pexip-swift-sdk.git`, branch `main`)"
-  - "PexipMedia (from `git@github.com:pexip/pexip-swift-sdk.git`, branch `main`)"
-  - "PexipRTC (from `git@github.com:pexip/pexip-swift-sdk.git`, branch `main`)"
-  - "PexipUtils (from `git@github.com:pexip/pexip-swift-sdk.git`, branch `main`)"
-  - "WebRTC (from `git@github.com:pexip/pexip-swift-sdk.git`, branch `main`)"
+  - PexipConference (from `../../PexipConference.podspec`)
+  - PexipInfinityClient (from `../../PexipInfinityClient.podspec`)
+  - PexipMedia (from `../../PexipMedia.podspec`)
+  - PexipRTC (from `../../PexipRTC.podspec`)
+  - PexipUtils (from `../../PexipUtils.podspec`)
+  - WebRTC (from `../../WebRTC.podspec`)
 
 EXTERNAL SOURCES:
   PexipConference:
-    :branch: main
-    :git: "git@github.com:pexip/pexip-swift-sdk.git"
+    :podspec: "../../PexipConference.podspec"
   PexipInfinityClient:
-    :branch: main
-    :git: "git@github.com:pexip/pexip-swift-sdk.git"
+    :podspec: "../../PexipInfinityClient.podspec"
   PexipMedia:
-    :branch: main
-    :git: "git@github.com:pexip/pexip-swift-sdk.git"
+    :podspec: "../../PexipMedia.podspec"
   PexipRTC:
-    :branch: main
-    :git: "git@github.com:pexip/pexip-swift-sdk.git"
+    :podspec: "../../PexipRTC.podspec"
   PexipUtils:
-    :branch: main
-    :git: "git@github.com:pexip/pexip-swift-sdk.git"
+    :podspec: "../../PexipUtils.podspec"
   WebRTC:
-    :branch: main
-    :git: "git@github.com:pexip/pexip-swift-sdk.git"
+    :podspec: "../../WebRTC.podspec"
 
 CHECKOUT OPTIONS:
   PexipConference:
@@ -61,13 +55,13 @@ CHECKOUT OPTIONS:
     :git: "git@github.com:pexip/pexip-swift-sdk.git"
 
 SPEC CHECKSUMS:
-  PexipConference: 8f7e32746efb422bf738e2e4ef538e430609db36
-  PexipInfinityClient: 31ca4481354de9072487ec0d79d83e8fabc07510
-  PexipMedia: e193930515c1fc533788869643bd5eaea0fe26c4
-  PexipRTC: b7076f865e872ded7e281097e3110ecb03945b27
-  PexipUtils: 1ce60f88b774ef09148213ff36b7076bc3146b8c
-  WebRTC: 185cb927ef5b4591b1d98a0aed46d79eeb85829e
+  PexipConference: 2bac41e4363484e0e8800f031f5116916a51463b
+  PexipInfinityClient: 6044b1a166b295b4fea8a92531adbc8f2257711b
+  PexipMedia: a0e4fedf5a77b163ac301782c82be16d0fa4861d
+  PexipRTC: cac7b4589fe49207c99fd8d66ffbb548b9ab7c9d
+  PexipUtils: 5c9a8f233eba5d24af8ed33cfd155465422e4d69
+  WebRTC: a05573a5f05af15b21dfaeb73d94e185c5283935
 
-PODFILE CHECKSUM: 0c0e6f4b27d1d3d61d8c4bbc7d5bcec71e9fd3d5
+PODFILE CHECKSUM: 77e8bf7665cef51fac5519980a4ec1608b8ba6e3
 
 COCOAPODS: 1.11.3
