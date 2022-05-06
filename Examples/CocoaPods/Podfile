@@ -7,10 +7,10 @@ target 'Example' do
   use_frameworks!
 
   # Pods for Example
-  pod 'PexipConference', :podspec => '../../PexipConference.podspec'
-  pod 'PexipInfinityClient', :podspec => '../../PexipInfinityClient.podspec'
-  pod 'PexipMedia', :podspec => '../../PexipMedia.podspec'
-  pod 'PexipRTC', :podspec => '../../PexipRTC.podspec'
-  pod 'PexipUtils', :podspec => '../../PexipUtils.podspec'
-  pod 'WebRTC', :podspec => '../../WebRTC.podspec'
+  pod 'PexipConference', :git => 'https://github.com/pexip/pexip-swift-sdk', :commit => 'a49fd9c6ab6d8ecae0552268c85068f1371568be'
+  pod 'PexipInfinityClient', :git => 'https://github.com/pexip/pexip-swift-sdk', :commit => 'a49fd9c6ab6d8ecae0552268c85068f1371568be'
+  pod 'PexipMedia', :git => 'https://github.com/pexip/pexip-swift-sdk', :commit => 'a49fd9c6ab6d8ecae0552268c85068f1371568be'
+  pod 'PexipRTC', :git => 'https://github.com/pexip/pexip-swift-sdk', :commit => 'a49fd9c6ab6d8ecae0552268c85068f1371568be'
+  pod 'PexipUtils', :git => 'https://github.com/pexip/pexip-swift-sdk', :commit => 'a49fd9c6ab6d8ecae0552268c85068f1371568be'
+  pod 'WebRTC', :git => 'https://github.com/pexip/pexip-swift-sdk', :commit => 'a49fd9c6ab6d8ecae0552268c85068f1371568be'
 end
