@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipConference'
-    s.version      = '0.1.1'
+    s.version      = '0.1.2'
     s.summary      = 'Core components for working with conferences hosted on the Pexip Infinity platform'
     s.description  = <<-DESC
                      Pexip Apple SDK is designed for use by iOS/macOS voice/video applications 
