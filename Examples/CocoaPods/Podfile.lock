@@ -42,27 +42,27 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   PexipConference:
-    :commit: 6cf5a61df068ef6c98178e81baedf3af003b95b1
+    :commit: a1129fb4c034a1876aee0d4b34c608d9ae2d71b5
     :git: "git@github.com:pexip/pexip-swift-sdk.git"
   PexipInfinityClient:
-    :commit: 6cf5a61df068ef6c98178e81baedf3af003b95b1
+    :commit: a1129fb4c034a1876aee0d4b34c608d9ae2d71b5
     :git: "git@github.com:pexip/pexip-swift-sdk.git"
   PexipMedia:
-    :commit: 6cf5a61df068ef6c98178e81baedf3af003b95b1
+    :commit: a1129fb4c034a1876aee0d4b34c608d9ae2d71b5
     :git: "git@github.com:pexip/pexip-swift-sdk.git"
   PexipRTC:
-    :commit: 6cf5a61df068ef6c98178e81baedf3af003b95b1
+    :commit: a1129fb4c034a1876aee0d4b34c608d9ae2d71b5
     :git: "git@github.com:pexip/pexip-swift-sdk.git"
   PexipUtils:
-    :commit: 6cf5a61df068ef6c98178e81baedf3af003b95b1
+    :commit: a1129fb4c034a1876aee0d4b34c608d9ae2d71b5
     :git: "git@github.com:pexip/pexip-swift-sdk.git"
   WebRTC:
-    :commit: 6cf5a61df068ef6c98178e81baedf3af003b95b1
+    :commit: a1129fb4c034a1876aee0d4b34c608d9ae2d71b5
     :git: "git@github.com:pexip/pexip-swift-sdk.git"
 
 SPEC CHECKSUMS:
-  PexipConference: a3845a937ad1108fa2bbc843d1ae63251ab9800e
-  PexipInfinityClient: 31ca4481354de9072487ec0d79d83e8fabc07510
+  PexipConference: 933463d8e84a2cb39ff475e403480837aa3a753f
+  PexipInfinityClient: a2ee38a6bf3f67c6aebc92646063cc6f7fa25dd3
   PexipMedia: e193930515c1fc533788869643bd5eaea0fe26c4
   PexipRTC: b7076f865e872ded7e281097e3110ecb03945b27
   PexipUtils: 1ce60f88b774ef09148213ff36b7076bc3146b8c
