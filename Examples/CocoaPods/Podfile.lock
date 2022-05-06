@@ -13,61 +13,61 @@ PODS:
   - WebRTC (100.0.4896)
 
 DEPENDENCIES:
-  - PexipConference (from `https://github.com/pexip/pexip-swift-sdk`, commit `a49fd9c6ab6d8ecae0552268c85068f1371568be`)
-  - PexipInfinityClient (from `https://github.com/pexip/pexip-swift-sdk`, commit `a49fd9c6ab6d8ecae0552268c85068f1371568be`)
-  - PexipMedia (from `https://github.com/pexip/pexip-swift-sdk`, commit `a49fd9c6ab6d8ecae0552268c85068f1371568be`)
-  - PexipRTC (from `https://github.com/pexip/pexip-swift-sdk`, commit `a49fd9c6ab6d8ecae0552268c85068f1371568be`)
-  - PexipUtils (from `https://github.com/pexip/pexip-swift-sdk`, commit `a49fd9c6ab6d8ecae0552268c85068f1371568be`)
-  - WebRTC (from `https://github.com/pexip/pexip-swift-sdk`, commit `a49fd9c6ab6d8ecae0552268c85068f1371568be`)
+  - "PexipConference (from `git@github.com:pexip/pexip-swift-sdk.git`, branch `main`)"
+  - "PexipInfinityClient (from `git@github.com:pexip/pexip-swift-sdk.git`, branch `main`)"
+  - "PexipMedia (from `git@github.com:pexip/pexip-swift-sdk.git`, branch `main`)"
+  - "PexipRTC (from `git@github.com:pexip/pexip-swift-sdk.git`, branch `main`)"
+  - "PexipUtils (from `git@github.com:pexip/pexip-swift-sdk.git`, branch `main`)"
+  - "WebRTC (from `git@github.com:pexip/pexip-swift-sdk.git`, branch `main`)"
 
 EXTERNAL SOURCES:
   PexipConference:
-    :commit: a49fd9c6ab6d8ecae0552268c85068f1371568be
-    :git: https://github.com/pexip/pexip-swift-sdk
+    :branch: main
+    :git: "git@github.com:pexip/pexip-swift-sdk.git"
   PexipInfinityClient:
-    :commit: a49fd9c6ab6d8ecae0552268c85068f1371568be
-    :git: https://github.com/pexip/pexip-swift-sdk
+    :branch: main
+    :git: "git@github.com:pexip/pexip-swift-sdk.git"
   PexipMedia:
-    :commit: a49fd9c6ab6d8ecae0552268c85068f1371568be
-    :git: https://github.com/pexip/pexip-swift-sdk
+    :branch: main
+    :git: "git@github.com:pexip/pexip-swift-sdk.git"
   PexipRTC:
-    :commit: a49fd9c6ab6d8ecae0552268c85068f1371568be
-    :git: https://github.com/pexip/pexip-swift-sdk
+    :branch: main
+    :git: "git@github.com:pexip/pexip-swift-sdk.git"
   PexipUtils:
-    :commit: a49fd9c6ab6d8ecae0552268c85068f1371568be
-    :git: https://github.com/pexip/pexip-swift-sdk
+    :branch: main
+    :git: "git@github.com:pexip/pexip-swift-sdk.git"
   WebRTC:
-    :commit: a49fd9c6ab6d8ecae0552268c85068f1371568be
-    :git: https://github.com/pexip/pexip-swift-sdk
+    :branch: main
+    :git: "git@github.com:pexip/pexip-swift-sdk.git"
 
 CHECKOUT OPTIONS:
   PexipConference:
-    :commit: a49fd9c6ab6d8ecae0552268c85068f1371568be
-    :git: https://github.com/pexip/pexip-swift-sdk
+    :commit: 6cf5a61df068ef6c98178e81baedf3af003b95b1
+    :git: "git@github.com:pexip/pexip-swift-sdk.git"
   PexipInfinityClient:
-    :commit: a49fd9c6ab6d8ecae0552268c85068f1371568be
-    :git: https://github.com/pexip/pexip-swift-sdk
+    :commit: 6cf5a61df068ef6c98178e81baedf3af003b95b1
+    :git: "git@github.com:pexip/pexip-swift-sdk.git"
   PexipMedia:
-    :commit: a49fd9c6ab6d8ecae0552268c85068f1371568be
-    :git: https://github.com/pexip/pexip-swift-sdk
+    :commit: 6cf5a61df068ef6c98178e81baedf3af003b95b1
+    :git: "git@github.com:pexip/pexip-swift-sdk.git"
   PexipRTC:
-    :commit: a49fd9c6ab6d8ecae0552268c85068f1371568be
-    :git: https://github.com/pexip/pexip-swift-sdk
+    :commit: 6cf5a61df068ef6c98178e81baedf3af003b95b1
+    :git: "git@github.com:pexip/pexip-swift-sdk.git"
   PexipUtils:
-    :commit: a49fd9c6ab6d8ecae0552268c85068f1371568be
-    :git: https://github.com/pexip/pexip-swift-sdk
+    :commit: 6cf5a61df068ef6c98178e81baedf3af003b95b1
+    :git: "git@github.com:pexip/pexip-swift-sdk.git"
   WebRTC:
-    :commit: a49fd9c6ab6d8ecae0552268c85068f1371568be
-    :git: https://github.com/pexip/pexip-swift-sdk
+    :commit: 6cf5a61df068ef6c98178e81baedf3af003b95b1
+    :git: "git@github.com:pexip/pexip-swift-sdk.git"
 
 SPEC CHECKSUMS:
-  PexipConference: 7593177682ad9b361f5b15263b3dd75685da54d8
-  PexipInfinityClient: 5504f22f140503d1f45c7d6454b213ef9727ae28
-  PexipMedia: 7998663be7c0d040a91ee9369cfbb3f29adeb046
-  PexipRTC: 099a330f6de5936d13539cfe8c236411589f10c2
-  PexipUtils: 0cb20b762d11b44b7dc165aecd35ddc6521a6e7c
-  WebRTC: d588519699896cbf73d6077179cf986fa496f17b
+  PexipConference: a3845a937ad1108fa2bbc843d1ae63251ab9800e
+  PexipInfinityClient: 31ca4481354de9072487ec0d79d83e8fabc07510
+  PexipMedia: e193930515c1fc533788869643bd5eaea0fe26c4
+  PexipRTC: b7076f865e872ded7e281097e3110ecb03945b27
+  PexipUtils: 1ce60f88b774ef09148213ff36b7076bc3146b8c
+  WebRTC: 185cb927ef5b4591b1d98a0aed46d79eeb85829e
 
-PODFILE CHECKSUM: 2c5a08e0333a02c571d30c5b340ac84586315414
+PODFILE CHECKSUM: 0c0e6f4b27d1d3d61d8c4bbc7d5bcec71e9fd3d5
 
 COCOAPODS: 1.11.3
