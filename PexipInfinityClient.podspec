@@ -16,7 +16,9 @@ Pod::Spec.new do |s|
     s.osx.deployment_target = '10.15'
     s.source = {
       http: 'https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64462996.zip',
-      sha256: 'fb68522539aa7acbb59be580efe8a80736a925ace96e057ffa426ef3445fdbb4'
+      sha256: 'fb68522539aa7acbb59be580efe8a80736a925ace96e057ffa426ef3445fdbb4',
+      type: 'zip',
+      headers: ['Accept: application/octet-stream']
     }
     s.vendored_frameworks = 'PexipInfinityClient.xcframework'
     s.dependency 'PexipUtils', "#{s.version}"
