@@ -45,8 +45,8 @@ let package = Package(
         ),
         .binaryTarget(
             name: "PexipConference",
-            url: "https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64462957.zip",
-            checksum: "b84379d99379818fc7827892d777cd81ad93fb1da47ee870512350300dbae249"
+            url: "https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64679300.zip",
+            checksum: "11b66f28b453ab210dd9df919848dea404c74660d85ed37fd7a0a0aa2e0e2032"
         ),
         // PexipInfinityClient
         .target(name: "PexipInfinityClientTargets",
@@ -58,8 +58,8 @@ let package = Package(
         ),
         .binaryTarget(
             name: "PexipInfinityClient",
-            url: "https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64462996.zip",
-            checksum: "fb68522539aa7acbb59be580efe8a80736a925ace96e057ffa426ef3445fdbb4"
+            url: "https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64679307.zip",
+            checksum: "2350d6ed0100c95fd722c21940f27e358b24c9d8d8665e54c90f0f89c2fa9acf"
         ),
         // PexipRTC
         .target(name: "PexipRTCTargets",
@@ -73,26 +73,26 @@ let package = Package(
         ),
         .binaryTarget(
             name: "PexipRTC",
-            url: "https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64463032.zip",
-            checksum: "ad0f6638fbc595f6027b27a444b6c4c96551848d0c943db9241e6b2bc66d0e5d"
+            url: "https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64679342.zip",
+            checksum: "24d4b39ac5719fb68125cb572f0c00f7b5d88ad76c92f3a95f1151d686d4e64a"
         ),
         // PexipMedia
         .binaryTarget(
             name: "PexipMedia",
-            url: "https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64463025.zip",
-            checksum: "bde85f3062f9d1211cd222a6812dfeafc4fbd3e60db81436132c97e04a288240"
+            url: "https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64679315.zip",
+            checksum: "cf47ef560094c5dd963b9aea93b7ce0750ca9b82b771ed59e638a5769d08dfb2"
         ),
         // PexipUtils
         .binaryTarget(
             name: "PexipUtils",
-            url: "https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64463054.zip",
-            checksum: "8e6645a6859847fae77fbf9dddbe201cfae8d24f6d27d1b97ca841bdeff125e7"
+            url: "https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64679388.zip",
+            checksum: "115626200bd781d69732cbb8b6cd56061d73a6e979d89428659a899fda59676a"
         ),
         // WebRTC
         .binaryTarget(
             name: "WebRTC",
-            url: "https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64463162.zip",
-            checksum: "ebfcf41e5171fa2c34cf06b6378f499fa41cf96435b4d32446d8cab73fff700a"
+            url: "https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64679615.zip",
+            checksum: "1ddefa62bfe01fbb2fbebea94c7c7992a26e09d3f0ee6c18ee008f62f498ce6f"
         )
     ]
 )

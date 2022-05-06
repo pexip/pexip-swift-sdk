@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipMedia'
-    s.version      = '0.1.1'
+    s.version      = '0.1.0'
     s.summary      = 'Core components for working with audio and video in the Pexip SDK'
     s.description  = <<-DESC
                      Core components for working with audio and video in the Pexip SDK.
@@ -15,8 +15,8 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
     s.source = {
-      http: 'https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64463025.zip',
-      sha256: 'bde85f3062f9d1211cd222a6812dfeafc4fbd3e60db81436132c97e04a288240',
+      http: 'https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64679315.zip',
+      sha256: 'cf47ef560094c5dd963b9aea93b7ce0750ca9b82b771ed59e638a5769d08dfb2',
       type: 'zip',
       headers: ['Accept: application/octet-stream']
     }
