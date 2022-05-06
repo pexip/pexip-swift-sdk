@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
     s.description  = <<-DESC
                      Core components for working with audio and video in the Pexip SDK.
                      DESC
-    s.homepage     = 'https://github.com/pexip/pexip-ios-sdk-builds'
+    s.homepage     = 'https://github.com/pexip'
     s.license      = {
       type: 'The Apache Software License, Version 1.1',
       file: 'LICENSE'
