@@ -41,7 +41,7 @@ let package = Package(
                 .target(name: "PexipInfinityClient"),
                 .target(name: "PexipMedia")
             ],
-            path: "PexipConference"
+            path: "Sources/PexipConference"
         ),
         .binaryTarget(
             name: "PexipConference",
@@ -54,7 +54,7 @@ let package = Package(
                 .target(name: "PexipInfinityClient"),
                 .target(name: "PexipUtils")
             ],
-            path: "PexipInfinityClient"
+            path: "Sources/PexipInfinityClient"
         ),
         .binaryTarget(
             name: "PexipInfinityClient",
@@ -69,7 +69,7 @@ let package = Package(
                 .target(name: "PexipMedia"),
                 .target(name: "WebRTC")
             ],
-            path: "PexipRTC"
+            path: "Sources/PexipRTC"
         ),
         .binaryTarget(
             name: "PexipRTC",
