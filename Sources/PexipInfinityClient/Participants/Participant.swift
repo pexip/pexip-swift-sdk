@@ -15,7 +15,7 @@ public struct Participant: Codable, Hashable, Identifiable {
         externalNodeId: String? = nil,
         callProtocol: String? = nil,
         spotlightTime: TimeInterval = 0,
-        startTime: TimeInterval = 0,
+        startTime: TimeInterval? = nil,
         uri: String? = nil,
         vendor: String? = nil,
         hasMedia: Bool,
@@ -126,7 +126,7 @@ public struct Participant: Codable, Hashable, Identifiable {
     /// A Unix timestamp of when this participant was spotlighted, if spotlight is used.
     public let spotlightTime: TimeInterval
     /// A Unix timestamp of when this participant joined (UTC).
-    public let startTime: TimeInterval
+    public let startTime: TimeInterval?
     /// The URI of the participant.
     public let uri: String?
     /// The vendor identifier of the browser/endpoint with which the participant is connecting.
@@ -147,7 +147,7 @@ public struct Participant: Codable, Hashable, Identifiable {
     private let _canReceivePresentation: ReceivePresentationPolicy
     /// "On" or "Off" as to whether this participant is connected via encrypted media.
     public var isConnectionEncrypted: Bool { _isConnectionEncrypted == .on }
-    private let _isConnectionEncrypted: Encryption
+    private let _isConnectionEncrypted: Encryption?
     /// Boolean indicating whether the participant can be disconnected.
     public var isDisconnectSupported: Bool { _isDisconnectSupported == .yes }
     private let _isDisconnectSupported: Boolean
@@ -215,6 +215,7 @@ public struct Participant: Codable, Hashable, Identifiable {
     private enum Encryption: String, Codable {
         case on = "On"
         case off = "Off"
+        case unknown = "Unknown"
     }
 
     private enum ReceivePresentationPolicy: String, Codable {
