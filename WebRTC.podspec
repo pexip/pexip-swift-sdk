@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
     s.description  = <<-DESC
                      WebRTC binaries for Apple platforms
                      DESC
-    s.homepage     = 'https://github.com/pexip/pexip-ios-sdk-builds'
+    s.homepage     = 'https://webrtc.org'
     s.license      = {
       type: 'BSD',
       text: <<-LICENSE
