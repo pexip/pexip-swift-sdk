@@ -95,6 +95,7 @@
 		DA1329D427A98EC500C2EA89 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DA1329D927A98EC500C2EA89 /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA6E026127CFA48700DF88A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DA81725A2825323A007CCA30 /* pexip-swift-sdk */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "pexip-swift-sdk"; path = ../..; sourceTree = "<group>"; };
 		DAB78D4E27E3953600CB17C9 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		DAE8989A282469DD006C30E8 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Configs/Debug.xcconfig; sourceTree = "<group>"; };
 		DAE8989B28246B12006C30E8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Configs/Release.xcconfig; sourceTree = "<group>"; };
@@ -214,6 +215,7 @@
 		DA1329CC27A98EC400C2EA89 = {
 			isa = PBXGroup;
 			children = (
+				DA8172592825323A007CCA30 /* Packages */,
 				DAE8989B28246B12006C30E8 /* Release.xcconfig */,
 				DAE8989A282469DD006C30E8 /* Debug.xcconfig */,
 				DAFADC9227F509D700A9AC3D /* SwiftUI */,
@@ -248,6 +250,14 @@
 				DAFADD2227F5ED2500A9AC3D /* AVFoundation.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DA8172592825323A007CCA30 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				DA81725A2825323A007CCA30 /* pexip-swift-sdk */,
+			);
+			name = Packages;
 			sourceTree = "<group>";
 		};
 		DAB78D4D27E3952300CB17C9 /* Utils */ = {
