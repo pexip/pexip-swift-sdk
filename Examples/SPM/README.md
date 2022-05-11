@@ -1,6 +1,7 @@
-# Swift Package Manager Demo app
+# Swift Package Manager Example app
 
-This example demonstrates how to use Pexip Swift SDK with Swift Package Manager.
+This example demonstrates how to install **Pexip Swift SDK** with Swift Package Manager and 
+how to add Pexip video conferencing in your app.
 
 ```
 open Example.xcodeproj
