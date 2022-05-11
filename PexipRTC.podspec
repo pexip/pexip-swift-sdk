@@ -1,9 +1,10 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipRTC'
     s.version      = '0.1.0'
-    s.summary      = 'Pexip WebRTC-based media stack.'
+    s.summary      = 'Pexip WebRTC-based media stack for sending and receiving video streams.'
     s.description  = <<-DESC
-                     Pexip SDK utilities
+                     Pexip Swift SDK is designed for use by iOS/macOS voice/video applications 
+                     that want to initiate or connect to conferences hosted on the Pexip Infinity platform.
                      DESC
     s.homepage     = 'https://github.com/pexip'
     s.license      = {
