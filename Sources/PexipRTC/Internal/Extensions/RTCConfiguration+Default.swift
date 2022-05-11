@@ -13,6 +13,7 @@ extension RTCConfiguration {
                 credential: $0.password
             )
         }
+        configuration.bundlePolicy = .maxBundle
         configuration.sdpSemantics = .unifiedPlan
         configuration.continualGatheringPolicy = .gatherContinually
         return configuration

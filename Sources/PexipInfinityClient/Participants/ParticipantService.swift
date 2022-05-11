@@ -25,6 +25,8 @@ public protocol ParticipantService {
 
     /**
      Mutes a participant's audio.
+     See [documentation](https://docs.pexip.com/api_client/api_rest.htm#mute)
+
      - Parameters:
         - token: Current valid API token
      - Returns: The result is true if successful, false otherwise.
@@ -35,6 +37,8 @@ public protocol ParticipantService {
 
     /**
      Unmutes a participant's audio.
+     See [documentation](https://docs.pexip.com/api_client/api_rest.htm#mute)
+
      - Parameters:
         - token: Current valid API token
      - Returns: The result is true if successful, false otherwise.
@@ -45,6 +49,8 @@ public protocol ParticipantService {
 
     /**
      Mutes a participant's video.
+     See [documentation](https://docs.pexip.com/api_client/api_rest.htm#videomute)
+
      - Parameters:
         - token: Current valid API token
      - Returns: The result is true if successful, false otherwise.
@@ -55,6 +61,8 @@ public protocol ParticipantService {
 
     /**
      Unmutes a participant's video.
+     See [documentation](https://docs.pexip.com/api_client/api_rest.htm#videomute)
+
      - Parameters:
         - token: Current valid API token
      - Returns: The result is true if successful, false otherwise.

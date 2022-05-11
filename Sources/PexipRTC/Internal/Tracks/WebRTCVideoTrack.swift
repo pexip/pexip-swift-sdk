@@ -1,39 +1,21 @@
 import WebRTC
+import PexipMedia
 
-// MARK: - Protocol
-
-#if os(iOS)
-import UIKit
-public typealias VideoRenderer = UIView
-#else
-import AppKit
-public typealias VideoRenderer = NSView
-#endif
-
-public protocol VideoTrack {
-    var aspectRatio: CGSize { get }
-    func setRenderer(_ view: VideoRenderer, aspectFit: Bool)
-}
-
-// MARK: - Implementation
-
-final class DefaultVideoTrack: VideoTrack {
-    let aspectRatio: CGSize
-    private var rtcTrack: RTCVideoTrack
+class WebRTCVideoTrack: VideoTrack {
+    let rtcTrack: RTCVideoTrack
     private weak var renderer: RTCVideoRenderer?
 
     // MARK: - Init
 
-    init(rtcTrack: RTCVideoTrack, aspectRatio: CGSize) {
+    init(rtcTrack: RTCVideoTrack) {
         self.rtcTrack = rtcTrack
-        self.aspectRatio = aspectRatio
     }
 
     deinit {
         removeCurrentRenderer()
     }
 
-    // MARK: - Public
+    // MARK: - VideoTrack
 
     func setRenderer(_ view: VideoRenderer, aspectFit: Bool) {
         removeCurrentRenderer()
@@ -75,7 +57,7 @@ final class DefaultVideoTrack: VideoTrack {
         renderer?.renderFrame(nil)
     }
 
-    // MARK: - Private methods
+    // MARK: - Private
 
     private func removeCurrentRenderer() {
         if let renderer = renderer {

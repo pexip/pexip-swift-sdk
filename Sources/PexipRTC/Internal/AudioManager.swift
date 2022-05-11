@@ -1,15 +1,18 @@
 import PexipMedia
 import WebRTC
+import PexipUtils
 
 #if os(iOS)
 
 final class AudioManager {
+    private let logger: Logger?
     private let audioSession = RTCAudioSession.sharedInstance()
     private let audioQueue = DispatchQueue(label: "audio")
 
     // MARK: - Init
 
-    init() {
+    init(logger: Logger?) {
+        self.logger = logger
         configureAudioSession()
     }
 
@@ -32,7 +35,7 @@ final class AudioManager {
             try audioSession.setCategory(AVAudioSession.Category.playAndRecord.rawValue)
             try audioSession.setMode(AVAudioSession.Mode.voiceChat.rawValue)
         } catch {
-            debugPrint("Error changing AVAudioSession category: \(error)")
+            logger?.error("Error changing AVAudioSession category: \(error)")
         }
 
         audioSession.unlockForConfiguration()
@@ -52,7 +55,7 @@ final class AudioManager {
                 try self.audioSession.overrideOutputAudioPort(portOverride)
                 try self.audioSession.setActive(true)
             } catch {
-                debugPrint("Error setting AVAudioSession category: \(error)")
+                self.logger?.error("Error setting AVAudioSession category: \(error)")
             }
 
             self.audioSession.unlockForConfiguration()

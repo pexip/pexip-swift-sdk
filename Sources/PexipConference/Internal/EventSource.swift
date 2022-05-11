@@ -5,6 +5,7 @@ import PexipUtils
 // MARK: - Protocol
 
 protocol EventSource {
+    var isOpen: Bool { get async }
     func messages() async -> AsyncStream<ServerEvent.Message>
     func open() async
     func close() async
@@ -13,6 +14,8 @@ protocol EventSource {
 // MARK: - Implementation
 
 actor DefaultEventSource: EventSource {
+    var isOpen: Bool { get async { eventSourceTask?.isCancelled == false } }
+
     private let decoder = JSONDecoder()
     private let service: ServerEventService
     private let tokenStore: TokenStore
@@ -71,7 +74,7 @@ actor DefaultEventSource: EventSource {
                 Task {
                     try await Task.sleep(seconds: seconds)
 
-                    if eventSourceTask?.isCancelled == false {
+                    if await isOpen {
                         reconnectionAttempts += 1
                         await open()
                     } else {

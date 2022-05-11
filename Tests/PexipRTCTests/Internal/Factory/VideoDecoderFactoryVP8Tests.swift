@@ -2,14 +2,14 @@ import XCTest
 import WebRTC
 @testable import PexipRTC
 
-final class RTCVideoDecoderFactoryVP8Tests: XCTestCase {
-    private var factory: RTCVideoDecoderFactoryVP8!
+final class VideoDecoderFactoryVP8Tests: XCTestCase {
+    private var factory: VideoDecoderFactoryVP8!
 
     // MARK: - Setup
 
     override func setUp() {
         super.setUp()
-        factory = RTCVideoDecoderFactoryVP8()
+        factory = VideoDecoderFactoryVP8()
     }
 
     // MARK: - Tests

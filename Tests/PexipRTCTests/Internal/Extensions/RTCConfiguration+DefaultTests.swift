@@ -17,7 +17,7 @@ final class RTCConfigurationDefaultTests: XCTestCase {
         XCTAssertEqual(configuration.iceServers.count, 1)
         XCTAssertEqual(configuration.iceServers.first?.urlStrings, iceServer.urls)
         XCTAssertEqual(configuration.sdpSemantics, .unifiedPlan)
-        XCTAssertEqual(configuration.bundlePolicy, .balanced)
+        XCTAssertEqual(configuration.bundlePolicy, .maxBundle)
         XCTAssertEqual(configuration.continualGatheringPolicy, .gatherContinually)
         XCTAssertEqual(configuration.rtcpMuxPolicy, .require)
         XCTAssertEqual(configuration.tcpCandidatePolicy, .enabled)

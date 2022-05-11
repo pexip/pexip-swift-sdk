@@ -1,5 +1,6 @@
 import WebRTC
 import PexipUtils
+import PexipMedia
 
 // MARK: - Delegate
 
@@ -7,7 +8,7 @@ protocol PeerConnectionDelegate: AnyObject {
     func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection)
     func peerConnection(
         _ peerConnection: RTCPeerConnection,
-        didChange newState: ConnectionState
+        didChange newState: MediaConnectionState
     )
     func peerConnection(
         _ peerConnection: RTCPeerConnection,
@@ -34,7 +35,7 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
         _ peerConnection: RTCPeerConnection,
         didChange newState: RTCPeerConnectionState
     ) {
-        let state = ConnectionState(newState)
+        let state = MediaConnectionState(newState)
         logger?.debug("Peer connection - new peer connection state: \(state)")
         delegate?.peerConnection(peerConnection, didChange: state)
     }

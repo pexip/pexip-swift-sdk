@@ -4,12 +4,14 @@ import PexipInfinityClient
 
 // MARK: - Delegate
 
+/// The object that acts as the delegate of the chat object.
 public protocol ChatDelegate: AnyObject {
     func chat(_ chat: Chat, didReceiveMessage message: ChatMessage)
 }
 
 // MARK: - Chat
 
+/// The object responsible for sending and receiving text messages in the conference
 public final class Chat {
     public typealias SendMessage = (String) async throws -> Bool
     /// The object that acts as the delegate of the chat.

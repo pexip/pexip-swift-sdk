@@ -94,10 +94,16 @@ actor ConferenceSignaling: MediaConnectionSignaling {
     }
 
     func muteAudio(_ muted: Bool) async throws {
+        let token = try await tokenStore.token()
+
+        guard token.role == .host else {
+            return
+        }
+
         if muted {
-            try await participantService.mute(token: tokenStore.token())
+            try await participantService.mute(token: token)
         } else {
-            try await participantService.unmute(token: tokenStore.token())
+            try await participantService.unmute(token: token)
         }
     }
 

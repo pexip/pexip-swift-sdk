@@ -1,24 +1,56 @@
 import AVFoundation
+import Combine
 
+/// Observable object that holds references to main and presentation remote video tracks.
+public final class RemoteVideoTracks: ObservableObject {
+    /// The main remote video track.
+    @Published public var mainTrack: VideoTrack?
+    /// The presentation remote video track.
+    @Published public var presentationTrack: VideoTrack?
+
+    /**
+     Creates a new instance of ``RemoteVideoTracks`` object.
+     - Parameters:
+        - mainTrack: The main remote video track
+        - presentationTrack: The presentation remote video track
+     */
+    public init(mainTrack: VideoTrack?, presentationTrack: VideoTrack?) {
+        self.mainTrack = mainTrack
+        self.presentationTrack = presentationTrack
+    }
+}
+
+/// Media connection between the local computer and a remote peer.
 public protocol MediaConnection {
-    var isCapturingMainVideo: Bool { get }
-    var isAudioMuted: Bool { get }
+    /// The publisher that publishes state changes.
+    var statePublisher: AnyPublisher<MediaConnectionState, Never> { get }
 
+    /// Observable object that holds references to main and presentation remote video tracks.
+    var remoteVideoTracks: RemoteVideoTracks { get }
+
+    /// Creates a media session
     func start() async throws
-    func stop() async
 
-    func sendMainAudio()
-    func sendMainVideo()
+    /// Terminates all media and deallocates resources
+    func stop()
 
-    func startMainCapture() async throws
-    func startMainCapture(with device: AVCaptureDevice) async throws
-    func stopMainCapture() async throws
-    #if os(iOS)
-    func toggleMainCaptureCamera() async throws
-    #endif
+    /**
+     Sends audio from the given local audio track
+     - Parameters:
+        - localAudioTrack: Local audio track
+     */
+    func sendMainAudio(localAudioTrack: LocalAudioTrack)
 
+    /**
+     Sends video from the given local video track
+     - Parameters:
+        - localVideoTrack: Local video track
+     */
+    func sendMainVideo(localVideoTrack: LocalVideoTrack)
+
+    /// Creates a remote presentation track and starts receiving remote presentation.
     func startPresentationReceive() throws
-    func stopPresentationReceive() throws
 
-    func muteAudio(_ muted: Bool) async throws
+    /// Stops receiving remote presentation.
+    func stopPresentationReceive() throws
 }

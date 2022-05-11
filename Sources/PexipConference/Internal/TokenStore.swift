@@ -3,11 +3,8 @@ import PexipInfinityClient
 
 // MARK: - Protocols
 
-protocol TokenProvider: AnyObject {
+protocol TokenStore {
     func token() async throws -> Token
-}
-
-protocol TokenStore: TokenProvider {
     func updateToken(withTask task: Task<Token, Error>) async throws
 }
 

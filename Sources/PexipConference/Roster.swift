@@ -4,6 +4,7 @@ import PexipInfinityClient
 
 // MARK: - Delegate
 
+/// Participant events
 public enum ParticipantEvent: Hashable {
     case added(Participant)
     case updated(Participant)
@@ -11,12 +12,14 @@ public enum ParticipantEvent: Hashable {
     case reloaded([Participant])
 }
 
+/// The object that acts as the delegate of the roster list.
 public protocol RosterDelegate: AnyObject {
     func roster(_ roster: Roster, didReceiveParticipantEvent event: ParticipantEvent)
 }
 
 // MARK: - Roster list
 
+/// The full participant list of the conference
 public final class Roster: ObservableObject {
     public typealias ReloadParticipants = () async throws -> [Participant]
 

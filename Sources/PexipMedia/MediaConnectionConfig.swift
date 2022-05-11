@@ -8,20 +8,22 @@ public struct MediaConnectionConfig {
     ]
     public static let googleIceServer = IceServer(urls: googleStunUrls)
 
+    public let signaling: MediaConnectionSignaling
     public let iceServers: [IceServer]
     public let presentationInMain: Bool
-    public let mainQualityProfile: QualityProfile
 
     public init(
+        signaling: MediaConnectionSignaling,
         iceServers: [IceServer] = [],
-        presentationInMain: Bool = false,
-        mainQualityProfile: QualityProfile = .medium
+        presentationInMain: Bool = false
     ) {
+        self.signaling = signaling
+
         let iceServers = iceServers.filter { !$0.urls.isEmpty }
         self.iceServers = iceServers.isEmpty
             ? [Self.googleIceServer]
             : iceServers
+
         self.presentationInMain = presentationInMain
-        self.mainQualityProfile = mainQualityProfile
     }
 }

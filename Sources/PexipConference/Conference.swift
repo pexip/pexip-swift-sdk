@@ -6,13 +6,22 @@ import PexipUtils
 
 // MARK: - Protocol
 
+/// Conference is responsible for media signaling, token refreshing
+/// and handling of the conference events.
 public protocol Conference {
+    /// The object that acts as the delegate of the conference.
     var delegate: ConferenceDelegate? { get set }
+    /// The publisher that publishes conference events
     var eventPublisher: AnyPublisher<ConferenceEvent, Never> { get }
-    var mainSignaling: MediaConnectionSignaling { get }
+    /// The object responsible for setting up and controlling a communication session
+    var signaling: MediaConnectionSignaling { get }
+    /// The object responsible for sending and receiving text messages in the conference
     var chat: Chat? { get }
+    // The full participant list of the conference
     var roster: Roster { get }
+    /// Subscribes to an HTTP EventSource which feeds events from the conference as they occur
     func join() async
+    /// Leaves the conference. Once left, the ``Conference`` object is no longer valid.
     func leave() async throws
 }
 
@@ -24,7 +33,7 @@ final class InfinityConference: Conference {
         eventSubject.eraseToAnyPublisher()
     }
 
-    let mainSignaling: MediaConnectionSignaling
+    let signaling: MediaConnectionSignaling
     let chat: Chat?
     let roster: Roster
 
@@ -34,7 +43,6 @@ final class InfinityConference: Conference {
     private let logger: Logger?
     private var eventSourceTask: Task<Void, Never>?
     private var eventSubject = PassthroughSubject<ConferenceEvent, Never>()
-    private var isActive = Isolated(false)
     private var isClientDisconnected = Isolated(false)
 
     // MARK: - Init
@@ -42,7 +50,7 @@ final class InfinityConference: Conference {
     init(
         conferenceName: String,
         tokenRefresher: TokenRefresher,
-        mainSignaling: MediaConnectionSignaling,
+        signaling: MediaConnectionSignaling,
         eventSource: EventSource,
         chat: Chat?,
         roster: Roster,
@@ -50,7 +58,7 @@ final class InfinityConference: Conference {
     ) {
         self.conferenceName = conferenceName
         self.tokenRefresher = tokenRefresher
-        self.mainSignaling = mainSignaling
+        self.signaling = signaling
         self.eventSource = eventSource
         self.chat = chat
         self.roster = roster
@@ -59,12 +67,14 @@ final class InfinityConference: Conference {
         Task {
             await tokenRefresher.startRefreshing()
         }
+
+        logger?.info("Joining \(conferenceName) as an API client")
     }
 
     // MARK: - Public API
 
     func join() async {
-        guard await !isActive.value, await !isClientDisconnected.value else {
+        guard await !eventSource.isOpen, await !isClientDisconnected.value else {
             return
         }
 
@@ -74,15 +84,9 @@ final class InfinityConference: Conference {
                 await handleServerMessage(message)
             }
         }
-        logger?.info("Joining \(conferenceName)")
-        await isActive.setValue(true)
     }
 
     func leave() async throws {
-        guard await isActive.value else {
-            return
-        }
-
         logger?.info("Leaving \(conferenceName)")
         eventSourceTask?.cancel()
         await roster.clear()
@@ -90,13 +94,6 @@ final class InfinityConference: Conference {
         await tokenRefresher.endRefreshing(
             withTokenRelease: await !isClientDisconnected.value
         )
-        await isActive.setValue(false)
-    }
-
-    // MARK: - Private methods
-
-    private func leave(withTokenRelease: Bool) async {
-
     }
 
     // MARK: - Server events

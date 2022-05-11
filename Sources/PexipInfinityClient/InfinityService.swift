@@ -3,12 +3,13 @@ import PexipUtils
 
 // MARK: - Protocol
 
+/// A fluent client for Infinity REST API v2.
 public protocol InfinityService {
     /**
-     Creates a new ``RequestBuilder``.
+     Creates a new ``NodeService``.
      - Parameters:
         - url: A conferencing node address in the form of https://example.com
-     - Returns: A new instance of ``RequestBuilder``
+     - Returns: A new instance of ``NodeService``
      */
     func node(url: URL) -> NodeService
 }

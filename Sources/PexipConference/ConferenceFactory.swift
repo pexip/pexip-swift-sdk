@@ -3,17 +3,31 @@ import PexipMedia
 import PexipInfinityClient
 import PexipUtils
 
+/// ConferenceFactory provides factory methods to create conference objects.
 public struct ConferenceFactory {
     private let logger: Logger?
 
     // MARK: - Init
 
+    /**
+     Creates a new instance of ``ConferenceFactory``
+     - Parameters:
+        - logger: An optional object for writing messages to the logging system of choice
+     */
     public init(logger: Logger? = DefaultLogger.conference) {
         self.logger = logger
     }
 
     // MARK: - Public methods
 
+    /**
+     Creates a new instance of ``Conference`` type.
+     - Parameters:
+        - service: A client for Infinity REST API v2
+        - node: A conferencing node address in the form of https://example.com
+        - alias: A conference alias
+        - token: A token of the conference
+     */
     public func conference(
         service: InfinityService,
         node: URL,
@@ -22,9 +36,6 @@ public struct ConferenceFactory {
     ) -> Conference {
         let service = service.node(url: node).conference(alias: alias)
         let tokenStore = DefaultTokenStore(token: token)
-        func signaling() -> MediaConnectionSignaling {
-            self.signaling(token: token, tokenStore: tokenStore, service: service)
-        }
 
         return InfinityConference(
             conferenceName: token.conferenceName,
@@ -33,7 +44,11 @@ public struct ConferenceFactory {
                 store: tokenStore,
                 logger: logger
             ),
-            mainSignaling: signaling(),
+            signaling: ConferenceSignaling(
+                participantService: service.participant(id: token.participantId),
+                tokenStore: tokenStore,
+                logger: logger
+            ),
             eventSource: DefaultEventSource(
                 service: service.eventSource(),
                 tokenStore: tokenStore,
@@ -46,18 +61,6 @@ public struct ConferenceFactory {
     }
 
     // MARK: - Private methods
-
-    private func signaling(
-        token: Token,
-        tokenStore: TokenStore,
-        service: ConferenceService
-    ) -> MediaConnectionSignaling {
-        ConferenceSignaling(
-            participantService: service.participant(id: token.participantId),
-            tokenStore: tokenStore,
-            logger: logger
-        )
-    }
 
     private func chat(
         token: Token,

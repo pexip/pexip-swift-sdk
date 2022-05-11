@@ -1,22 +1,26 @@
 import XCTest
 import AVFoundation
+#if os(iOS)
+import UIKit
+#else
+import AppKit
+#endif
 @testable import PexipMedia
 
 final class MediaCapturePermissionTests: XCTestCase {
     private var permission: MediaCapturePermission!
-    private var settingsOpener: SettingsOpenerMock!
+    private var urlOpener: URLOpenerMock!
+    #if os(iOS)
+    private let settingsURLString = UIApplication.openSettingsURLString
+    #endif
 
     // MARK: - Setup
 
     override func setUp() {
         super.setUp()
         CaptureDevice.status = .notDetermined
-        settingsOpener = SettingsOpenerMock()
-        permission = MediaCapturePermission(
-            mediaType: .video,
-            captureDeviceType: CaptureDevice.self,
-            settingsOpener: settingsOpener
-        )
+        urlOpener = URLOpenerMock()
+        permission = permission(for: .video)
     }
 
     // MARK: - Tests
@@ -77,13 +81,45 @@ final class MediaCapturePermissionTests: XCTestCase {
         XCTAssertEqual(status, CaptureDevice.status)
     }
 
-    func testRequestAccessOpenSettingsIfNeeded() async throws {
+    func testRequestAccessOpenAudioSettingsIfNeeded() async throws {
+        permission = permission(for: .audio)
         CaptureDevice.status = .denied
         await permission.requestAccess(openSettingsIfNeeded: true)
 
+        #if os(iOS)
+        XCTAssertEqual(urlOpener.url?.absoluteString, settingsURLString)
+        #else
         XCTAssertEqual(
-            settingsOpener.url,
-            settingsOpener.openSettingsURL
+            urlOpener.url?.absoluteString,
+            "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone"
+        )
+        #endif
+    }
+
+    func testRequestAccessOpenVideoSettingsIfNeeded() async throws {
+        permission = permission(for: .video)
+        CaptureDevice.status = .denied
+        await permission.requestAccess(openSettingsIfNeeded: true)
+
+        #if os(iOS)
+        XCTAssertEqual(urlOpener.url?.absoluteString, settingsURLString)
+        #else
+        XCTAssertEqual(
+            urlOpener.url?.absoluteString,
+            "x-apple.systempreferences:com.apple.preference.security?Privacy_Camera"
+        )
+        #endif
+    }
+
+    // MARK: - Helpers
+
+    private func permission(
+        for mediaType: MediaCapturePermission.MediaType
+    ) -> MediaCapturePermission {
+        MediaCapturePermission(
+            mediaType: mediaType,
+            captureDeviceType: CaptureDevice.self,
+            urlOpener: urlOpener
         )
     }
 }
@@ -102,14 +138,11 @@ private final class CaptureDevice: AVCaptureDevice {
     }
 }
 
-private final class SettingsOpenerMock: SettingsOpener {
+private final class URLOpenerMock: URLOpener {
     private(set) var url: URL?
 
-    var openSettingsURL: URL? {
-        URL(string: "settings://test")
-    }
-
-    func open(_ url: URL) {
+    func open(_ url: URL) -> Bool {
         self.url = url
+        return true
     }
 }

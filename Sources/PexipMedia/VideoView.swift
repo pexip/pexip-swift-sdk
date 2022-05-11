@@ -3,29 +3,15 @@ import SwiftUI
 // MARK: - SwiftUI
 
 public struct VideoComponent: View {
-    public enum ContentMode {
-        /// Horizontal aspect ratio, e.g 16:9
-        case horizontal
-        /// Vertical aspect ratio, e.g 9:16
-        case vertical
-        /// Fill the parent context
-        case fill
-    }
-
     private let track: VideoTrack
-    private let contentMode: ContentMode
+    private let contentMode: VideoContentMode
     private let isMirrored: Bool
+    private let isReversed: Bool
     private var aspectRatio: CGSize? {
-        switch contentMode {
-        case .horizontal:
-            return track.aspectRatio
-        case .vertical:
-            return CGSize(
-                width: track.aspectRatio.height,
-                height: track.aspectRatio.width
-            )
-        case .fill:
-            return nil
+        contentMode.aspectRatio.map {
+            isReversed
+                ? CGSize(width: $0.height, height: $0.width)
+                : $0
         }
     }
 
@@ -34,15 +20,19 @@ public struct VideoComponent: View {
         - track: Video track
         - contentMode: Indicates whether the view should fit or fill the parent context
         - isMirrored: Indicates whether the video should be mirrored about its vertical axis
+        - isReversed: Indicates whether the aspect ratio numbers should
+                      get reversed (for vertical video)
      */
     public init(
         track: VideoTrack,
-        contentMode: ContentMode = .horizontal,
-        isMirrored: Bool = false
+        contentMode: VideoContentMode,
+        isMirrored: Bool = false,
+        isReversed: Bool = false
     ) {
         self.track = track
         self.contentMode = contentMode
         self.isMirrored = isMirrored
+        self.isReversed = isReversed
     }
 
     public var body: some View {
@@ -61,7 +51,7 @@ public struct VideoComponent: View {
         VideoViewWrapper(
             track: track,
             isMirrored: isMirrored,
-            aspectFit: contentMode != .fill
+            aspectFit: aspectRatio != nil
         )
     }
 }

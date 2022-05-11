@@ -3,6 +3,7 @@ public enum PresentationType: String, Encodable {
     case receive
 }
 
+/// The object responsible for setting up and controlling a communication session.
 public protocol MediaConnectionSignaling {
     func sendOffer(
         callType: String,

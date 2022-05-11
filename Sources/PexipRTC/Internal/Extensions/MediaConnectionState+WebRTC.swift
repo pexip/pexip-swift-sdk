@@ -1,14 +1,7 @@
 import WebRTC
+import PexipMedia
 
-public enum ConnectionState: String, CustomStringConvertible, CaseIterable {
-    case new
-    case connecting
-    case connected
-    case disconnected
-    case failed
-    case closed
-    case unknown
-
+extension MediaConnectionState {
     init(_ value: RTCPeerConnectionState) {
         switch value {
         case .new:
@@ -26,9 +19,5 @@ public enum ConnectionState: String, CustomStringConvertible, CaseIterable {
         @unknown default:
             self = .unknown
         }
-    }
-
-    public var description: String {
-        rawValue.capitalized
     }
 }

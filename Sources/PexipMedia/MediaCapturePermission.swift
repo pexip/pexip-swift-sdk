@@ -1,25 +1,26 @@
 import AVFoundation
+
 #if os(iOS)
 import UIKit
+#else
+import AppKit
 #endif
 
 // MARK: - Protocols
 
-protocol SettingsOpener {
-    var openSettingsURL: URL? { get }
-    func open(_ url: URL)
+protocol URLOpener {
+    func open(_ url: URL) -> Bool
 }
 
 #if os(iOS)
-extension UIApplication: SettingsOpener {
-    var openSettingsURL: URL? {
-        URL(string: UIApplication.openSettingsURLString)
-    }
-
-    func open(_ url: URL) {
+extension UIApplication: URLOpener {
+    func open(_ url: URL) -> Bool {
         open(url, options: [:], completionHandler: nil)
+        return true
     }
 }
+#else
+extension NSWorkspace: URLOpener {}
 #endif
 
 // MARK: - Implementation
@@ -41,27 +42,20 @@ public struct MediaCapturePermission {
 
     let mediaType: AVMediaType
     private let captureDevice: AVCaptureDevice.Type
-    private let settingsOpener: SettingsOpener?
+    private let urlOpener: URLOpener
 
     // MARK: - Init
-
-    #if os(iOS) && !targetEnvironment(macCatalyst)
-    init(mediaType: MediaType) {
-        self.init(
-            mediaType: mediaType,
-            settingsOpener: UIApplication.shared
-        )
-    }
-    #else
-    init(mediaType: MediaType) {
-        self.init(mediaType: mediaType, settingsOpener: nil)
-    }
-    #endif
 
     init(
         mediaType: MediaType,
         captureDeviceType: AVCaptureDevice.Type = AVCaptureDevice.self,
-        settingsOpener: SettingsOpener?
+        urlOpener: URLOpener = {
+            #if os(iOS)
+            UIApplication.shared
+            #else
+            NSWorkspace.shared
+            #endif
+        }()
     ) {
         switch mediaType {
         case .audio:
@@ -71,7 +65,7 @@ public struct MediaCapturePermission {
         }
 
         self.captureDevice = captureDeviceType
-        self.settingsOpener = settingsOpener
+        self.urlOpener = urlOpener
     }
 
     // MARK: - Public
@@ -108,8 +102,17 @@ public struct MediaCapturePermission {
     }
 
     private func openSettings() {
-        if let url = settingsOpener?.openSettingsURL {
-            settingsOpener?.open(url)
+        #if os(iOS)
+        let url = URL(string: UIApplication.openSettingsURLString)
+        #else
+        let setting = mediaType == .video ? "Privacy_Camera" : "Privacy_Microphone"
+        let url = URL(
+            string: "x-apple.systempreferences:com.apple.preference.security?\(setting)"
+        )
+        #endif
+
+        if let url = url {
+            _ = urlOpener.open(url)
         }
     }
 }

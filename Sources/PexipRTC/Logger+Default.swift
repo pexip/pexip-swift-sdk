@@ -3,6 +3,7 @@ import Foundation
 import PexipUtils
 
 public extension DefaultLogger {
+    /// Default logger for PexipRTC framework
     static let mediaWebRTC = DefaultLogger(
         logContainer: OSLog(
             subsystem: Bundle(

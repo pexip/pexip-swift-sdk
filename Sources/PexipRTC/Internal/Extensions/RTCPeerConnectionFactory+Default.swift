@@ -1,11 +1,11 @@
 import WebRTC
 
 extension RTCPeerConnectionFactory {
-    static let `default`: RTCPeerConnectionFactory = {
+    static func defaultFactory() -> RTCPeerConnectionFactory {
         RTCInitializeSSL()
         #if targetEnvironment(simulator) || os(macOS)
-        let videoEncoderFactory = RTCVideoEncoderFactoryVP8()
-        let videoDecoderFactory = RTCVideoDecoderFactoryVP8()
+        let videoEncoderFactory = VideoEncoderFactoryVP8()
+        let videoDecoderFactory = VideoDecoderFactoryVP8()
         #else
         let videoEncoderFactory = RTCVideoEncoderFactoryH264()
         let videoDecoderFactory = RTCVideoDecoderFactoryH264()
@@ -14,5 +14,5 @@ extension RTCPeerConnectionFactory {
             encoderFactory: videoEncoderFactory,
             decoderFactory: videoDecoderFactory
         )
-    }()
+    }
 }

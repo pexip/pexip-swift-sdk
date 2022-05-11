@@ -8,7 +8,7 @@ struct SessionDescriptionMangler {
     let sdp: String
 
     func mangle(
-        mainQualityProfile: QualityProfile,
+        mainQualityProfile: QualityProfile?,
         mainAudioMid: String? = nil,
         mainVideoMid: String? = nil,
         presentationVideoMid: String? = nil
@@ -36,9 +36,11 @@ struct SessionDescriptionMangler {
                 let isVideoSection = section == "video"
                 let isConnectionLine = line.starts(with: "c=")
 
-                if addBandwidth && isVideoSection && isConnectionLine  {
-                    modifiedLines.append("b=AS:\(mainQualityProfile.bandwidth)")
-                    addBandwidth = false
+                if let mainQualityProfile = mainQualityProfile {
+                    if addBandwidth && isVideoSection && isConnectionLine  {
+                        modifiedLines.append("b=AS:\(mainQualityProfile.bandwidth)")
+                        addBandwidth = false
+                    }
                 }
             }
         }
