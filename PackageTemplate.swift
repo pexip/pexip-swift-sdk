@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "Pexip",
+    name: "PexipSDK",
     platforms: [
         .iOS(.v13),
         .macOS(.v10_15)
@@ -39,7 +39,8 @@ let package = Package(
             dependencies: [
                 .target(name: "PexipConference"),
                 .target(name: "PexipInfinityClient"),
-                .target(name: "PexipMedia")
+                .target(name: "PexipMedia"),
+                .target(name: "PexipUtils")
             ],
             path: "Sources/PexipConference"
         ),

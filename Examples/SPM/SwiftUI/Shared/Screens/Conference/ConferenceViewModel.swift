@@ -78,7 +78,7 @@ final class ConferenceViewModel: ObservableObject {
         Task { @MainActor in
             do {
                 try await mediaConnection.start()
-                await conference.join()
+                await conference.receiveEvents()
             } catch {
                 state = .preflight
                 debugPrint(error)
