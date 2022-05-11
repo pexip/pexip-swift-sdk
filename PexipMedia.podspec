@@ -1,9 +1,10 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipMedia'
     s.version      = '0.1.0'
-    s.summary      = 'Core components for working with audio and video in the Pexip SDK'
+    s.summary      = 'Core components for working with audio and video in the Pexip Swift SDK'
     s.description  = <<-DESC
-                     Core components for working with audio and video in the Pexip SDK.
+                     Pexip Swift SDK is designed for use by iOS/macOS voice/video applications 
+                     that want to initiate or connect to conferences hosted on the Pexip Infinity platform.
                      DESC
     s.homepage     = 'https://github.com/pexip'
     s.license      = {
