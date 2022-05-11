@@ -3,7 +3,8 @@ Pod::Spec.new do |s|
     s.version      = '96.0.4664'
     s.summary      = 'WebRTC binaries for Apple platforms'
     s.description  = <<-DESC
-                     WebRTC binaries for Apple platforms
+                     WebRTC is a free and open-source project providing web browsers and 
+                     mobile applications with real-time communication.
                      DESC
     s.homepage     = 'https://webrtc.org'
     s.license      = {
