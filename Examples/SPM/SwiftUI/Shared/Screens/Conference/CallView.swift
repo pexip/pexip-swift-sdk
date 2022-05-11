@@ -1,12 +1,15 @@
 import SwiftUI
+import PexipMedia
 import PexipRTC
 import PexipConference
 
 struct CallView: View {
-    let mainLocalVideoTrack: VideoTrack?
+    let cameraVideoTrack: VideoTrack?
     let mainRemoteVideoTrack: VideoTrack?
     let presentationRemoteVideoTrack: VideoTrack?
     let presenterName: String?
+    let cameraQualityProfile: QualityProfile
+    let remoteVideoContentMode: VideoContentMode
     @Binding var showingChat: Bool?
     @Binding var showingParticipants: Bool
     @Binding var cameraEnabled: Bool
@@ -98,12 +101,12 @@ private extension CallView {
             if let track = presentationRemoteVideoTrack {
                 VideoComponent(
                     track: track,
-                    contentMode: .horizontal
+                    contentMode: remoteVideoContentMode
                 ).edgesIgnoringSafeArea(.all)
             } else if let track = mainRemoteVideoTrack {
                 VideoComponent(
                     track: track,
-                    contentMode: .horizontal
+                    contentMode: remoteVideoContentMode
                 ).edgesIgnoringSafeArea(.all)
             }
         }
@@ -116,7 +119,7 @@ private extension CallView {
         mainRemoteVideoTrack.map { track in
             VideoComponent(
                 track: track,
-                contentMode: .horizontal
+                contentMode: .fit_16x9
             )
             .frame(height: height)
             .cornerRadius(10)
@@ -128,13 +131,12 @@ private extension CallView {
         let size = smallVideoViewSize(for: geometry)
         let isLandscape = isLandscape(geometry: geometry)
 
-        mainLocalVideoTrack.map { track in
+        cameraVideoTrack.map { track in
             VideoComponent(
                 track: track,
-                contentMode: isLandscape
-                    ? .horizontal
-                    : .vertical,
-                isMirrored: true
+                contentMode: .fitQualityProfile(cameraQualityProfile),
+                isMirrored: true,
+                isReversed: !isLandscape
             )
             .cornerRadius(10)
             .frame(
@@ -236,10 +238,14 @@ struct CallView_Previews: PreviewProvider {
 
     private static func callView(withPresentation: Bool) -> some View {
         CallView(
-            mainLocalVideoTrack: VideoTrackMock(.lightGray),
+            cameraVideoTrack: VideoTrackMock(.lightGray),
             mainRemoteVideoTrack: VideoTrackMock(.darkGray),
-            presentationRemoteVideoTrack: withPresentation ? VideoTrackMock(.purple): nil,
+            presentationRemoteVideoTrack: withPresentation
+                ? VideoTrackMock(.purple)
+                : nil,
             presenterName: withPresentation ? "Presenter" : nil,
+            cameraQualityProfile: .high,
+            remoteVideoContentMode: .fit_16x9,
             showingChat: .constant(false),
             showingParticipants: .constant(false),
             cameraEnabled: .constant(true),

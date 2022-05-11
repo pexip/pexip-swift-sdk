@@ -1,6 +1,5 @@
 import Combine
 import SwiftUI
-import PexipInfinityClient
 import PexipRTC
 import PexipConference
 import PexipMedia
@@ -27,34 +26,38 @@ final class ConferenceViewModel: ObservableObject {
     @Published private(set) var cameraEnabled = false
     @Published private(set) var microphoneEnabled = false
     @Published private(set) var modal: Modal?
-    @Published private(set) var mainLocalVideoTrack: VideoTrack?
     @Published private(set) var mainRemoteVideoTrack: VideoTrack?
     @Published private(set) var presentationRemoteVideoTrack: VideoTrack?
     @Published private(set) var presenterName: String?
+    let cameraVideoTrack: CameraVideoTrack?
+    let cameraQualityProfile: QualityProfile = .high
+    let remoteVideoContentMode: VideoContentMode = .fit_16x9
     var chat: Chat? { conference.chat }
     var roster: Roster { conference.roster }
 
     private let conference: Conference
-    private let mediaConnection: WebRTCMediaConnection
-    private var cancellables = Set<AnyCancellable>()
+    private var mediaConnection: MediaConnection
+    private let mainLocalAudioTrack: LocalAudioTrack
     private let onComplete: () -> Void
     private let videoPermission = MediaCapturePermission.video
     private let audioPermission = MediaCapturePermission.audio
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
 
     init(
         conference: Conference,
-        mediaConnection: WebRTCMediaConnection,
+        mediaConnection: MediaConnection,
+        cameraVideoTrack: CameraVideoTrack?,
+        mainLocalAudioTrack: LocalAudioTrack,
         onComplete: @escaping () -> Void
     ) {
         self.conference = conference
         self.mediaConnection = mediaConnection
+        self.cameraVideoTrack = cameraVideoTrack
+        self.mainLocalAudioTrack = mainLocalAudioTrack
         self.onComplete = onComplete
         self.state = .preflight
-
-        mediaConnection.sendMainAudio()
-        mediaConnection.sendMainVideo()
 
         setCameraEnabled(videoPermission.isAuthorized)
         setMicrophoneEnabled(audioPermission.isAuthorized)
@@ -66,11 +69,16 @@ final class ConferenceViewModel: ObservableObject {
 
     func join() {
         state = .connecting
+        mediaConnection.sendMainAudio(localAudioTrack: mainLocalAudioTrack)
+
+        if let cameraVideoTrack = cameraVideoTrack {
+            mediaConnection.sendMainVideo(localVideoTrack: cameraVideoTrack)
+        }
 
         Task { @MainActor in
             do {
-                await conference.join()
                 try await mediaConnection.start()
+                await conference.join()
             } catch {
                 state = .preflight
                 debugPrint(error)
@@ -79,16 +87,24 @@ final class ConferenceViewModel: ObservableObject {
     }
 
     func leave() {
-        Task { @MainActor in
+        state = .disconnected
+
+        Task {
+            try await conference.leave()
             mediaConnection.stop()
-            await leaveConference()
+            setCameraEnabled(false)
+            setMicrophoneEnabled(false)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.onComplete()
+            }
         }
     }
 
     func cancel() {
-        Task { @MainActor in
-            mediaConnection.stop()
-            await leaveConference()
+        setCameraEnabled(false)
+        setMicrophoneEnabled(false)
+        Task {
+            try await conference.leave()
             onComplete()
         }
     }
@@ -96,7 +112,7 @@ final class ConferenceViewModel: ObservableObject {
     func toggleCamera() {
         #if os(iOS)
         Task {
-            try await mediaConnection.toggleMainCaptureCamera()
+            try await cameraVideoTrack?.toggleCamera()
         }
         #endif
     }
@@ -107,10 +123,12 @@ final class ConferenceViewModel: ObservableObject {
                 if await videoPermission.requestAccess(
                     openSettingsIfNeeded: true
                 ) == .authorized {
-                    try await mediaConnection.startMainCapture()
+                    try await cameraVideoTrack?.startCapture(
+                        profile: cameraQualityProfile
+                    )
                 }
             } else {
-                try await mediaConnection.stopMainCapture()
+                cameraVideoTrack?.stopCapture()
             }
         }
     }
@@ -121,10 +139,10 @@ final class ConferenceViewModel: ObservableObject {
                 if await audioPermission.requestAccess(
                     openSettingsIfNeeded: true
                 ) == .authorized {
-                    try await mediaConnection.muteAudio(enabled)
+                    try await mainLocalAudioTrack.startCapture()
                 }
             } else {
-                try await mediaConnection.muteAudio(enabled)
+                mainLocalAudioTrack.stopCapture()
             }
         }
     }
@@ -148,37 +166,27 @@ final class ConferenceViewModel: ObservableObject {
                     self.state = .connected
                 case .failed, .closed, .disconnected:
                     self.state = .disconnected
-                    self.mediaConnection.stop()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                        self?.onComplete()
-                    }
                 case .unknown:
                     break
                 }
             }
             .store(in: &cancellables)
 
-        mediaConnection.$mainRemoteVideoTrack
-            .assign(to: \.mainRemoteVideoTrack, on: self)
-            .store(in: &cancellables)
-
-        mediaConnection.$mainLocalVideoTrack
-            .assign(to: \.mainLocalVideoTrack, on: self)
-            .store(in: &cancellables)
-
-        mediaConnection.$presentationRemoteVideoTrack
-            .assign(to: \.presentationRemoteVideoTrack, on: self)
-            .store(in: &cancellables)
-
-        mediaConnection.$isAudioMuted
+        mediaConnection.remoteVideoTracks.$mainTrack
             .receive(on: DispatchQueue.main)
-            .assign(to: \.microphoneEnabled, on: self)
-            .store(in: &cancellables)
+            .assign(to: &$mainRemoteVideoTrack)
 
-        mediaConnection.$isCapturingMainVideo
+        mediaConnection.remoteVideoTracks.$presentationTrack
             .receive(on: DispatchQueue.main)
-            .assign(to: \.cameraEnabled, on: self)
-            .store(in: &cancellables)
+            .assign(to: &$presentationRemoteVideoTrack)
+
+        cameraVideoTrack?.capturingStatus.$isCapturing
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$cameraEnabled)
+
+        mainLocalAudioTrack.capturingStatus.$isCapturing
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$microphoneEnabled)
     }
 
     private func addConferenceEventListeners() {
@@ -195,22 +203,12 @@ final class ConferenceViewModel: ObservableObject {
                         self.presenterName = nil
                         try self.mediaConnection.stopPresentationReceive()
                     case .clientDisconnected:
-                        Task {
-                            try await self.conference.leave()
-                        }
+                        self.leave()
                     }
                 } catch {
                     debugPrint("Cannot handle conference event, error: \(error)")
                 }
             }
             .store(in: &cancellables)
-    }
-
-    private func leaveConference() async {
-        do {
-            try await self.conference.leave()
-        } catch {
-            debugPrint(error)
-        }
     }
 }

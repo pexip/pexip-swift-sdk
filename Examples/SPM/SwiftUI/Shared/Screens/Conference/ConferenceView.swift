@@ -15,8 +15,8 @@ struct ConferenceView: View {
             return .constant(nil)
         } else {
             return Binding(
-                get: { viewModel.modal == .chat },
-                set: { value in
+                get: { [unowned viewModel] in viewModel.modal == .chat },
+                set: { [unowned viewModel] value in
                     viewModel.setModal(value == true ? .chat : nil)
                 }
             )
@@ -25,8 +25,8 @@ struct ConferenceView: View {
 
     private var showingParticipants: Binding<Bool> {
         Binding(
-            get: { viewModel.modal == .participants },
-            set: { value in
+            get: { [unowned viewModel] in viewModel.modal == .participants },
+            set: { [unowned viewModel] value in
                 viewModel.setModal(value ? .participants : nil)
             }
         )
@@ -34,8 +34,8 @@ struct ConferenceView: View {
 
     private var microphoneEnabled: Binding<Bool> {
         Binding(
-            get: { viewModel.microphoneEnabled },
-            set: { value in viewModel.setMicrophoneEnabled(value) }
+            get: { [unowned viewModel] in viewModel.microphoneEnabled },
+            set: { [unowned viewModel] value in viewModel.setMicrophoneEnabled(value) }
         )
     }
 
@@ -74,7 +74,7 @@ struct ConferenceView: View {
 
     private var preflightView: some View {
         PreflightView(
-            localVideoTrack: viewModel.mainLocalVideoTrack,
+            cameraVideoTrack: viewModel.cameraVideoTrack,
             cameraEnabled: cameraEnabled,
             microphoneEnabled: microphoneEnabled,
             onToggleCamera: viewModel.toggleCamera,
@@ -111,10 +111,12 @@ struct ConferenceView: View {
 
     private var callView: some View {
         CallView(
-            mainLocalVideoTrack: viewModel.mainLocalVideoTrack,
+            cameraVideoTrack: viewModel.cameraVideoTrack,
             mainRemoteVideoTrack: viewModel.mainRemoteVideoTrack,
             presentationRemoteVideoTrack: viewModel.presentationRemoteVideoTrack,
             presenterName: viewModel.presenterName,
+            cameraQualityProfile: viewModel.cameraQualityProfile,
+            remoteVideoContentMode: viewModel.remoteVideoContentMode,
             showingChat: showingChat,
             showingParticipants: showingParticipants,
             cameraEnabled: cameraEnabled,
@@ -179,7 +181,7 @@ struct ConferenceView: View {
     }
 
     private func modalSize(geometry: GeometryProxy) -> CGSize {
-        let aspectRatio = viewModel.mainRemoteVideoTrack?.aspectRatio
+        let aspectRatio = viewModel.remoteVideoContentMode.aspectRatio
             ?? CGSize(width: 16, height: 9)
         let videoHeight = geometry.size.width * aspectRatio.height / aspectRatio.width
 
@@ -215,13 +217,18 @@ struct ConferenceView_Previews: PreviewProvider {
     )
 
     static var previews: some View {
+        let factory = WebRTCMediaConnectionFactory()
+
         ConferenceView(
             viewModel: ConferenceViewModel(
                 conference: conference,
-                mediaConnection: WebRTCMediaConnection(
-                    config: MediaConnectionConfig(),
-                    signaling: conference.mainSignaling
+                mediaConnection: factory.createMediaConnection(
+                    config: MediaConnectionConfig(
+                        signaling: conference.signaling
+                    )
                 ),
+                cameraVideoTrack: factory.createCameraVideoTrack(),
+                mainLocalAudioTrack: factory.createLocalAudioTrack(),
                 onComplete: {}
             )
         )

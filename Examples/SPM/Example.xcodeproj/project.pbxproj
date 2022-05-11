@@ -20,12 +20,6 @@
 		DA1329E627A98EC500C2EA89 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA1329D427A98EC500C2EA89 /* Assets.xcassets */; };
 		DA7AC0FE281096B400739C4E /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADD2027F5D69A00A9AC3D /* AppCoordinator.swift */; };
 		DAB78D4F27E3953600CB17C9 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB78D4E27E3953600CB17C9 /* Utils.swift */; };
-		DABA6F69281817B1009A263A /* PexipConference in Frameworks */ = {isa = PBXBuildFile; productRef = DABA6F68281817B1009A263A /* PexipConference */; };
-		DABA6F6B281817D8009A263A /* PexipRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DABA6F6A281817D8009A263A /* PexipRTC */; };
-		DABA6F6D2818186F009A263A /* PexipConference in Frameworks */ = {isa = PBXBuildFile; productRef = DABA6F6C2818186F009A263A /* PexipConference */; };
-		DABA6F6F28181873009A263A /* PexipRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DABA6F6E28181873009A263A /* PexipRTC */; };
-		DABA6F712818187B009A263A /* PexipConference in Frameworks */ = {isa = PBXBuildFile; productRef = DABA6F702818187B009A263A /* PexipConference */; };
-		DABA6F732818187E009A263A /* PexipRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DABA6F722818187E009A263A /* PexipRTC */; };
 		DAFADC9427F50B6900A9AC3D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA1329D427A98EC500C2EA89 /* Assets.xcassets */; };
 		DAFADC9527F50B6D00A9AC3D /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB78D4E27E3953600CB17C9 /* Utils.swift */; };
 		DAFADCC527F50C1400A9AC3D /* CallButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADC9727F50C1400A9AC3D /* CallButtons.swift */; };
@@ -95,7 +89,7 @@
 		DA1329D427A98EC500C2EA89 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DA1329D927A98EC500C2EA89 /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA6E026127CFA48700DF88A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		DA81725A2825323A007CCA30 /* pexip-swift-sdk */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "pexip-swift-sdk"; path = ../..; sourceTree = "<group>"; };
+		DAAA9396282C2DAC00F801AE /* pexip-swift-sdk */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "pexip-swift-sdk"; path = ../..; sourceTree = "<group>"; };
 		DAB78D4E27E3953600CB17C9 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		DAE8989A282469DD006C30E8 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Configs/Debug.xcconfig; sourceTree = "<group>"; };
 		DAE8989B28246B12006C30E8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Configs/Release.xcconfig; sourceTree = "<group>"; };
@@ -136,8 +130,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DABA6F712818187B009A263A /* PexipConference in Frameworks */,
-				DABA6F732818187E009A263A /* PexipRTC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -145,8 +137,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DABA6F69281817B1009A263A /* PexipConference in Frameworks */,
-				DABA6F6B281817D8009A263A /* PexipRTC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -154,8 +144,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DABA6F6D2818186F009A263A /* PexipConference in Frameworks */,
-				DABA6F6F28181873009A263A /* PexipRTC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -215,11 +203,11 @@
 		DA1329CC27A98EC400C2EA89 = {
 			isa = PBXGroup;
 			children = (
-				DA8172592825323A007CCA30 /* Packages */,
 				DAE8989B28246B12006C30E8 /* Release.xcconfig */,
 				DAE8989A282469DD006C30E8 /* Debug.xcconfig */,
 				DAFADC9227F509D700A9AC3D /* SwiftUI */,
 				DA11B0BB27E9EA3900501E50 /* UIKit */,
+				DA8172592825323A007CCA30 /* Packages */,
 				DA1329DA27A98EC500C2EA89 /* Products */,
 				DA1329F027A9902500C2EA89 /* Frameworks */,
 			);
@@ -255,7 +243,7 @@
 		DA8172592825323A007CCA30 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				DA81725A2825323A007CCA30 /* pexip-swift-sdk */,
+				DAAA9396282C2DAC00F801AE /* pexip-swift-sdk */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
@@ -367,20 +355,12 @@
 		DAFADCAC27F50C1400A9AC3D /* Conference */ = {
 			isa = PBXGroup;
 			children = (
-				DAFADCAD27F50C1400A9AC3D /* ConferenceViewModel.swift */,
+				DAFADCB127F50C1400A9AC3D /* CallView.swift */,
 				DAFADCAE27F50C1400A9AC3D /* ConferenceView.swift */,
-				DAFADCAF27F50C1400A9AC3D /* Views */,
+				DAFADCAD27F50C1400A9AC3D /* ConferenceViewModel.swift */,
+				DAFADCB027F50C1400A9AC3D /* PreflightView.swift */,
 			);
 			path = Conference;
-			sourceTree = "<group>";
-		};
-		DAFADCAF27F50C1400A9AC3D /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				DAFADCB027F50C1400A9AC3D /* PreflightView.swift */,
-				DAFADCB127F50C1400A9AC3D /* CallView.swift */,
-			);
-			path = Views;
 			sourceTree = "<group>";
 		};
 		DAFADCB227F50C1400A9AC3D /* Chat */ = {
@@ -419,8 +399,6 @@
 			);
 			name = "Example (UIKit)";
 			packageProductDependencies = (
-				DABA6F702818187B009A263A /* PexipConference */,
-				DABA6F722818187E009A263A /* PexipRTC */,
 			);
 			productName = ExampleUIKit;
 			productReference = DA11B0BA27E9EA3900501E50 /* Example (UIKit).app */;
@@ -441,8 +419,6 @@
 			);
 			name = "Example (iOS)";
 			packageProductDependencies = (
-				DABA6F68281817B1009A263A /* PexipConference */,
-				DABA6F6A281817D8009A263A /* PexipRTC */,
 			);
 			productName = "Example (iOS)";
 			productReference = DA1329D927A98EC500C2EA89 /* Example.app */;
@@ -463,8 +439,6 @@
 			);
 			name = "Example (macOS)";
 			packageProductDependencies = (
-				DABA6F6C2818186F009A263A /* PexipConference */,
-				DABA6F6E28181873009A263A /* PexipRTC */,
 			);
 			productName = PexipVideoExample;
 			productReference = DAFADC8227F5083300A9AC3D /* Example (macOS).app */;
@@ -1060,33 +1034,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		DABA6F68281817B1009A263A /* PexipConference */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = PexipConference;
-		};
-		DABA6F6A281817D8009A263A /* PexipRTC */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = PexipRTC;
-		};
-		DABA6F6C2818186F009A263A /* PexipConference */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = PexipConference;
-		};
-		DABA6F6E28181873009A263A /* PexipRTC */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = PexipRTC;
-		};
-		DABA6F702818187B009A263A /* PexipConference */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = PexipConference;
-		};
-		DABA6F722818187E009A263A /* PexipRTC */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = PexipRTC;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DA1329CD27A98EC400C2EA89 /* Project object */;
 }

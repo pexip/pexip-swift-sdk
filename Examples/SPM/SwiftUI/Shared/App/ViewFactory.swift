@@ -72,29 +72,35 @@ struct ViewFactory: ViewFactoryProtocol {
         token: Token,
         onComplete: @escaping () -> Void
     ) -> ConferenceView {
+        let mediaConnectionFactory = WebRTCMediaConnectionFactory()
         let conference = conferenceFactory.conference(
             service: apiClientFactory.infinityService(),
             node: node,
             alias: alias,
             token: token
         )
-        let mediaConnection = WebRTCMediaConnection(
-            config: MediaConnectionConfig(
-                iceServers: [IceServer(urls: token.stunUrlStrings)],
-                presentationInMain: false,
-                mainQualityProfile: .high
-            ),
-            signaling: conference.mainSignaling
+        let mediaConnectionConfig = MediaConnectionConfig(
+            signaling: conference.signaling,
+            iceServers: [IceServer(urls: token.stunUrlStrings)],
+            presentationInMain: false
         )
         let viewModel = ConferenceViewModel(
             conference: conference,
-            mediaConnection: mediaConnection,
+            mediaConnection: mediaConnectionFactory.createMediaConnection(
+                config: mediaConnectionConfig
+            ),
+            cameraVideoTrack: mediaConnectionFactory.createCameraVideoTrack(),
+            mainLocalAudioTrack: mediaConnectionFactory.createLocalAudioTrack(),
             onComplete: onComplete
         )
         return ConferenceView(viewModel: viewModel)
     }
 
-    func chatView(chat: Chat, roster: Roster, onDismiss: @escaping () -> Void) -> ChatView {
+    func chatView(
+        chat: Chat,
+        roster: Roster,
+        onDismiss: @escaping () -> Void
+    ) -> ChatView {
         let viewModel = ChatViewModel(chat: chat, roster: roster)
         return ChatView(viewModel: viewModel, onDismiss: onDismiss)
     }
