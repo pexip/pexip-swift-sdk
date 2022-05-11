@@ -1,4 +1,4 @@
-# CocoaPods Demo app
+# CocoaPods Example app
 
 This example demonstrates how to install **Pexip Swift SDK** with Cocoa Pods. 
 
