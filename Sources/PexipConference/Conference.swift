@@ -19,8 +19,8 @@ public protocol Conference {
     var chat: Chat? { get }
     // The full participant list of the conference
     var roster: Roster { get }
-    /// Subscribes to an HTTP EventSource which feeds events from the conference as they occur
-    func join() async
+    /// Starts receiving conference events as they occur
+    func receiveEvents() async
     /// Leaves the conference. Once left, the ``Conference`` object is no longer valid.
     func leave() async throws
 }
@@ -73,7 +73,7 @@ final class InfinityConference: Conference {
 
     // MARK: - Public API
 
-    func join() async {
+    func receiveEvents() async {
         guard await !eventSource.isOpen, await !isClientDisconnected.value else {
             return
         }
