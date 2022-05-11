@@ -14,11 +14,7 @@ PODS:
 
 DEPENDENCIES:
   - PexipConference
-  - PexipInfinityClient
-  - PexipMedia
   - PexipRTC
-  - PexipUtils
-  - WebRTC
 
 SPEC REPOS:
   https://github.com/pexip/pexip-pod-specs.git:
@@ -37,6 +33,6 @@ SPEC CHECKSUMS:
   PexipUtils: 3843de9ee78b55772891d3a7fb47e130ab151801
   WebRTC: 6b30c48182ce1ae1672bada68ccbb4e81ed20423
 
-PODFILE CHECKSUM: c290ceb9207f82b7891f4ba55688461f6f7ae5f3
+PODFILE CHECKSUM: db0378f34d11d214a22f96948b53aa2a91f08b4a
 
 COCOAPODS: 1.11.3
