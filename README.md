@@ -5,13 +5,14 @@
 [![CocoaPods Compatible](https://img.shields.io/badge/CocoaPods-compatible-green?style=flat-square)](https://img.shields.io/badge/CocoaPods-compatible-green?style=flat-square)
 [![Swift Package Manager](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)
 
-Pexip Swift SDK is a collection of frameworks for self hosted [Pexip Infinity](https://docs.pexip.com/admin/admin_intro.htm) installations that enables customers to build bespoke applications for Apple platforms or add Pexip to existing mobile or desktop experienes and workflows.
+**Pexip Swift SDK** is a collection of frameworks for self hosted [Pexip Infinity](https://docs.pexip.com/admin/admin_intro.htm) installations that enables customers to build bespoke applications for Apple platforms or add Pexip to existing mobile or desktop experienes and workflows.
 
 - [Features](#features)
 - [Products](#products)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](https://github.com/pexip/pexip-swift-sdk/blob/main/Documentation/Usage.md)
+- [Examples](#examples)
 - [License](#license)
 
 ## Features
@@ -84,7 +85,14 @@ pod 'PexipRTC'
 - Download the archives from the [GitHub releases](https://github.com/pexip/pexip-swift-sdk/releases)
 - Add the xcframeworks as embedded frameworks to your target in Xcode
 
+## Examples
+
+- Check [Swift Package Manager example app](https://github.com/pexip/pexip-swift-sdk/tree/main/Examples/SPM) to learn how to integrate **Pexip Swift SDK** in your app.
+
+- Check [CocoaPods example app](https://github.com/pexip/pexip-swift-sdk/tree/main/Examples/CocoaPods) to 
+see how to install **Pexip Swift SDK** with Cocoa Pods.
+
 ## License
 
-Pexip Swift SDK is released under the Apache Software License, version 1.1. 
+**Pexip Swift SDK** is released under the Apache Software License, version 1.1. 
 See [LICENSE](https://github.com/pexip/pexip-swift-sdk/blob/main/LICENSE) for details.
