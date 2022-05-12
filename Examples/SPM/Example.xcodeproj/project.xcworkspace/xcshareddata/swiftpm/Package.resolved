@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "pexip-swift-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pexip/pexip-swift-sdk",
+      "state" : {
+        "revision" : "26466c67f760427b520eb05257a6f1b3694edde8",
+        "version" : "0.1.0"
+      }
+    }
+  ],
+  "version" : 2
+}

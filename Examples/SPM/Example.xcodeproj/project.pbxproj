@@ -18,6 +18,12 @@
 		DA11B0E127EA0C3100501E50 /* UIViewController+Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0DF27EA0BFF00501E50 /* UIViewController+Keyboard.swift */; };
 		DA11B0E527EA104200501E50 /* UserDefaultsBacked.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0E327EA103F00501E50 /* UserDefaultsBacked.swift */; };
 		DA1329E627A98EC500C2EA89 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA1329D427A98EC500C2EA89 /* Assets.xcassets */; };
+		DA652D95282D15DE00B67E43 /* PexipConference in Frameworks */ = {isa = PBXBuildFile; productRef = DA652D94282D15DE00B67E43 /* PexipConference */; };
+		DA652D97282D15DE00B67E43 /* PexipInfinityClient in Frameworks */ = {isa = PBXBuildFile; productRef = DA652D96282D15DE00B67E43 /* PexipInfinityClient */; };
+		DA652D99282D15DE00B67E43 /* PexipMedia in Frameworks */ = {isa = PBXBuildFile; productRef = DA652D98282D15DE00B67E43 /* PexipMedia */; };
+		DA652D9B282D15DE00B67E43 /* PexipRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DA652D9A282D15DE00B67E43 /* PexipRTC */; };
+		DA652D9D282D15DE00B67E43 /* PexipUtils in Frameworks */ = {isa = PBXBuildFile; productRef = DA652D9C282D15DE00B67E43 /* PexipUtils */; };
+		DA652D9F282D15DE00B67E43 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DA652D9E282D15DE00B67E43 /* WebRTC */; };
 		DA7AC0FE281096B400739C4E /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADD2027F5D69A00A9AC3D /* AppCoordinator.swift */; };
 		DAB78D4F27E3953600CB17C9 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB78D4E27E3953600CB17C9 /* Utils.swift */; };
 		DAFADC9427F50B6900A9AC3D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA1329D427A98EC500C2EA89 /* Assets.xcassets */; };
@@ -89,7 +95,6 @@
 		DA1329D427A98EC500C2EA89 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DA1329D927A98EC500C2EA89 /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA6E026127CFA48700DF88A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		DAAA9396282C2DAC00F801AE /* pexip-swift-sdk */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "pexip-swift-sdk"; path = ../..; sourceTree = "<group>"; };
 		DAB78D4E27E3953600CB17C9 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		DAE8989A282469DD006C30E8 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Configs/Debug.xcconfig; sourceTree = "<group>"; };
 		DAE8989B28246B12006C30E8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Configs/Release.xcconfig; sourceTree = "<group>"; };
@@ -137,6 +142,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA652D99282D15DE00B67E43 /* PexipMedia in Frameworks */,
+				DA652D9F282D15DE00B67E43 /* WebRTC in Frameworks */,
+				DA652D97282D15DE00B67E43 /* PexipInfinityClient in Frameworks */,
+				DA652D9D282D15DE00B67E43 /* PexipUtils in Frameworks */,
+				DA652D95282D15DE00B67E43 /* PexipConference in Frameworks */,
+				DA652D9B282D15DE00B67E43 /* PexipRTC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -243,7 +254,6 @@
 		DA8172592825323A007CCA30 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				DAAA9396282C2DAC00F801AE /* pexip-swift-sdk */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
@@ -419,6 +429,12 @@
 			);
 			name = "Example (iOS)";
 			packageProductDependencies = (
+				DA652D94282D15DE00B67E43 /* PexipConference */,
+				DA652D96282D15DE00B67E43 /* PexipInfinityClient */,
+				DA652D98282D15DE00B67E43 /* PexipMedia */,
+				DA652D9A282D15DE00B67E43 /* PexipRTC */,
+				DA652D9C282D15DE00B67E43 /* PexipUtils */,
+				DA652D9E282D15DE00B67E43 /* WebRTC */,
 			);
 			productName = "Example (iOS)";
 			productReference = DA1329D927A98EC500C2EA89 /* Example.app */;
@@ -475,6 +491,7 @@
 			);
 			mainGroup = DA1329CC27A98EC400C2EA89;
 			packageReferences = (
+				DA652D93282D15DE00B67E43 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */,
 			);
 			productRefGroup = DA1329DA27A98EC500C2EA89 /* Products */;
 			projectDirPath = "";
@@ -1034,6 +1051,50 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DA652D93282D15DE00B67E43 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pexip/pexip-swift-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DA652D94282D15DE00B67E43 /* PexipConference */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA652D93282D15DE00B67E43 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
+			productName = PexipConference;
+		};
+		DA652D96282D15DE00B67E43 /* PexipInfinityClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA652D93282D15DE00B67E43 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
+			productName = PexipInfinityClient;
+		};
+		DA652D98282D15DE00B67E43 /* PexipMedia */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA652D93282D15DE00B67E43 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
+			productName = PexipMedia;
+		};
+		DA652D9A282D15DE00B67E43 /* PexipRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA652D93282D15DE00B67E43 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
+			productName = PexipRTC;
+		};
+		DA652D9C282D15DE00B67E43 /* PexipUtils */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA652D93282D15DE00B67E43 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
+			productName = PexipUtils;
+		};
+		DA652D9E282D15DE00B67E43 /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA652D93282D15DE00B67E43 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
+			productName = WebRTC;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DA1329CD27A98EC400C2EA89 /* Project object */;
 }
