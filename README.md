@@ -91,6 +91,11 @@ pod 'PexipRTC'
 - Check [CocoaPods example app](https://github.com/pexip/pexip-swift-sdk/tree/main/Examples/CocoaPods) to 
 see how to install **Pexip Swift SDK** with Cocoa Pods.
 
+## WIP
+
+**Pexip Swift SDK** is still in active development, there will be breaking changes until we reach v1.0.
+If you have any questions about the SDK please contact your Pexip representative.
+
 ## License
 
 **Pexip Swift SDK** is released under the Apache Software License, version 1.1. 

@@ -40,7 +40,7 @@ let nodeResolver = apiClientFactory.nodeResolver(dnssec: false)
 // 2. Create a conference alias (force unwrapping is for example only)
 let alias = ConferenceAlias(uri: "conference@example.com")!
 
-// 3. Resolves the address of a Conferencing Node for the provided host
+// 3. Resolve the address of a Conferencing Node for the provided host
 let nodes = try await nodeResolver.resolveNodes(for: alias.host)
 
 // 4. Find the first available node
@@ -64,7 +64,7 @@ the conference alias alongside some properties:
 - SSO token
 
 The server might respond with a pin challenge. Then you do another call with 
-the same properties as step 1, and supply a pin as well.
+the same properties, and supply a pin as well.
 
 
 ```swift
@@ -79,7 +79,7 @@ let infinityService = apiClientFactory.infinityService()
 // 3. Request a token from the Pexip Conferencing Node
 do {
     let conferenceService = infinityService.node(url: node).conference(alias: alias)
-    // Check RequestTokenFields documentation to learn about all possible request properties
+    // Check RequestTokenFields documentation to read more about all possible request properties
     let fields = RequestTokenFields(displayName: displayName)
     let token = try await conferenceService.requestToken(
         fields: fields,
@@ -87,7 +87,7 @@ do {
     )
 } catch let error as TokenError {
     // The server might respond with a pin challenge, require SSO or conference extension.
-    // Check TokenError documentation to learn about all possible error types.
+    // Check TokenError documentation to read more about all possible error types.
 } catch {
     // ...
 }
@@ -96,12 +96,13 @@ do {
 ### Create a conference 
 
 When requesting a token you will get a response token. The response token is used to 
-create a `Conference` along with the node from the previous step and the conference alias.
+create a `Conference` along with the node from the previous steps and the conference alias.
 
 ```swift
 import PexipConference
 
 let conferenceFactory = ConferenceFactory(logger: DefaultLogger.conference)
+
 // Conference object starts refreshing the token when created.
 let conference = conferenceFactory.conference(
     service: infinityService,
@@ -143,7 +144,7 @@ you will need:
 - Stun URLs
 
 Use the Stun URLs to create an `Ice Server`. That server is used along with the active `Conference` 
-from the previous step, to create a `Media Connection`. At the same time you can set properties like:
+from the previous steps, to create a `Media Connection`. At the same time you can set properties like:
 - Video quality (medium, high, etc)
 - Presentation In Main
 
@@ -153,7 +154,6 @@ import PexipRTC
 
 let mediaConnectionFactory = WebRTCMediaConnectionFactory(logger: DefaultLogger.mediaWebRTC)
 
-// 1. Create media connection
 let config = MediaConnectionConfig(
     signaling: conference.signaling,
     iceServers: [IceServer(urls: token.stunUrlStrings)],
@@ -167,11 +167,11 @@ When having an active `Media Connection` you are able to do things like:
 - Start and stop the session
 
 ```swift
-// 2. Send audio and video
+// 1. Send audio and video
 mediaConnection.sendMainVideo(localVideoTrack: cameraVideoTrack)
 mediaConnection.sendMainAudio(localAudioTrack: mainLocalAudioTrack)
 
-// 3. Start a media session
+// 2. Start a media session
 try await mediaConnection.start()
 ```
 
@@ -268,17 +268,21 @@ import PexipMedia
 
 let view = VideoView()
 view.isMirrored = true
-track.setRenderer(view, aspectFit: true)   
+cameraVideoTrack.setRenderer(view, aspectFit: true)   
 ```
 
 ### Chat
 
 If chat is enabled for the conference, you can send and receive text messages with the help 
-of dedicated `Chat` object accessible from your `Conference`. 
+of dedicated `Chat` object accessible from the active `Conference`. 
 
 ```swift
 let chat = conference.chat
-chat?.sendMessage("Hello world!")
+
+// 1. Send a chat message 
+try await chat?.sendMessage("Hello world!")
+
+// 2. Receive incoming chat messages
 chat?.publisher.sink(receiveValue: { message in
     print("\(message.senderName): \(message.payload)")
 }).store(in: &cancellables)
@@ -286,13 +290,13 @@ chat?.publisher.sink(receiveValue: { message in
 
 ### Roster list
 
-Use the `Roster` object to get the full participant list of the conference, display name of 
-the current participant or subscribe to participant updates.
+Use the `Roster` object to get the full participant list of the conference 
+and subscribe to participant updates.
 
 ```swift
 let roster = conference.roster
 
-// 1. Render the names of all conference participants
+// 1. Render the names of all conference participants in SwiftUI
 ForEach(roster.participants) { participant in
     Text(participant.displayName)
 }
