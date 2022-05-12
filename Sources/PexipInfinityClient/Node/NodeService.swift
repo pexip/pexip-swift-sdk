@@ -6,10 +6,10 @@ import PexipUtils
 public protocol NodeService {
     var baseURL: URL { get }
     /**
-     Checks whether a Conferencing Node is in maintenance mode.
+     Checks the status of the conferencing node.
      - Parameters:
        - nodeAddress: a node address in the form of https://example.com
-     - Returns: False if the node is in maintenance mode, true otherwise
+     - Returns: False if the node is in maintenance mode, true if the node is available
      - Throws: `NodeError.nodeNotFound` if supplied `nodeAddress` doesn't have a deployment
      - Throws: `HTTPError.unacceptableStatusCode` if the response wasn't handled by the client
      - Throws: `Error` if another type of error was encountered during operation
