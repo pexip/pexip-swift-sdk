@@ -47,7 +47,7 @@ let package = Package(
         .binaryTarget(
             name: "PexipConference",
             url: "https://github.com/pexip/pexip-swift-sdk/releases/download/0.2.0/PexipConference.xcframework.zip",
-            checksum: "68d6ac8cf617990035fe66fffb175132f1f0eaca53946b6a8ad4fe5d1007ffeb"
+            checksum: "0dc20fdc87bbe8416298778c4ca05a023f12d1872ce19c04a7896e22b464c30c"
         ),
         // PexipInfinityClient
         .target(name: "PexipInfinityClientTargets",
@@ -60,7 +60,7 @@ let package = Package(
         .binaryTarget(
             name: "PexipInfinityClient",
             url: "https://github.com/pexip/pexip-swift-sdk/releases/download/0.2.0/PexipInfinityClient.xcframework.zip",
-            checksum: "be960d70fdd0d55d9a177cc87c4fdfd03883eca32e452b153197fd2e05b339dd"
+            checksum: "fc57256dabf58a02b103271c37121b2a841146449d99addebaa82ca071898db3"
         ),
         // PexipRTC
         .target(name: "PexipRTCTargets",
@@ -75,19 +75,19 @@ let package = Package(
         .binaryTarget(
             name: "PexipRTC",
             url: "https://github.com/pexip/pexip-swift-sdk/releases/download/0.2.0/PexipRTC.xcframework.zip",
-            checksum: "986a8f43d44755d7e27a9fbf59ebc2ae41fdf4e038f3ac486f6b098b945a7c8a"
+            checksum: "44cb87cdfec5ff38e05791133440b8e5870a2653afc7422df272be05e7dcdcc8"
         ),
         // PexipMedia
         .binaryTarget(
             name: "PexipMedia",
             url: "https://github.com/pexip/pexip-swift-sdk/releases/download/0.2.0/PexipMedia.xcframework.zip",
-            checksum: "6dd21f2098d5399016984970c33286dd5f1cac7f9f79e5bee6214e607471e36b"
+            checksum: "d1ca6e395896a8b967c4b96e5c8d8c7e52fb9b13e5b79106f1b11cc4a9333490"
         ),
         // PexipUtils
         .binaryTarget(
             name: "PexipUtils",
             url: "https://github.com/pexip/pexip-swift-sdk/releases/download/0.2.0/PexipUtils.xcframework.zip",
-            checksum: "32bcd1cd83039f8433cdab0fabaad5345d847b3be9d966d9bc66e5635cad247b"
+            checksum: "3618e2c0de032cf76f8ac3a3538e1cac501083a5c1871020c34bf71f5f6782b4"
         ),
         // WebRTC
         .binaryTarget(
