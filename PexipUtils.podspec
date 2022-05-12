@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipUtils'
-    s.version      = '0.1.0'
+    s.version      = '0.2.0'
     s.summary      = 'Pexip Swift SDK extensions, utilities and shared components.'
     s.description  = <<-DESC
                      Pexip Swift SDK is designed for use by iOS/macOS voice/video applications 
@@ -58,8 +58,8 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
     s.source = {
-      http: 'https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64686429.zip',
-      sha256: 'e4b6e8fead3f1fac86bae44e5317f27f88ed27b315aa45213d802ea891fe4160',
+      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/untagged-1c543b808d9d4f62485f/PexipUtils.xcframework.zip',
+      sha256: '9127507a58116de6b746ae7753193b9b4411f832fe939da0e593e85fe528f80e',
       type: 'zip',
       headers: ['Accept: application/octet-stream']
     }

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipConference'
-    s.version      = '0.1.0'
+    s.version      = '0.2.0'
     s.summary      = 'Core components for working with conferences hosted on the Pexip Infinity platform'
     s.description  = <<-DESC
                      Pexip Swift SDK is designed for use by iOS/macOS voice/video applications 
@@ -58,8 +58,8 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
     s.source = {
-      http: 'https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64686462.zip',
-      sha256: 'f06cc991c51f8e4b7e6644de5091dfc4fbc07a2154c17644ba2fb07ac032e472',
+      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/untagged-1c543b808d9d4f62485f/PexipConference.xcframework.zip',
+      sha256: '33652933aa75c035fe137530a36a5fa4db0a50378546dcc396f613f3549886fb',
       type: 'zip',
       headers: ['Accept: application/octet-stream']
     }

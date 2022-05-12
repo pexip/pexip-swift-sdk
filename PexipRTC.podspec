@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipRTC'
-    s.version      = '0.1.0'
+    s.version      = '0.2.0'
     s.summary      = 'Pexip WebRTC-based media stack for sending and receiving video streams.'
     s.description  = <<-DESC
                      Pexip Swift SDK is designed for use by iOS/macOS voice/video applications 
@@ -58,8 +58,8 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
     s.source = {
-      http: 'https://api.github.com/repos/pexip/pexip-swift-sdk/releases/assets/64686452.zip',
-      sha256: '0ff3a8e27142dce5c715754d539f81d9dfe724ac4e3de2036251ada25d68df0f',
+      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/untagged-1c543b808d9d4f62485f/PexipRTC.xcframework.zip',
+      sha256: '2990833e960ea03e74614abbc6feccc8895be361dc575f8b205bcd7842f0482c',
       type: 'zip',
       headers: ['Accept: application/octet-stream']
     }
