@@ -58,8 +58,8 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
     s.source = {
-      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/untagged-1c543b808d9d4f62485f/PexipMedia.xcframework.zip',
-      sha256: 'b226abb3e5e6fbcb4ea5fc81f7d3055372a946e7cf994171915df76593c45a52',
+      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/0.2.0/PexipMedia.xcframework.zip',
+      sha256: '6dd21f2098d5399016984970c33286dd5f1cac7f9f79e5bee6214e607471e36b',
       type: 'zip',
       headers: ['Accept: application/octet-stream']
     }
