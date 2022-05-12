@@ -5,7 +5,7 @@
 [![CocoaPods Compatible](https://img.shields.io/badge/CocoaPods-compatible-green?style=flat-square)](https://img.shields.io/badge/CocoaPods-compatible-green?style=flat-square)
 [![Swift Package Manager](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)
 
-**Pexip Swift SDK** is a collection of frameworks for self hosted [Pexip Infinity](https://docs.pexip.com/admin/admin_intro.htm) installations that enables customers to build bespoke applications for Apple platforms or add Pexip to existing mobile or desktop experienes and workflows.
+**Pexip Swift SDK** is a collection of frameworks for self hosted [Pexip Infinity](https://docs.pexip.com/admin/admin_intro.htm) installations that enables customers to build bespoke applications for Apple platforms or add Pexip to existing mobile or desktop experiences and workflows.
 
 - [Features](#features)
 - [Products](#products)
