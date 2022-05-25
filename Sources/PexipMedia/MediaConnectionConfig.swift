@@ -27,7 +27,9 @@ public struct MediaConnectionConfig {
     ) {
         self.signaling = signaling
 
-        let iceServers = iceServers.filter { !$0.urls.isEmpty }
+        let iceServers = (signaling.iceServers + iceServers).filter {
+            !$0.urls.isEmpty
+        }
         self.iceServers = iceServers.isEmpty
             ? [Self.googleIceServer]
             : iceServers

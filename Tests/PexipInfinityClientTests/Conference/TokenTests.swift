@@ -30,7 +30,14 @@ final class TokenTests: XCTestCase {
                 "version": {"pseudo_version": "25010.0.0", "version_id": "10"},
                 "service_type": "conference",
                 "chat_enabled": true,
-                "current_service_type": "conference"
+                "current_service_type": "conference",
+                "turn": [{
+                    "urls": [
+                        "turn:turn.pexip.com:1234"
+                    ],
+                    "username": "username",
+                    "credential": "password"
+                }]
             }
         }
         """
@@ -63,7 +70,13 @@ final class TokenTests: XCTestCase {
                 serviceType: "conference",
                 conferenceName: "Conference",
                 stun: [.init(url: "stun:stun.l.google.com:19302")],
+                turn: [.init(
+                    urls: ["turn:turn.pexip.com:1234"],
+                    username: "username",
+                    credential: "password"
+                )],
                 chatEnabled: true,
+                analyticsEnabled: true,
                 expiresString: "120"
             )
         )
@@ -82,7 +95,9 @@ final class TokenTests: XCTestCase {
             serviceType: "conference",
             conferenceName: "Conference",
             stun: [.init(url: "stun:stun.l.google.com:19302")],
+            turn: nil,
             chatEnabled: true,
+            analyticsEnabled: false,
             expiresString: "120"
         )
 
@@ -128,7 +143,9 @@ final class TokenTests: XCTestCase {
             serviceType: "conference",
             conferenceName: "Conference",
             stun: [.init(url: "stun:stun.l.google.com:19302")],
+            turn: [],
             chatEnabled: true,
+            analyticsEnabled: false,
             expiresString: "120"
         )
 
@@ -168,45 +185,11 @@ final class TokenTests: XCTestCase {
             serviceType: "test",
             conferenceName: "Conference",
             stun: [],
+            turn: [],
             chatEnabled: false,
+            analyticsEnabled: true,
             expiresString: "test"
         )
         XCTAssertEqual(token.expires, 0)
-    }
-
-    func testIceServers() {
-        let token = Token(
-            value: UUID().uuidString,
-            participantId: UUID(),
-            role: .guest,
-            displayName: "Name",
-            serviceType: "test",
-            conferenceName: "Conference",
-            stun: [
-                .init(url: "stun:stun.l.google.com:19302"),
-                .init(url: "stun:stun1.l.google.com:19302")
-            ],
-            chatEnabled: false,
-            expiresString: "test"
-        )
-        XCTAssertEqual(token.stunUrlStrings, [
-            "stun:stun.l.google.com:19302",
-            "stun:stun1.l.google.com:19302"
-        ])
-    }
-
-    func testIceServersWithoutStun() {
-        let token = Token(
-            value: UUID().uuidString,
-            participantId: UUID(),
-            role: .guest,
-            displayName: "Name",
-            serviceType: "test",
-            conferenceName: "Conference",
-            stun: nil,
-            chatEnabled: false,
-            expiresString: "test"
-        )
-        XCTAssertTrue(token.stunUrlStrings.isEmpty)
     }
 }

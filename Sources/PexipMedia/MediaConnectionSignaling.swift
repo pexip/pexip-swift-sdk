@@ -1,5 +1,8 @@
 /// The object responsible for setting up and controlling a communication session.
 public protocol MediaConnectionSignaling {
+    /// The list of ice servers.
+    var iceServers: [IceServer] { get }
+
     /**
      Sends a new local SDP.
      - Parameters:

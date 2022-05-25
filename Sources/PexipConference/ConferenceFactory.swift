@@ -47,6 +47,7 @@ public struct ConferenceFactory {
             signaling: ConferenceSignaling(
                 participantService: service.participant(id: token.participantId),
                 tokenStore: tokenStore,
+                iceServers: token.iceServers,
                 logger: logger
             ),
             eventSource: DefaultEventSource(
@@ -91,5 +92,19 @@ public struct ConferenceFactory {
                 service.participant(id: token.participantId).avatarURL()
             }
         )
+    }
+}
+
+// MARK: - Private extension
+
+private extension Token {
+    var iceServers: [IceServer] {
+        let stunIceServers = (stun ?? []).map {
+            IceServer(url: $0.url)
+        }
+        let turnIceServers = (turn ?? []).map {
+            IceServer(urls: $0.urls, username: $0.username, password: $0.credential)
+        }
+        return stunIceServers + turnIceServers
     }
 }

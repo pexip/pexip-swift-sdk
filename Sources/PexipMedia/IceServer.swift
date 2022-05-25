@@ -14,4 +14,12 @@ public struct IceServer: Hashable {
         self.username = username
         self.password = password
     }
+
+    public init(
+        url: String,
+        username: String? = nil,
+        password: String? = nil
+    ) {
+        self.init(urls: [url], username: username, password: password)
+    }
 }

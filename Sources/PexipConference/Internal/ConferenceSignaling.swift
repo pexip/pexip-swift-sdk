@@ -5,6 +5,8 @@ import PexipUtils
 actor ConferenceSignaling: MediaConnectionSignaling {
     private typealias CallDetailsTask = Task<CallDetails, Error>
 
+    let iceServers: [IceServer]
+
     private let participantService: ParticipantService
     private let tokenStore: TokenStore
     private let logger: Logger?
@@ -16,10 +18,12 @@ actor ConferenceSignaling: MediaConnectionSignaling {
     init(
         participantService: ParticipantService,
         tokenStore: TokenStore,
+        iceServers: [IceServer],
         logger: Logger?
     ) {
         self.participantService = participantService
         self.tokenStore = tokenStore
+        self.iceServers = iceServers
         self.logger = logger
     }
 

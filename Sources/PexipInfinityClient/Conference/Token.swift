@@ -7,7 +7,13 @@ public struct Token: Codable, Hashable {
     }
 
     public struct Stun: Codable, Hashable {
-        let url: String
+        public let url: String
+    }
+
+    public struct Turn: Codable, Hashable {
+        public let urls: [String]
+        public let username: String
+        public let credential: String
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -19,28 +25,46 @@ public struct Token: Codable, Hashable {
         case serviceType = "service_type"
         case conferenceName = "conference_name"
         case stun
+        case turn
         case chatEnabled = "chat_enabled"
+        case analyticsEnabled = "analytics_enabled"
     }
 
     /// The authentication token for future requests.
     public private(set) var value: String
+
     /// Date when the token was requested
     public private(set) var updatedAt = Date()
+
     /// The uuid associated with this newly created participant.
     /// It is used to identify this participant in the participant list.
     public let participantId: UUID
+
     /// Whether the participant is connecting as a "HOST" or a "GUEST".
     public let role: Role
+
     /// The name by which this participant should be known
     public let displayName: String
+
     /// VMR, gateway or Test Call Service
     public let serviceType: String
+
     /// The name of the conference
     public let conferenceName: String
+
     // STUN server configuration from the Pexip Conferencing Node
     public let stun: [Stun]?
+
+    // TURN server configuration from the Pexip Conferencing Node
+    public let turn: [Turn]?
+
     /// true = chat is enabled; false = chat is not enabled
     public let chatEnabled: Bool
+
+    /// Whether the Automatically send deployment and usage statistics
+    /// to Pexip global setting has been enabled on the Pexip installation.
+    public let analyticsEnabled: Bool
+
     /// Validity lifetime in seconds.
     public var expires: TimeInterval {
         TimeInterval(expiresString) ?? 0
@@ -59,10 +83,6 @@ public struct Token: Codable, Hashable {
         currentDate >= expiresAt
     }
 
-    public var stunUrlStrings: [String] {
-        (stun ?? []).map(\.url)
-    }
-
     private var expiresString: String
 
     // MARK: - Init
@@ -76,7 +96,9 @@ public struct Token: Codable, Hashable {
         serviceType: String,
         conferenceName: String,
         stun: [Token.Stun]?,
+        turn: [Token.Turn]?,
         chatEnabled: Bool,
+        analyticsEnabled: Bool,
         expiresString: String
     ) {
         self.value = value
@@ -87,7 +109,9 @@ public struct Token: Codable, Hashable {
         self.serviceType = serviceType
         self.conferenceName = conferenceName
         self.stun = stun
+        self.turn = turn
         self.chatEnabled = chatEnabled
+        self.analyticsEnabled = analyticsEnabled
         self.expiresString = expiresString
     }
 

@@ -32,6 +32,8 @@ final class MediaConnectionConfigTests: XCTestCase {
 // MARK: - Mocks
 
 private struct Signaling: MediaConnectionSignaling, Hashable {
+    var iceServers = [IceServer]()
+
     func sendOffer(
         callType: String,
         description: String,
