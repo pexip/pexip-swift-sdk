@@ -107,6 +107,16 @@ actor ConferenceSignaling: MediaConnectionSignaling {
         }
     }
 
+    func takeFloor() async throws {
+        let token = try await tokenStore.token()
+        try await participantService.takeFloor(token: token)
+    }
+
+    func releaseFloor() async throws {
+        let token = try await tokenStore.token()
+        try await participantService.releaseFloor(token: token)
+    }
+
     // MARK: - Private
 
     private var callService: CallService? {
@@ -150,15 +160,4 @@ private extension Regex {
     static let sdpUfrag = Regex("^a=ice-ufrag:(.+)$")
     static let sdpPwd = Regex("^a=ice-pwd:(.+)$")
     static let candicateUfrag = Regex(".*\\bufrag\\s+(.+?)\\s+.*")
-}
-
-private extension PresentationType {
-    var presentField: CallsFields.Present? {
-        switch self {
-        case .inMix:
-            return .main
-        case .receive:
-            return .receive
-        }
-    }
 }

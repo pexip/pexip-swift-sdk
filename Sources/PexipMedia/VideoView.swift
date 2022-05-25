@@ -2,6 +2,7 @@ import SwiftUI
 
 // MARK: - SwiftUI
 
+/// SwiftUI video view.
 public struct VideoComponent: View {
     private let track: VideoTrack
     private let contentMode: VideoContentMode

@@ -54,13 +54,7 @@ final class WebRTCMediaConnection: MediaConnection {
         self.connection = connection
         self.logger = logger
         self.connectionDelegateProxy.delegate = self
-
-        if !config.presentationInMain {
-            presentationVideoTransceiver = connection.addTransceiver(
-                of: .video,
-                init: .init(direction: .inactive)
-            )
-        }
+        createPresentationVideoTransceiverIfNeeded()
     }
 
     deinit {
@@ -75,6 +69,7 @@ final class WebRTCMediaConnection: MediaConnection {
         }
 
         await started.setValue(true)
+        createPresentationVideoTransceiverIfNeeded()
         try await createOffer()
     }
 
@@ -129,7 +124,7 @@ final class WebRTCMediaConnection: MediaConnection {
         }.store(in: &cancellables)
     }
 
-    func sendMainVideo(localVideoTrack: LocalVideoTrack) {
+    func sendMainVideo(localVideoTrack: CameraVideoTrack) {
         guard mainVideoTransceiver == nil else {
             return
         }
@@ -149,40 +144,73 @@ final class WebRTCMediaConnection: MediaConnection {
         }.store(in: &cancellables)
     }
 
-    func startPresentationReceive() throws {
+    #if os(macOS)
+    func sendPresentationVideo(screenVideoTrack: ScreenVideoTrack) async throws {
+        guard let track = screenVideoTrack as? WebRTCScreenVideoTrack else {
+            preconditionFailure(
+                "screenVideoTrack must be an instance of WebRTCScreenVideoTrack."
+            )
+        }
+
         guard
             let transceiver = presentationVideoTransceiver,
-            transceiver.direction != .recvOnly
+            transceiver.direction != .sendOnly
         else {
             return
         }
 
-        var error: NSError?
-        transceiver.setDirection(.recvOnly, error: &error)
+        transceiver.sender.track = track.rtcTrack
+        try transceiver.setDirection(.sendOnly)
+        try await config.signaling.takeFloor()
+    }
 
-        if let error = error {
-            throw error
+    func stopSendingPresentation() async throws {
+        guard
+            let transceiver = presentationVideoTransceiver,
+            transceiver.direction == .sendOnly
+        else {
+            return
         }
 
+        transceiver.sender.track = nil
+        try transceiver.setDirection(.inactive)
+        try await config.signaling.releaseFloor()
+    }
+
+    #endif
+
+    func startPresentationReceive() throws {
+        try startReceivingPresentation()
+    }
+
+    func startReceivingPresentation() throws {
+        guard
+            let transceiver = presentationVideoTransceiver,
+            transceiver.direction != .recvOnly,
+            !config.presentationInMain
+        else {
+            return
+        }
+
+        try transceiver.setDirection(.recvOnly)
         let track = transceiver.receiver.track as? RTCVideoTrack
         setPresentationRemoteVideoTrack(track)
     }
 
     func stopPresentationReceive() throws {
+        try stopReceivingPresentation()
+    }
+
+    func stopReceivingPresentation() throws {
         guard
             let transceiver = presentationVideoTransceiver,
-            transceiver.direction != .inactive
+            transceiver.direction == .recvOnly,
+            !config.presentationInMain
         else {
             return
         }
 
-        var error: NSError?
-        transceiver.setDirection(.inactive, error: &error)
-
-        if let error = error {
-            throw error
-        }
-
+        try transceiver.setDirection(.inactive)
         setPresentationRemoteVideoTrack(nil)
     }
 
@@ -261,6 +289,15 @@ final class WebRTCMediaConnection: MediaConnection {
             remoteVideoTracks.presentationTrack = track.map {
                 WebRTCVideoTrack(rtcTrack: $0)
             }
+        }
+    }
+
+    private func createPresentationVideoTransceiverIfNeeded() {
+        if presentationVideoTransceiver == nil {
+            presentationVideoTransceiver = connection.addTransceiver(
+                of: .video,
+                init: .init(direction: .inactive)
+            )
         }
     }
 }

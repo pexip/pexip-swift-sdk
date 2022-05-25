@@ -44,13 +44,33 @@ public protocol MediaConnection {
     /**
      Sends video from the given local video track
      - Parameters:
-        - localVideoTrack: Local video track
+        - localVideoTrack: Local camera video track
      */
-    func sendMainVideo(localVideoTrack: LocalVideoTrack)
+    func sendMainVideo(localVideoTrack: CameraVideoTrack)
 
+    #if os(macOS)
+
+    /**
+     Sends video from the given local screen video track (starts screen sharing session).
+     */
+    func sendPresentationVideo(screenVideoTrack: ScreenVideoTrack) async throws
+
+    /// Stops sending local presentation (stops screen sharing session).
+    func stopSendingPresentation() async throws
+
+    #endif
+
+    @available(*, deprecated, renamed: "startReceivingPresentation")
     /// Creates a remote presentation track and starts receiving remote presentation.
     func startPresentationReceive() throws
 
+    @available(*, deprecated, renamed: "stopReceivingPresentation")
     /// Stops receiving remote presentation.
     func stopPresentationReceive() throws
+
+    /// Creates a remote presentation track and starts receiving remote presentation.
+    func startReceivingPresentation() throws
+
+    /// Stops receiving remote presentation.
+    func stopReceivingPresentation() throws
 }

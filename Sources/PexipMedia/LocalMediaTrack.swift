@@ -12,12 +12,6 @@ public final class CapturingStatus: ObservableObject {
 
 public protocol LocalMediaTrack {
     var capturingStatus: CapturingStatus { get }
-    /**
-     Starts the capture.
-     Implementations should use ``QualityProfile/medium``
-     if they support changing profiles.
-     */
-    func startCapture() async throws
 
     /// Stops the capture
     func stopCapture()

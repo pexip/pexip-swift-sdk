@@ -1,6 +1,6 @@
 import AVFoundation
 
-public protocol CameraVideoTrack: LocalVideoTrack {
+public protocol CameraVideoTrack: LocalMediaTrack, VideoTrack {
     func startCapture(profile: QualityProfile) async throws
 
     #if os(iOS)

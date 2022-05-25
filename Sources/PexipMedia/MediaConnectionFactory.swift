@@ -1,6 +1,6 @@
 import AVFoundation
 
-/// MediaConnectionFactory provides factory methods
+/// ``MediaConnectionFactory`` provides factory methods
 /// to create media connection, audio and video tracks, etc.
 public protocol MediaConnectionFactory {
     /// Creates a new local audio track.
@@ -16,6 +16,16 @@ public protocol MediaConnectionFactory {
      - Returns: A new camera track
      */
     func createCameraVideoTrack(device: AVCaptureDevice) -> CameraVideoTrack
+
+    #if os(macOS)
+    /**
+     Creates a new screen video track.
+     - Parameters:
+        - videoSource: The source of the screen content (display or window).
+     - Returns: A new screen video track
+     */
+    func createScreenVideoTrack(videoSource: ScreenVideoSource) -> ScreenVideoTrack
+    #endif
 
     /**
      Create a new instance of ``MediaConnection`` type.

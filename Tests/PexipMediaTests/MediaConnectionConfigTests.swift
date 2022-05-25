@@ -43,4 +43,6 @@ private struct Signaling: MediaConnectionSignaling, Hashable {
     func addCandidate(sdp: String, mid: String?) async throws {}
     func muteVideo(_ muted: Bool) async throws {}
     func muteAudio(_ muted: Bool) async throws {}
+    func takeFloor() async throws {}
+    func releaseFloor() async throws {}
 }

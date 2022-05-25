@@ -63,7 +63,7 @@ public struct QualityProfile: Hashable {
     public let bandwidth: UInt
     /// An optional bitrate of an OPUS audio stream (64...510)
     public private(set) var opusBitrate: UInt?
-
+    /// The aspect ratio of a video stream
     public var aspectRatio: CGSize {
         CGSize(width: Int(width), height: Int(height))
     }

@@ -72,6 +72,22 @@ public protocol ParticipantService {
     func videoUnmuted(token: Token) async throws -> Bool
 
     /**
+     Starts sending local presentation.
+     - Parameters:
+        - token: Current valid API token
+     - Throws: `HTTPError` if a network error was encountered during operation
+     */
+    func takeFloor(token: Token) async throws
+
+    /**
+     Stops sending local presentation.
+     - Parameters:
+        - token: Current valid API token
+     - Throws: `HTTPError` if a network error was encountered during operation
+     */
+    func releaseFloor(token: Token) async throws
+
+    /**
      Sets the call ID.
      - Parameters:
         - id: The ID of the call
@@ -142,6 +158,24 @@ struct DefaultParticipantService: ParticipantService {
         )
         request.setHTTPHeader(.token(token.value))
         return try await client.json(for: request)
+    }
+
+    func takeFloor(token: Token) async throws {
+        var request = URLRequest(
+            url: baseURL.appendingPathComponent("take_floor"),
+            httpMethod: .POST
+        )
+        request.setHTTPHeader(.token(token.value))
+        _ = try await client.data(for: request)
+    }
+
+    func releaseFloor(token: Token) async throws {
+        var request = URLRequest(
+            url: baseURL.appendingPathComponent("release_floor"),
+            httpMethod: .POST
+        )
+        request.setHTTPHeader(.token(token.value))
+        _ = try await client.data(for: request)
     }
 
     func call(id: UUID) -> CallService {

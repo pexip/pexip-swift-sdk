@@ -12,6 +12,14 @@ public struct MediaConnectionConfig {
     public let iceServers: [IceServer]
     public let presentationInMain: Bool
 
+    /**
+     - Parameters:
+        - signaling: The object responsible for setting up and controlling
+                     a communication session.
+        - iceServers: The list of ice servers.
+        - presentationInMain: Controls whether or not the participant sees
+                              presentation in the layout mix.
+     */
     public init(
         signaling: MediaConnectionSignaling,
         iceServers: [IceServer] = [],
