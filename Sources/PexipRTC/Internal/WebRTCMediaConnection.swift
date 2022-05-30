@@ -154,25 +154,26 @@ final class WebRTCMediaConnection: MediaConnection {
 
         guard
             let transceiver = presentationVideoTransceiver,
-            transceiver.direction != .sendOnly
+            transceiver.direction != .sendRecv
         else {
             return
         }
 
+        setPresentationRemoteVideoTrack(nil)
         transceiver.sender.track = track.rtcTrack
-        try transceiver.setDirection(.sendOnly)
+        try transceiver.setDirection(.sendRecv)
         try await config.signaling.takeFloor()
     }
 
     func stopSendingPresentation() async throws {
         guard
             let transceiver = presentationVideoTransceiver,
-            transceiver.direction == .sendOnly
+            transceiver.direction == .sendRecv
         else {
             return
         }
 
-        transceiver.sender.track = nil
+        connection.removeTrack(transceiver.sender)
         try transceiver.setDirection(.inactive)
         try await config.signaling.releaseFloor()
     }
