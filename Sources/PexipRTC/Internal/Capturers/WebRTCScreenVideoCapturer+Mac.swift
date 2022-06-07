@@ -1,6 +1,7 @@
 #if os(macOS)
 
 import WebRTC
+import ImageIO
 import PexipMedia
 import PexipUtils
 
@@ -46,7 +47,7 @@ final class WebRTCScreenVideoCapturer: RTCVideoCapturer, ScreenVideoCapturerDele
         let rtcPixelBuffer = RTCCVPixelBuffer(pixelBuffer: videoFrame.pixelBuffer)
         let rtcVideoFrame = RTCVideoFrame(
             buffer: rtcPixelBuffer,
-            rotation: ._0,
+            rotation: videoFrame.orientation.rtcRotation,
             timeStampNs: Int64(videoFrame.elapsedTimeNs)
         )
         delegate?.capturer(self, didCapture: rtcVideoFrame)

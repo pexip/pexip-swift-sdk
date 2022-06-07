@@ -67,7 +67,33 @@ public final class WebRTCMediaConnectionFactory: MediaConnectionFactory {
         )
     }
 
-    #if os(macOS)
+    #if os(iOS)
+
+    public func createScreenVideoTrack(
+        appGroup: String,
+        broadcastUploadExtension: String
+    ) -> ScreenVideoTrack {
+        let videoSource = factory.videoSource()
+        let videoTrack = factory.videoTrack(
+            with: videoSource,
+            trackId: UUID().uuidString
+        )
+        let rtcScreenVideoCapturer = WebRTCScreenVideoCapturer(
+            videoSource: videoSource,
+            capturer: ScreenVideoCapturer(
+                appGroup: appGroup,
+                broadcastUploadExtension: broadcastUploadExtension
+            ),
+            logger: logger
+        )
+        return WebRTCScreenVideoTrack(
+            rtcTrack: videoTrack,
+            capturer: rtcScreenVideoCapturer
+        )
+    }
+
+    #else
+
     public func createScreenVideoTrack(
         videoSource: ScreenVideoSource
     ) -> ScreenVideoTrack {
@@ -88,6 +114,7 @@ public final class WebRTCMediaConnectionFactory: MediaConnectionFactory {
             capturer: rtcScreenVideoCapturer
         )
     }
+
     #endif
 
     public func createMediaConnection(

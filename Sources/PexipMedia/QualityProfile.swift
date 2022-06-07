@@ -10,8 +10,7 @@ public struct QualityProfile: Hashable {
         width: 1280,
         height: 720,
         fps: 30,
-        bandwidth: 1280,
-        opusBitrate: 64
+        bandwidth: 1280
     )
 
     #if os(iOS)
@@ -21,8 +20,7 @@ public struct QualityProfile: Hashable {
         width: 1920,
         height: 1080,
         fps: 30,
-        bandwidth: 2880,
-        opusBitrate: 64
+        bandwidth: 2880
     )
 
     /// 960x540 (16:9)
@@ -61,11 +59,13 @@ public struct QualityProfile: Hashable {
     public let fps: UInt
     /// The max bandwidth of a video stream (384...2560)
     public let bandwidth: UInt
-    /// An optional bitrate of an OPUS audio stream (64...510)
-    public private(set) var opusBitrate: UInt?
     /// The aspect ratio of a video stream
     public var aspectRatio: CGSize {
         CGSize(width: Int(width), height: Int(height))
+    }
+    /// The dimensions of a video stream
+    public var dimensions: CMVideoDimensions {
+        CMVideoDimensions(width: Int32(width), height: Int32(height))
     }
 
     // MARK: - Init
@@ -78,29 +78,22 @@ public struct QualityProfile: Hashable {
         - height: the height of a video stream (360...1080)
         - fps: the FPS of a video stream (1...60)
         - bandwidth: the max bandwidth of a video stream (384...2560)
-        - opusBitrate: an optional bitrate of an OPUS audio stream (64...510)
      */
     public init(
         width: UInt,
         height: UInt,
         fps: UInt,
-        bandwidth: UInt,
-        opusBitrate: UInt? = nil
+        bandwidth: UInt
     ) {
         precondition((480...1920).contains(width))
         precondition((360...1080).contains(height))
         precondition((1...60).contains(fps))
         precondition((384...2880).contains(bandwidth))
 
-        if let opusBitrate = opusBitrate {
-            precondition((64...510).contains(opusBitrate))
-        }
-
         self.width = width
         self.height = height
         self.fps = fps
         self.bandwidth = bandwidth
-        self.opusBitrate = opusBitrate
     }
 
     // MARK: - Frame rate

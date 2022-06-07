@@ -41,9 +41,9 @@ final class InfinityConference: Conference {
     private let tokenRefresher: TokenRefresher
     private let eventSource: EventSource
     private let logger: Logger?
+    private let isClientDisconnected = Isolated(false)
     private var eventSourceTask: Task<Void, Never>?
     private var eventSubject = PassthroughSubject<ConferenceEvent, Never>()
-    private var isClientDisconnected = Isolated(false)
 
     // MARK: - Init
 

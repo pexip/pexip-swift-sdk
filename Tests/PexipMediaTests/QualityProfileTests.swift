@@ -8,15 +8,13 @@ final class QualityProfileTests: XCTestCase {
             width: 1920,
             height: 1080,
             fps: 60,
-            bandwidth: 2880,
-            opusBitrate: 64
+            bandwidth: 2880
         )
 
         XCTAssertEqual(qualityProfile.width, 1920)
         XCTAssertEqual(qualityProfile.height, 1080)
         XCTAssertEqual(qualityProfile.fps, 60)
         XCTAssertEqual(qualityProfile.bandwidth, 2880)
-        XCTAssertEqual(qualityProfile.opusBitrate, 64)
     }
 
     func testDefault() {
@@ -30,7 +28,6 @@ final class QualityProfileTests: XCTestCase {
         XCTAssertEqual(qualityProfile.height, 720)
         XCTAssertEqual(qualityProfile.fps, 30)
         XCTAssertEqual(qualityProfile.bandwidth, 1280)
-        XCTAssertEqual(qualityProfile.opusBitrate, 64)
     }
 
     #if os(iOS)
@@ -42,7 +39,6 @@ final class QualityProfileTests: XCTestCase {
         XCTAssertEqual(qualityProfile.height, 1080)
         XCTAssertEqual(qualityProfile.fps, 30)
         XCTAssertEqual(qualityProfile.bandwidth, 2880)
-        XCTAssertEqual(qualityProfile.opusBitrate, 64)
     }
 
     func testMedium() {
@@ -52,7 +48,6 @@ final class QualityProfileTests: XCTestCase {
         XCTAssertEqual(qualityProfile.height, 540)
         XCTAssertEqual(qualityProfile.fps, 25)
         XCTAssertEqual(qualityProfile.bandwidth, 768)
-        XCTAssertNil(qualityProfile.opusBitrate)
     }
 
     func testLow() {
@@ -62,7 +57,6 @@ final class QualityProfileTests: XCTestCase {
         XCTAssertEqual(qualityProfile.height, 360)
         XCTAssertEqual(qualityProfile.fps, 15)
         XCTAssertEqual(qualityProfile.bandwidth, 384)
-        XCTAssertNil(qualityProfile.opusBitrate)
     }
 
     #else

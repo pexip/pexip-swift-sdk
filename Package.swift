@@ -58,7 +58,8 @@ let package = Package(
         ),
         // PexipMedia
         .target(
-            name: "PexipMedia"
+            name: "PexipMedia",
+            dependencies: ["PexipUtils"]
         ),
         .testTarget(
             name: "PexipMediaTests",
@@ -68,7 +69,6 @@ let package = Package(
         .target(
             name: "PexipRTC",
             dependencies: [
-                "PexipUtils",
                 "PexipMedia",
                 .product(name: "WebRTC", package: "webrtc-ios-builds")
             ]

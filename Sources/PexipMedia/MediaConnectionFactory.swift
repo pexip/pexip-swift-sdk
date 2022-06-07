@@ -17,7 +17,22 @@ public protocol MediaConnectionFactory {
      */
     func createCameraVideoTrack(device: AVCaptureDevice) -> CameraVideoTrack
 
-    #if os(macOS)
+    #if os(iOS)
+
+    /**
+     Creates a new screen video track.
+     - Parameters:
+        - appGroup: The app group identifier.
+        - broadcastUploadExtension: Bundle identifier of your broadcast upload extension.
+     - Returns: A new screen video track
+     */
+    func createScreenVideoTrack(
+        appGroup: String,
+        broadcastUploadExtension: String
+    ) -> ScreenVideoTrack
+
+    #else
+
     /**
      Creates a new screen video track.
      - Parameters:
@@ -25,6 +40,7 @@ public protocol MediaConnectionFactory {
      - Returns: A new screen video track
      */
     func createScreenVideoTrack(videoSource: ScreenVideoSource) -> ScreenVideoTrack
+
     #endif
 
     /**

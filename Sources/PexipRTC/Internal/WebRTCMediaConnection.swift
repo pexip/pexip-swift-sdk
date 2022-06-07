@@ -18,8 +18,8 @@ final class WebRTCMediaConnection: MediaConnection {
     private let connection: RTCPeerConnection
     private let connectionDelegateProxy: PeerConnectionDelegateProxy
     private let logger: Logger?
-    private var started = Isolated(false)
-    private var shouldRenegotiate = Isolated(false)
+    private let started = Isolated(false)
+    private let shouldRenegotiate = Isolated(false)
     private var mainAudioTransceiver: RTCRtpTransceiver?
     private var mainVideoTransceiver: RTCRtpTransceiver?
     private var presentationVideoTransceiver: RTCRtpTransceiver?
@@ -144,7 +144,6 @@ final class WebRTCMediaConnection: MediaConnection {
         }.store(in: &cancellables)
     }
 
-    #if os(macOS)
     func sendPresentationVideo(screenVideoTrack: ScreenVideoTrack) async throws {
         guard let track = screenVideoTrack as? WebRTCScreenVideoTrack else {
             preconditionFailure(
@@ -177,8 +176,6 @@ final class WebRTCMediaConnection: MediaConnection {
         try transceiver.setDirection(.inactive)
         try await config.signaling.releaseFloor()
     }
-
-    #endif
 
     func startPresentationReceive() throws {
         try startReceivingPresentation()

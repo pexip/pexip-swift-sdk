@@ -48,8 +48,6 @@ public protocol MediaConnection {
      */
     func sendMainVideo(localVideoTrack: CameraVideoTrack)
 
-    #if os(macOS)
-
     /**
      Sends video from the given local screen video track (starts screen sharing session).
      */
@@ -57,8 +55,6 @@ public protocol MediaConnection {
 
     /// Stops sending local presentation (stops screen sharing session).
     func stopSendingPresentation() async throws
-
-    #endif
 
     @available(*, deprecated, renamed: "startReceivingPresentation")
     /// Creates a remote presentation track and starts receiving remote presentation.
