@@ -32,7 +32,10 @@ final class AudioManager {
         audioSession.lockForConfiguration()
 
         do {
-            try audioSession.setCategory(AVAudioSession.Category.playAndRecord.rawValue)
+            try audioSession.setCategory(
+                AVAudioSession.Category.playAndRecord.rawValue,
+                with: [.mixWithOthers]
+            )
             try audioSession.setMode(AVAudioSession.Mode.voiceChat.rawValue)
         } catch {
             logger?.error("Error changing AVAudioSession category: \(error)")
@@ -51,7 +54,7 @@ final class AudioManager {
 
             do {
                 let category = AVAudioSession.Category.playAndRecord.rawValue
-                try self.audioSession.setCategory(category)
+                try self.audioSession.setCategory(category, with: [.mixWithOthers])
                 try self.audioSession.overrideOutputAudioPort(portOverride)
                 try self.audioSession.setActive(true)
             } catch {

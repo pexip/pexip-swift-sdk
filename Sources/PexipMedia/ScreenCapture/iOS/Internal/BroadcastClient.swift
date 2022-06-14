@@ -3,6 +3,7 @@
 import Foundation
 import Network
 import PexipUtils
+import CoreMedia
 
 // MARK: - BroadcastClientDelegate
 
@@ -56,8 +57,10 @@ final class BroadcastClient {
     }
 
     func stop() {
-        connection.stateUpdateHandler = nil
-        connection.cancel()
+        if connection.state != .cancelled {
+            connection.cancel()
+            connection.stateUpdateHandler = nil
+        }
     }
 
     func send(message: BroadcastMessage) async {

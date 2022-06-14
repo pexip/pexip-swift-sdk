@@ -15,14 +15,6 @@ extension CMSampleBuffer {
         )
         return value?.uint32Value ?? 0
     }
-
-    var displayTimeNs: UInt64 {
-        let displayTime = CMSampleBufferGetPresentationTimeStamp(self)
-        let displayTimeNs = llround(
-            CMTimeGetSeconds(displayTime) * Float64(NSEC_PER_SEC)
-        )
-        return UInt64(displayTimeNs)
-    }
 }
 
 #endif

@@ -1,9 +1,9 @@
-#if os(iOS)
-
 import WebRTC
 import ImageIO
 import PexipMedia
 import PexipUtils
+
+// MARK: - WebRTCScreenVideoCapturerErrorDelegate
 
 protocol WebRTCScreenVideoCapturerErrorDelegate: AnyObject {
     func webRTCScreenVideoCapturer(
@@ -11,6 +11,8 @@ protocol WebRTCScreenVideoCapturerErrorDelegate: AnyObject {
         didStopWithError error: Error?
     )
 }
+
+// MARK: - WebRTCScreenVideoCapturer
 
 final class WebRTCScreenVideoCapturer: RTCVideoCapturer, ScreenVideoCapturerDelegate {
     weak var errorDelegate: WebRTCScreenVideoCapturerErrorDelegate?
@@ -36,13 +38,15 @@ final class WebRTCScreenVideoCapturer: RTCVideoCapturer, ScreenVideoCapturerDele
 
     // MARK: - Capture
 
-    func startCapture(profile: QualityProfile) throws {
+    func startCapture(profile: QualityProfile) async throws {
         self.profile = profile
-        try capturer.startCapture()
+        try await capturer.startCapture(withFps: profile.fps)
+        logger?.info("Screen capture did start.")
     }
 
-    func stopCapture() throws {
-        try capturer.stopCapture()
+    func stopCapture() async throws {
+        try await capturer.stopCapture()
+        logger?.info("Screen capture did stop.")
     }
 
     // MARK: - ScreenCapturerDelegate
@@ -52,7 +56,7 @@ final class WebRTCScreenVideoCapturer: RTCVideoCapturer, ScreenVideoCapturerDele
         didCaptureVideoFrame videoFrame: VideoFrame
     ) {
         if let profile = profile {
-            let dimensions = downscaleResolution(
+            let dimensions = downscaleVideoDimensions(
                 from: videoFrame.dimensions,
                 to: profile.dimensions
             )
@@ -66,7 +70,7 @@ final class WebRTCScreenVideoCapturer: RTCVideoCapturer, ScreenVideoCapturerDele
 
         let rtcPixelBuffer = RTCCVPixelBuffer(pixelBuffer: videoFrame.pixelBuffer)
         let rtcVideoFrame = RTCVideoFrame(
-            buffer: rtcPixelBuffer,
+            buffer: rtcPixelBuffer.toI420(),
             rotation: videoFrame.orientation.rtcRotation,
             timeStampNs: Int64(videoFrame.elapsedTimeNs)
         )
@@ -83,7 +87,7 @@ final class WebRTCScreenVideoCapturer: RTCVideoCapturer, ScreenVideoCapturerDele
 
     // MARK: - Private
 
-    private func downscaleResolution(
+    private func downscaleVideoDimensions(
         from: CMVideoDimensions,
         to: CMVideoDimensions
     ) -> CMVideoDimensions {
@@ -102,5 +106,3 @@ final class WebRTCScreenVideoCapturer: RTCVideoCapturer, ScreenVideoCapturerDele
         return from
     }
 }
-
-#endif

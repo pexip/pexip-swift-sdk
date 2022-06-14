@@ -2,6 +2,7 @@
 
 import AppKit
 import CoreMedia
+import Combine
 
 // MARK: - LegacyDisplayCapturerDelegate
 
@@ -20,8 +21,9 @@ protocol LegacyDisplayVideoCapturerDelegate: AnyObject {
  Quartz Window Services -based display video capturer.
  https://developer.apple.com/documentation/coregraphics/quartz_window_services
  */
-final class LegacyDisplayVideoCapturer {
-    weak var delegate: LegacyDisplayVideoCapturerDelegate?
+final class LegacyDisplayVideoCapturer: ScreenVideoCapturer {
+    let display: Display
+    weak var delegate: ScreenVideoCapturerDelegate?
 
     private var isCapturing = false
     private var displayStream: CGDisplayStream?
@@ -31,32 +33,30 @@ final class LegacyDisplayVideoCapturer {
         qos: .userInteractive
     )
 
+    // MARK: - Init
+
+    init(display: Display) {
+        self.display = display
+    }
+
     deinit {
         try? stopCapture()
     }
 
-    // MARK: - Capture
+    // MARK: - ScreenVideoCapturer
 
-    func startCapture(
-        display: Display,
-        configuration: ScreenCaptureConfiguration
-    ) throws {
+    func startCapture(withFps fps: UInt) async throws {
         try stopCapture()
 
-        let minimumFrameRate = configuration.minimumFrameIntervalSeconds as CFNumber
-
         let properties: [CFString: Any] = [
-            CGDisplayStream.preserveAspectRatio: configuration.scalesToFit
-                ? kCFBooleanFalse as Any
-                : kCFBooleanTrue as Any,
-            CGDisplayStream.queueDepth: configuration.queueDepth as CFNumber,
-            CGDisplayStream.minimumFrameTime: minimumFrameRate
+            CGDisplayStream.preserveAspectRatio: kCFBooleanTrue as Any,
+            CGDisplayStream.minimumFrameTime: CMTime(fps: fps).seconds as CFNumber
         ]
 
         displayStream = CGDisplayStream(
             dispatchQueueDisplay: display.displayID,
-            outputWidth: configuration.width,
-            outputHeight: configuration.height,
+            outputWidth: Int(display.width),
+            outputHeight: Int(display.height),
             pixelFormat: Int32(k32BGRAPixelFormat),
             properties: properties as CFDictionary,
             queue: dispatchQueue,
@@ -108,7 +108,7 @@ final class LegacyDisplayVideoCapturer {
         case .stopped:
             if isCapturing {
                 isCapturing = false
-                delegate?.legacyDisplayVideoCapturerDidStop(self)
+                delegate?.screenVideoCapturer(self, didStopWithError: nil)
             }
         case .frameComplete:
             guard let ioSurface = ioSurface else {
@@ -132,14 +132,12 @@ final class LegacyDisplayVideoCapturer {
                     displayTimeNs: displayTimeNs,
                     elapsedTimeNs: displayTimeNs - startTimeNs!
                 )
-                delegate?.legacyDisplayVideoCapturer(self, didCaptureVideoFrame: videoFrame)
+                delegate?.screenVideoCapturer(self, didCaptureVideoFrame: videoFrame)
             }
         @unknown default:
             break
         }
     }
 }
-
-// MARK: - Global internal functions
 
 #endif

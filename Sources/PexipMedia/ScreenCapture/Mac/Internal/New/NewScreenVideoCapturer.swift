@@ -2,6 +2,7 @@
 
 import AppKit
 import Combine
+import CoreMedia
 
 #if canImport(ScreenCaptureKit)
 import ScreenCaptureKit
@@ -16,19 +17,22 @@ final class NewScreenVideoCapturer: NSObject,
                                     ScreenVideoCapturer,
                                     SCStreamOutput,
                                     SCStreamDelegate {
+    let videoSource: ScreenVideoSource
     weak var delegate: ScreenVideoCapturerDelegate?
-    var publisher: AnyPublisher<VideoFrame.Status, Never> {
-        subject.eraseToAnyPublisher()
-    }
 
     private var isCapturing = false
     private var stream: SCStream?
     private var startTimeNs: UInt64?
-    private let subject = PassthroughSubject<VideoFrame.Status, Never>()
     private let dispatchQueue = DispatchQueue(
         label: "com.pexip.PexipMedia.NewScreenVideoCapturer",
         qos: .userInteractive
     )
+
+    // MARK: - Init
+
+    init(videoSource: ScreenVideoSource) {
+        self.videoSource = videoSource
+    }
 
     deinit {
         try? stream?.removeStreamOutput(self, type: .screen)
@@ -37,41 +41,36 @@ final class NewScreenVideoCapturer: NSObject,
 
     // MARK: - ScreenVideoCapturer
 
-    func startCapture(
-        display: Display,
-        configuration: ScreenCaptureConfiguration
-    ) async throws {
+    func startCapture(withFps fps: UInt) async throws {
         let content = try await SCShareableContent.defaultSelection()
+        var filter: SCContentFilter?
 
-        guard let display = content.displays.first(where: {
-            $0.displayID == display.displayID
-        }) else {
-            return
+        switch videoSource {
+        case .display(let display):
+            filter = content.displays
+                .first(where: {
+                    $0.displayID == display.displayID
+                }).map({
+                    SCContentFilter(
+                        display: $0,
+                        excludingApplications: [],
+                        exceptingWindows: []
+                    )
+                })
+        case .window(let window):
+            filter = content.windows
+                .first(where: {
+                    $0.windowID == window.windowID
+                }).map({
+                    SCContentFilter(desktopIndependentWindow: $0)
+                })
         }
 
-        let filter = SCContentFilter(
-            display: display,
-            excludingApplications: [],
-            exceptingWindows: []
-        )
-
-        try await startCapture(filter: filter, configuration: configuration)
-    }
-
-    func startCapture(
-        window: Window,
-        configuration: ScreenCaptureConfiguration
-    ) async throws {
-        let content = try await SCShareableContent.defaultSelection()
-
-        guard let window = content.windows.first(where: {
-            $0.windowID == window.windowID
-        }) else {
-            return
+        if let filter = filter {
+            try await startCapture(filter: filter, fps: fps)
+        } else {
+            throw ScreenCaptureError.noScreenVideoSourceAvailable
         }
-
-        let filter = SCContentFilter(desktopIndependentWindow: window)
-        try await startCapture(filter: filter, configuration: configuration)
     }
 
     func stopCapture() async throws {
@@ -115,15 +114,16 @@ final class NewScreenVideoCapturer: NSObject,
         case .stopped:
             if isCapturing {
                 isCapturing = false
-                onStop()
+                delegate?.screenVideoCapturer(self, didStopWithError: nil)
             }
         case .complete:
             if let pixelBuffer = sampleBuffer.imageBuffer {
-                onCapture(videoFrame: VideoFrame(
+                let videoFrame = VideoFrame(
                     pixelBuffer: pixelBuffer,
                     displayTimeNs: displayTimeNs,
                     elapsedTimeNs: displayTimeNs - startTimeNs!
-                ))
+                )
+                delegate?.screenVideoCapturer(self, didCaptureVideoFrame: videoFrame)
             }
         @unknown default:
             break
@@ -134,38 +134,19 @@ final class NewScreenVideoCapturer: NSObject,
 
     private func startCapture(
         filter: SCContentFilter,
-        configuration: ScreenCaptureConfiguration
+        fps: UInt
     ) async throws {
         try await stopCapture()
 
         let streamConfig = SCStreamConfiguration()
-        streamConfig.minimumFrameInterval = configuration.minimumFrameInterval
-        streamConfig.queueDepth = configuration.queueDepth
-        streamConfig.width = configuration.width
-        streamConfig.height = configuration.height
-        streamConfig.scalesToFit = configuration.scalesToFit
+        streamConfig.minimumFrameInterval = CMTime(fps: fps)
+        streamConfig.width = Int(videoSource.videoDimensions.width)
+        streamConfig.height = Int(videoSource.videoDimensions.height)
 
         stream = SCStream(filter: filter, configuration: streamConfig, delegate: nil)
         try stream?.addStreamOutput(self, type: .screen, sampleHandlerQueue: dispatchQueue)
         try await stream?.startCapture()
         isCapturing = true
-    }
-
-    private func onStop() {
-        delegate?.screenVideoCapturerDidStop(self)
-        subject.send(.stopped)
-    }
-
-    private func onCapture(videoFrame: VideoFrame) {
-        delegate?.screenVideoCapturer(self, didCaptureVideoFrame: videoFrame)
-        subject.send(.complete(videoFrame))
-    }
-
-    private func getShareableContent() async throws -> SCShareableContent {
-        try await SCShareableContent.excludingDesktopWindows(
-            true,
-            onScreenWindowsOnly: true
-        )
     }
 }
 

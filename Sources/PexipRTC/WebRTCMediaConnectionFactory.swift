@@ -73,23 +73,11 @@ public final class WebRTCMediaConnectionFactory: MediaConnectionFactory {
         appGroup: String,
         broadcastUploadExtension: String
     ) -> ScreenVideoTrack {
-        let videoSource = factory.videoSource()
-        let videoTrack = factory.videoTrack(
-            with: videoSource,
-            trackId: UUID().uuidString
+        let screenVideoCapturer = BroadcastScreenVideoCapturer(
+            appGroup: appGroup,
+            broadcastUploadExtension: broadcastUploadExtension
         )
-        let rtcScreenVideoCapturer = WebRTCScreenVideoCapturer(
-            videoSource: videoSource,
-            capturer: ScreenVideoCapturer(
-                appGroup: appGroup,
-                broadcastUploadExtension: broadcastUploadExtension
-            ),
-            logger: logger
-        )
-        return WebRTCScreenVideoTrack(
-            rtcTrack: videoTrack,
-            capturer: rtcScreenVideoCapturer
-        )
+        return createScreenVideoTrack(screenVideoCapturer: screenVideoCapturer)
     }
 
     #else
@@ -97,22 +85,8 @@ public final class WebRTCMediaConnectionFactory: MediaConnectionFactory {
     public func createScreenVideoTrack(
         videoSource: ScreenVideoSource
     ) -> ScreenVideoTrack {
-        let screenVideoSource = videoSource
-        let videoSource = factory.videoSource()
-        let videoTrack = factory.videoTrack(
-            with: videoSource,
-            trackId: UUID().uuidString
-        )
-        let rtcScreenVideoCapturer = WebRTCScreenVideoCapturer(
-            capturer: ScreenVideoSource.createCapturer(),
-            logger: logger,
-            delegate: videoSource
-        )
-        return WebRTCScreenVideoTrack(
-            rtcTrack: videoTrack,
-            videoSource: screenVideoSource,
-            capturer: rtcScreenVideoCapturer
-        )
+        let screenVideoCapturer = ScreenVideoSource.createCapturer(for: videoSource)
+        return createScreenVideoTrack(screenVideoCapturer: screenVideoCapturer)
     }
 
     #endif
@@ -125,5 +99,23 @@ public final class WebRTCMediaConnectionFactory: MediaConnectionFactory {
             factory: factory,
             logger: logger
         )
+    }
+
+    // MARK: - Private
+
+    private func createScreenVideoTrack(
+        screenVideoCapturer: ScreenVideoCapturer
+    ) -> ScreenVideoTrack {
+        let videoSource = factory.videoSource(forScreenCast: true)
+        let videoTrack = factory.videoTrack(
+            with: videoSource,
+            trackId: UUID().uuidString
+        )
+        let capturer = WebRTCScreenVideoCapturer(
+            videoSource: videoSource,
+            capturer: screenVideoCapturer,
+            logger: logger
+        )
+        return WebRTCScreenVideoTrack(rtcTrack: videoTrack, capturer: capturer)
     }
 }

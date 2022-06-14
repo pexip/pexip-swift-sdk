@@ -4,34 +4,17 @@ import CoreVideo
 import Combine
 import ReplayKit
 
-// MARK: - ScreenVideoCapturerDelegate
-
-public protocol ScreenVideoCapturerDelegate: AnyObject {
-    func screenVideoCapturer(
-        _ capturer: ScreenVideoCapturer,
-        didCaptureVideoFrame frame: VideoFrame
-    )
-
-    func screenVideoCapturer(
-        _ capturer: ScreenVideoCapturer,
-        didStopWithError error: Error?
-    )
-}
-
 /// A video capturer that captures the screen content as a video stream.
-public final class ScreenVideoCapturer {
+public final class BroadcastScreenVideoCapturer: ScreenVideoCapturer {
     public weak var delegate: ScreenVideoCapturerDelegate?
-    public var publisher: AnyPublisher<VideoFrame.Status, Never> {
-        subject.eraseToAnyPublisher()
-    }
 
     private let filePath: String
     private let broadcastUploadExtension: String
     private let notificationCenter = BroadcastNotificationCenter.default
-    private let subject = PassthroughSubject<VideoFrame.Status, Never>()
+    private let userDefaults: UserDefaults?
     private var server: BroadcastServer?
     private var startTimeNs: UInt64?
-    private let processQueue = DispatchQueue(
+    private let processingQueue = DispatchQueue(
         label: "com.pexip.PexipMedia.ScreenVideoCapturer",
         qos: .userInteractive
     )
@@ -45,6 +28,7 @@ public final class ScreenVideoCapturer {
     ) {
         self.filePath = fileManager.broadcastSocketPath(appGroup: appGroup)
         self.broadcastUploadExtension = broadcastUploadExtension
+        self.userDefaults = UserDefaults(suiteName: appGroup)
     }
 
     deinit {
@@ -53,8 +37,9 @@ public final class ScreenVideoCapturer {
 
     // MARK: - Internal
 
-    public func startCapture() throws {
+    public func startCapture(withFps fps: UInt) async throws {
         addNotificationObservers()
+        userDefaults?.broadcastFps = fps
 
         let broadcastUploadExtension = self.broadcastUploadExtension
 
@@ -136,22 +121,21 @@ public final class ScreenVideoCapturer {
     private func clean() {
         removeNotificationObservers()
         startTimeNs = nil
+        userDefaults?.broadcastFps = nil
     }
 
     private func onStop(error: Error?) {
         delegate?.screenVideoCapturer(self, didStopWithError: error)
-        subject.send(.stopped)
     }
 
     private func onCapture(videoFrame: VideoFrame) {
         delegate?.screenVideoCapturer(self, didCaptureVideoFrame: videoFrame)
-        subject.send(.complete(videoFrame))
     }
 }
 
 // MARK: - BroadcastServerDelegate
 
-extension ScreenVideoCapturer: BroadcastServerDelegate {
+extension BroadcastScreenVideoCapturer: BroadcastServerDelegate {
     func broadcastServerDidStart(_ server: BroadcastServer) {
         notificationCenter.post(.serverStarted)
     }
@@ -160,7 +144,7 @@ extension ScreenVideoCapturer: BroadcastServerDelegate {
         _ server: BroadcastServer,
         didReceiveMessage message: BroadcastMessage
     ) {
-        processQueue.async { [weak self] in
+        processingQueue.async { [weak self] in
             self?.processMessage(message)
         }
     }

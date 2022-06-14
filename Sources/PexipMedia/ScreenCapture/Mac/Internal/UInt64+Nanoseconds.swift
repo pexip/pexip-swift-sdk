@@ -1,3 +1,5 @@
+#if os(macOS)
+
 import Foundation
 
 extension UInt64 {
@@ -7,3 +9,5 @@ extension UInt64 {
         return self * UInt64(timebase.numer) / UInt64(timebase.denom)
     }
 }
+
+#endif

@@ -3,23 +3,23 @@
 import CoreMedia
 import ReplayKit
 
+// MARK: - BroadcastSampleHandlerDelegate
+
 public protocol BroadcastSampleHandlerDelegate: AnyObject {
     func broadcastSampleHandler(
         _ handler: BroadcastSampleHandler,
-        didFailWithError error: Error?
+        didFinishWithError error: Error
     )
 }
+
+// MARK: - BroadcastSampleHandler
 
 public final class BroadcastSampleHandler {
     public weak var delegate: BroadcastSampleHandlerDelegate?
 
     private let client: BroadcastClient
+    private let messageLoop: BroadcastMessageLoop
     private let notificationCenter = BroadcastNotificationCenter.default
-    private let processQueue = DispatchQueue(
-        label: "com.pexip.PexipMedia.BroadcastSampleHandler",
-        qos: .userInteractive
-    )
-    private var frame: Int = 0
 
     // MARK: - Init
 
@@ -28,8 +28,16 @@ public final class BroadcastSampleHandler {
         fileManager: FileManager = .default
     ) {
         let filePath = fileManager.broadcastSocketPath(appGroup: appGroup)
-        self.client = BroadcastClient(filePath: filePath)
+        client = BroadcastClient(filePath: filePath)
+
+        let userDefaults = UserDefaults(suiteName: appGroup)
+        /// The broadcast extension has hard memory limit of 50MB.
+        /// Use lower frame rate to reduce the memory load.
+        let fps = min(userDefaults?.broadcastFps ?? 15, 15)
+        messageLoop = BroadcastMessageLoop(fps: fps)
+
         client.delegate = self
+        messageLoop.delegate = self
     }
 
     deinit {
@@ -40,7 +48,6 @@ public final class BroadcastSampleHandler {
 
     /// Performs the required actions after starting a live broadcast.
     public func broadcastStarted() {
-        frame = 0
         addNotificationObservers()
         notificationCenter.post(.broadcastStarted)
     }
@@ -59,6 +66,7 @@ public final class BroadcastSampleHandler {
     public func broadcastFinished() {
         removeNotificationObservers()
         notificationCenter.post(.broadcastFinished)
+        messageLoop.stop()
         client.stop()
     }
 
@@ -78,13 +86,7 @@ public final class BroadcastSampleHandler {
 
         switch sampleBufferType {
         case .video:
-            frame += 1
-
-            if frame % 3 == 0 {
-                processQueue.async { [weak self] in
-                    self?.processVideoFrame(from: sampleBuffer)
-                }
-            }
+            messageLoop.addSampleBuffer(sampleBuffer)
         case .audioApp, .audioMic:
             return
         @unknown default:
@@ -94,22 +96,28 @@ public final class BroadcastSampleHandler {
 
     // MARK: - Private
 
-    private func processVideoFrame(from sampleBuffer: CMSampleBuffer) {
-        if let message = BroadcastMessage(sampleBuffer: sampleBuffer) {
-            Task {
-                await client.send(message: message)
-            }
-        }
-    }
-
     private func addNotificationObservers() {
         notificationCenter.addObserver(for: .serverStarted) { [weak self] in
             self?.client.start()
+            self?.messageLoop.start()
         }
     }
 
     private func removeNotificationObservers() {
         notificationCenter.removeObserver(for: .serverStarted)
+    }
+}
+
+// MARK: - BroadcastMessageLoopDelegate
+
+extension BroadcastSampleHandler: BroadcastMessageLoopDelegate {
+    func broadcastMessageLoop(
+        _ messageLoop: BroadcastMessageLoop,
+        didPrepareMessage message: BroadcastMessage
+    ) {
+        Task {
+            await client.send(message: message)
+        }
     }
 }
 
@@ -120,7 +128,8 @@ extension BroadcastSampleHandler: BroadcastClientDelegate {
         _ client: BroadcastClient,
         didStopWithError error: Error?
     ) {
-        delegate?.broadcastSampleHandler(self, didFailWithError: error)
+        let error = BroadcastError.broadcastFinished(error: error)
+        delegate?.broadcastSampleHandler(self, didFinishWithError: error)
     }
 }
 

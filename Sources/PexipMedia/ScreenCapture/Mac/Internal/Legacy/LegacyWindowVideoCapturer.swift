@@ -2,27 +2,24 @@
 
 import AppKit
 import CoreMedia
-
-// MARK: - LegacyWindowCapturerDelegate
-
-protocol LegacyWindowVideoCapturerDelegate: AnyObject {
-    func legacyWindowVideoCapturer(
-        _ capturer: LegacyWindowVideoCapturer,
-        didCaptureVideoFrame videoFrame: VideoFrame
-    )
-}
-
-// MARK: - LegacyWindowCapturer
+import Combine
 
 /**
  Quartz Window Services -based window video capturer.
  https://developer.apple.com/documentation/coregraphics/quartz_window_services
  */
-final class LegacyWindowVideoCapturer {
-    weak var delegate: LegacyWindowVideoCapturerDelegate?
+final class LegacyWindowVideoCapturer: ScreenVideoCapturer {
+    let window: Window
+    weak var delegate: ScreenVideoCapturerDelegate?
 
     private var timer: Timer?
     private var frameCapturer: FrameCapturer?
+
+    // MARK: - Init
+
+    init(window: Window) {
+        self.window = window
+    }
 
     deinit {
         try? stopCapture()
@@ -30,21 +27,18 @@ final class LegacyWindowVideoCapturer {
 
     // MARK: - Capture
 
-    func startCapture(
-        window: Window,
-        configuration: ScreenCaptureConfiguration
-    ) throws {
+    func startCapture(withFps fps: UInt) async throws {
         try stopCapture()
 
         frameCapturer = FrameCapturer(
             window: window,
-            queueDepth: configuration.queueDepth,
+            queueDepth: 3,
             delegate: self
         )
 
         DispatchQueue.main.async { [weak self] in
             self?.timer = Timer.scheduledTimer(
-                withTimeInterval: configuration.minimumFrameIntervalSeconds,
+                withTimeInterval: CMTime(fps: fps).seconds,
                 repeats: true,
                 block: { _ in
                     Task { [weak self] in
@@ -68,7 +62,7 @@ extension LegacyWindowVideoCapturer: FrameCapturerDelegate {
         _ frameCapturer: FrameCapturer,
         didCaptureVideoFrame frame: VideoFrame
     ) {
-        delegate?.legacyWindowVideoCapturer(self, didCaptureVideoFrame: frame)
+        delegate?.screenVideoCapturer(self, didCaptureVideoFrame: frame)
     }
 }
 
@@ -156,12 +150,12 @@ private actor FrameCapturer {
                 return nil
             }
 
-            CVPixelBufferLockBaseAddress(pixelBuffer, .init(rawValue: 0))
+            pixelBuffer.lockBaseAddress(.init(rawValue: 0))
 
             let ciImage = CIImage(cgImage: cgImage)
             ciContext.render(ciImage, to: pixelBuffer)
 
-            CVPixelBufferUnlockBaseAddress(pixelBuffer, .init(rawValue: 0))
+            pixelBuffer.unlockBaseAddress(.init(rawValue: 0))
 
             let displayTimeNs = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
             startTimeNs = startTimeNs ?? displayTimeNs

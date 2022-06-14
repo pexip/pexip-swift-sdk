@@ -1,3 +1,5 @@
+#if os(iOS)
+
 import Foundation
 import Network
 
@@ -16,3 +18,5 @@ extension NWConnection {
         )
     }
 }
+
+#endif

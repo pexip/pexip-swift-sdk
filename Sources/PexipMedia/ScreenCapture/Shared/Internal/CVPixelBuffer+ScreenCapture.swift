@@ -87,18 +87,18 @@ extension CVPixelBuffer {
         }
     }
 
+    func lockBaseAddress(_ flags: CVPixelBufferLockFlags) {
+        CVPixelBufferLockBaseAddress(self, flags)
+    }
+
+    func unlockBaseAddress(_ flags: CVPixelBufferLockFlags) {
+        CVPixelBufferUnlockBaseAddress(self, flags)
+    }
+
     // MARK: - Private
 
     private var planeCount: Int {
         CVPixelBufferGetPlaneCount(self)
-    }
-
-    private func lockBaseAddress(_ flags: CVPixelBufferLockFlags) {
-        CVPixelBufferLockBaseAddress(self, flags)
-    }
-
-    private func unlockBaseAddress(_ flags: CVPixelBufferLockFlags) {
-        CVPixelBufferUnlockBaseAddress(self, flags)
     }
 }
 

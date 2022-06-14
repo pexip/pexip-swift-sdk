@@ -1,0 +1,99 @@
+#if os(iOS)
+
+import Foundation
+import CoreMedia
+import ReplayKit
+
+// MARK: - BroadcastMessageLoopDelegate
+
+protocol BroadcastMessageLoopDelegate: AnyObject {
+    func broadcastMessageLoop(
+        _ messageLoop: BroadcastMessageLoop,
+        didPrepareMessage message: BroadcastMessage
+    )
+}
+
+// MARK: - BroadcastMessageLoop
+
+final class BroadcastMessageLoop {
+    weak var delegate: BroadcastMessageLoopDelegate?
+
+    private let fps: UInt
+    private let processingQueue = DispatchQueue(
+        label: "com.pexip.PexipMedia.BroadcastMessageLoop",
+        qos: .userInteractive
+    )
+    private var displayLink: CADisplayLink?
+    private var lastSampleBuffer: CMSampleBuffer?
+
+    // MARK: - Init
+
+    init(fps: UInt) {
+        self.fps = fps
+    }
+
+    deinit {
+        stop()
+    }
+
+    // MARK: - Internal
+
+    func start() {
+        guard displayLink == nil else {
+            return
+        }
+
+        let displayLink = CADisplayLink(
+            target: self,
+            selector: #selector(onDisplayLink)
+        )
+        displayLink.preferredFramesPerSecond = Int(fps)
+        displayLink.add(to: .current, forMode: .default)
+        self.displayLink = displayLink
+    }
+
+    func stop() {
+        displayLink?.isPaused = true
+        displayLink?.invalidate()
+        displayLink = nil
+    }
+
+    func addSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
+        processingQueue.async { [weak self] in
+            self?.lastSampleBuffer = sampleBuffer
+        }
+    }
+
+    // MARK: - Private
+
+    @objc private func onDisplayLink() {
+        processingQueue.async { [weak self] in
+            self?.prepareMessage()
+        }
+    }
+
+    private func prepareMessage() {
+        guard let displayLink = displayLink else {
+            return
+        }
+
+        guard let lastSampleBuffer = lastSampleBuffer else {
+            return
+        }
+
+        let displayTimeNs = UInt64(
+            llround(displayLink.timestamp * Float64(NSEC_PER_SEC))
+        )
+
+        guard let message = BroadcastMessage(
+            sampleBuffer: lastSampleBuffer,
+            displayTimeNs: displayTimeNs
+        ) else {
+            return
+        }
+
+        delegate?.broadcastMessageLoop(self, didPrepareMessage: message)
+    }
+}
+
+#endif

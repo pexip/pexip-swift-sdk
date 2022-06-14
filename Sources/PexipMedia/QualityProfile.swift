@@ -1,9 +1,11 @@
 import CoreGraphics
 import CoreMedia
 
-/// Call quality profile.
+/// Call and presentation quality profile.
 public struct QualityProfile: Hashable {
     public static let `default` = Self.high
+
+    // MARK: - Video call
 
     /// 1280x720 (16:9)
     public static let high = QualityProfile(
@@ -51,19 +53,53 @@ public struct QualityProfile: Hashable {
 
     #endif
 
+    // MARK: - Presentation
+
+    public static let presentationVeryHigh = QualityProfile(
+        width: 1920,
+        height: 1080,
+        fps: 15,
+        bandwidth: 2880
+    )
+
+    public static let presentationHigh = QualityProfile(
+        width: 1280,
+        height: 720,
+        fps: 15,
+        bandwidth: 1280
+    )
+
+    #if os(iOS)
+
+    public static let presentationMedium = QualityProfile(
+        width: 640,
+        height: 480,
+        fps: 15,
+        bandwidth: 768
+    )
+
+    #endif
+
+    // MARK: - Properties
+
     /// The width of a video stream (640...1920)
     public let width: UInt
+
     /// The height of a video stream (360...1080)
     public let height: UInt
+
     /// The FPS of a video stream (1...60)
     public let fps: UInt
+
     /// The max bandwidth of a video stream (384...2560)
     public let bandwidth: UInt
-    /// The aspect ratio of a video stream
+
+    /// The aspect ratio of a video stream.
     public var aspectRatio: CGSize {
         CGSize(width: Int(width), height: Int(height))
     }
-    /// The dimensions of a video stream
+
+    /// The dimensions of a video stream.
     public var dimensions: CMVideoDimensions {
         CMVideoDimensions(width: Int32(width), height: Int32(height))
     }

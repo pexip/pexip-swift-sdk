@@ -83,13 +83,17 @@ final class BroadcastServer {
     }
 
     func stop() throws {
-        listener.stateUpdateHandler = nil
-        listener.newConnectionHandler = nil
-        listener.cancel()
+        if listener.state != .cancelled {
+            listener.cancel()
+            listener.stateUpdateHandler = nil
+            listener.newConnectionHandler = nil
+        }
 
-        connection?.stateUpdateHandler = nil
-        connection?.cancel()
-        connection = nil
+        if connection != nil {
+            connection?.cancel()
+            connection?.stateUpdateHandler = nil
+            connection = nil
+        }
 
         try removeSocketFile()
     }

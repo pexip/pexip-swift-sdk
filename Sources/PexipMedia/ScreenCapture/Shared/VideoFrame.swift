@@ -9,7 +9,7 @@ public struct VideoFrame {
         /// New frame was generated.
         case complete(VideoFrame)
         /// The stream was stopped.
-        case stopped
+        case stopped(error: Error?)
     }
 
     /// The pixel buffer.

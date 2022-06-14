@@ -18,7 +18,7 @@ public struct VideoComponent: View {
 
     /**
      - Parameters:
-        - track: Video track
+        - track: The video track
         - contentMode: Indicates whether the view should fit or fill the parent context
         - isMirrored: Indicates whether the video should be mirrored about its vertical axis
         - isReversed: Indicates whether the aspect ratio numbers should
@@ -32,6 +32,24 @@ public struct VideoComponent: View {
     ) {
         self.track = track
         self.contentMode = contentMode
+        self.isMirrored = isMirrored
+        self.isReversed = isReversed
+    }
+
+    /**
+     - Parameters:
+        - video: The video track and content mode.
+        - isMirrored: Indicates whether the video should be mirrored about its vertical axis
+        - isReversed: Indicates whether the aspect ratio numbers should
+                      get reversed (for vertical video)
+     */
+    public init(
+        video: Video,
+        isMirrored: Bool = false,
+        isReversed: Bool = false
+    ) {
+        self.track = video.track
+        self.contentMode = video.contentMode
         self.isMirrored = isMirrored
         self.isReversed = isReversed
     }

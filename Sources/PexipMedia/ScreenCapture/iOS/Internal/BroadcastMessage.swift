@@ -11,7 +11,7 @@ struct BroadcastMessage {
 // MARK: - CMSampleBuffer
 
 extension BroadcastMessage {
-    init?(sampleBuffer: CMSampleBuffer) {
+    init?(sampleBuffer: CMSampleBuffer, displayTimeNs: UInt64) {
         guard let pixelBuffer = sampleBuffer.imageBuffer else {
             return nil
         }
@@ -21,7 +21,7 @@ extension BroadcastMessage {
         }
 
         let header = BroadcastHeader(
-            displayTimeNs: sampleBuffer.displayTimeNs,
+            displayTimeNs: displayTimeNs,
             pixelFormat: pixelBuffer.pixelFormat,
             videoWidth: pixelBuffer.width,
             videoHeight: pixelBuffer.height,

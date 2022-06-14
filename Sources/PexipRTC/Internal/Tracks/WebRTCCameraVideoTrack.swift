@@ -29,6 +29,10 @@ final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
 
     // MARK: - CameraVideoTrack
 
+    func startCapture() async throws {
+        try await startCapture(profile: .medium)
+    }
+
     func startCapture(profile: QualityProfile) async throws {
         let status = await permission.requestAccess()
 
@@ -64,10 +68,6 @@ final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
 
         qualityProfile = profile
         capturingStatus.isCapturing = true
-    }
-
-    func startCapture() async throws {
-        try await startCapture(profile: .medium)
     }
 
     func stopCapture() {
