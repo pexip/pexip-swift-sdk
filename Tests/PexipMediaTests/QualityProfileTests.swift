@@ -7,14 +7,12 @@ final class QualityProfileTests: XCTestCase {
         let qualityProfile = QualityProfile(
             width: 1920,
             height: 1080,
-            fps: 60,
-            bandwidth: 2880
+            fps: 60
         )
 
         XCTAssertEqual(qualityProfile.width, 1920)
         XCTAssertEqual(qualityProfile.height, 1080)
         XCTAssertEqual(qualityProfile.fps, 60)
-        XCTAssertEqual(qualityProfile.bandwidth, 2880)
     }
 
     func testDefault() {
@@ -27,7 +25,6 @@ final class QualityProfileTests: XCTestCase {
         XCTAssertEqual(qualityProfile.width, 1280)
         XCTAssertEqual(qualityProfile.height, 720)
         XCTAssertEqual(qualityProfile.fps, 30)
-        XCTAssertEqual(qualityProfile.bandwidth, 1280)
     }
 
     #if os(iOS)
@@ -38,7 +35,6 @@ final class QualityProfileTests: XCTestCase {
         XCTAssertEqual(qualityProfile.width, 1920)
         XCTAssertEqual(qualityProfile.height, 1080)
         XCTAssertEqual(qualityProfile.fps, 30)
-        XCTAssertEqual(qualityProfile.bandwidth, 2880)
     }
 
     func testMedium() {
@@ -47,7 +43,6 @@ final class QualityProfileTests: XCTestCase {
         XCTAssertEqual(qualityProfile.width, 960)
         XCTAssertEqual(qualityProfile.height, 540)
         XCTAssertEqual(qualityProfile.fps, 25)
-        XCTAssertEqual(qualityProfile.bandwidth, 768)
     }
 
     func testLow() {
@@ -56,7 +51,6 @@ final class QualityProfileTests: XCTestCase {
         XCTAssertEqual(qualityProfile.width, 480)
         XCTAssertEqual(qualityProfile.height, 360)
         XCTAssertEqual(qualityProfile.fps, 15)
-        XCTAssertEqual(qualityProfile.bandwidth, 384)
     }
 
     #else
@@ -67,7 +61,36 @@ final class QualityProfileTests: XCTestCase {
         XCTAssertEqual(qualityProfile.width, 640)
         XCTAssertEqual(qualityProfile.height, 480)
         XCTAssertEqual(qualityProfile.fps, 30)
-        XCTAssertEqual(qualityProfile.bandwidth, 768)
+    }
+
+    #endif
+
+    // MARK: - Presentation
+
+    func testPresentationVeryHigh() {
+        let qualityProfile = QualityProfile.presentationVeryHigh
+
+        XCTAssertEqual(qualityProfile.width, 1920)
+        XCTAssertEqual(qualityProfile.height, 1080)
+        XCTAssertEqual(qualityProfile.fps, 15)
+    }
+
+    func testPresentationHigh() {
+        let qualityProfile = QualityProfile.presentationHigh
+
+        XCTAssertEqual(qualityProfile.width, 1280)
+        XCTAssertEqual(qualityProfile.height, 720)
+        XCTAssertEqual(qualityProfile.fps, 15)
+    }
+
+    #if os(iOS)
+
+    func testPresentationMedium() {
+        let qualityProfile = QualityProfile.presentationHigh
+
+        XCTAssertEqual(qualityProfile.width, 640)
+        XCTAssertEqual(qualityProfile.height, 480)
+        XCTAssertEqual(qualityProfile.fps, 15)
     }
 
     #endif

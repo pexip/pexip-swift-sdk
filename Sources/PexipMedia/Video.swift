@@ -1,3 +1,4 @@
+/// A helper type that groups the video track with its content mode.
 public struct Video {
     /// The video track.
     public let track: VideoTrack
@@ -5,10 +6,10 @@ public struct Video {
     public let contentMode: VideoContentMode
 
     /**
+     Creates a new instance of ``Video``.
      - Parameters:
         - track: The video track
         - contentMode: Indicates whether the view should fit or fill the parent context
-        - isMirrored: Indicates whether the video should be mirrored about its vertical axis
      */
     public init(track: VideoTrack, contentMode: VideoContentMode) {
         self.track = track
@@ -16,6 +17,7 @@ public struct Video {
     }
 
     /**
+     Creates a new instance of ``Video``.
      - Parameters:
         - track: The video track
         - qualityProfile: The quality profile of the video

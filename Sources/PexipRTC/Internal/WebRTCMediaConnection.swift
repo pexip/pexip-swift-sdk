@@ -244,6 +244,7 @@ final class WebRTCMediaConnection: MediaConnection {
 
             let mangler = SessionDescriptionMangler(sdp: offer.sdp)
             let newLocalSdp = mangler.mangle(
+                bandwidth: config.bandwidth,
                 mainQualityProfile: mainLocalVideoTrack?.qualityProfile,
                 mainAudioMid: mainAudioTransceiver?.mid,
                 mainVideoMid: mainVideoTransceiver?.mid,

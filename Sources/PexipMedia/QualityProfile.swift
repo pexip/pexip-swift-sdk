@@ -11,8 +11,7 @@ public struct QualityProfile: Hashable {
     public static let high = QualityProfile(
         width: 1280,
         height: 720,
-        fps: 30,
-        bandwidth: 1280
+        fps: 30
     )
 
     #if os(iOS)
@@ -21,24 +20,21 @@ public struct QualityProfile: Hashable {
     public static let veryHigh = QualityProfile(
         width: 1920,
         height: 1080,
-        fps: 30,
-        bandwidth: 2880
+        fps: 30
     )
 
     /// 960x540 (16:9)
     public static let medium = QualityProfile(
         width: 960,
         height: 540,
-        fps: 25,
-        bandwidth: 768
+        fps: 25
     )
 
     /// 480x360 (4:3)
     public static let low = QualityProfile(
         width: 480,
         height: 360,
-        fps: 15,
-        bandwidth: 384
+        fps: 15
     )
 
     #else
@@ -47,8 +43,7 @@ public struct QualityProfile: Hashable {
     public static let medium = QualityProfile(
         width: 640,
         height: 480,
-        fps: 30,
-        bandwidth: 768
+        fps: 30
     )
 
     #endif
@@ -58,15 +53,13 @@ public struct QualityProfile: Hashable {
     public static let presentationVeryHigh = QualityProfile(
         width: 1920,
         height: 1080,
-        fps: 15,
-        bandwidth: 2880
+        fps: 15
     )
 
     public static let presentationHigh = QualityProfile(
         width: 1280,
         height: 720,
-        fps: 15,
-        bandwidth: 1280
+        fps: 15
     )
 
     #if os(iOS)
@@ -74,8 +67,7 @@ public struct QualityProfile: Hashable {
     public static let presentationMedium = QualityProfile(
         width: 640,
         height: 480,
-        fps: 15,
-        bandwidth: 768
+        fps: 15
     )
 
     #endif
@@ -91,9 +83,6 @@ public struct QualityProfile: Hashable {
     /// The FPS of a video stream (1...60)
     public let fps: UInt
 
-    /// The max bandwidth of a video stream (384...2560)
-    public let bandwidth: UInt
-
     /// The aspect ratio of a video stream.
     public var aspectRatio: CGSize {
         CGSize(width: Int(width), height: Int(height))
@@ -107,29 +96,25 @@ public struct QualityProfile: Hashable {
     // MARK: - Init
 
     /**
-     Call quality profile.
+     Creates a new instance of ``QualityProfile``.
 
      - Parameters:
         - width: the width of a video stream (640...1920)
         - height: the height of a video stream (360...1080)
         - fps: the FPS of a video stream (1...60)
-        - bandwidth: the max bandwidth of a video stream (384...2560)
      */
     public init(
         width: UInt,
         height: UInt,
-        fps: UInt,
-        bandwidth: UInt
+        fps: UInt
     ) {
         precondition((480...1920).contains(width))
         precondition((360...1080).contains(height))
         precondition((1...60).contains(fps))
-        precondition((384...2880).contains(bandwidth))
 
         self.width = width
         self.height = height
         self.fps = fps
-        self.bandwidth = bandwidth
     }
 
     // MARK: - Frame rate

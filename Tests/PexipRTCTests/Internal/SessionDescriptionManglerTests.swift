@@ -6,6 +6,7 @@ import PexipMedia
 final class SDPManglerTests: XCTestCase {
     private func mangle(
         _ sdp: SDP,
+        bandwidth: Bandwidth = .high,
         profile: QualityProfile = .medium,
         mainAudioMid: String? = nil,
         mainVideoMid: String? = nil,
@@ -13,6 +14,7 @@ final class SDPManglerTests: XCTestCase {
     ) -> SDP {
         let mangler = SessionDescriptionMangler(sdp: sdp.string)
         let outSDPString = mangler.mangle(
+            bandwidth: bandwidth,
             mainQualityProfile: profile,
             mainAudioMid: mainAudioMid,
             mainVideoMid: mainVideoMid,
@@ -42,6 +44,7 @@ final class SDPManglerTests: XCTestCase {
 
     func testMangleWithMidLines() {
         let profile = QualityProfile.medium
+        let bandwidth = Bandwidth.medium
         let inSDP = SDP([
             "a=mid:3",
             "a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level",
@@ -70,7 +73,7 @@ final class SDPManglerTests: XCTestCase {
             "a=extmap:14 urn:ietf:params:rtp-hdrext:toffset",
             "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
             "c=IN IP4 91.240.204.48",
-            "b=AS:\(profile.bandwidth)",
+            "b=AS:\(bandwidth.rawValue)",
 
             "a=mid:5",
             "a=content:slides",
@@ -80,6 +83,7 @@ final class SDPManglerTests: XCTestCase {
         ])
         let outSDP = mangle(
             inSDP,
+            bandwidth: bandwidth,
             profile: profile,
             mainAudioMid: "3",
             mainVideoMid: "4",
@@ -93,6 +97,7 @@ final class SDPManglerTests: XCTestCase {
 
     func testSDPAddsBandwidthToVideoSectionAfterConnection() {
         let profile = QualityProfile.high
+        let bandwidth = Bandwidth.high
         let inSDP = SDP([
             "line1",
             "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
@@ -103,10 +108,10 @@ final class SDPManglerTests: XCTestCase {
             "line1",
             "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
             "c=IN IP4 91.240.204.48",
-            "b=AS:\(profile.bandwidth)",
+            "b=AS:\(bandwidth.rawValue)",
             "line4"
         ])
-        let outSDP = mangle(inSDP, profile: profile)
+        let outSDP = mangle(inSDP, bandwidth: bandwidth, profile: profile)
         XCTAssertEqual(outSDP, expectedSDP)
     }
 
@@ -137,6 +142,7 @@ final class SDPManglerTests: XCTestCase {
 
     func testAddsBandwidthToVideoSectionAfterConnectionWithAudioSectionFirst() {
         let profile = QualityProfile.medium
+        let bandwidth = Bandwidth.medium
         let inSDP = SDP([
             "line1",
             "m=audio 64165 UDP/TLS/RTP/SAVPF 111 103 104 9 102 0 8 106 105 13 110 112 113 126",
@@ -153,10 +159,10 @@ final class SDPManglerTests: XCTestCase {
             "line4",
             "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
             "c=IN IP4 91.240.204.48",
-            "b=AS:\(profile.bandwidth)",
+            "b=AS:\(bandwidth.rawValue)",
             "line7"
         ])
-        let outSDP = mangle(inSDP, profile: profile)
+        let outSDP = mangle(inSDP, bandwidth: bandwidth, profile: profile)
         XCTAssertEqual(outSDP, expectedSDP)
     }
 
