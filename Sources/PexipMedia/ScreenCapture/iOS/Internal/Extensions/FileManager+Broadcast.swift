@@ -7,8 +7,11 @@ extension FileManager {
         let url = containerURL(
             forSecurityApplicationGroupIdentifier: appGroup
         )
-        return url?.appendingPathComponent("pex_broadcast_FD").path ?? ""
+        let suffix = "pex_broadcast_FD"
+        return url?.appendingPathComponent(suffix).path ?? suffix
     }
 }
+
+
 
 #endif

@@ -1,42 +1,43 @@
 #if os(iOS)
 
 import Foundation
+import Combine
 import Network
 import PexipUtils
 
-// MARK: - BroadcastServerDelegate
-
-protocol BroadcastServerDelegate: AnyObject {
-    func broadcastServerDidStart(_ server: BroadcastServer)
-    func broadcastServer(
-        _ server: BroadcastServer,
-        didReceiveMessage message: BroadcastMessage
-    )
-    func broadcastServer(_ server: BroadcastServer, didStopWithError error: Error?)
-}
-
-// MARK: - BroadcastServer
-
 /// Inter-process communication server based on AF_UNIX domain sockets
-final class BroadcastServer {
-    weak var delegate: BroadcastServerDelegate?
+final class BroadcastServer: Publisher {
+    typealias Output = Event
+    typealias Failure = Never
+
+    enum Event {
+        case start
+        case message(BroadcastMessage)
+        case stop(Error?)
+    }
+
+    var isRunning: Bool {
+        _isRunning.value
+    }
 
     private let listener: NWListener
-    private let path: String
+    private let filePath: String
     private let fileManager: FileManager
     private let receivedHandshake = Synchronized(false)
     private let callbackQueue = DispatchQueue(label: "com.pexip.PexipMedia.BroadcastServer")
     /// Accept only single connection.
     private var connection: NWConnection?
+    private let subject = PassthroughSubject<Event, Never>()
+    private let _isRunning = Synchronized(false)
 
     // MARK: - Init
 
-    init(path: String, fileManager: FileManager = .default) throws {
+    init(filePath: String, fileManager: FileManager = .default) throws {
         let params = NWParameters.tcp
-        params.requiredLocalEndpoint = NWEndpoint.unix(path: path)
+        params.requiredLocalEndpoint = NWEndpoint.unix(path: filePath)
 
         self.listener = try NWListener(using: params)
-        self.path = path
+        self.filePath = filePath
         self.fileManager = fileManager
     }
 
@@ -46,7 +47,12 @@ final class BroadcastServer {
 
     // MARK: - Internal
 
-    func start() throws {
+    @discardableResult
+    func start() throws -> Bool {
+        guard !isRunning else {
+            return false
+        }
+
         do {
             try removeSocketFile()
 
@@ -57,7 +63,8 @@ final class BroadcastServer {
 
                 switch state {
                 case .ready:
-                    self.delegate?.broadcastServerDidStart(self)
+                    self._isRunning.mutate { $0 = true }
+                    self.subject.send(.start)
                 case .failed(let error):
                     self.stop(error: error)
                 default:
@@ -80,22 +87,35 @@ final class BroadcastServer {
             try stop()
             throw error
         }
+
+        return true
     }
 
     func stop() throws {
+        guard isRunning else {
+            return
+        }
+
+        _isRunning.mutate { $0 = false }
+        listener.stateUpdateHandler = nil
+        listener.newConnectionHandler = nil
+        connection?.stateUpdateHandler = nil
+
         if listener.state != .cancelled {
             listener.cancel()
-            listener.stateUpdateHandler = nil
-            listener.newConnectionHandler = nil
         }
 
         if connection != nil {
             connection?.cancel()
-            connection?.stateUpdateHandler = nil
             connection = nil
         }
 
         try removeSocketFile()
+    }
+
+    func receive<S: Subscriber>(subscriber: S) where S.Failure == Failure,
+                                                     S.Input == Output {
+        subject.subscribe(subscriber)
     }
 
     // MARK: - Private
@@ -186,7 +206,7 @@ final class BroadcastServer {
 
                 if let data = data, data.count == bodyLength {
                     let message = BroadcastMessage(header: header, body: data)
-                    self.delegate?.broadcastServer(self, didReceiveMessage: message)
+                    self.subject.send(.message(message))
                 }
 
                 if error == nil, !isComplete {
@@ -199,6 +219,10 @@ final class BroadcastServer {
     }
 
     private func stop(error: Error?) {
+        guard isRunning else {
+            return
+        }
+
         var stopError = error
 
         do {
@@ -207,12 +231,12 @@ final class BroadcastServer {
             stopError = error
         }
 
-        delegate?.broadcastServer(self, didStopWithError: stopError)
+        subject.send(.stop(stopError))
     }
 
     private func removeSocketFile() throws {
-        if fileManager.fileExists(atPath: path) {
-            try fileManager.removeItem(atPath: path)
+        if fileManager.fileExists(atPath: filePath) {
+            try fileManager.removeItem(atPath: filePath)
         }
     }
 }

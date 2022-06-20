@@ -3,7 +3,7 @@
 import Foundation
 import CoreMedia
 
-struct BroadcastMessage {
+struct BroadcastMessage: Hashable {
     let header: BroadcastHeader
     let body: Data
 }

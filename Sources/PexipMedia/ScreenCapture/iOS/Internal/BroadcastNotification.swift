@@ -8,6 +8,10 @@ enum BroadcastNotification: String {
     case broadcastResumed = "com.pexip.PexipMedia.broadcastResumed"
     case broadcastFinished = "com.pexip.PexipMedia.broadcastFinished"
     case serverStarted = "com.pexip.PexipMedia.serverStarted"
+
+    var cfNotificationName: CFNotificationName {
+        CFNotificationName(rawValue as CFString)
+    }
 }
 
 #endif

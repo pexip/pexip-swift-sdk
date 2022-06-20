@@ -16,9 +16,10 @@ protocol BroadcastMessageLoopDelegate: AnyObject {
 // MARK: - BroadcastMessageLoop
 
 final class BroadcastMessageLoop {
+    let fps: UInt
     weak var delegate: BroadcastMessageLoopDelegate?
+    var isRunning: Bool { displayLink != nil }
 
-    private let fps: UInt
     private let processingQueue = DispatchQueue(
         label: "com.pexip.PexipMedia.BroadcastMessageLoop",
         qos: .userInteractive
@@ -38,9 +39,10 @@ final class BroadcastMessageLoop {
 
     // MARK: - Internal
 
-    func start() {
+    @discardableResult
+    func start() -> Bool {
         guard displayLink == nil else {
-            return
+            return false
         }
 
         let displayLink = CADisplayLink(
@@ -50,6 +52,8 @@ final class BroadcastMessageLoop {
         displayLink.preferredFramesPerSecond = Int(fps)
         displayLink.add(to: .current, forMode: .default)
         self.displayLink = displayLink
+
+        return true
     }
 
     func stop() {

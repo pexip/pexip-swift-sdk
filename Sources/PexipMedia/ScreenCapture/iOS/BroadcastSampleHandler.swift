@@ -1,5 +1,6 @@
 #if os(iOS)
 
+import Combine
 import CoreMedia
 import ReplayKit
 
@@ -17,26 +18,44 @@ public protocol BroadcastSampleHandlerDelegate: AnyObject {
 public final class BroadcastSampleHandler {
     public weak var delegate: BroadcastSampleHandlerDelegate?
 
+    let fps: UInt
     private let client: BroadcastClient
     private let messageLoop: BroadcastMessageLoop
     private let notificationCenter = BroadcastNotificationCenter.default
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
 
-    public init(
+    public convenience init(
         appGroup: String,
         fileManager: FileManager = .default
     ) {
         let filePath = fileManager.broadcastSocketPath(appGroup: appGroup)
-        client = BroadcastClient(filePath: filePath)
-
+        let client = BroadcastClient(filePath: filePath)
         let userDefaults = UserDefaults(suiteName: appGroup)
         /// The broadcast extension has hard memory limit of 50MB.
         /// Use lower frame rate to reduce the memory load.
         let fps = min(userDefaults?.broadcastFps ?? 15, 15)
+        self.init(client: client, fps: fps)
+    }
+
+    init(client: BroadcastClient, fps: UInt) {
+        self.client = client
+        self.fps = fps
         messageLoop = BroadcastMessageLoop(fps: fps)
 
-        client.delegate = self
+        client.sink { [weak self] event in
+            guard let self = self else { return }
+
+            switch event {
+            case .connect:
+                break
+            case .stop(let error):
+                let error = BroadcastError.broadcastFinished(error: error)
+                self.delegate?.broadcastSampleHandler(self, didFinishWithError: error)
+            }
+        }.store(in: &cancellables)
+
         messageLoop.delegate = self
     }
 
@@ -75,36 +94,39 @@ public final class BroadcastSampleHandler {
      - Parameters:
         - sampleBuffer: An object containing either audio or video data.
         - sampleBufferType: An object identifying the media type of the sample.
+     - Returns: True is the sample buffer was handled, False otherwise.
      */
+    @discardableResult
     public func processSampleBuffer(
         _ sampleBuffer: CMSampleBuffer,
         with sampleBufferType: RPSampleBufferType
-    ) {
+    ) -> Bool {
         guard client.isConnected else {
-            return
+            return false
         }
 
         switch sampleBufferType {
         case .video:
             messageLoop.addSampleBuffer(sampleBuffer)
+            return true
         case .audioApp, .audioMic:
-            return
+            return false
         @unknown default:
-            return
+            return false
         }
     }
 
     // MARK: - Private
 
     private func addNotificationObservers() {
-        notificationCenter.addObserver(for: .serverStarted) { [weak self] in
+        notificationCenter.addObserver(self, for: .serverStarted) { [weak self] in
             self?.client.start()
             self?.messageLoop.start()
         }
     }
 
     private func removeNotificationObservers() {
-        notificationCenter.removeObserver(for: .serverStarted)
+        notificationCenter.removeObserver(self)
     }
 }
 
@@ -118,18 +140,6 @@ extension BroadcastSampleHandler: BroadcastMessageLoopDelegate {
         Task {
             await client.send(message: message)
         }
-    }
-}
-
-// MARK: - BroadcastClientDelegate
-
-extension BroadcastSampleHandler: BroadcastClientDelegate {
-    func broadcastClient(
-        _ client: BroadcastClient,
-        didStopWithError error: Error?
-    ) {
-        let error = BroadcastError.broadcastFinished(error: error)
-        delegate?.broadcastSampleHandler(self, didFinishWithError: error)
     }
 }
 

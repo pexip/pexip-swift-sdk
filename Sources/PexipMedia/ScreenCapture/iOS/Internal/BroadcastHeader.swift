@@ -2,30 +2,18 @@
 
 import Foundation
 
-struct BroadcastHeader: Codable {
+struct BroadcastHeader: Hashable {
     let displayTimeNs: UInt64
     let pixelFormat: UInt32
     let videoWidth: UInt32
     let videoHeight: UInt32
     let videoOrientation: UInt32
     let contentLength: UInt32
+}
 
-    init(
-        displayTimeNs: UInt64,
-        pixelFormat: UInt32,
-        videoWidth: UInt32,
-        videoHeight: UInt32,
-        videoOrientation: UInt32,
-        contentLength: UInt32
-    ) {
-        self.displayTimeNs = displayTimeNs
-        self.pixelFormat = pixelFormat
-        self.videoWidth = videoWidth
-        self.videoHeight = videoHeight
-        self.videoOrientation = videoOrientation
-        self.contentLength = contentLength
-    }
+// MARK: - Encoding/decoding
 
+extension BroadcastHeader {
     init?(_ buffer: UnsafeMutableRawBufferPointer) {
         guard let baseAddress = buffer.baseAddress, buffer.count > 0 else {
             return nil
@@ -88,7 +76,7 @@ struct BroadcastHeader: Codable {
     }
 
     static var encodedSize: Int {
-        return MemoryLayout<UInt64>.size + MemoryLayout<UInt32>.size * 5
+        MemoryLayout<UInt64>.size + MemoryLayout<UInt32>.size * 5
     }
 }
 

@@ -9,7 +9,8 @@ extension UserDefaults {
 
     var broadcastFps: UInt? {
         get {
-            UInt(integer(forKey: Key.broadcastFps))
+            let value = UInt(integer(forKey: Key.broadcastFps))
+            return value > 0 ? value : nil
         }
         set {
             if let newValue = newValue {

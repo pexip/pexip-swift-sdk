@@ -13,7 +13,7 @@ extension CMSampleBuffer {
             key: RPVideoSampleOrientationKey as CFString,
             attachmentModeOut: nil
         )
-        return value?.uint32Value ?? 0
+        return value?.uint32Value ?? CGImagePropertyOrientation.up.rawValue
     }
 }
 

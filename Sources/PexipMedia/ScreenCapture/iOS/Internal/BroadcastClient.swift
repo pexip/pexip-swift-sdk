@@ -1,21 +1,20 @@
 #if os(iOS)
 
 import Foundation
+import Combine
 import Network
 import PexipUtils
 import CoreMedia
 
-// MARK: - BroadcastClientDelegate
-
-protocol BroadcastClientDelegate: AnyObject {
-    func broadcastClient(_ client: BroadcastClient, didStopWithError error: Error?)
-}
-
-// MARK: - BroadcastClient
-
 /// Inter-process communication client based on AF_UNIX domain sockets
-final class BroadcastClient {
-    weak var delegate: BroadcastClientDelegate?
+final class BroadcastClient: Publisher {
+    typealias Output = Event
+    typealias Failure = Never
+
+    enum Event {
+        case connect
+        case stop(Error?)
+    }
 
     var isConnected: Bool {
         receivedHandshake.value
@@ -25,6 +24,7 @@ final class BroadcastClient {
     private let sender: DataSender
     private let callbackQueue = DispatchQueue(label: "com.pexip.PexipMedia.BroadcastClient")
     private let receivedHandshake = Synchronized(false)
+    private let subject = PassthroughSubject<Event, Never>()
 
     // MARK: - Init
 
@@ -40,7 +40,12 @@ final class BroadcastClient {
 
     // MARK: - Internal
 
-    func start() {
+    @discardableResult
+    func start() -> Bool {
+        guard !isConnected else {
+            return false
+        }
+
         connection.stateUpdateHandler = { [weak self] state in
             switch state {
             case .ready:
@@ -54,26 +59,39 @@ final class BroadcastClient {
             }
         }
         connection.start(queue: callbackQueue)
+
+        return true
     }
 
     func stop() {
-        if connection.state != .cancelled {
-            connection.cancel()
-            connection.stateUpdateHandler = nil
+        guard isConnected && connection.state != .cancelled else {
+            return
         }
+
+        connection.cancel()
+        connection.stateUpdateHandler = nil
+        receivedHandshake.mutate { $0 = false }
     }
 
-    func send(message: BroadcastMessage) async {
-        guard receivedHandshake.value else {
-            return
+    @discardableResult
+    func send(message: BroadcastMessage) async -> Bool {
+        guard isConnected else {
+            return false
         }
 
         do {
             try await sender.send(data: message.header.encodedData)
             try await sender.send(data: message.body)
+            return true
         } catch {
             stop(error: error)
+            return false
         }
+    }
+
+    func receive<S: Subscriber>(subscriber: S) where S.Failure == Failure,
+                                                     S.Input == Output {
+        subject.subscribe(subscriber)
     }
 
     // MARK: - Private
@@ -97,7 +115,9 @@ final class BroadcastClient {
             } else if isComplete {
                 self.stop(error: nil)
             } else if !self.receivedHandshake.value {
-                self.receivedHandshake.mutate { $0 = data == message }
+                let isConnected = data == message
+                self.receivedHandshake.mutate { $0 = isConnected }
+                self.subject.send(.connect)
             }
         }
 
@@ -110,7 +130,7 @@ final class BroadcastClient {
 
     private func stop(error: Error?) {
         stop()
-        delegate?.broadcastClient(self, didStopWithError: error)
+        subject.send(.stop(error))
     }
 }
 
@@ -143,6 +163,8 @@ private actor DataSender {
                 )
             }
         }
+
+        try await task!.value
     }
 }
 

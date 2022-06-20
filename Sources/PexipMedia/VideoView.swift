@@ -4,11 +4,11 @@ import SwiftUI
 
 /// SwiftUI video view.
 public struct VideoComponent: View {
-    private let track: VideoTrack
-    private let contentMode: VideoContentMode
-    private let isMirrored: Bool
-    private let isReversed: Bool
-    private var aspectRatio: CGSize? {
+    public let track: VideoTrack
+    public let contentMode: VideoContentMode
+    public let isMirrored: Bool
+    public let isReversed: Bool
+    public var aspectRatio: CGSize? {
         contentMode.aspectRatio.map {
             isReversed
                 ? CGSize(width: $0.height, height: $0.width)

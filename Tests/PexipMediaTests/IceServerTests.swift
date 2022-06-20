@@ -11,7 +11,7 @@ final class IceServerTests: XCTestCase {
         XCTAssertNil(iceServer.password)
     }
 
-    func testInit() {
+    func testInitWithUrls() {
         let urls = ["url1", "url2"]
         let username = "User"
         let password = "Password"
@@ -22,6 +22,21 @@ final class IceServerTests: XCTestCase {
         )
 
         XCTAssertEqual(iceServer.urls, urls)
+        XCTAssertEqual(iceServer.username, username)
+        XCTAssertEqual(iceServer.password, password)
+    }
+
+    func testInitWithUrl() {
+        let url = "url"
+        let username = "User"
+        let password = "Password"
+        let iceServer = IceServer(
+            url: url,
+            username: username,
+            password: password
+        )
+
+        XCTAssertEqual(iceServer.urls, [url])
         XCTAssertEqual(iceServer.username, username)
         XCTAssertEqual(iceServer.password, password)
     }

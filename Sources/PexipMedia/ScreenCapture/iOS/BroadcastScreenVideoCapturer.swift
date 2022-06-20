@@ -2,6 +2,7 @@
 
 import CoreVideo
 import Combine
+import PexipUtils
 import ReplayKit
 
 /// A video capturer that captures the screen content as a video stream.
@@ -9,15 +10,18 @@ public final class BroadcastScreenVideoCapturer: ScreenVideoCapturer {
     public weak var delegate: ScreenVideoCapturerDelegate?
 
     private let filePath: String
+    private let fileManager: FileManager
     private let broadcastUploadExtension: String
     private let notificationCenter = BroadcastNotificationCenter.default
     private let userDefaults: UserDefaults?
     private var server: BroadcastServer?
     private var startTimeNs: UInt64?
+    private let isCapturing = Synchronized(false)
     private let processingQueue = DispatchQueue(
         label: "com.pexip.PexipMedia.ScreenVideoCapturer",
         qos: .userInteractive
     )
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
 
@@ -27,6 +31,7 @@ public final class BroadcastScreenVideoCapturer: ScreenVideoCapturer {
         fileManager: FileManager = .default
     ) {
         self.filePath = fileManager.broadcastSocketPath(appGroup: appGroup)
+        self.fileManager = fileManager
         self.broadcastUploadExtension = broadcastUploadExtension
         self.userDefaults = UserDefaults(suiteName: appGroup)
     }
@@ -38,6 +43,10 @@ public final class BroadcastScreenVideoCapturer: ScreenVideoCapturer {
     // MARK: - Internal
 
     public func startCapture(withFps fps: UInt) async throws {
+        guard !isCapturing.value else {
+            return
+        }
+
         addNotificationObservers()
         userDefaults?.broadcastFps = fps
 
@@ -54,45 +63,78 @@ public final class BroadcastScreenVideoCapturer: ScreenVideoCapturer {
     }
 
     public func stopCapture() throws {
+        guard isCapturing.value else {
+            return
+        }
+
         clean()
         try server?.stop()
+        server = nil
     }
 
     // MARK: - Private
 
     private func addNotificationObservers() {
-        notificationCenter.addObserver(for: .broadcastStarted) { [weak self] in
+        notificationCenter.addObserver(self, for: .broadcastStarted) { [weak self] in
             guard let self = self else {
                 return
             }
 
             do {
-                self.server = try BroadcastServer(path: self.filePath)
-                self.server?.delegate = self
+                self.server = try BroadcastServer(
+                    filePath: self.filePath,
+                    fileManager: self.fileManager
+                )
+                self.subscribeToEvents(from: self.server!)
+                self.isCapturing.mutate { $0 = true }
                 try self.server?.start()
             } catch {
-                self.clean()
-                self.onStop(error: error)
+                if self.isCapturing.value {
+                    self.clean()
+                    self.onStop(error: error)
+                }
             }
         }
 
-        notificationCenter.addObserver(for: .broadcastFinished) { [weak self] in
+        notificationCenter.addObserver(self, for: .broadcastFinished) { [weak self] in
+            guard let self = self, self.isCapturing.value else {
+                return
+            }
+
             var stopError: Error?
 
             do {
-                try self?.stopCapture()
+                try self.stopCapture()
             } catch {
                 stopError = error
             }
 
-            self?.clean()
-            self?.onStop(error: stopError)
+            self.onStop(error: stopError)
         }
     }
 
     private func removeNotificationObservers() {
-        notificationCenter.removeObserver(for: .broadcastStarted)
-        notificationCenter.removeObserver(for: .broadcastFinished)
+        notificationCenter.removeObserver(self)
+    }
+
+    private func subscribeToEvents(from server: BroadcastServer) {
+        server.sink { [weak self] event in
+            guard let self = self else { return }
+
+            switch event {
+            case .start:
+                self.notificationCenter.post(.serverStarted)
+            case .message(let message):
+                self.processingQueue.async { [weak self] in
+                    self?.processMessage(message)
+                }
+            case .stop(let error):
+                if self.isCapturing.value {
+                    self.clean()
+                    self.onStop(error: error)
+                }
+            }
+        }.store(in: &self.cancellables)
     }
 
     private func processMessage(_ message: BroadcastMessage) {
@@ -119,6 +161,7 @@ public final class BroadcastScreenVideoCapturer: ScreenVideoCapturer {
     }
 
     private func clean() {
+        isCapturing.mutate { $0 = false }
         removeNotificationObservers()
         startTimeNs = nil
         userDefaults?.broadcastFps = nil
@@ -130,31 +173,6 @@ public final class BroadcastScreenVideoCapturer: ScreenVideoCapturer {
 
     private func onCapture(videoFrame: VideoFrame) {
         delegate?.screenVideoCapturer(self, didCaptureVideoFrame: videoFrame)
-    }
-}
-
-// MARK: - BroadcastServerDelegate
-
-extension BroadcastScreenVideoCapturer: BroadcastServerDelegate {
-    func broadcastServerDidStart(_ server: BroadcastServer) {
-        notificationCenter.post(.serverStarted)
-    }
-
-    func broadcastServer(
-        _ server: BroadcastServer,
-        didReceiveMessage message: BroadcastMessage
-    ) {
-        processingQueue.async { [weak self] in
-            self?.processMessage(message)
-        }
-    }
-
-    func broadcastServer(
-        _ server: BroadcastServer,
-        didStopWithError error: Error?
-    ) {
-        clean()
-        onStop(error: error)
     }
 }
 

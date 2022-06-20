@@ -5,74 +5,128 @@ import Foundation
 final class BroadcastNotificationCenter {
     static let `default` = BroadcastNotificationCenter()
 
-    typealias Observer = () -> Void
+    typealias NotificationHandler = () -> Void
 
     private let center = CFNotificationCenterGetDarwinNotifyCenter()
-    private(set) var observers = [String: Observer]()
+    private(set) var observations = [Observation]()
 
     // MARK: - Init
 
     private init() {}
 
-    deinit {
-        removeAllObservers()
-    }
-
     // MARK: - Internal
 
     func post(_ notification: BroadcastNotification) {
-        CFNotificationCenterPostNotification(
-            center,
-            CFNotificationName(notification.rawValue as CFString),
-            nil,
-            nil,
-            true
-        )
+        let name = notification.cfNotificationName
+        CFNotificationCenterPostNotification(center, name, nil, nil, true)
     }
 
     func addObserver(
+        _ observer: AnyObject,
         for notification: BroadcastNotification,
-        using block: @escaping Observer
+        using handler: @escaping NotificationHandler
     ) {
-        observers[notification.rawValue] = block
+        let observation = Observation(
+            observer: observer,
+            notification: notification,
+            handler: handler
+        )
 
-        let callback: CFNotificationCallback = { _, _, name, _, _ in
+        if observations.contains(observation) {
+            removeObserver(observer, for: notification)
+        }
+
+        observations.append(observation)
+
+        let callback: CFNotificationCallback = { _, pointer, name, _, _ in
             guard let name = name?.rawValue as? String else { return }
-            BroadcastNotificationCenter.default.observers[name]?()
+
+            let observations = BroadcastNotificationCenter.default.observations
+
+            func isIncluded(_ observation: Observation) -> Bool {
+                observation.notification.rawValue == name && observation.rawPointer == pointer
+            }
+
+            for observation in observations where isIncluded(observation) {
+                observation.handler()
+            }
         }
 
         CFNotificationCenterAddObserver(
             center,
-            observerPointer(),
+            observation.rawPointer,
             callback,
-            notification.rawValue as CFString,
+            observation.notification.cfNotificationName.rawValue,
             nil,
             .deliverImmediately
         )
     }
 
-    func removeObserver(for notification: BroadcastNotification) {
-        observers.removeValue(forKey: notification.rawValue)
+    func removeObserver(_ observer: AnyObject, for notification: BroadcastNotification? = nil) {
+        func shouldRemove(_ observation: Observation) -> Bool {
+            var result = observation.observer === observer
 
-        CFNotificationCenterRemoveObserver(
-            center,
-            observerPointer(),
-            CFNotificationName(notification.rawValue as CFString),
-            nil
-        )
+            if let notification = notification {
+                result = result && observation.notification == notification
+            }
+
+            return result
+        }
+
+        var newObservations = [Observation]()
+
+        for observation in observations {
+            if shouldRemove(observation) {
+                CFNotificationCenterRemoveObserver(
+                    center,
+                    observation.rawPointer,
+                    observation.notification.cfNotificationName,
+                    nil
+                )
+            } else {
+                newObservations.append(observation)
+            }
+        }
+
+        observations = newObservations
     }
 
-    // MARK: - Private
-
-    private func removeAllObservers() {
-        CFNotificationCenterRemoveEveryObserver(
-            center,
-            observerPointer()
-        )
+    func removeAll() {
+        for observation in observations {
+            CFNotificationCenterRemoveEveryObserver(
+                center,
+                observation.rawPointer
+            )
+        }
+        observations.removeAll()
     }
+}
 
-    private func observerPointer() -> UnsafeMutableRawPointer {
-        Unmanaged.passUnretained(self).toOpaque()
+// MARK: - Observation
+
+extension BroadcastNotificationCenter {
+    final class Observation: Equatable {
+        weak var observer: AnyObject?
+        let notification: BroadcastNotification
+        let handler: NotificationHandler
+
+        init(
+            observer: AnyObject,
+            notification: BroadcastNotification,
+            handler: @escaping NotificationHandler
+        ) {
+            self.observer = observer
+            self.notification = notification
+            self.handler = handler
+        }
+
+        var rawPointer: UnsafeMutableRawPointer {
+            Unmanaged.passUnretained(self).toOpaque()
+        }
+
+        static func == (lhs: Observation, rhs: Observation) -> Bool {
+            lhs.observer === rhs.observer && lhs.notification == rhs.notification
+        }
     }
 }
 

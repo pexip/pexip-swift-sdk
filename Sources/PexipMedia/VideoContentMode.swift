@@ -1,7 +1,7 @@
 import CoreGraphics
 
 /// Indicates whether the video view should fit or fill the parent context
-public enum VideoContentMode {
+public enum VideoContentMode: Equatable {
     /// Fit the size of the view by maintaining the aspect ratio (9:16)
     case fit_16x9
     /// Fit the size of the view by maintaining the aspect ratio (4:3)

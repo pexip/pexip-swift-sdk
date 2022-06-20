@@ -86,7 +86,7 @@ final class QualityProfileTests: XCTestCase {
     #if os(iOS)
 
     func testPresentationMedium() {
-        let qualityProfile = QualityProfile.presentationHigh
+        let qualityProfile = QualityProfile.presentationMedium
 
         XCTAssertEqual(qualityProfile.width, 640)
         XCTAssertEqual(qualityProfile.height, 480)
@@ -94,6 +94,27 @@ final class QualityProfileTests: XCTestCase {
     }
 
     #endif
+
+    // MARK: - Other properties
+
+    func testAspectRatio() {
+        let qualityProfile = QualityProfile.high
+
+        XCTAssertEqual(
+            qualityProfile.aspectRatio,
+            CGSize(
+                width: Int(qualityProfile.width),
+                height: Int(qualityProfile.height)
+            )
+        )
+    }
+
+    func testDimensions() {
+        let qualityProfile = QualityProfile.high
+
+        XCTAssertEqual(qualityProfile.dimensions.width, Int32(qualityProfile.width))
+        XCTAssertEqual(qualityProfile.dimensions.height, Int32(qualityProfile.height))
+    }
 
     // MARK: - Best format
 
