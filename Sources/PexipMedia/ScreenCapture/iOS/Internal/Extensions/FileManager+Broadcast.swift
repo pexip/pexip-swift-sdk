@@ -12,6 +12,4 @@ extension FileManager {
     }
 }
 
-
-
 #endif

@@ -95,14 +95,14 @@ final class BroadcastMessageLoopTests: XCTestCase {
                 XCTAssertEqual(
                     delta.seconds,
                     maxTimeInterval.seconds,
-                    accuracy: 0.01
+                    accuracy: 0.02
                 )
             }
 
             iteration += 1
             lastTime = currentTime
 
-            if iteration == 10 {
+            if iteration == 3 {
                 expectation.fulfill()
             }
         }

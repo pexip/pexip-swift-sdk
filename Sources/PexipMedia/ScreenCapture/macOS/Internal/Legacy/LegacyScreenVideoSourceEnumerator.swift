@@ -32,7 +32,8 @@ struct LegacyScreenVideoSourceEnumerator: ScreenVideoSourceEnumerator {
 
         result = getOnlineDisplayList(
             displayCount.pointee,
-            displays, displayCount
+            displays,
+            displayCount
         )
 
         guard result == .success else {

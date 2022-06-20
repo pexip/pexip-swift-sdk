@@ -20,8 +20,11 @@ final class LegacyScreenVideoSourceEnumeratorTests: XCTestCase {
     func testGetShareableDisplays() async throws {
         enumerator.displayMode = { [weak self] _ in self?.displayMode }
         enumerator.getOnlineDisplayList = { (_, displays, count) -> CGError in
-            displays?.pointee = 1
-            count?.pointee = 2
+            var displaysSource: [UInt32] = [1, 2]
+            displays?.initialize(from: &displaysSource, count: displaysSource.count)
+
+            var countSource = UInt32(displaysSource.count)
+            count?.initialize(from: &countSource, count: 1)
             return .success
         }
 
@@ -33,7 +36,7 @@ final class LegacyScreenVideoSourceEnumeratorTests: XCTestCase {
                 height: displayMode.height
             ),
             LegacyDisplay(
-                displayID: 0,
+                displayID: 2,
                 width: displayMode.width,
                 height: displayMode.height
             )

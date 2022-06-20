@@ -144,6 +144,10 @@ private actor DataSender {
         self.connection = connection
     }
 
+    deinit {
+        task?.cancel()
+    }
+
     func send(data: Data) async throws {
         if let task = task {
             try? await task.value

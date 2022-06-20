@@ -14,7 +14,7 @@ public enum BroadcastError: LocalizedError, CustomStringConvertible, CustomNSErr
         case .invalidHeader:
             return "Invalid broadcast header"
         case .broadcastFinished:
-            return "Screen broadcasting finished"
+            return "Screen broadcast finished"
         }
     }
 

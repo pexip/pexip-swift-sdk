@@ -51,6 +51,8 @@ public final class BroadcastSampleHandler {
             case .connect:
                 break
             case .stop(let error):
+                self.messageLoop.stop()
+
                 let error = BroadcastError.broadcastFinished(error: error)
                 self.delegate?.broadcastSampleHandler(self, didFinishWithError: error)
             }
