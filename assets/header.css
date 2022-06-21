@@ -9,7 +9,6 @@
     --color-header-border: var(--color-nav-keyline);
     --color-header-link-hover: var(--color-link);
     --color-header-text: var(--color-header-text-light);
-    --logo-url: url("/pexip-swift-sdk/assets/logo.svg");
 
     font-family:
         -apple-system,
@@ -40,18 +39,6 @@ header {
     min-height: 52px;
 }
 
-a,
-a:active,
-a:hover,
-a:visited {
-    color: var(--color-header-text);
-    text-decoration: none;
-}
-
-a:hover {
-    color: var(--color-link);
-}
-
 .container {
     --padding-x: 22px;
     align-items: center;
@@ -63,37 +50,29 @@ a:hover {
     width: 980px;
 }
 
-#logo {
-    float: left;
-    position: relative;
-    --logo-width: 75px;
-    margin-left: calc(var(--logo-width) + 5px);
-}
-
-#logo::before {
-    content: '';
-    background-color: var(--color-header-text);
-    -webkit-mask-image: var(--logo-url);
-    mask-image: var(--logo-url);
-    background-size: contain;
-    position: absolute;
-    width: var(--logo-width);
-    height: 50px;
-    top: -15px;
-    left: calc(-1 * var(--logo-width) - 5px);
-}
-
 .topnav {
     overflow: hidden;
 }
 
 .topnav a {
-    float: right;
+    float: left;
     display: block;
     text-align: center;
     padding: 18px 18px;
     text-decoration: none;
     font-size: 17px;
+}
+
+.topnav a,
+.topnav a:active,
+.topnav a:hover,
+.topnav a:visited {
+    color: var(--color-header-text);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--color-link);
 }
 
 .topnav .icon {

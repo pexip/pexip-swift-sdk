@@ -1,4 +1,4 @@
-function myFunction() {
+function toggleMenu() {
   var x = document.getElementById("menu");
   
   if (x.className === "topnav") {
