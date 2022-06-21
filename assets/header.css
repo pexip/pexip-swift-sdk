@@ -1,13 +1,14 @@
 .top-nav {
-    background-color: #333;
     overflow: hidden;
-    border-bottom: 1px solid #666;
-    min-height: 52px;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 1.3rem;
 }
 
 .top-nav a {
     float: left;
-    display: block;
+    display: flex;
     text-align: center;
-    padding: 18px 18px;
+    padding: 18px 24px 18px 0;
+    font-size: 16px;
 }
