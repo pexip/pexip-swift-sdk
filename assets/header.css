@@ -1,3 +1,7 @@
+header {
+    background-color: var(--color-content-table-content-color);
+}
+
 .top-nav {
     overflow: hidden;
     max-width: 980px;
