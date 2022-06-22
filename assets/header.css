@@ -9,10 +9,50 @@ header {
     padding: 0 1.3rem;
 }
 
-.top-nav a {
+div.version {
     float: left;
     display: flex;
     text-align: center;
-    padding: 18px 24px 18px 0;
+    padding: 19px 5px;
     font-size: 16px;
+    color: var(--color-text);
+}
+
+.top-nav a {
+    float: right;
+    display: flex;
+    text-align: center;
+    padding: 18px 24px 18px 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+a.library-name {
+    position: relative;
+    float: left;
+    margin-left: calc(var(--logo-width));
+    --logo-width: 75px;
+    color: var(--color-text);
+    font-weight: 600;
+    font-size: 16px;
+    padding-right: 8px;
+}
+
+a.library-name:hover {
+    text-decoration: none;
+}
+
+a.library-name::before {
+    position: absolute;
+    content: "";
+    background-color: var(--color-text);
+    mask-image: url("/pexip-swift-sdk/assets/logo.svg");
+    -webkit-mask-image: url("/pexip-swift-sdk/assets/logo.svg");
+    mask-repeat: no-repeat;
+    mask-position: center;
+    width: var(--logo-width);
+    height: 50px;
+    top: 6px;
+    left: calc(-1 * var(--logo-width) - 5px);
 }
