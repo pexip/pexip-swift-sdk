@@ -50,7 +50,9 @@ a.library-name::before {
     mask-image: url("/pexip-swift-sdk/assets/logo.svg");
     -webkit-mask-image: url("/pexip-swift-sdk/assets/logo.svg");
     mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
     mask-position: center;
+    -webkit-mask-position: center;
     width: var(--logo-width);
     height: 50px;
     top: 6px;
