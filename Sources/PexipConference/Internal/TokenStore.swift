@@ -26,12 +26,6 @@ actor DefaultTokenStore: TokenStore {
         self.token = token
     }
 
-    deinit {
-        Task { [weak self] in
-            await self?.cancelUpdateTask()
-        }
-    }
-
     // MARK: - TokenStore
 
     func token() async throws -> Token {

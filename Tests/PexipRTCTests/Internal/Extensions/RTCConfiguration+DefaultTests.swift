@@ -11,7 +11,8 @@ final class RTCConfigurationDefaultTests: XCTestCase {
 
     func testDefaultConfiguration() {
         let configuration = RTCConfiguration.defaultConfiguration(
-            withIceServers: [iceServer]
+            withIceServers: [iceServer],
+            dscp: true
         )
 
         XCTAssertEqual(configuration.iceServers.count, 1)
@@ -21,5 +22,6 @@ final class RTCConfigurationDefaultTests: XCTestCase {
         XCTAssertEqual(configuration.continualGatheringPolicy, .gatherContinually)
         XCTAssertEqual(configuration.rtcpMuxPolicy, .require)
         XCTAssertEqual(configuration.tcpCandidatePolicy, .enabled)
+        XCTAssertTrue(configuration.enableDscp)
     }
 }

@@ -27,12 +27,6 @@ actor ConferenceSignaling: MediaConnectionSignaling {
         self.logger = logger
     }
 
-    deinit {
-        Task {
-            await callsRequestTask?.cancel()
-        }
-    }
-
     // MARK: - MediaConnectionSignaling
 
     func sendOffer(

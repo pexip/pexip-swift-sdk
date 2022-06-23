@@ -41,12 +41,6 @@ actor DefaultTokenRefresher: TokenRefresher {
         self.currentDate = currentDateProvider
     }
 
-    deinit {
-        Task { [weak self] in
-            await self?.stopRefreshTask()
-        }
-    }
-
     // MARK: - TokenRefresher
 
     @discardableResult

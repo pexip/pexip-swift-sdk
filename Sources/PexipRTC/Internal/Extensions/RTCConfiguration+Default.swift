@@ -3,7 +3,8 @@ import PexipMedia
 
 extension RTCConfiguration {
     static func defaultConfiguration(
-        withIceServers iceServers: [IceServer]
+        withIceServers iceServers: [IceServer],
+        dscp: Bool
     ) -> RTCConfiguration {
         let configuration = RTCConfiguration()
         configuration.iceServers = iceServers.map {
@@ -15,6 +16,7 @@ extension RTCConfiguration {
         }
         configuration.bundlePolicy = .maxBundle
         configuration.sdpSemantics = .unifiedPlan
+        configuration.enableDscp = dscp
         configuration.continualGatheringPolicy = .gatherContinually
         return configuration
     }

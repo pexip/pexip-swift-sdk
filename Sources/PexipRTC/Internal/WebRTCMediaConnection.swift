@@ -39,7 +39,10 @@ final class WebRTCMediaConnection: MediaConnection {
         connectionDelegateProxy = PeerConnectionDelegateProxy(logger: logger)
 
         guard let connection = factory.peerConnection(
-            with: .defaultConfiguration(withIceServers: config.iceServers),
+            with: .defaultConfiguration(
+                withIceServers: config.iceServers,
+                dscp: config.dscp
+            ),
             constraints: RTCMediaConstraints(
                 mandatoryConstraints: nil,
                 optionalConstraints: nil

@@ -11,11 +11,13 @@ final class MediaConnectionConfigTests: XCTestCase {
         let config = MediaConnectionConfig(
             signaling: signaling,
             iceServers: [iceServer],
+            dscp: true,
             presentationInMain: true
         )
 
         XCTAssertEqual(config.signaling as? Signaling, signaling)
         XCTAssertEqual(config.iceServers, [iceServer])
+        XCTAssertTrue(config.dscp)
         XCTAssertTrue(config.presentationInMain)
     }
 
@@ -25,6 +27,7 @@ final class MediaConnectionConfigTests: XCTestCase {
 
         XCTAssertEqual(config.signaling as? Signaling, signaling)
         XCTAssertEqual(config.iceServers, [MediaConnectionConfig.googleIceServer])
+        XCTAssertFalse(config.dscp)
         XCTAssertFalse(config.presentationInMain)
     }
 }

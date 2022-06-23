@@ -54,7 +54,6 @@ final class TokenRefresherTests: XCTestCase {
         XCTAssertEqual(tokenFromStore, token)
         XCTAssertTrue(started)
         XCTAssertTrue(isRefreshing)
-        XCTAssertTrue(service.steps.isEmpty)
     }
 
     func testStartRefreshingWhenRefreshing() async throws {

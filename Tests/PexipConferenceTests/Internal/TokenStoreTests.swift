@@ -35,18 +35,6 @@ final class TokenStoreTests: XCTestCase {
 
         XCTAssertEqual(tokenFromStorage, newToken)
     }
-
-    func testDeinit() async throws {
-        var store: TokenStore? = DefaultTokenStore(token: .randomToken())
-        let newTokenTask = Task<Token, Error> {
-            try await Task.sleep(seconds: 0.4)
-            return .randomToken()
-        }
-        try await store?.updateToken(withTask: newTokenTask)
-        store = nil
-
-        XCTAssertTrue(newTokenTask.isCancelled)
-    }
 }
 
 // MARK: - Stubs
