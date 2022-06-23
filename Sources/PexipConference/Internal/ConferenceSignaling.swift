@@ -28,7 +28,9 @@ actor ConferenceSignaling: MediaConnectionSignaling {
     }
 
     deinit {
-        callsRequestTask?.cancel()
+        Task {
+            await callsRequestTask?.cancel()
+        }
     }
 
     // MARK: - MediaConnectionSignaling
@@ -160,7 +162,7 @@ actor ConferenceSignaling: MediaConnectionSignaling {
 
 // MARK: - Private extensions
 
-private extension Regex {
+private extension PexipUtils.Regex {
     static let sdpUfrag = Regex("^a=ice-ufrag:(.+)$")
     static let sdpPwd = Regex("^a=ice-pwd:(.+)$")
     static let candicateUfrag = Regex(".*\\bufrag\\s+(.+?)\\s+.*")

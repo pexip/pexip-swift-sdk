@@ -6,7 +6,7 @@ public struct InfinityClientFactory {
     private let logger: Logger?
 
     /**
-     Creates a new instance of ``PexipInfinityFactory``
+     Creates a new instance of ``InfinityClientFactory``
      - Parameters:
         - urlSession: An optional instance of `URLSession` to make HTTP calls
         - logger: An optional object for writing messages to the logging system of choice

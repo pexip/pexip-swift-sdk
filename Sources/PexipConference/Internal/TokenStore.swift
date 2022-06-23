@@ -27,7 +27,9 @@ actor DefaultTokenStore: TokenStore {
     }
 
     deinit {
-        cancelUpdateTask()
+        Task { [weak self] in
+            await self?.cancelUpdateTask()
+        }
     }
 
     // MARK: - TokenStore

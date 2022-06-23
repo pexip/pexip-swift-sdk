@@ -91,7 +91,7 @@ public protocol ParticipantService {
      Sets the call ID.
      - Parameters:
         - id: The ID of the call
-     - Returns: A new instance of ``CallStep``
+     - Returns: A new instance of ``CallService``
      */
     func call(id: UUID) -> CallService
 }

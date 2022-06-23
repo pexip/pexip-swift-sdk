@@ -60,7 +60,7 @@ public protocol ConferenceService: TokenService {
      Sets the participant ID.
      - Parameters:
         - id: The ID of the participant
-     - Returns: A new instance of ``ParticipantStep``
+     - Returns: A new instance of ``ParticipantService``
      */
     func participant(id: UUID) -> ParticipantService
 }

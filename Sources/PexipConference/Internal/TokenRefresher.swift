@@ -42,7 +42,9 @@ actor DefaultTokenRefresher: TokenRefresher {
     }
 
     deinit {
-        stopRefreshTask()
+        Task { [weak self] in
+            await self?.stopRefreshTask()
+        }
     }
 
     // MARK: - TokenRefresher
