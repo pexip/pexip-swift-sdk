@@ -4,7 +4,7 @@ import PexipRTC
 import PexipConference
 
 struct PreflightView: View {
-    let cameraVideoTrack: VideoTrack?
+    let mainLocalVideoTrack: VideoTrack?
     @Binding var cameraEnabled: Bool
     @Binding var microphoneEnabled: Bool
     let onToggleCamera: () -> Void
@@ -32,7 +32,7 @@ struct PreflightView: View {
     }
 
     private var localVideoView: some View {
-        cameraVideoTrack.map { track in
+        mainLocalVideoTrack.map { track in
             VideoComponent(
                 track: track,
                 contentMode: .fill,
@@ -83,7 +83,7 @@ struct PreflightView_Previews: PreviewProvider {
 
     private static var view: some View {
         PreflightView(
-            cameraVideoTrack: VideoTrackMock(.darkGray),
+            mainLocalVideoTrack: VideoTrackMock(.darkGray),
             cameraEnabled: .constant(true),
             microphoneEnabled: .constant(true),
             onToggleCamera: {},

@@ -28,6 +28,21 @@ struct ToggleCameraButton: View {
     }
 }
 
+// MARK: - Screen share
+
+struct ScreenShareButton: View {
+    @Binding var enabled: Bool
+
+    var body: some View {
+        CircleButton(
+            icon: "display",
+            background: Material.ultraThin,
+            foregroundColor: enabled ? .blue : .white,
+            action: { enabled.toggle() }
+        )
+    }
+}
+
 // MARK: - Disconnect
 
 struct DisconnectButton: View {
@@ -91,14 +106,19 @@ struct ChatButton: View {
 private struct CircleButton<Background: ShapeStyle>: View {
     let icon: String
     let background: Background
+    var foregroundColor: Color = .white
     var font: Font = .headline
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            SystemIcon(name: icon, font: font)
-                .background(background)
-                .clipShape(Circle())
+            SystemIcon(
+                name: icon,
+                font: font,
+                foregroundColor: foregroundColor
+            )
+            .background(background)
+            .clipShape(Circle())
         }
         .preferredColorScheme(.dark)
         .buttonStyle(PlainButtonStyle())
@@ -108,10 +128,11 @@ private struct CircleButton<Background: ShapeStyle>: View {
 private struct SystemIcon: View {
     let name: String
     let font: Font
+    var foregroundColor: Color = .white
 
     var body: some View {
         Image(systemName: name)
-            .foregroundColor(.white)
+            .foregroundColor(foregroundColor)
             .font(font)
             .frame(width: 55, height: 55)
     }
@@ -129,6 +150,10 @@ struct CircleButton_Previews: PreviewProvider {
             Group {
                 MicrophoneButton(enabled: .constant(true))
                 MicrophoneButton(enabled: .constant(false))
+            }
+            Group {
+                ScreenShareButton(enabled: .constant(true))
+                ScreenShareButton(enabled: .constant(false))
             }
             ToggleCameraButton(action: {})
             DisconnectButton(action: {})

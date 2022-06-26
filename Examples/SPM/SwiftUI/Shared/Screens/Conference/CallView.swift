@@ -4,16 +4,17 @@ import PexipRTC
 import PexipConference
 
 struct CallView: View {
-    let cameraVideoTrack: VideoTrack?
-    let mainRemoteVideoTrack: VideoTrack?
-    let presentationRemoteVideoTrack: VideoTrack?
+    let mainLocalVideo: Video?
+    let mainRemoteVideo: Video?
+    let presentationLocalVideo: Video?
+    let presentationRemoteVideo: Video?
     let presenterName: String?
-    let cameraQualityProfile: QualityProfile
-    let remoteVideoContentMode: VideoContentMode
+
     @Binding var showingChat: Bool?
     @Binding var showingParticipants: Bool
     @Binding var cameraEnabled: Bool
     @Binding var microphoneEnabled: Bool
+    @Binding var isPresenting: Bool
     let onToggleCamera: () -> Void
     let onDisconnect: () -> Void
 
@@ -66,7 +67,13 @@ private extension CallView {
                     }
 
                     HStack {
-                        localVideoView(geometry: geometry)
+                        videoView(
+                            video: mainLocalVideo,
+                            isMirrored: true,
+                            supportsRotation: true,
+                            geometry: geometry
+                        )
+                        .onTapGesture(perform: onToggleCamera)
                         Spacer()
                     }
                     .padding(.horizontal)
@@ -78,14 +85,20 @@ private extension CallView {
                 VStack(spacing: 0) {
                     Spacer()
 
-                    if presentationRemoteVideoTrack != nil {
-                        HStack {
-                            Spacer()
-                            smallRemoteVideoView(geometry: geometry)
+                    HStack {
+                        Spacer()
+                        if presentationRemoteVideo != nil {
+                            videoView(video: mainRemoteVideo, geometry: geometry)
+                        } else if presentationLocalVideo != nil {
+                            videoView(
+                                video: presentationLocalVideo,
+                                supportsRotation: true,
+                                geometry: geometry
+                            )
                         }
-                        .padding(.horizontal)
-                        .padding(.bottom, 15)
                     }
+                    .padding(.horizontal)
+                    .padding(.bottom, 15)
 
                     if showingButtons {
                         bottomBar
@@ -98,54 +111,38 @@ private extension CallView {
     var mainVideoView: some View {
         ZStack(alignment: .center) {
             Color.black.edgesIgnoringSafeArea(.all)
-            if let track = presentationRemoteVideoTrack {
-                VideoComponent(
-                    track: track,
-                    contentMode: remoteVideoContentMode
-                ).edgesIgnoringSafeArea(.all)
-            } else if let track = mainRemoteVideoTrack {
-                VideoComponent(
-                    track: track,
-                    contentMode: remoteVideoContentMode
-                ).edgesIgnoringSafeArea(.all)
+            if let video = presentationRemoteVideo {
+                VideoComponent(video: video).edgesIgnoringSafeArea(.all)
+            } else if let video = mainRemoteVideo {
+                VideoComponent(video: video).edgesIgnoringSafeArea(.all)
             }
         }
     }
 
     @ViewBuilder
-    func smallRemoteVideoView(geometry: GeometryProxy) -> some View {
-        let height = smallVideoViewSize(for: geometry)
-
-        mainRemoteVideoTrack.map { track in
-            VideoComponent(
-                track: track,
-                contentMode: .fit_16x9
-            )
-            .frame(height: height)
-            .cornerRadius(10)
-        }
-    }
-
-    @ViewBuilder
-    func localVideoView(geometry: GeometryProxy) -> some View {
+    func videoView(
+        video: Video?,
+        isMirrored: Bool = false,
+        supportsRotation: Bool = false,
+        geometry: GeometryProxy
+    ) -> some View {
         let size = smallVideoViewSize(for: geometry)
         let isLandscape = isLandscape(geometry: geometry)
+        let isReversed = supportsRotation ? !isLandscape : false
 
-        cameraVideoTrack.map { track in
+        video.map { video in
             VideoComponent(
-                track: track,
-                contentMode: .fitQualityProfile(cameraQualityProfile),
-                isMirrored: true,
-                isReversed: !isLandscape
+                video: video,
+                isMirrored: isMirrored,
+                isReversed: isReversed
             )
             .cornerRadius(10)
             .frame(
-                width: isLandscape ? nil : size,
-                height: isLandscape ? size : nil,
+                width: isReversed ? size : nil,
+                height: isReversed ? nil : size,
                 alignment: .trailing
             )
             .shadow(radius: 2)
-            .onTapGesture(perform: onToggleCamera)
         }
     }
 
@@ -167,7 +164,7 @@ private extension CallView {
                 showingParticipants.toggle()
             })
             Spacer()
-            if presentationRemoteVideoTrack != nil {
+            if presentationRemoteVideo != nil {
                 presenterNameLabel
             }
             Spacer()
@@ -185,6 +182,13 @@ private extension CallView {
         HStack(spacing: 20) {
             MicrophoneButton(enabled: $microphoneEnabled)
             CameraButton(enabled: $cameraEnabled)
+            ScreenShareButton(enabled: Binding(
+                get: { isPresenting },
+                set: { value in
+                    showingButtons = false
+                    isPresenting = value
+                })
+            )
             Spacer()
             DisconnectButton(action: onDisconnect)
         }
@@ -212,44 +216,69 @@ private extension CallView {
 
 struct CallView_Previews: PreviewProvider {
     static var previews: some View {
-        callView(withPresentation: false)
+        callView()
             .previewInterfaceOrientation(.portrait)
 
         VStack {
-            callView(withPresentation: false)
-                .frame(height: 180)
+            callView().frame(height: 180)
             Spacer()
         }
         .background(Color.black)
         .previewInterfaceOrientation(.portrait)
 
-        callView(withPresentation: false)
+        callView()
             .previewInterfaceOrientation(.landscapeLeft)
 
-        callView(withPresentation: true)
+        callView(withRemotePresentation: true)
             .previewInterfaceOrientation(.portrait)
 
-        callView(withPresentation: true)
+        callView(withRemotePresentation: true)
             .previewInterfaceOrientation(.landscapeLeft)
 
-        callView(withPresentation: true)
+        callView(withRemotePresentation: true)
+            .previewInterfaceOrientation(.landscapeRight)
+
+        callView(withLocalPresentation: true)
+            .previewInterfaceOrientation(.portrait)
+
+        callView(withLocalPresentation: true)
+            .previewInterfaceOrientation(.landscapeLeft)
+
+        callView(withLocalPresentation: true)
             .previewInterfaceOrientation(.landscapeRight)
     }
 
-    private static func callView(withPresentation: Bool) -> some View {
+    private static func callView(
+        withRemotePresentation: Bool = false,
+        withLocalPresentation: Bool = false
+    ) -> some View {
         CallView(
-            cameraVideoTrack: VideoTrackMock(.lightGray),
-            mainRemoteVideoTrack: VideoTrackMock(.darkGray),
-            presentationRemoteVideoTrack: withPresentation
-                ? VideoTrackMock(.purple)
+            mainLocalVideo: Video(
+                track: VideoTrackMock(.lightGray),
+                qualityProfile: .high
+            ),
+            mainRemoteVideo: Video(
+                track: VideoTrackMock(.darkGray),
+                contentMode: .fit_16x9
+            ),
+            presentationLocalVideo: withLocalPresentation
+                ? Video(
+                    track: VideoTrackMock(.purple),
+                    contentMode: .fit_16x9
+                )
                 : nil,
-            presenterName: withPresentation ? "Presenter" : nil,
-            cameraQualityProfile: .high,
-            remoteVideoContentMode: .fit_16x9,
+            presentationRemoteVideo: withRemotePresentation
+                ? Video(
+                    track: VideoTrackMock(.purple),
+                    contentMode: .fit_16x9
+                )
+                : nil,
+            presenterName: withRemotePresentation ? "Presenter" : nil,
             showingChat: .constant(false),
             showingParticipants: .constant(false),
             cameraEnabled: .constant(true),
             microphoneEnabled: .constant(true),
+            isPresenting: .constant(false),
             onToggleCamera: {},
             onDisconnect: {}
         )
