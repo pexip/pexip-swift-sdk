@@ -6,7 +6,14 @@ public protocol MediaConnectionFactory {
     /// Creates a new local audio track.
     func createLocalAudioTrack() -> LocalAudioTrack
 
-    /// Creates a new local video track.
+    /*
+     Creates a new camera video track for the best available camera.
+
+     Best available camera is determined by the following order:
+     1. First front-facing camera
+     2. First back-facing camera
+     3. The default video device
+     */
     func createCameraVideoTrack() -> CameraVideoTrack?
 
     /**
@@ -20,26 +27,26 @@ public protocol MediaConnectionFactory {
     #if os(iOS)
 
     /**
-     Creates a new screen video track.
+     Creates a new screen media track.
      - Parameters:
         - appGroup: The app group identifier.
         - broadcastUploadExtension: Bundle identifier of your broadcast upload extension.
-     - Returns: A new screen video track
+     - Returns: A new screen media track
      */
-    func createScreenVideoTrack(
+    func createScreenMediaTrack(
         appGroup: String,
         broadcastUploadExtension: String
-    ) -> ScreenVideoTrack
+    ) -> ScreenMediaTrack
 
     #else
 
     /**
-     Creates a new screen video track.
+     Creates a new screen media track.
      - Parameters:
-        - videoSource: The source of the screen content (display or window).
-     - Returns: A new screen video track
+        - mediaSource: The source of the screen content (display or window).
+     - Returns: A new screen media track
      */
-    func createScreenVideoTrack(videoSource: ScreenVideoSource) -> ScreenVideoTrack
+    func createScreenMediaTrack(mediaSource: ScreenMediaSource) -> ScreenMediaTrack
 
     #endif
 

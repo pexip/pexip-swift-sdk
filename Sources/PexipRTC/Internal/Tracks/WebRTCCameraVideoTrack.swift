@@ -3,7 +3,7 @@ import PexipMedia
 
 final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
     let capturingStatus = CapturingStatus(isCapturing: false)
-    var qualityProfile: QualityProfile?
+    var videoProfile: QualityProfile?
 
     private var currentDevice: AVCaptureDevice
     private let capturer: RTCCameraVideoCapturer
@@ -30,10 +30,10 @@ final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
     // MARK: - CameraVideoTrack
 
     func startCapture() async throws {
-        try await startCapture(profile: .medium)
+        try await startCapture(withVideoProfile: .medium)
     }
 
-    func startCapture(profile: QualityProfile) async throws {
+    func startCapture(withVideoProfile videoProfile: QualityProfile) async throws {
         let status = await permission.requestAccess()
 
         if let error = MediaCapturePermissionError(status: status) {
@@ -44,14 +44,14 @@ final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
             stopCapture()
         }
 
-        guard let format = profile.bestFormat(
+        guard let format = videoProfile.bestFormat(
             from: RTCCameraVideoCapturer.supportedFormats(for: currentDevice),
             formatDescription: \.formatDescription
         ) else {
             return
         }
 
-        guard let fps = profile.bestFrameRate(
+        guard let fps = videoProfile.bestFrameRate(
             from: format.videoSupportedFrameRateRanges,
             maxFrameRate: \.maxFrameRate
         ) else {
@@ -66,7 +66,7 @@ final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
             fps: Int(fps)
         )
 
-        qualityProfile = profile
+        self.videoProfile = videoProfile
         capturingStatus.isCapturing = true
     }
 
@@ -87,8 +87,8 @@ final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
         currentDevice = newDevice
         stopCapture()
 
-        if let qualityProfile = qualityProfile {
-            try await startCapture(profile: qualityProfile)
+        if let videoProfile = videoProfile {
+            try await startCapture(withVideoProfile: videoProfile)
         } else {
             try await startCapture()
         }

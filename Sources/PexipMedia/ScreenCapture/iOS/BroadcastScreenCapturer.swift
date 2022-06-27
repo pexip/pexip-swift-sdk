@@ -5,9 +5,9 @@ import Combine
 import PexipUtils
 import ReplayKit
 
-/// A video capturer that captures the screen content as a video stream.
-public final class BroadcastScreenVideoCapturer: ScreenVideoCapturer {
-    public weak var delegate: ScreenVideoCapturerDelegate?
+/// A capturer that captures the screen content from Broadcast Upload Extension on iOS.
+public final class BroadcastScreenCapturer: ScreenMediaCapturer {
+    public weak var delegate: ScreenMediaCapturerDelegate?
 
     private let filePath: String
     private let fileManager: FileManager
@@ -18,7 +18,7 @@ public final class BroadcastScreenVideoCapturer: ScreenVideoCapturer {
     private var startTimeNs: UInt64?
     private let isCapturing = Synchronized(false)
     private let processingQueue = DispatchQueue(
-        label: "com.pexip.PexipMedia.ScreenVideoCapturer",
+        label: "com.pexip.PexipMedia.BroadcastScreenCapturer",
         qos: .userInteractive
     )
     private var cancellables = Set<AnyCancellable>()
@@ -42,13 +42,13 @@ public final class BroadcastScreenVideoCapturer: ScreenVideoCapturer {
 
     // MARK: - Internal
 
-    public func startCapture(withFps fps: UInt) async throws {
+    public func startCapture(withVideoProfile videoProfile: QualityProfile) async throws {
         guard !isCapturing.value else {
             return
         }
 
         addNotificationObservers()
-        userDefaults?.broadcastFps = fps
+        userDefaults?.broadcastFps = videoProfile.fps
 
         let broadcastUploadExtension = self.broadcastUploadExtension
 
@@ -152,6 +152,12 @@ public final class BroadcastScreenVideoCapturer: ScreenVideoCapturer {
 
         let videoFrame = VideoFrame(
             pixelBuffer: pixelBuffer,
+            contentRect: CGRect(
+                x: 0,
+                y: 0,
+                width: Int(pixelBuffer.width),
+                height: Int(pixelBuffer.height)
+            ),
             orientation: .init(rawValue: message.header.videoOrientation) ?? .up,
             displayTimeNs: displayTimeNs,
             elapsedTimeNs: displayTimeNs - startTimeNs!
@@ -168,11 +174,11 @@ public final class BroadcastScreenVideoCapturer: ScreenVideoCapturer {
     }
 
     private func onStop(error: Error?) {
-        delegate?.screenVideoCapturer(self, didStopWithError: error)
+        delegate?.screenMediaCapturer(self, didStopWithError: error)
     }
 
     private func onCapture(videoFrame: VideoFrame) {
-        delegate?.screenVideoCapturer(self, didCaptureVideoFrame: videoFrame)
+        delegate?.screenMediaCapturer(self, didCaptureVideoFrame: videoFrame)
     }
 }
 

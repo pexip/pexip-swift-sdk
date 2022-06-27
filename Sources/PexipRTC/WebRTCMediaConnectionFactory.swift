@@ -69,24 +69,24 @@ public final class WebRTCMediaConnectionFactory: MediaConnectionFactory {
 
     #if os(iOS)
 
-    public func createScreenVideoTrack(
+    public func createScreenMediaTrack(
         appGroup: String,
         broadcastUploadExtension: String
-    ) -> ScreenVideoTrack {
-        let screenVideoCapturer = BroadcastScreenVideoCapturer(
+    ) -> ScreenMediaTrack {
+        let screenMediaCapturer = BroadcastScreenCapturer(
             appGroup: appGroup,
             broadcastUploadExtension: broadcastUploadExtension
         )
-        return createScreenVideoTrack(screenVideoCapturer: screenVideoCapturer)
+        return createScreenMediaTrack(screenMediaCapturer: screenMediaCapturer)
     }
 
     #else
 
-    public func createScreenVideoTrack(
-        videoSource: ScreenVideoSource
-    ) -> ScreenVideoTrack {
-        let screenVideoCapturer = ScreenVideoSource.createCapturer(for: videoSource)
-        return createScreenVideoTrack(screenVideoCapturer: screenVideoCapturer)
+    public func createScreenMediaTrack(
+        mediaSource: ScreenMediaSource
+    ) -> ScreenMediaTrack {
+        let screenMediaCapturer = ScreenMediaSource.createCapturer(for: mediaSource)
+        return createScreenMediaTrack(screenMediaCapturer: screenMediaCapturer)
     }
 
     #endif
@@ -103,19 +103,19 @@ public final class WebRTCMediaConnectionFactory: MediaConnectionFactory {
 
     // MARK: - Private
 
-    private func createScreenVideoTrack(
-        screenVideoCapturer: ScreenVideoCapturer
-    ) -> ScreenVideoTrack {
+    private func createScreenMediaTrack(
+        screenMediaCapturer: ScreenMediaCapturer
+    ) -> ScreenMediaTrack {
         let videoSource = factory.videoSource(forScreenCast: true)
         let videoTrack = factory.videoTrack(
             with: videoSource,
             trackId: UUID().uuidString
         )
-        let capturer = WebRTCScreenVideoCapturer(
+        let capturer = WebRTCScreenCapturer(
             videoSource: videoSource,
-            capturer: screenVideoCapturer,
+            mediaCapturer: screenMediaCapturer,
             logger: logger
         )
-        return WebRTCScreenVideoTrack(rtcTrack: videoTrack, capturer: capturer)
+        return WebRTCScreenMediaTrack(rtcTrack: videoTrack, capturer: capturer)
     }
 }

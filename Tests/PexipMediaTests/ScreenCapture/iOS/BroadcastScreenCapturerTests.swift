@@ -5,13 +5,13 @@ import Combine
 import CoreMedia
 @testable import PexipMedia
 
-final class BroadcastScreenVideoCapturerTests: XCTestCase {
+final class BroadcastScreenCapturerTests: XCTestCase {
     private let appGroup = "test"
     private let notificationCenter = BroadcastNotificationCenter.default
     private var userDefaults: UserDefaults!
     private var fileManager: BroadcastFileManagerMock!
-    private var delegate: ScreenVideoCapturerDelegateMock!
-    private var videoCapturer: BroadcastScreenVideoCapturer!
+    private var delegate: ScreenMediaCapturerDelegateMock!
+    private var capturer: BroadcastScreenCapturer!
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Setup
@@ -23,29 +23,29 @@ final class BroadcastScreenVideoCapturerTests: XCTestCase {
         userDefaults.broadcastFps = nil
 
         fileManager = BroadcastFileManagerMock()
-        delegate = ScreenVideoCapturerDelegateMock()
+        delegate = ScreenMediaCapturerDelegateMock()
 
-        videoCapturer = BroadcastScreenVideoCapturer(
+        capturer = BroadcastScreenCapturer(
             appGroup: appGroup,
             broadcastUploadExtension: "test",
             fileManager: fileManager
         )
-        videoCapturer.delegate = delegate
+        capturer.delegate = delegate
     }
 
     override func tearDown() {
         super.tearDown()
         userDefaults.removePersistentDomain(forName: appGroup)
-        videoCapturer = nil
+        capturer = nil
     }
 
     // MARK: - Tests
 
     func testStartCapture() async throws {
-        let fps: UInt = 15
-        try await videoCapturer.startCapture(withFps: fps)
+        let videoProfile = QualityProfile.high
+        try await capturer.startCapture(withVideoProfile: videoProfile)
 
-        XCTAssertEqual(userDefaults.broadcastFps, fps)
+        XCTAssertEqual(userDefaults.broadcastFps, videoProfile.fps)
     }
 
     func testStartCaptureWhenCapturing() throws {
@@ -54,13 +54,14 @@ final class BroadcastScreenVideoCapturerTests: XCTestCase {
         let client = BroadcastClient(filePath: filePath)
         let fps: UInt = 15
         let handler = BroadcastSampleHandler(client: client, fps: fps)
+        let videoProfile = QualityProfile(width: 1280, height: 720, fps: 5)
 
         client.sink { [unowned self] event in
             switch event {
             case .connect:
                 Task {
-                    try await videoCapturer.startCapture(withFps: 5)
-                    XCTAssertEqual(userDefaults.broadcastFps, fps)
+                    try await capturer.startCapture(withVideoProfile: videoProfile)
+                    XCTAssertEqual(userDefaults.broadcastFps, videoProfile.fps)
                     expectation.fulfill()
                 }
             case .stop:
@@ -69,7 +70,7 @@ final class BroadcastScreenVideoCapturerTests: XCTestCase {
         }.store(in: &cancellables)
 
         Task {
-            try await videoCapturer.startCapture(withFps: fps)
+            try await capturer.startCapture(withVideoProfile: videoProfile)
             handler.broadcastStarted()
         }
 
@@ -85,7 +86,8 @@ final class BroadcastScreenVideoCapturerTests: XCTestCase {
         let width = 1920
         let height = 1080
         let sampleBuffer = CMSampleBuffer.stub(width: width, height: height)
-        let handler = BroadcastSampleHandler(client: client, fps: 15)
+        let videoProfile = QualityProfile.presentationHigh
+        let handler = BroadcastSampleHandler(client: client, fps: videoProfile.fps)
 
         client.sink { event in
             switch event {
@@ -110,7 +112,7 @@ final class BroadcastScreenVideoCapturerTests: XCTestCase {
         }
 
         Task {
-            try await videoCapturer.startCapture(withFps: 15)
+            try await capturer.startCapture(withVideoProfile: videoProfile)
             handler.broadcastStarted()
         }
 
@@ -118,6 +120,7 @@ final class BroadcastScreenVideoCapturerTests: XCTestCase {
     }
 
     func testBroadcastWithServerStartError() throws {
+        let videoProfile = QualityProfile.presentationHigh
         fileManager.fileError = URLError(.badURL)
 
         let stopExpectation = self.expectation(description: "Broadcast finished")
@@ -132,7 +135,7 @@ final class BroadcastScreenVideoCapturerTests: XCTestCase {
         }
 
         Task {
-            try await videoCapturer.startCapture(withFps: 15)
+            try await capturer.startCapture(withVideoProfile: videoProfile)
             handler.broadcastStarted()
         }
 
@@ -140,6 +143,7 @@ final class BroadcastScreenVideoCapturerTests: XCTestCase {
     }
 
     func testBroadcastFinishedWhenNotCapturing() {
+        let videoProfile = QualityProfile.presentationHigh
         let stopExpectation = self.expectation(description: "Broadcast finished")
         stopExpectation.isInverted = true
 
@@ -153,7 +157,7 @@ final class BroadcastScreenVideoCapturerTests: XCTestCase {
         }
 
         Task {
-            try await videoCapturer.startCapture(withFps: 15)
+            try await capturer.startCapture(withVideoProfile: videoProfile)
             handler.broadcastFinished()
         }
 
@@ -162,9 +166,10 @@ final class BroadcastScreenVideoCapturerTests: XCTestCase {
 
     func testBroadcastFinishedWithError() throws {
         let stopExpectation = self.expectation(description: "Broadcast finished")
+        let videoProfile = QualityProfile.presentationHigh
         let filePath = fileManager.broadcastSocketPath(appGroup: appGroup)
         let client = BroadcastClient(filePath: filePath)
-        let handler = BroadcastSampleHandler(client: client, fps: 15)
+        let handler = BroadcastSampleHandler(client: client, fps: videoProfile.fps)
 
         client.sink { [unowned self] event in
             switch event {
@@ -182,7 +187,7 @@ final class BroadcastScreenVideoCapturerTests: XCTestCase {
         }
 
         Task {
-            try await videoCapturer.startCapture(withFps: 15)
+            try await capturer.startCapture(withVideoProfile: videoProfile)
             handler.broadcastStarted()
         }
 

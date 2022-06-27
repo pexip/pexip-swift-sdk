@@ -29,11 +29,13 @@ final class ScreenCaptureKitExtensionsTests: XCTestCase {
 struct ShareableContentMock: ShareableContent {
     static var displays = [LegacyDisplay]()
     static var windows = [LegacyWindow]()
+    static var applications = [LegacyRunningApplication]()
 
     let excludeDesktopWindows: Bool
     let onScreenWindowsOnly: Bool
     let displays: [LegacyDisplay]
     let windows: [LegacyWindow]
+    let applications: [LegacyRunningApplication]
 
     static func excludingDesktopWindows(
         _ excludeDesktopWindows: Bool,
@@ -43,7 +45,8 @@ struct ShareableContentMock: ShareableContent {
             excludeDesktopWindows: excludeDesktopWindows,
             onScreenWindowsOnly: onScreenWindowsOnly,
             displays: Self.displays,
-            windows: Self.windows
+            windows: Self.windows,
+            applications: Self.applications
         )
     }
 
@@ -56,15 +59,21 @@ struct ShareableContentMock: ShareableContent {
 struct ScreenCaptureContentFilterMock: ScreenCaptureContentFilter {
     private(set) var window: LegacyWindow?
     private(set) var display: LegacyDisplay?
-    private(set) var excludedWindows = [LegacyWindow]()
+    private(set) var excludedApplications = [LegacyRunningApplication]()
+    private(set) var exceptedWindows = [LegacyWindow]()
 
     init(desktopIndependentWindow window: LegacyWindow) {
         self.window = window
     }
 
-    init(display: LegacyDisplay, excludingWindows excluded: [LegacyWindow]) {
+    init(
+        display: LegacyDisplay,
+        excludingApplications applications: [LegacyRunningApplication],
+        exceptingWindows: [LegacyWindow]
+    ) {
         self.display = display
-        self.excludedWindows = excluded
+        self.excludedApplications = applications
+        self.exceptedWindows = exceptingWindows
     }
 }
 

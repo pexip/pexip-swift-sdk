@@ -9,6 +9,7 @@ actor ConferenceSignaling: MediaConnectionSignaling {
 
     private let participantService: ParticipantService
     private let tokenStore: TokenStore
+    private let roster: Roster
     private let logger: Logger?
     private var pwds = [String: String]()
     private var callsRequestTask: CallDetailsTask?
@@ -18,11 +19,13 @@ actor ConferenceSignaling: MediaConnectionSignaling {
     init(
         participantService: ParticipantService,
         tokenStore: TokenStore,
+        roster: Roster,
         iceServers: [IceServer],
         logger: Logger?
     ) {
         self.participantService = participantService
         self.tokenStore = tokenStore
+        self.roster = roster
         self.iceServers = iceServers
         self.logger = logger
     }
@@ -108,11 +111,19 @@ actor ConferenceSignaling: MediaConnectionSignaling {
     }
 
     func takeFloor() async throws {
+        guard roster.currentParticipant?.isPresenting == false else {
+            return
+        }
+
         let token = try await tokenStore.token()
         try await participantService.takeFloor(token: token)
     }
 
     func releaseFloor() async throws {
+        guard roster.currentParticipant?.isPresenting == true else {
+            return
+        }
+
         let token = try await tokenStore.token()
         try await participantService.releaseFloor(token: token)
     }

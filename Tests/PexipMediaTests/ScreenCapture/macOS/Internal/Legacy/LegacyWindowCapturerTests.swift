@@ -4,10 +4,10 @@ import XCTest
 import CoreMedia
 @testable import PexipMedia
 
-final class LegacyWindowVideoCapturerTests: XCTestCase {
+final class LegacyWindowCapturerTests: XCTestCase {
     private var window: WindowMock!
-    private var videoCapturer: LegacyWindowVideoCapturer!
-    private var delegate: ScreenVideoCapturerDelegateMock!
+    private var capturer: LegacyWindowCapturer!
+    private var delegate: ScreenMediaCapturerDelegateMock!
 
     // MARK: - Setup
 
@@ -27,23 +27,23 @@ final class LegacyWindowVideoCapturerTests: XCTestCase {
             windowLayer: 0
         )
 
-        delegate = ScreenVideoCapturerDelegateMock()
+        delegate = ScreenMediaCapturerDelegateMock()
 
-        videoCapturer = LegacyWindowVideoCapturer(window: window)
-        videoCapturer.delegate = delegate
+        capturer = LegacyWindowCapturer(window: window)
+        capturer.delegate = delegate
     }
 
     override func tearDown() {
         window = nil
-        videoCapturer = nil
+        capturer = nil
         super.tearDown()
     }
 
     // MARK: - Tests
 
     func testInit() {
-        XCTAssertEqual(videoCapturer.isCapturing, false)
-        XCTAssertEqual(videoCapturer.window.windowID, window.windowID)
+        XCTAssertEqual(capturer.isCapturing, false)
+        XCTAssertEqual(capturer.window.windowID, window.windowID)
     }
 
     func testStartCapture() async throws {
@@ -53,11 +53,11 @@ final class LegacyWindowVideoCapturerTests: XCTestCase {
         var timeNs = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
         let startTimeNs = timeNs
 
-        videoCapturer.displayTimeNs = { timeNs }
+        capturer.displayTimeNs = { timeNs }
 
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .presentationHigh)
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
 
         var iteration = 0
 
@@ -67,12 +67,16 @@ final class LegacyWindowVideoCapturerTests: XCTestCase {
             XCTAssertEqual(videoFrame.width, UInt32(window.width))
             XCTAssertEqual(videoFrame.height, UInt32(window.height))
             XCTAssertEqual(videoFrame.orientation, .up)
+            XCTAssertEqual(
+                videoFrame.contentRect,
+                CGRect(x: 0, y: 0, width: window.width, height: window.height)
+            )
 
             iteration += 1
 
             if iteration == 1 {
                 timeNs = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
-                self?.videoCapturer.displayTimeNs = { timeNs }
+                self?.capturer.displayTimeNs = { timeNs }
                 expectation1.fulfill()
             } else if iteration == 2 {
                 expectation2.fulfill()
@@ -83,11 +87,11 @@ final class LegacyWindowVideoCapturerTests: XCTestCase {
     }
 
     func testStopCapture() async throws {
-        try await videoCapturer.startCapture(withFps: 15)
-        XCTAssertTrue(videoCapturer.isCapturing)
+        try await capturer.startCapture(withVideoProfile: .presentationHigh)
+        XCTAssertTrue(capturer.isCapturing)
 
-        try videoCapturer.stopCapture()
-        XCTAssertFalse(videoCapturer.isCapturing)
+        try capturer.stopCapture()
+        XCTAssertFalse(capturer.isCapturing)
     }
 }
 

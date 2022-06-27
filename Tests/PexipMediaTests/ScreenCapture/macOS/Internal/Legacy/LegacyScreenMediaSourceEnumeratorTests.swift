@@ -4,15 +4,15 @@ import XCTest
 import CoreMedia
 @testable import PexipMedia
 
-final class LegacyScreenVideoSourceEnumeratorTests: XCTestCase {
-    private var enumerator: LegacyScreenVideoSourceEnumerator!
+final class LegacyScreenMediaSourceEnumeratorTests: XCTestCase {
+    private var enumerator: LegacyScreenMediaSourceEnumerator!
     private let displayMode = DisplayModeMock(width: 1920, height: 1080)
 
     // MARK: - Setup
 
     override func setUp() {
         super.setUp()
-        enumerator = LegacyScreenVideoSourceEnumerator()
+        enumerator = LegacyScreenMediaSourceEnumerator()
     }
 
     // MARK: - Tests

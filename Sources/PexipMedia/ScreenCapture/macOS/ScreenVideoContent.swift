@@ -3,8 +3,8 @@
 import CoreGraphics
 import CoreMedia
 
-/// An object that represents a screen content your app can capture.
-public protocol ScreenCaptureContent {
+/// An object that represents a screen video content your app can capture.
+public protocol ScreenVideoContent {
     /// The width of the screen content in points.
     var width: Int { get }
 
@@ -17,7 +17,7 @@ public protocol ScreenCaptureContent {
 
 // MARK: - Default implementations
 
-public extension ScreenCaptureContent {
+public extension ScreenVideoContent {
     /// The aspect ratio of the screen content.
     var aspectRatio: CGFloat {
         CGFloat(width) / CGFloat(height)

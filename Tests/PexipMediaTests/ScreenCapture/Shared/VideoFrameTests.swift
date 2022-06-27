@@ -29,6 +29,7 @@ final class VideoFrameTests: XCTestCase {
 
         videoFrame = VideoFrame(
             pixelBuffer: try XCTUnwrap(pixelBuffer),
+            contentRect: CGRect(x: 10.7, y: 10.4, width: 1280.8, height: 720.5),
             displayTimeNs: displayTimeNs,
             elapsedTimeNs: elapsedTimeNs
         )
@@ -48,8 +49,45 @@ final class VideoFrameTests: XCTestCase {
         XCTAssertEqual(videoFrame.height, UInt32(height))
     }
 
-    func testDimensions() {
-        XCTAssertEqual(videoFrame.dimensions.width, Int32(width))
-        XCTAssertEqual(videoFrame.dimensions.height, Int32(height))
+    func testPixelBufferDimensions() {
+        XCTAssertEqual(videoFrame.pixelBufferDimensions.width, Int32(width))
+        XCTAssertEqual(videoFrame.pixelBufferDimensions.height, Int32(height))
+    }
+
+    func testContentDimensions() {
+        XCTAssertEqual(videoFrame.contentDimensions.width, 1280)
+        XCTAssertEqual(videoFrame.contentDimensions.height, 720)
+    }
+
+    func testAdaptedContentDimensions() {
+        let dimensionsA = videoFrame.adaptedContentDimensions(
+            to: QualityProfile(width: 1920, height: 1080, fps: 30)
+        )
+        XCTAssertEqual(dimensionsA.width, 1280)
+        XCTAssertEqual(dimensionsA.height, 720)
+
+        #if os(iOS)
+        let dimensionsB = videoFrame.adaptedContentDimensions(to: .medium)
+        XCTAssertEqual(dimensionsB.width, 960)
+        XCTAssertEqual(dimensionsB.height, 540)
+        #else
+        let dimensionsB = videoFrame.adaptedContentDimensions(to: .medium)
+        XCTAssertEqual(dimensionsB.width, 853)
+        XCTAssertEqual(dimensionsB.height, 480)
+        #endif
+
+        let dimensionsC = videoFrame.adaptedContentDimensions(
+            to: QualityProfile(width: 1000, height: 800, fps: 15)
+        )
+        XCTAssertEqual(dimensionsC.width, 1000)
+        XCTAssertEqual(dimensionsC.height, 562)
+    }
+
+    func testContentX() {
+        XCTAssertEqual(videoFrame.contentX, 10)
+    }
+
+    func testContentY() {
+        XCTAssertEqual(videoFrame.contentY, 10)
     }
 }

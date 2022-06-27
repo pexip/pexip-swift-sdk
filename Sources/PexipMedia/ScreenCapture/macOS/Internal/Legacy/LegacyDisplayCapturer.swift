@@ -5,19 +5,19 @@ import CoreMedia
 import Combine
 
 /**
- Quartz Window Services -based display video capturer.
+ Quartz Window Services -based display media capturer.
  https://developer.apple.com/documentation/coregraphics/quartz_window_services
  */
-final class LegacyDisplayVideoCapturer: ScreenVideoCapturer {
+final class LegacyDisplayCapturer: ScreenMediaCapturer {
     let display: Display
     let displayStreamType: LegacyDisplayStream.Type
-    weak var delegate: ScreenVideoCapturerDelegate?
+    weak var delegate: ScreenMediaCapturerDelegate?
     private(set) var isCapturing = false
 
     private var displayStream: LegacyDisplayStream?
     private var startTimeNs: UInt64?
     private let processingQueue = DispatchQueue(
-        label: "com.pexip.PexipMedia.LegacyDisplayVideoCapturer",
+        label: "com.pexip.PexipMedia.LegacyDisplayCapturer",
         qos: .userInteractive
     )
 
@@ -35,21 +35,23 @@ final class LegacyDisplayVideoCapturer: ScreenVideoCapturer {
         try? stopCapture()
     }
 
-    // MARK: - ScreenVideoCapturer
+    // MARK: - ScreenMediaCapturer
 
-    func startCapture(withFps fps: UInt) async throws {
+    func startCapture(withVideoProfile videoProfile: QualityProfile) async throws {
         try stopCapture()
 
         let properties: [CFString: Any] = [
             CGDisplayStream.preserveAspectRatio: kCFBooleanTrue as Any,
-            CGDisplayStream.minimumFrameTime: CMTime(fps: fps).seconds as CFNumber
+            CGDisplayStream.minimumFrameTime: CMTime(
+                fps: videoProfile.fps
+            ).seconds as CFNumber
         ]
 
         displayStream = displayStreamType.init(
             dispatchQueueDisplay: display.displayID,
-            outputWidth: Int(display.width),
-            outputHeight: Int(display.height),
-            pixelFormat: Int32(k32BGRAPixelFormat),
+            outputWidth: Int(videoProfile.width),
+            outputHeight: Int(videoProfile.height),
+            pixelFormat: Int32(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange),
             properties: properties as CFDictionary,
             queue: processingQueue,
             handler: { [weak self] status, displayTime, ioSurface, _ in
@@ -100,14 +102,14 @@ final class LegacyDisplayVideoCapturer: ScreenVideoCapturer {
         case .stopped:
             if isCapturing {
                 isCapturing = false
-                delegate?.screenVideoCapturer(self, didStopWithError: nil)
+                delegate?.screenMediaCapturer(self, didStopWithError: nil)
             }
         case .frameComplete:
             guard let ioSurface = ioSurface else {
                 break
             }
 
-            var pixelBuffer: Unmanaged<CVPixelBuffer>?
+            var pixelBufferRef: Unmanaged<CVPixelBuffer>?
             let attributes: [AnyHashable: Any] = [
                 kCVPixelBufferIOSurfacePropertiesKey: true as AnyObject
             ]
@@ -115,16 +117,23 @@ final class LegacyDisplayVideoCapturer: ScreenVideoCapturer {
             let result = CVPixelBufferCreateWithIOSurface(
                 kCFAllocatorDefault, ioSurface,
                 attributes as CFDictionary,
-                &pixelBuffer
+                &pixelBufferRef
             )
 
-            if let pixelBuffer = pixelBuffer, result == kCVReturnSuccess {
+            if let pixelBufferRef = pixelBufferRef, result == kCVReturnSuccess {
+                let pixelBuffer = pixelBufferRef.takeRetainedValue()
                 let videoFrame = VideoFrame(
-                    pixelBuffer: pixelBuffer.takeRetainedValue(),
+                    pixelBuffer: pixelBuffer,
+                    contentRect: CGRect(
+                        x: 0,
+                        y: 0,
+                        width: Int(pixelBuffer.width),
+                        height: Int(pixelBuffer.height)
+                    ),
                     displayTimeNs: displayTimeNs,
                     elapsedTimeNs: displayTimeNs - startTimeNs!
                 )
-                delegate?.screenVideoCapturer(self, didCaptureVideoFrame: videoFrame)
+                delegate?.screenMediaCapturer(self, didCaptureVideoFrame: videoFrame)
             }
         @unknown default:
             break

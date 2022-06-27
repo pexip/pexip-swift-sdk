@@ -16,6 +16,7 @@ protocol ShareableContent {
     associatedtype Content: ShareableContent
     associatedtype D: Display
     associatedtype W: Window
+    associatedtype A: RunningApplication
 
     static func excludingDesktopWindows(
         _ excludeDesktopWindows: Bool,
@@ -24,6 +25,7 @@ protocol ShareableContent {
 
     var displays: [D] { get }
     var windows: [W] { get }
+    var applications: [A] { get }
 }
 
 @available(macOS 12.3, *)
@@ -44,9 +46,14 @@ extension SCShareableContent: ShareableContent {}
 protocol ScreenCaptureContentFilter {
     associatedtype D: Display
     associatedtype W: Window
+    associatedtype A: RunningApplication
 
     init(desktopIndependentWindow window: W)
-    init(display: D, excludingWindows excluded: [W])
+    init(
+        display: D,
+        excludingApplications applications: [A],
+        exceptingWindows: [W]
+    )
 }
 
 @available(macOS 12.3, *)

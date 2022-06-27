@@ -1,17 +1,17 @@
 import WebRTC
 import PexipMedia
 
-final class WebRTCScreenVideoTrack: WebRTCVideoTrack,
-                                    ScreenVideoTrack,
-                                    WebRTCScreenVideoCapturerErrorDelegate {
+final class WebRTCScreenMediaTrack: WebRTCVideoTrack,
+                                    ScreenMediaTrack,
+                                    WebRTCScreenCapturerErrorDelegate {
     let capturingStatus = CapturingStatus(isCapturing: false)
-    private let capturer: WebRTCScreenVideoCapturer
+    private let capturer: WebRTCScreenCapturer
 
     // MARK: - Init
 
     init(
         rtcTrack: RTCVideoTrack,
-        capturer: WebRTCScreenVideoCapturer
+        capturer: WebRTCScreenCapturer
     ) {
         self.capturer = capturer
         super.init(rtcTrack: rtcTrack)
@@ -22,20 +22,20 @@ final class WebRTCScreenVideoTrack: WebRTCVideoTrack,
         stopCapture(withDelay: false)
     }
 
-    // MARK: - ScreenVideoTrack
+    // MARK: - ScreenMediaTrack
 
     func startCapture() async throws {
-        try await startCapture(profile: .presentationHigh)
+        try await startCapture(withVideoProfile: .presentationHigh)
     }
 
-    func startCapture(profile: QualityProfile) async throws {
+    func startCapture(withVideoProfile videoProfile: QualityProfile) async throws {
         if capturingStatus.isCapturing {
             stopCapture()
         }
 
         isEnabled = true
 
-        try await capturer.startCapture(profile: profile)
+        try await capturer.startCapture(withVideoProfile: videoProfile)
 
         capturingStatus.isCapturing = true
     }
@@ -44,10 +44,10 @@ final class WebRTCScreenVideoTrack: WebRTCVideoTrack,
         stopCapture(withDelay: true)
     }
 
-    // MARK: - WebRTCScreenVideoCapturerErrorDelegate
+    // MARK: - WebRTCScreenCapturerErrorDelegate
 
-    func webRTCScreenVideoCapturer(
-        _ capturer: WebRTCScreenVideoCapturer,
+    func webRTCScreenCapturer(
+        _ capturer: WebRTCScreenCapturer,
         didStopWithError error: Error?
     ) {
         isEnabled = false
@@ -67,7 +67,7 @@ final class WebRTCScreenVideoTrack: WebRTCVideoTrack,
         isEnabled = false
         capturingStatus.isCapturing = false
 
-        func stop(capturer: WebRTCScreenVideoCapturer?) {
+        func stop(capturer: WebRTCScreenCapturer?) {
             Task { [weak self, weak capturer] in
                 try await capturer?.stopCapture()
                 self?.renderEmptyFrame()

@@ -4,10 +4,10 @@ import CoreMedia
 
 #if os(macOS)
 
-final class LegacyDisplayVideoCapturerTests: XCTestCase {
+final class LegacyDisplayCapturerTests: XCTestCase {
     private var display: LegacyDisplay!
-    private var videoCapturer: LegacyDisplayVideoCapturer!
-    private var delegate: ScreenVideoCapturerDelegateMock!
+    private var capturer: LegacyDisplayCapturer!
+    private var delegate: ScreenMediaCapturerDelegateMock!
     private var displayStream: DisplayStreamMock? {
         DisplayStreamMock.current
     }
@@ -22,52 +22,55 @@ final class LegacyDisplayVideoCapturerTests: XCTestCase {
         DisplayStreamMock.result = nil
 
         display = LegacyDisplay(displayID: 1, width: 1920, height: 1080)
-        delegate = ScreenVideoCapturerDelegateMock()
-        videoCapturer = LegacyDisplayVideoCapturer(
+        delegate = ScreenMediaCapturerDelegateMock()
+        capturer = LegacyDisplayCapturer(
             display: display,
             displayStreamType: DisplayStreamMock.self
         )
-        videoCapturer.delegate = delegate
+        capturer.delegate = delegate
     }
 
     // MARK: - Tests
 
     func testInit() {
-        XCTAssertEqual(videoCapturer.isCapturing, false)
-        XCTAssertEqual(videoCapturer.display as? LegacyDisplay, display)
-        XCTAssertTrue(videoCapturer.displayStreamType is DisplayStreamMock.Type)
+        XCTAssertEqual(capturer.isCapturing, false)
+        XCTAssertEqual(capturer.display as? LegacyDisplay, display)
+        XCTAssertTrue(capturer.displayStreamType is DisplayStreamMock.Type)
     }
 
     func testDeinit() async throws {
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .high)
 
         let displayStream = try XCTUnwrap(displayStream)
         XCTAssertTrue(displayStream.isRunning)
 
-        videoCapturer = nil
+        capturer = nil
         XCTAssertFalse(displayStream.isRunning)
     }
 
     func testStartCapture() async throws {
-        let fps: UInt = 15
-        try await videoCapturer.startCapture(withFps: fps)
+        let videoProfile = QualityProfile.presentationHigh
+        try await capturer.startCapture(withVideoProfile: videoProfile)
         let displayStream = try XCTUnwrap(displayStream)
         let properties: [CFString: Any] = [
             CGDisplayStream.preserveAspectRatio: kCFBooleanTrue as Any,
-            CGDisplayStream.minimumFrameTime: CMTime(fps: fps).seconds as CFNumber
+            CGDisplayStream.minimumFrameTime: CMTime(fps: videoProfile.fps).seconds as CFNumber
         ]
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
         XCTAssertTrue(displayStream.isRunning)
 
         XCTAssertEqual(displayStream.display, display.displayID)
-        XCTAssertEqual(displayStream.outputWidth, Int(display.width))
-        XCTAssertEqual(displayStream.outputHeight, Int(display.height))
-        XCTAssertEqual(displayStream.pixelFormat, Int32(k32BGRAPixelFormat))
+        XCTAssertEqual(displayStream.outputWidth, Int(videoProfile.width))
+        XCTAssertEqual(displayStream.outputHeight, Int(videoProfile.height))
+        XCTAssertEqual(
+            displayStream.pixelFormat,
+            Int32(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)
+        )
         XCTAssertEqual(displayStream.properties, properties as CFDictionary)
         XCTAssertEqual(
             displayStream.queue.label,
-            "com.pexip.PexipMedia.LegacyDisplayVideoCapturer"
+            "com.pexip.PexipMedia.LegacyDisplayCapturer"
         )
         XCTAssertEqual(displayStream.queue.qos, .userInteractive)
     }
@@ -76,7 +79,7 @@ final class LegacyDisplayVideoCapturerTests: XCTestCase {
         DisplayStreamMock.error = CGError.failure
 
         do {
-            try await videoCapturer.startCapture(withFps: 15)
+            try await capturer.startCapture(withVideoProfile: .high)
             XCTFail("Should fail with error")
         } catch {
             XCTAssertNil(displayStream)
@@ -85,39 +88,39 @@ final class LegacyDisplayVideoCapturerTests: XCTestCase {
     }
 
     func testDisplayStreamFrameStatusIdle() async throws {
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .high)
         let displayStream = try XCTUnwrap(displayStream)
         displayStream.handler?(.frameBlank, mach_absolute_time(), nil, nil)
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
         XCTAssertNil(delegate.status)
     }
 
     func testDisplayStreamFrameStatusBlank() async throws {
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .high)
         let displayStream = try XCTUnwrap(displayStream)
         displayStream.handler?(.frameBlank, mach_absolute_time(), nil, nil)
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
         XCTAssertNil(delegate.status)
     }
 
     func testDisplayStreamFrameStatusUnknown() async throws {
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .high)
         let status = CGDisplayStreamFrameStatus(rawValue: 1001)!
         let displayStream = try XCTUnwrap(displayStream)
         displayStream.handler?(status, mach_absolute_time(), nil, nil)
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
         XCTAssertNil(delegate.status)
     }
 
     func testDisplayStreamFrameStatusStopped() async throws {
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .high)
         let displayStream = try XCTUnwrap(displayStream)
         displayStream.handler?(.stopped, mach_absolute_time(), nil, nil)
 
-        XCTAssertFalse(videoCapturer.isCapturing)
+        XCTAssertFalse(capturer.isCapturing)
 
         switch delegate.status {
         case .complete, .none:
@@ -128,25 +131,25 @@ final class LegacyDisplayVideoCapturerTests: XCTestCase {
     }
 
     func testDisplayStreamFrameStatusStoppedWhenNotCapturing() async throws {
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .high)
         let displayStream = try XCTUnwrap(displayStream)
         let handler = displayStream.handler
-        try videoCapturer.stopCapture()
+        try capturer.stopCapture()
 
         handler?(.stopped, mach_absolute_time(), nil, nil)
 
-        XCTAssertFalse(videoCapturer.isCapturing)
+        XCTAssertFalse(capturer.isCapturing)
         XCTAssertNil(delegate.status)
     }
 
     func testDisplayStreamFrameStatusComplete() async throws {
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .high)
         let displayStream = try XCTUnwrap(displayStream)
         let ioSurface = displayStream.createIOSurface()
         let time = mach_absolute_time()
         displayStream.handler?(.frameComplete, time, ioSurface, nil)
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
 
         switch delegate.status {
         case .stopped, .none:
@@ -160,44 +163,53 @@ final class LegacyDisplayVideoCapturerTests: XCTestCase {
             XCTAssertEqual(videoFrame.width, UInt32(displayStream.outputWidth))
             XCTAssertEqual(videoFrame.height, UInt32(displayStream.outputHeight))
             XCTAssertEqual(videoFrame.orientation, .up)
+            XCTAssertEqual(
+                videoFrame.contentRect,
+                CGRect(
+                    x: 0,
+                    y: 0,
+                    width: displayStream.outputWidth,
+                    height: displayStream.outputHeight
+                )
+            )
         }
     }
 
     func testDisplayStreamFrameStatusCompleteWithNoIoSurface() async throws {
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .high)
         let displayStream = try XCTUnwrap(displayStream)
 
         displayStream.handler?(.frameComplete, mach_absolute_time(), nil, nil)
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
         XCTAssertNil(delegate.status)
     }
 
     func testStopCapture() async throws {
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .high)
         let displayStream = try XCTUnwrap(displayStream)
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
         XCTAssertTrue(displayStream.isRunning)
 
-        try videoCapturer.stopCapture()
+        try capturer.stopCapture()
 
-        XCTAssertFalse(videoCapturer.isCapturing)
+        XCTAssertFalse(capturer.isCapturing)
         XCTAssertFalse(displayStream.isRunning)
     }
 
     func testStopCaptureWithError() async throws {
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .high)
         let displayStream = try XCTUnwrap(displayStream)
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
         XCTAssertTrue(displayStream.isRunning)
 
         do {
             DisplayStreamMock.error = CGError.failure
-            try videoCapturer.stopCapture()
+            try capturer.stopCapture()
         } catch {
-            XCTAssertFalse(videoCapturer.isCapturing)
+            XCTAssertFalse(capturer.isCapturing)
             XCTAssertFalse(displayStream.isRunning)
             XCTAssertEqual(error as? ScreenCaptureError, .cgError(.failure))
         }
@@ -278,21 +290,21 @@ private extension IOSurfaceRef {
 
 #endif
 
-final class ScreenVideoCapturerDelegateMock: ScreenVideoCapturerDelegate {
+final class ScreenMediaCapturerDelegateMock: ScreenMediaCapturerDelegate {
     var onVideoFrame: ((VideoFrame) -> Void)?
     var onStop: ((Error?) -> Void)?
     private(set) var status: VideoFrame.Status?
 
-    func screenVideoCapturer(
-        _ capturer: ScreenVideoCapturer,
+    func screenMediaCapturer(
+        _ capturer: ScreenMediaCapturer,
         didCaptureVideoFrame frame: VideoFrame
     ) {
         status = .complete(frame)
         onVideoFrame?(frame)
     }
 
-    func screenVideoCapturer(
-        _ capturer: ScreenVideoCapturer,
+    func screenMediaCapturer(
+        _ capturer: ScreenMediaCapturer,
         didStopWithError error: Error?
     ) {
         status = .stopped(error: error)

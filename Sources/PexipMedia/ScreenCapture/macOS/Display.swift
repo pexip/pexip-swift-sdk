@@ -3,7 +3,7 @@
 import CoreGraphics
 
 /// An object that represents a display device.
-public protocol Display: ScreenCaptureContent {
+public protocol Display: ScreenVideoContent {
     /// The Core Graphics display identifier.
     var displayID: CGDirectDisplayID { get }
 

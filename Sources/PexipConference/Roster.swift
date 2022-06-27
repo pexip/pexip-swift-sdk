@@ -25,16 +25,24 @@ public final class Roster: ObservableObject {
 
     /// The display name of the current participant.
     @Published public private(set) var currentParticipantName: String
+
+    /// The current participant object.
+    @Published public private(set) var currentParticipant: Participant?
+
     /// The full participant list of the conference.
     @Published public private(set) var participants = [Participant]()
+
     /// Roster event publisher (participant added, updated, deleted, etc).
     public var eventPublisher: AnyPublisher<ParticipantEvent, Never> {
         eventSubject.eraseToAnyPublisher()
     }
+
     /// The UUID of the current participant.
     public let currentParticipantId: UUID
+
     /// The object that acts as the delegate of the roster list.
     public weak var delegate: RosterDelegate?
+
     private let eventSubject = PassthroughSubject<ParticipantEvent, Never>()
     private let storage: Storage
     private let _avatarURL: (UUID) -> URL?
@@ -96,6 +104,7 @@ public final class Roster: ObservableObject {
         await storage.addParticipant(participant)
 
         if isCurrentParticipant(participant) {
+            currentParticipant = participant
             currentParticipantName = participant.displayName
         }
 
@@ -111,6 +120,7 @@ public final class Roster: ObservableObject {
         }
 
         if isCurrentParticipant(participant) {
+            currentParticipant = participant
             currentParticipantName = participant.displayName
         }
 

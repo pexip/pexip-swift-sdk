@@ -39,9 +39,9 @@ public protocol MediaConnectionSignaling {
      */
     func muteAudio(_ muted: Bool) async throws
 
-    /// Starts sending local presentation.
+    /// Requests to take presentation floor.
     func takeFloor() async throws
 
-    /// Stops sending local presentation.
+    /// Requests to release presentation floor.
     func releaseFloor() async throws
 }

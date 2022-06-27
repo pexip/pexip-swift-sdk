@@ -4,9 +4,9 @@ import CoreGraphics
 import CoreMedia
 import ScreenCaptureKit
 
-/// A source of the screen content for video capture.
-public enum ScreenVideoSource: Equatable {
-    public static func == (lhs: ScreenVideoSource, rhs: ScreenVideoSource) -> Bool {
+/// A source of the screen content for media capture.
+public enum ScreenMediaSource: Equatable {
+    public static func == (lhs: ScreenMediaSource, rhs: ScreenMediaSource) -> Bool {
         switch (lhs, rhs) {
         case let (.display(d1), .display(d2)):
             return d1.displayID == d2.displayID
@@ -20,48 +20,38 @@ public enum ScreenVideoSource: Equatable {
     case display(Display)
     case window(Window)
 
-    /// The video dimensions on the sceen content.
-    public var videoDimensions: CMVideoDimensions {
-        switch self {
-        case .display(let display):
-            return display.videoDimensions
-        case .window(let window):
-            return window.videoDimensions
-        }
-    }
-
-    /// Creates a new instance of ``ScreenVideoSourceEnumerator``
-    public static func createEnumerator() -> ScreenVideoSourceEnumerator {
+    /// Creates a new instance of ``ScreenMediaSourceEnumerator``
+    public static func createEnumerator() -> ScreenMediaSourceEnumerator {
         if #available(macOS 12.3, *) {
             // Use ScreenCaptureKit
             // https://developer.apple.com/documentation/screencapturekit
-            return NewScreenVideoSourceEnumerator<SCShareableContent>()
+            return NewScreenMediaSourceEnumerator<SCShareableContent>()
         } else {
             // Use Quartz Window Services.
             // https://developer.apple.com/documentation/coregraphics/quartz_window_services
-            return LegacyScreenVideoSourceEnumerator()
+            return LegacyScreenMediaSourceEnumerator()
         }
     }
 
-    /// Creates a new screen video capturer for the specified video source.
+    /// Creates a new screen media capturer for the specified media source.
     public static func createCapturer(
-        for videoSource: ScreenVideoSource
-    ) -> ScreenVideoCapturer {
+        for mediaSource: ScreenMediaSource
+    ) -> ScreenMediaCapturer {
         if #available(macOS 12.3, *) {
             // Use ScreenCaptureKit
             // https://developer.apple.com/documentation/screencapturekit
-            return NewScreenVideoCapturer(
-                videoSource: videoSource,
+            return NewScreenMediaCapturer(
+                source: mediaSource,
                 streamFactory: SCStreamFactory()
             )
         } else {
             // Use Quartz Window Services.
             // https://developer.apple.com/documentation/coregraphics/quartz_window_services
-            switch videoSource {
+            switch mediaSource {
             case .display(let display):
-                return LegacyDisplayVideoCapturer(display: display)
+                return LegacyDisplayCapturer(display: display)
             case .window(let window):
-                return LegacyWindowVideoCapturer(window: window)
+                return LegacyWindowCapturer(window: window)
             }
         }
     }

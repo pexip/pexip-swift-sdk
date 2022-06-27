@@ -35,38 +35,39 @@ public protocol MediaConnection {
     func stop()
 
     /**
-     Sends audio from the given local audio track
+     Sets the given local audio track as the main audio track
+     of the media connection and starts sending audio.
+
      - Parameters:
-        - localAudioTrack: Local audio track
+        - audioTrack: Local audio track
      */
-    func sendMainAudio(localAudioTrack: LocalAudioTrack)
+    func setMainAudioTrack(_ audioTrack: LocalAudioTrack?)
 
     /**
-     Sends video from the given local video track
+     Sets the given local video track as the main video track
+     of the media connection and starts sending video.
+
      - Parameters:
         - localVideoTrack: Local camera video track
      */
-    func sendMainVideo(localVideoTrack: CameraVideoTrack)
+    func setMainVideoTrack(_ videoTrack: CameraVideoTrack?)
 
     /**
-     Sends video from the given local screen video track (starts screen sharing session).
+     Sets the given local screen media track as the source for local presentation.
+
+     Call ``ScreenMediaTrack.startCapture`` to start your presentation
+     and ``ScreenMediaTrack.stopCapture`` to stop your presentation.
+
+     - Parameters:
+        - screenMediaTrack: Local screen media track
      */
-    func sendPresentationVideo(screenVideoTrack: ScreenVideoTrack) async throws
+    func setScreenMediaTrack(_ screenMediaTrack: ScreenMediaTrack?)
 
-    /// Stops sending local presentation (stops screen sharing session).
-    func stopSendingPresentation() async throws
+    /**
+     Adds or removes remote presentation track from the current media connection.
 
-    @available(*, deprecated, renamed: "startReceivingPresentation")
-    /// Creates a remote presentation track and starts receiving remote presentation.
-    func startPresentationReceive() throws
-
-    @available(*, deprecated, renamed: "stopReceivingPresentation")
-    /// Stops receiving remote presentation.
-    func stopPresentationReceive() throws
-
-    /// Creates a remote presentation track and starts receiving remote presentation.
-    func startReceivingPresentation() throws
-
-    /// Stops receiving remote presentation.
-    func stopReceivingPresentation() throws
+     - Parameters:
+        - receive: True to add remote presentation track, False to remove it.
+     */
+    func receivePresentation(_ receive: Bool) throws
 }

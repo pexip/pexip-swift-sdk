@@ -9,10 +9,10 @@ protocol ScreenCaptureStreamFactory {
     associatedtype Content: ShareableContent where Content.Content == Content
 
     associatedtype Filter: ScreenCaptureContentFilter
-    where Filter.W == Content.W, Filter.D == Content.D
+    where Filter.W == Content.W, Filter.D == Content.D, Filter.A == Content.A
 
     func createStream(
-        videoSource: ScreenVideoSource,
+        mediaSource: ScreenMediaSource,
         configuration: SCStreamConfiguration,
         delegate: SCStreamDelegate?
     ) async throws -> SCStream
@@ -21,12 +21,12 @@ protocol ScreenCaptureStreamFactory {
 @available(macOS 12.3, *)
 extension ScreenCaptureStreamFactory {
     func createContentFilter(
-        videoSource: ScreenVideoSource
+        mediaSource: ScreenMediaSource
     ) async throws -> Filter {
         let content = try await Content.defaultSelection()
         var filter: Filter?
 
-        switch videoSource {
+        switch mediaSource {
         case .display(let display):
             filter = content.displays
                 .first(where: {
@@ -34,7 +34,10 @@ extension ScreenCaptureStreamFactory {
                 }).map({
                     Filter(
                         display: $0,
-                        excludingWindows: []
+                        excludingApplications: content.applications.filter { app in
+                            app.bundleIdentifier == Bundle.main.bundleIdentifier
+                        },
+                        exceptingWindows: []
                     )
                 })
         case .window(let window):
@@ -49,7 +52,7 @@ extension ScreenCaptureStreamFactory {
         if let filter = filter {
             return filter
         } else {
-            throw ScreenCaptureError.noScreenVideoSourceAvailable
+            throw ScreenCaptureError.noScreenMediaSourceAvailable
         }
     }
 }
@@ -60,12 +63,12 @@ struct SCStreamFactory: ScreenCaptureStreamFactory {
     typealias Filter = SCContentFilter
 
     func createStream(
-        videoSource: ScreenVideoSource,
+        mediaSource: ScreenMediaSource,
         configuration: SCStreamConfiguration,
         delegate: SCStreamDelegate?
     ) async throws -> SCStream {
         SCStream(
-            filter: try await createContentFilter(videoSource: videoSource),
+            filter: try await createContentFilter(mediaSource: mediaSource),
             configuration: configuration,
             delegate: delegate
         )

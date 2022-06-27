@@ -8,7 +8,7 @@ import ScreenCaptureKit
 #endif
 
 @available(macOS 12.3, *)
-final class NewScreenVideoSourceEnumeratorTests: XCTestCase {
+final class NewScreenMediaSourceEnumeratorTests: XCTestCase {
     override func tearDown() {
         ShareableContentMock.clear()
         super.tearDown()
@@ -20,7 +20,7 @@ final class NewScreenVideoSourceEnumeratorTests: XCTestCase {
         let display = LegacyDisplay.stub
         ShareableContentMock.displays = [display]
 
-        let enumetator = NewScreenVideoSourceEnumerator<ShareableContentMock>()
+        let enumetator = NewScreenMediaSourceEnumerator<ShareableContentMock>()
         let displays = try await enumetator.getShareableDisplays()
 
         XCTAssertEqual(displays.count, 1)
@@ -31,7 +31,7 @@ final class NewScreenVideoSourceEnumeratorTests: XCTestCase {
         let window = try XCTUnwrap(LegacyWindow.stub)
         ShareableContentMock.windows = [window]
 
-        let enumetator = NewScreenVideoSourceEnumerator<ShareableContentMock>()
+        let enumetator = NewScreenMediaSourceEnumerator<ShareableContentMock>()
         let windows = try await enumetator.getAllOnScreenWindows()
 
         XCTAssertEqual(windows.count, 1)

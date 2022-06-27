@@ -2,7 +2,7 @@
 
 import AppKit
 
-struct LegacyRunningApplication: RunningApplication {
+struct LegacyRunningApplication: RunningApplication, Hashable {
     let processID: pid_t
     let bundleIdentifier: String
     let applicationName: String

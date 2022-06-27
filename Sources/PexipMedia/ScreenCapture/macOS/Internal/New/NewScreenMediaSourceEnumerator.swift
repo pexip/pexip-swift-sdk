@@ -6,11 +6,11 @@ import ScreenCaptureKit
 #endif
 
 /**
- ScreenCaptureKit -based screen video source enumerator.
+ ScreenCaptureKit -based screen media source enumerator.
  https://developer.apple.com/documentation/screencapturekit
  */
 @available(macOS 12.3, *)
-struct NewScreenVideoSourceEnumerator<T: ShareableContent>: ScreenVideoSourceEnumerator {
+struct NewScreenMediaSourceEnumerator<T: ShareableContent>: ScreenMediaSourceEnumerator {
     func getShareableDisplays() async throws -> [Display] {
         try await T.defaultSelection().displays
     }

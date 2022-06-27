@@ -6,7 +6,7 @@ import ScreenCaptureKit
 #endif
 
 /// An object that retrieves the displays and windows for screen capture.
-public protocol ScreenVideoSourceEnumerator {
+public protocol ScreenMediaSourceEnumerator {
     /// The url to the app's privacy settings.
     var permissionSettingsURL: URL? { get }
 
@@ -22,7 +22,7 @@ public protocol ScreenVideoSourceEnumerator {
 
 // MARK: - Default implementation
 
-public extension ScreenVideoSourceEnumerator {
+public extension ScreenMediaSourceEnumerator {
     var permissionSettingsURL: URL? {
         let prefix = "x-apple.systempreferences:com.apple.preference.security"
         let setting = "Privacy_ScreenRecording"

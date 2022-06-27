@@ -5,10 +5,10 @@ import CoreGraphics
 import AppKit
 
 /**
- Quartz Window Services -based video source enumerator.
+ Quartz Window Services -based screen media source enumerator.
  https://developer.apple.com/documentation/coregraphics/quartz_window_services
  */
-struct LegacyScreenVideoSourceEnumerator: ScreenVideoSourceEnumerator {
+struct LegacyScreenMediaSourceEnumerator: ScreenMediaSourceEnumerator {
     var getOnlineDisplayList = CGGetOnlineDisplayList
     var getWindowInfoList = CGWindowListCopyWindowInfo
     var displayMode: (CGDirectDisplayID) -> DisplayMode? = {
@@ -16,7 +16,7 @@ struct LegacyScreenVideoSourceEnumerator: ScreenVideoSourceEnumerator {
     }
     var workspace: NSWorkspace = .shared
 
-    // MARK: - ScreenVideoSourceEnumerator
+    // MARK: - ScreenMediaSourceEnumerator
 
     func getShareableDisplays() async throws -> [Display] {
         let displayCount = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)

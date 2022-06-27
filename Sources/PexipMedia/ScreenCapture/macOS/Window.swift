@@ -3,7 +3,7 @@
 import CoreGraphics
 
 /// An object that represents an onscreen window.
-public protocol Window: ScreenCaptureContent {
+public protocol Window: ScreenVideoContent {
     /// The Core Graphics window identifier.
     var windowID: CGWindowID { get }
     /// The string that displays in a window’s title bar.

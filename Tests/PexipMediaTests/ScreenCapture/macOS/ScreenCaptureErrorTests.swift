@@ -6,7 +6,7 @@ import XCTest
 final class ScreenCaptureErrorTests: XCTestCase {
     func testDescription() {
         let errors: [ScreenCaptureError] = [
-            .noScreenVideoSourceAvailable,
+            .noScreenMediaSourceAvailable,
             .cgError(.failure)
         ]
 

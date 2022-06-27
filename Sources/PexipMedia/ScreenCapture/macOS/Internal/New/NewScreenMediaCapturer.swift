@@ -9,32 +9,32 @@ import ScreenCaptureKit
 #endif
 
 /**
- ScreenCaptureKit -based screen video capturer.
+ ScreenCaptureKit -based screen media capturer.
  https://developer.apple.com/documentation/screencapturekit
  */
 @available(macOS 12.3, *)
-final class NewScreenVideoCapturer<Factory: ScreenCaptureStreamFactory>:
+final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>:
     NSObject,
-    ScreenVideoCapturer,
+    ScreenMediaCapturer,
     SCStreamOutput,
     SCStreamDelegate
 {
-    let videoSource: ScreenVideoSource
-    weak var delegate: ScreenVideoCapturerDelegate?
+    let source: ScreenMediaSource
+    weak var delegate: ScreenMediaCapturerDelegate?
     private(set) var isCapturing = false
 
     private let streamFactory: Factory
     private var stream: SCStream?
     private var startTimeNs: UInt64?
     private let dispatchQueue = DispatchQueue(
-        label: "com.pexip.PexipMedia.NewScreenVideoCapturer",
+        label: "com.pexip.PexipMedia.NewScreenMediaCapturer",
         qos: .userInteractive
     )
 
     // MARK: - Init
 
-    init(videoSource: ScreenVideoSource, streamFactory: Factory) {
-        self.videoSource = videoSource
+    init(source: ScreenMediaSource, streamFactory: Factory) {
+        self.source = source
         self.streamFactory = streamFactory
     }
 
@@ -43,19 +43,20 @@ final class NewScreenVideoCapturer<Factory: ScreenCaptureStreamFactory>:
         stream?.stopCapture(completionHandler: { _ in })
     }
 
-    // MARK: - ScreenVideoCapturer
+    // MARK: - ScreenMediaCapturer
 
-    func startCapture(withFps fps: UInt) async throws {
+    func startCapture(withVideoProfile videoProfile: QualityProfile) async throws {
         try await stopCapture()
 
-        let videoDimensions = videoSource.videoDimensions
         let streamConfig = SCStreamConfiguration()
-        streamConfig.minimumFrameInterval = CMTime(fps: fps)
-        streamConfig.width = Int(videoDimensions.width)
-        streamConfig.height = Int(videoDimensions.height)
+        streamConfig.backgroundColor = .black
+        streamConfig.pixelFormat = kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+        streamConfig.minimumFrameInterval = CMTime(fps: videoProfile.fps)
+        streamConfig.width = Int(videoProfile.width)
+        streamConfig.height = Int(videoProfile.height)
 
         stream = try await streamFactory.createStream(
-            videoSource: videoSource,
+            mediaSource: source,
             configuration: streamConfig,
             delegate: nil
         )
@@ -97,6 +98,17 @@ final class NewScreenVideoCapturer<Factory: ScreenCaptureStreamFactory>:
             return
         }
 
+        // Retrieve the content rectangle, scale, and scale factor.
+        guard let contentRectDict = attachments[.contentRect],
+              var contentRect = CGRect(dictionaryRepresentation: contentRectDict as! CFDictionary),
+              let scaleFactor = attachments[.scaleFactor] as? CGFloat
+        else {
+            return
+        }
+
+        let transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
+        contentRect = contentRect.applying(transform)
+
         let displayTimeNs = MachAbsoluteTime(displayTime).nanoseconds
         startTimeNs = startTimeNs ?? displayTimeNs
 
@@ -106,16 +118,17 @@ final class NewScreenVideoCapturer<Factory: ScreenCaptureStreamFactory>:
         case .stopped:
             if isCapturing {
                 isCapturing = false
-                delegate?.screenVideoCapturer(self, didStopWithError: nil)
+                delegate?.screenMediaCapturer(self, didStopWithError: nil)
             }
         case .complete:
             if let pixelBuffer = sampleBuffer.imageBuffer {
                 let videoFrame = VideoFrame(
                     pixelBuffer: pixelBuffer,
+                    contentRect: contentRect,
                     displayTimeNs: displayTimeNs,
                     elapsedTimeNs: displayTimeNs - startTimeNs!
                 )
-                delegate?.screenVideoCapturer(self, didCaptureVideoFrame: videoFrame)
+                delegate?.screenMediaCapturer(self, didCaptureVideoFrame: videoFrame)
             }
         @unknown default:
             break

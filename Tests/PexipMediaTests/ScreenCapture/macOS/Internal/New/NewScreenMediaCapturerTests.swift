@@ -8,12 +8,12 @@ import ScreenCaptureKit
 #endif
 
 @available(macOS 12.3, *)
-final class NewScreenVideoCapturerTests: XCTestCase {
-    private var videoCapturer: NewScreenVideoCapturer<ScreenCaptureStreamFactoryMock>!
+final class NewScreenMediaCapturerTests: XCTestCase {
+    private var capturer: NewScreenMediaCapturer<ScreenCaptureStreamFactoryMock>!
     private var display: LegacyDisplay!
     private var window: LegacyWindow!
-    private var videoSource: ScreenVideoSource!
-    private var delegate: ScreenVideoCapturerDelegateMock!
+    private var mediaSource: ScreenMediaSource!
+    private var delegate: ScreenMediaCapturerDelegateMock!
     private var factory: ScreenCaptureStreamFactoryMock!
 
     // MARK: - Setup
@@ -22,14 +22,14 @@ final class NewScreenVideoCapturerTests: XCTestCase {
         super.setUp()
         display = LegacyDisplay.stub
         window = LegacyWindow.stub
-        videoSource = ScreenVideoSource.display(display)
-        delegate = ScreenVideoCapturerDelegateMock()
+        mediaSource = ScreenMediaSource.display(display)
+        delegate = ScreenMediaCapturerDelegateMock()
         factory = ScreenCaptureStreamFactoryMock()
-        videoCapturer = NewScreenVideoCapturer(
-            videoSource: videoSource,
+        capturer = NewScreenMediaCapturer(
+            source: mediaSource,
             streamFactory: factory
         )
-        videoCapturer.delegate = delegate
+        capturer.delegate = delegate
     }
 
     override func tearDown() {
@@ -39,13 +39,13 @@ final class NewScreenVideoCapturerTests: XCTestCase {
 
     // MARK: - Tests
 
-    func testInitWithDisplayVideoSource() {
-        videoCapturer = NewScreenVideoCapturer(
-            videoSource: .display(display),
+    func testInitWithDisplayMediaSource() {
+        capturer = NewScreenMediaCapturer(
+            source: .display(display),
             streamFactory: factory
         )
 
-        switch videoCapturer.videoSource {
+        switch capturer.source {
         case .display(let value):
             XCTAssertEqual(value as? LegacyDisplay, display)
         case .window:
@@ -53,14 +53,14 @@ final class NewScreenVideoCapturerTests: XCTestCase {
         }
     }
 
-    func testInitWithWindowVideoSource() throws {
+    func testInitWithWindowMediaSource() throws {
         let window = try XCTUnwrap(window)
-        videoCapturer = NewScreenVideoCapturer(
-            videoSource: .window(window),
+        capturer = NewScreenMediaCapturer(
+            source: .window(window),
             streamFactory: factory
         )
 
-        switch videoCapturer.videoSource {
+        switch capturer.source {
         case .display:
             XCTFail("Invalid video source")
         case .window(let value):
@@ -72,10 +72,10 @@ final class NewScreenVideoCapturerTests: XCTestCase {
         let expectation = self.expectation(description: "Deinit")
         ShareableContentMock.displays = [display]
 
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .high)
         let stream = try XCTUnwrap(factory.stream)
 
-        videoCapturer = nil
+        capturer = nil
 
         stream.onStop = {
             XCTAssertEqual(
@@ -94,22 +94,27 @@ final class NewScreenVideoCapturerTests: XCTestCase {
     }
 
     func testStartCaptureDisplay() async throws {
-        let fps: UInt = 15
+        let videoProfile = QualityProfile.presentationVeryHigh
         ShareableContentMock.displays = [display]
 
-        try await videoCapturer.startCapture(withFps: fps)
+        try await capturer.startCapture(withVideoProfile: videoProfile)
         let stream = try XCTUnwrap(factory.stream)
 
+        XCTAssertEqual(stream.configuration.backgroundColor, .black)
         XCTAssertEqual(
             stream.configuration.minimumFrameInterval,
-            CMTime(fps: fps)
+            CMTime(fps: videoProfile.fps)
         )
         XCTAssertEqual(stream.configuration.width, display.width)
         XCTAssertEqual(stream.configuration.height, display.height)
+        XCTAssertEqual(
+            stream.configuration.pixelFormat,
+            kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+        )
 
         XCTAssertNil(stream.delegate)
-        XCTAssertTrue(stream.streamOutput === videoCapturer)
-        XCTAssertEqual(stream.sampleHandlerQueue?.label, "com.pexip.PexipMedia.NewScreenVideoCapturer")
+        XCTAssertTrue(stream.streamOutput === capturer)
+        XCTAssertEqual(stream.sampleHandlerQueue?.label, "com.pexip.PexipMedia.NewScreenMediaCapturer")
         XCTAssertEqual(stream.sampleHandlerQueue?.qos, .userInteractive)
 
         XCTAssertEqual(
@@ -120,31 +125,31 @@ final class NewScreenVideoCapturerTests: XCTestCase {
             ]
         )
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
     }
 
     func testStartCaptureWindow() async throws {
-        let fps: UInt = 15
+        let videoProfile = QualityProfile.presentationHigh
         ShareableContentMock.windows = [window]
 
-        videoCapturer = NewScreenVideoCapturer(
-            videoSource: .window(window),
+        capturer = NewScreenMediaCapturer(
+            source: .window(window),
             streamFactory: factory
         )
 
-        try await videoCapturer.startCapture(withFps: fps)
+        try await capturer.startCapture(withVideoProfile: videoProfile)
         let stream = try XCTUnwrap(factory.stream)
 
         XCTAssertEqual(
             stream.configuration.minimumFrameInterval,
-            CMTime(fps: fps)
+            CMTime(fps: videoProfile.fps)
         )
-        XCTAssertEqual(stream.configuration.width, window.width)
-        XCTAssertEqual(stream.configuration.height, window.height)
+        XCTAssertEqual(stream.configuration.width, Int(videoProfile.width))
+        XCTAssertEqual(stream.configuration.height, Int(videoProfile.height))
 
         XCTAssertNil(stream.delegate)
-        XCTAssertTrue(stream.streamOutput === videoCapturer)
-        XCTAssertEqual(stream.sampleHandlerQueue?.label, "com.pexip.PexipMedia.NewScreenVideoCapturer")
+        XCTAssertTrue(stream.streamOutput === capturer)
+        XCTAssertEqual(stream.sampleHandlerQueue?.label, "com.pexip.PexipMedia.NewScreenMediaCapturer")
         XCTAssertEqual(stream.sampleHandlerQueue?.qos, .userInteractive)
 
         XCTAssertEqual(
@@ -155,18 +160,18 @@ final class NewScreenVideoCapturerTests: XCTestCase {
             ]
         )
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
     }
 
     func testStopCapture() async throws {
         ShareableContentMock.displays = [display]
 
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .presentationHigh)
         let stream = try XCTUnwrap(factory.stream)
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
 
-        try await videoCapturer.stopCapture()
+        try await capturer.stopCapture()
 
         XCTAssertEqual(
             stream.actions,
@@ -177,64 +182,123 @@ final class NewScreenVideoCapturerTests: XCTestCase {
                 .stopCapture,
             ]
         )
-        XCTAssertFalse(videoCapturer.isCapturing)
+        XCTAssertFalse(capturer.isCapturing)
     }
 
     func testSampleBufferWithoutAttachments() async throws {
         ShareableContentMock.displays = [display]
 
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .presentationHigh)
 
         let stream = try XCTUnwrap(factory.stream)
-        let buffer = stream.createCMSampleBuffer(status: nil, displayTime: nil)
+        let buffer = stream.createCMSampleBuffer(
+            status: nil,
+            displayTime: nil,
+            contentRect: nil,
+            scaleFactor: nil
+        )
 
-        videoCapturer.stream(stream, didOutputSampleBuffer: buffer, of: .screen)
+        capturer.stream(stream, didOutputSampleBuffer: buffer, of: .screen)
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
         XCTAssertNil(delegate.status)
     }
 
     func testSampleBufferWithoutStatus() async throws {
         ShareableContentMock.displays = [display]
 
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .presentationHigh)
 
         let stream = try XCTUnwrap(factory.stream)
         let time = mach_absolute_time()
-        let buffer = stream.createCMSampleBuffer(status: nil, displayTime: time)
+        let buffer = stream.createCMSampleBuffer(
+            status: nil,
+            displayTime: time,
+            contentRect: CGRect(x: 0, y: 0, width: 1280, height: 720),
+            scaleFactor: 1
+        )
 
-        videoCapturer.stream(stream, didOutputSampleBuffer: buffer, of: .screen)
+        capturer.stream(stream, didOutputSampleBuffer: buffer, of: .screen)
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
         XCTAssertNil(delegate.status)
     }
 
     func testSampleBufferWithoutDisplayTime() async throws {
         ShareableContentMock.displays = [display]
 
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .presentationHigh)
 
         let stream = try XCTUnwrap(factory.stream)
-        let buffer = stream.createCMSampleBuffer(status: .idle, displayTime: nil)
+        let buffer = stream.createCMSampleBuffer(
+            status: .idle,
+            displayTime: nil,
+            contentRect: CGRect(x: 0, y: 0, width: 1280, height: 720),
+            scaleFactor: 1
+        )
 
-        videoCapturer.stream(stream, didOutputSampleBuffer: buffer, of: .screen)
+        capturer.stream(stream, didOutputSampleBuffer: buffer, of: .screen)
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
         XCTAssertNil(delegate.status)
     }
+
+    func testSampleBufferWithoutContentRect() async throws {
+        ShareableContentMock.displays = [display]
+
+        try await capturer.startCapture(withVideoProfile: .presentationHigh)
+
+        let stream = try XCTUnwrap(factory.stream)
+        let buffer = stream.createCMSampleBuffer(
+            status: .idle,
+            displayTime: mach_absolute_time(),
+            contentRect: nil,
+            scaleFactor: 1
+        )
+
+        capturer.stream(stream, didOutputSampleBuffer: buffer, of: .screen)
+
+        XCTAssertTrue(capturer.isCapturing)
+        XCTAssertNil(delegate.status)
+    }
+
+    func testSampleBufferWithoutScaleFactor() async throws {
+        ShareableContentMock.displays = [display]
+
+        try await capturer.startCapture(withVideoProfile: .presentationHigh)
+
+        let stream = try XCTUnwrap(factory.stream)
+        let buffer = stream.createCMSampleBuffer(
+            status: .idle,
+            displayTime: mach_absolute_time(),
+            contentRect: CGRect(x: 0, y: 0, width: 1280, height: 720),
+            scaleFactor: nil
+        )
+
+        capturer.stream(stream, didOutputSampleBuffer: buffer, of: .screen)
+
+        XCTAssertTrue(capturer.isCapturing)
+        XCTAssertNil(delegate.status)
+    }
+
 
     func testSampleBufferWithStatusStopped() async throws {
         ShareableContentMock.displays = [display]
 
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .presentationHigh)
 
         let stream = try XCTUnwrap(factory.stream)
         let time = mach_absolute_time()
-        let buffer = stream.createCMSampleBuffer(status: .stopped, displayTime: time)
+        let buffer = stream.createCMSampleBuffer(
+            status: .stopped,
+            displayTime: time,
+            contentRect: CGRect(x: 0, y: 0, width: 1280, height: 720),
+            scaleFactor: 1
+        )
 
-        videoCapturer.stream(stream, didOutputSampleBuffer: buffer, of: .screen)
+        capturer.stream(stream, didOutputSampleBuffer: buffer, of: .screen)
 
-        XCTAssertFalse(videoCapturer.isCapturing)
+        XCTAssertFalse(capturer.isCapturing)
 
         switch delegate.status {
         case .complete, .none:
@@ -247,15 +311,21 @@ final class NewScreenVideoCapturerTests: XCTestCase {
     func testSampleBufferWithStatusComplete() async throws {
         ShareableContentMock.displays = [display]
 
-        try await videoCapturer.startCapture(withFps: 15)
+        let videoProfile = QualityProfile.presentationHigh
+        try await capturer.startCapture(withVideoProfile: videoProfile)
 
         let stream = try XCTUnwrap(factory.stream)
         let time = mach_absolute_time()
-        let buffer = stream.createCMSampleBuffer(status: .complete, displayTime: time)
+        let buffer = stream.createCMSampleBuffer(
+            status: .complete,
+            displayTime: time,
+            contentRect: CGRect(x: 0, y: 0, width: 500, height: 350),
+            scaleFactor: 2
+        )
 
-        videoCapturer.stream(stream, didOutputSampleBuffer: buffer, of: .screen)
+        capturer.stream(stream, didOutputSampleBuffer: buffer, of: .screen)
 
-        XCTAssertTrue(videoCapturer.isCapturing)
+        XCTAssertTrue(capturer.isCapturing)
 
         switch delegate.status {
         case .complete(let videoFrame):
@@ -264,9 +334,13 @@ final class NewScreenVideoCapturerTests: XCTestCase {
                 MachAbsoluteTime(time).nanoseconds
             )
             XCTAssertEqual(videoFrame.elapsedTimeNs, 0)
-            XCTAssertEqual(videoFrame.width, UInt32(display.width))
-            XCTAssertEqual(videoFrame.height, UInt32(display.height))
+            XCTAssertEqual(videoFrame.width, UInt32(videoProfile.width))
+            XCTAssertEqual(videoFrame.height, UInt32(videoProfile.height))
             XCTAssertEqual(videoFrame.orientation, .up)
+            XCTAssertEqual(
+                videoFrame.contentRect,
+                CGRect(x: 0, y: 0, width: 1000, height: 700)
+            )
         case .stopped, .none:
             XCTFail("Invalid video frame status")
         }
@@ -275,7 +349,7 @@ final class NewScreenVideoCapturerTests: XCTestCase {
     func testSampleBufferWithOtherStatuses() async throws {
         ShareableContentMock.displays = [display]
 
-        try await videoCapturer.startCapture(withFps: 15)
+        try await capturer.startCapture(withVideoProfile: .presentationHigh)
 
         let stream = try XCTUnwrap(factory.stream)
         let statuses: [SCFrameStatus] = [
@@ -284,11 +358,16 @@ final class NewScreenVideoCapturerTests: XCTestCase {
 
         for status in statuses {
             let time = mach_absolute_time()
-            let buffer = stream.createCMSampleBuffer(status: status, displayTime: time)
+            let buffer = stream.createCMSampleBuffer(
+                status: status,
+                displayTime: time,
+                contentRect: CGRect(x: 0, y: 0, width: 1280, height: 720),
+                scaleFactor: 1
+            )
 
-            videoCapturer.stream(stream, didOutputSampleBuffer: buffer, of: .screen)
+            capturer.stream(stream, didOutputSampleBuffer: buffer, of: .screen)
 
-            XCTAssertTrue(videoCapturer.isCapturing)
+            XCTAssertTrue(capturer.isCapturing)
             XCTAssertNil(delegate.status)
         }
     }
@@ -302,14 +381,14 @@ final class ScreenCaptureStreamFactoryMock: ScreenCaptureStreamFactory {
     typealias Filter = ScreenCaptureContentFilterMock
 
     private(set) var stream: StreamMock?
-    private(set) var videoSource: ScreenVideoSource?
+    private(set) var mediaSource: ScreenMediaSource?
 
     func createStream(
-        videoSource: ScreenVideoSource,
+        mediaSource: ScreenMediaSource,
         configuration: SCStreamConfiguration,
         delegate: SCStreamDelegate?
     ) async throws -> SCStream {
-        self.videoSource = videoSource
+        self.mediaSource = mediaSource
         stream = StreamMock(
             filter: SCContentFilter(),
             configuration: configuration,
@@ -380,7 +459,9 @@ final class StreamMock: SCStream {
 
     func createCMSampleBuffer(
         status: SCFrameStatus?,
-        displayTime: UInt64?
+        displayTime: UInt64?,
+        contentRect: CGRect?,
+        scaleFactor: CGFloat?
     ) -> CMSampleBuffer {
         var pixelBuffer: CVPixelBuffer?
 
@@ -415,7 +496,9 @@ final class StreamMock: SCStream {
             sampleBufferOut: &sampleBuffer
         )
 
-        if status != nil || displayTime != nil {
+        let attachments: [Any?] = [status, displayTime, contentRect, scaleFactor]
+
+        if !attachments.compactMap({ $0 }).isEmpty {
             let attachments: CFArray! = CMSampleBufferGetSampleAttachmentsArray(
                 sampleBuffer!,
                 createIfNecessary: true
@@ -443,6 +526,28 @@ final class StreamMock: SCStream {
                         SCStreamFrameInfo.displayTime.rawValue as CFString
                     ).toOpaque(),
                     Unmanaged.passUnretained(displayTime as CFNumber).toOpaque()
+                )
+            }
+
+            if let contentRect = contentRect {
+                CFDictionarySetValue(
+                    dictionary,
+                    Unmanaged.passUnretained(
+                        SCStreamFrameInfo.contentRect.rawValue as CFString
+                    ).toOpaque(),
+                    Unmanaged.passRetained(
+                        contentRect.dictionaryRepresentation
+                    ).toOpaque()
+                )
+            }
+
+            if let scaleFactor = scaleFactor {
+                CFDictionarySetValue(
+                    dictionary,
+                    Unmanaged.passUnretained(
+                        SCStreamFrameInfo.scaleFactor.rawValue as CFString
+                    ).toOpaque(),
+                    Unmanaged.passUnretained(scaleFactor as CFNumber).toOpaque()
                 )
             }
         }

@@ -6,14 +6,14 @@ import CoreGraphics
 /// An object that represents the error occured during screen capture.
 public enum ScreenCaptureError: LocalizedError, CustomStringConvertible, Hashable {
     case cgError(CGError)
-    case noScreenVideoSourceAvailable
+    case noScreenMediaSourceAvailable
 
     public var description: String {
         switch self {
         case .cgError(let errorCode):
             return "Screen capture error, CGError code: \(errorCode)"
-        case .noScreenVideoSourceAvailable:
-            return "No screen video source available."
+        case .noScreenMediaSourceAvailable:
+            return "No screen media source available."
         }
     }
 

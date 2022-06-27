@@ -108,111 +108,58 @@ final class WebRTCMediaConnection: MediaConnection {
         }
     }
 
-    func sendMainAudio(localAudioTrack: LocalAudioTrack) {
-        guard mainAudioTransceiver == nil else {
-            return
-        }
-
-        guard let track = localAudioTrack as? WebRTCLocalAudioTrack else {
-            preconditionFailure(
-                "localAudioTrack must be an instance of WebRtcLocalAudioTrack."
-            )
-        }
-
-        mainAudioTransceiver = connection.addTransceiver(with: track.rtcTrack)
-        mainLocalAudioTrack = track
-
-        track.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
+    func setMainAudioTrack(_ audioTrack: LocalAudioTrack?) {
+        mainLocalAudioTrack = audioTrack.valueOrNil(WebRTCLocalAudioTrack.self)
+        mainAudioTransceiver = mainAudioTransceiver ?? connection.addTransceiver(of: .audio)
+        mainAudioTransceiver?.sender.track = mainLocalAudioTrack?.rtcTrack
+        mainLocalAudioTrack?.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
             self?.muteAudio(!isCapturing)
         }.store(in: &cancellables)
     }
 
-    func sendMainVideo(localVideoTrack: CameraVideoTrack) {
-        guard mainVideoTransceiver == nil else {
-            return
+    func setMainVideoTrack(_ videoTrack: CameraVideoTrack?) {
+        mainLocalVideoTrack = videoTrack.valueOrNil(WebRTCCameraVideoTrack.self)
+
+        let shouldSetRemoteVideoTrack = mainVideoTransceiver == nil
+        mainVideoTransceiver = mainVideoTransceiver ?? connection.addTransceiver(of: .video)
+        mainVideoTransceiver?.sender.track = mainLocalVideoTrack?.rtcTrack
+
+        if shouldSetRemoteVideoTrack {
+            setRemoteVideoTrack(mainVideoTransceiver?.receiver.track as? RTCVideoTrack)
         }
 
-        guard let track = localVideoTrack as? WebRTCCameraVideoTrack else {
-            preconditionFailure(
-                "localVideoTrack must be an instance of WebRtcLocalVideoTrack."
-            )
-        }
-
-        mainVideoTransceiver = connection.addTransceiver(with: track.rtcTrack)
-        mainLocalVideoTrack = track
-        setRemoteVideoTrack(mainVideoTransceiver?.receiver.track as? RTCVideoTrack)
-
-        track.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
+        mainLocalVideoTrack?.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
             self?.muteVideo(!isCapturing)
         }.store(in: &cancellables)
     }
 
-    func sendPresentationVideo(screenVideoTrack: ScreenVideoTrack) async throws {
-        guard let track = screenVideoTrack as? WebRTCScreenVideoTrack else {
-            preconditionFailure(
-                "screenVideoTrack must be an instance of WebRTCScreenVideoTrack."
-            )
-        }
-
-        guard
-            let transceiver = presentationVideoTransceiver,
-            transceiver.direction != .sendRecv
-        else {
-            return
-        }
-
-        setPresentationRemoteVideoTrack(nil)
-        transceiver.sender.track = track.rtcTrack
-        try transceiver.setDirection(.sendRecv)
-        try await config.signaling.takeFloor()
+    func setScreenMediaTrack(_ screenMediaTrack: ScreenMediaTrack?) {
+        let track = screenMediaTrack.valueOrNil(WebRTCScreenMediaTrack.self)
+        presentationVideoTransceiver?.sender.track = track?.rtcTrack
+        track?.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
+            self?.toggleLocalPresentation(isCapturing)
+        }.store(in: &cancellables)
     }
 
-    func stopSendingPresentation() async throws {
+    func receivePresentation(_ receive: Bool) throws {
         guard
             let transceiver = presentationVideoTransceiver,
-            transceiver.direction == .sendRecv
-        else {
-            return
-        }
-
-        connection.removeTrack(transceiver.sender)
-        try transceiver.setDirection(.inactive)
-        try await config.signaling.releaseFloor()
-    }
-
-    func startPresentationReceive() throws {
-        try startReceivingPresentation()
-    }
-
-    func startReceivingPresentation() throws {
-        guard
-            let transceiver = presentationVideoTransceiver,
-            transceiver.direction != .recvOnly,
             !config.presentationInMain
         else {
             return
         }
 
-        try transceiver.setDirection(.recvOnly)
-        let track = transceiver.receiver.track as? RTCVideoTrack
-        setPresentationRemoteVideoTrack(track)
-    }
-
-    func stopPresentationReceive() throws {
-        try stopReceivingPresentation()
-    }
-
-    func stopReceivingPresentation() throws {
-        guard
-            let transceiver = presentationVideoTransceiver,
-            transceiver.direction == .recvOnly,
-            !config.presentationInMain
-        else {
-            return
+        switch receive {
+        case true where transceiver.direction != .recvOnly:
+            try transceiver.setDirection(.recvOnly)
+            let track = transceiver.receiver.track as? RTCVideoTrack
+            setPresentationRemoteVideoTrack(track)
+        case false where transceiver.direction == .recvOnly:
+            try transceiver.setDirection(.inactive)
+            setPresentationRemoteVideoTrack(nil)
+        default:
+            break
         }
-
-        try transceiver.setDirection(.inactive)
-        setPresentationRemoteVideoTrack(nil)
     }
 
     // MARK: - Private
@@ -248,7 +195,7 @@ final class WebRTCMediaConnection: MediaConnection {
             let mangler = SessionDescriptionMangler(sdp: offer.sdp)
             let newLocalSdp = mangler.mangle(
                 bandwidth: config.bandwidth,
-                mainQualityProfile: mainLocalVideoTrack?.qualityProfile,
+                mainQualityProfile: mainLocalVideoTrack?.videoProfile,
                 mainAudioMid: mainAudioTransceiver?.mid,
                 mainVideoMid: mainVideoTransceiver?.mid,
                 presentationVideoMid: presentationVideoTransceiver?.mid
@@ -275,6 +222,30 @@ final class WebRTCMediaConnection: MediaConnection {
     private func muteAudio(_ muted: Bool) {
         Task {
             try await config.signaling.muteAudio(muted)
+        }
+    }
+
+    private func toggleLocalPresentation(_ isPresenting: Bool) {
+        guard let transceiver = presentationVideoTransceiver else {
+            return
+        }
+
+        Task {
+            do {
+                switch isPresenting {
+                case true where transceiver.direction != .sendRecv:
+                    setPresentationRemoteVideoTrack(nil)
+                    try transceiver.setDirection(.sendRecv)
+                    try await config.signaling.takeFloor()
+                case false where transceiver.direction == .sendRecv:
+                    try transceiver.setDirection(.inactive)
+                    try await config.signaling.releaseFloor()
+                default:
+                    break
+                }
+            } catch {
+                logger?.error("Error on taking/releasing presentation floor: \(error)")
+            }
         }
     }
 
@@ -346,6 +317,25 @@ extension WebRTCMediaConnection: PeerConnectionDelegate {
             } catch {
                 logger?.error(
                     "MediaConnectionSignaling.onCandidate failed with error: \(error)"
+                )
+            }
+        }
+    }
+}
+
+// MARK: - Private extension
+
+extension Optional {
+    func valueOrNil<T>(_ type: T.Type) -> T? {
+        switch self {
+        case .none:
+            return nil
+        case .some(let value):
+            if let value = value as? T {
+                return value
+            } else {
+                preconditionFailure(
+                    "Value must be an instance of \(T.self)."
                 )
             }
         }
