@@ -55,7 +55,9 @@ struct AppCoordinator: View {
                 push(.alias)
             })
         case .alias:
-            NavigationStep(onBack: { pop(to: .displayName) }, content: {
+            NavigationStep(onBack: {
+                pop(to: .displayName)
+            }, content: {
                 viewFactory.aliasView(
                     onComplete: { output in
                         switch output.token {

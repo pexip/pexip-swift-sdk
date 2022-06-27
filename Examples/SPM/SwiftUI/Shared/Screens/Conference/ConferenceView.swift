@@ -9,6 +9,9 @@ struct ConferenceView: View {
     @StateObject var viewModel: ConferenceViewModel
     @Environment(\.verticalSizeClass) private var sizeClass
     @Environment(\.viewFactory) private var viewFactory: ViewFactory
+    #if os(macOS)
+    @State private var showingScreenSharingPicker = false
+    #endif
 
     private var showingChat: Binding<Bool?> {
         if viewModel.chat == nil {
@@ -46,6 +49,23 @@ struct ConferenceView: View {
         )
     }
 
+    private var isPresenting: Binding<Bool> {
+        Binding(
+            get: { viewModel.isPresenting },
+            set: { value in
+                if value {
+                    #if os(iOS)
+                    viewModel.startPresenting()
+                    #else
+                    showingScreenSharingPicker = true
+                    #endif
+                } else {
+                    viewModel.stopPresenting()
+                }
+            }
+        )
+    }
+
     // MARK: - Body
 
     var body: some View {
@@ -74,7 +94,7 @@ struct ConferenceView: View {
 
     private var preflightView: some View {
         PreflightView(
-            cameraVideoTrack: viewModel.cameraVideoTrack,
+            mainLocalVideoTrack: viewModel.mainLocalVideo?.track,
             cameraEnabled: cameraEnabled,
             microphoneEnabled: microphoneEnabled,
             onToggleCamera: viewModel.toggleCamera,
@@ -111,19 +131,33 @@ struct ConferenceView: View {
 
     private var callView: some View {
         CallView(
-            cameraVideoTrack: viewModel.cameraVideoTrack,
-            mainRemoteVideoTrack: viewModel.mainRemoteVideoTrack,
-            presentationRemoteVideoTrack: viewModel.presentationRemoteVideoTrack,
+            mainLocalVideo: viewModel.mainLocalVideo,
+            mainRemoteVideo: viewModel.mainRemoteVideo,
+            presentationLocalVideo: viewModel.presentationLocalVideo,
+            presentationRemoteVideo: viewModel.presentationRemoteVideo,
             presenterName: viewModel.presenterName,
-            cameraQualityProfile: viewModel.cameraQualityProfile,
-            remoteVideoContentMode: viewModel.remoteVideoContentMode,
             showingChat: showingChat,
             showingParticipants: showingParticipants,
             cameraEnabled: cameraEnabled,
             microphoneEnabled: microphoneEnabled,
+            isPresenting: isPresenting,
             onToggleCamera: viewModel.toggleCamera,
             onDisconnect: viewModel.leave
         )
+        #if os(macOS)
+        .sheet(
+            isPresented: $showingScreenSharingPicker,
+            content: {
+                viewFactory.screenMediaSourcePicker(
+                    onShare: { source in
+                        showingScreenSharingPicker = false
+                        viewModel.startPresenting(source)
+                    },
+                    onCancel: { showingScreenSharingPicker = false }
+                )
+            }
+        )
+        #endif
     }
 
     @ViewBuilder
@@ -211,7 +245,9 @@ struct ConferenceView_Previews: PreviewProvider {
             serviceType: "",
             conferenceName: "",
             stun: nil,
+            turn: nil,
             chatEnabled: false,
+            analyticsEnabled: true,
             expiresString: "1234"
         )
     )
@@ -222,13 +258,10 @@ struct ConferenceView_Previews: PreviewProvider {
         ConferenceView(
             viewModel: ConferenceViewModel(
                 conference: conference,
-                mediaConnection: factory.createMediaConnection(
-                    config: MediaConnectionConfig(
-                        signaling: conference.signaling
-                    )
+                mediaConnectionConfig: MediaConnectionConfig(
+                    signaling: conference.signaling
                 ),
-                cameraVideoTrack: factory.createCameraVideoTrack(),
-                mainLocalAudioTrack: factory.createLocalAudioTrack(),
+                mediaConnectionFactory: factory,
                 onComplete: {}
             )
         )

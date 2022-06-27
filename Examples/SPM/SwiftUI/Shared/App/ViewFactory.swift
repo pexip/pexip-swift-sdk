@@ -81,16 +81,12 @@ struct ViewFactory: ViewFactoryProtocol {
         )
         let mediaConnectionConfig = MediaConnectionConfig(
             signaling: conference.signaling,
-            iceServers: [IceServer(urls: token.stunUrlStrings)],
             presentationInMain: false
         )
         let viewModel = ConferenceViewModel(
             conference: conference,
-            mediaConnection: mediaConnectionFactory.createMediaConnection(
-                config: mediaConnectionConfig
-            ),
-            cameraVideoTrack: mediaConnectionFactory.createCameraVideoTrack(),
-            mainLocalAudioTrack: mediaConnectionFactory.createLocalAudioTrack(),
+            mediaConnectionConfig: mediaConnectionConfig,
+            mediaConnectionFactory: mediaConnectionFactory,
             onComplete: onComplete
         )
         return ConferenceView(viewModel: viewModel)
@@ -111,6 +107,20 @@ struct ViewFactory: ViewFactoryProtocol {
     ) -> ParticipantsView {
         ParticipantsView(roster: roster, onDismiss: onDismiss)
     }
+
+    #if os(macOS)
+    func screenMediaSourcePicker(
+        onShare: @escaping (ScreenMediaSource) -> Void,
+        onCancel: @escaping () -> Void
+    ) -> ScreenMediaSourcePicker {
+        let viewModel = ScreenMediaSourcePickerModel(
+            enumerator: ScreenMediaSource.createEnumerator(),
+            onShare: onShare,
+            onCancel: onCancel
+        )
+        return ScreenMediaSourcePicker(viewModel: viewModel)
+    }
+    #endif
 }
 
 // MARK: - Environment

@@ -11,7 +11,7 @@
 - [Products](#products)
 - [Requirements](#requirements)
 - [Installation](#installation)
-- [Usage](https://github.com/pexip/pexip-swift-sdk/blob/main/Documentation/Usage.md)
+- [Documentation](https://pexip.github.io/pexip-swift-sdk/sdk/documentation/pexipswiftsdk/)
 - [Examples](#examples)
 - [License](#license)
 

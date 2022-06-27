@@ -4,58 +4,84 @@ import PexipRTC
 import PexipConference
 import PexipMedia
 
+enum ConferenceState {
+    case preflight
+    case connecting
+    case connected
+    case disconnected
+}
+
+enum ConferenceModal {
+    case chat
+    case participants
+}
+
 final class ConferenceViewModel: ObservableObject {
-    enum State {
-        case preflight
-        case connecting
-        case connected
-        case disconnected
-    }
-
-    enum Modal {
-        case chat
-        case participants
-    }
-
-    struct Presentation {
-        let track: VideoTrack
-        var presenterName: String?
-    }
-
-    @Published private(set) var state: State
+    @Published private(set) var state: ConferenceState
     @Published private(set) var cameraEnabled = false
     @Published private(set) var microphoneEnabled = false
-    @Published private(set) var modal: Modal?
-    @Published private(set) var mainRemoteVideoTrack: VideoTrack?
-    @Published private(set) var presentationRemoteVideoTrack: VideoTrack?
+    @Published private(set) var isPresenting = false
+    @Published private(set) var modal: ConferenceModal?
     @Published private(set) var presenterName: String?
-    let cameraVideoTrack: CameraVideoTrack?
-    let cameraQualityProfile: QualityProfile = .high
-    let remoteVideoContentMode: VideoContentMode = .fit_16x9
+
+    var mainRemoteVideo: Video? {
+        mainRemoteVideoTrack.map {
+            Video(track: $0, contentMode: remoteVideoContentMode)
+        }
+    }
+
+    var mainLocalVideo: Video? {
+        cameraVideoTrack.map {
+            Video(track: $0, qualityProfile: cameraQualityProfile)
+        }
+    }
+
+    var presentationLocalVideo: Video? {
+        screenMediaTrack.map {
+            Video(track: $0, qualityProfile: localPresentationQualityProfile)
+        }
+    }
+
+    var presentationRemoteVideo: Video? {
+        presentationRemoteVideoTrack.map {
+            Video(track: $0, contentMode: remoteVideoContentMode)
+        }
+    }
+
+    let remoteVideoContentMode = VideoContentMode.fit_16x9
     var chat: Chat? { conference.chat }
     var roster: Roster { conference.roster }
 
     private let conference: Conference
+    private let mediaConnectionFactory: MediaConnectionFactory
     private var mediaConnection: MediaConnection
     private let mainLocalAudioTrack: LocalAudioTrack
+    private let cameraVideoTrack: CameraVideoTrack?
     private let onComplete: () -> Void
     private let videoPermission = MediaCapturePermission.video
     private let audioPermission = MediaCapturePermission.audio
     private var cancellables = Set<AnyCancellable>()
+    private let cameraQualityProfile: QualityProfile = .high
+    private let localPresentationQualityProfile: QualityProfile = .presentationVeryHigh
+    @Published private var mainRemoteVideoTrack: VideoTrack?
+    @Published private var presentationRemoteVideoTrack: VideoTrack?
+    @Published private var screenMediaTrack: ScreenMediaTrack?
 
     // MARK: - Init
 
     init(
         conference: Conference,
-        mediaConnection: MediaConnection,
-        cameraVideoTrack: CameraVideoTrack?,
-        mainLocalAudioTrack: LocalAudioTrack,
+        mediaConnectionConfig: MediaConnectionConfig,
+        mediaConnectionFactory: MediaConnectionFactory,
         onComplete: @escaping () -> Void
     ) {
         self.conference = conference
-        self.mediaConnection = mediaConnection
-        self.cameraVideoTrack = cameraVideoTrack
-        self.mainLocalAudioTrack = mainLocalAudioTrack
+        self.mediaConnectionFactory = mediaConnectionFactory
+        self.mediaConnection = mediaConnectionFactory.createMediaConnection(
+            config: mediaConnectionConfig
+        )
+        self.cameraVideoTrack = mediaConnectionFactory.createCameraVideoTrack()
+        self.mainLocalAudioTrack = mediaConnectionFactory.createLocalAudioTrack()
         self.onComplete = onComplete
         self.state = .preflight
 
@@ -69,11 +95,8 @@ final class ConferenceViewModel: ObservableObject {
 
     func join() {
         state = .connecting
-        mediaConnection.sendMainAudio(localAudioTrack: mainLocalAudioTrack)
-
-        if let cameraVideoTrack = cameraVideoTrack {
-            mediaConnection.sendMainVideo(localVideoTrack: cameraVideoTrack)
-        }
+        mediaConnection.setMainAudioTrack(mainLocalAudioTrack)
+        mediaConnection.setMainVideoTrack(cameraVideoTrack)
 
         Task { @MainActor in
             do {
@@ -124,7 +147,7 @@ final class ConferenceViewModel: ObservableObject {
                     openSettingsIfNeeded: true
                 ) == .authorized {
                     try await cameraVideoTrack?.startCapture(
-                        profile: cameraQualityProfile
+                        withVideoProfile: cameraQualityProfile
                     )
                 }
             } else {
@@ -147,7 +170,34 @@ final class ConferenceViewModel: ObservableObject {
         }
     }
 
-    func setModal(_ modal: Modal?) {
+    #if os(iOS)
+
+    func startPresenting() {
+        let track = mediaConnectionFactory.createScreenMediaTrack(
+            appGroup: Constants.appGroup,
+            broadcastUploadExtension: Constants.broadcastUploadExtension
+        )
+        startScreenCapture(withTrack: track)
+    }
+
+    #else
+
+    func startPresenting(_ screenMediaSource: ScreenMediaSource) {
+        let track = mediaConnectionFactory.createScreenMediaTrack(
+            mediaSource: screenMediaSource
+        )
+        startScreenCapture(withTrack: track)
+    }
+    #endif
+
+    func stopPresenting() {
+        screenMediaTrack?.stopCapture()
+        screenMediaTrack = nil
+        mediaConnection.setScreenMediaTrack(nil)
+        isPresenting = false
+    }
+
+    func setModal(_ modal: ConferenceModal?) {
         withAnimation {
             self.modal = modal
         }
@@ -197,11 +247,12 @@ final class ConferenceViewModel: ObservableObject {
                 do {
                     switch event {
                     case .presentationStart(let message):
+                        self.stopPresenting()
                         self.presenterName = message.presenterName
-                        try self.mediaConnection.startPresentationReceive()
+                        try self.mediaConnection.receivePresentation(true)
                     case .presentationStop:
                         self.presenterName = nil
-                        try self.mediaConnection.stopPresentationReceive()
+                        try self.mediaConnection.receivePresentation(false)
                     case .clientDisconnected:
                         self.leave()
                     }
@@ -210,5 +261,35 @@ final class ConferenceViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
+    }
+
+    private func startScreenCapture(withTrack screenMediaTrack: ScreenMediaTrack) {
+        self.screenMediaTrack = screenMediaTrack
+
+        screenMediaTrack.capturingStatus.$isCapturing
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isCapturing in
+                guard let self  = self else { return }
+
+                if !isCapturing && self.isPresenting {
+                    self.screenMediaTrack = nil
+                    self.mediaConnection.setScreenMediaTrack(nil)
+                }
+
+                self.isPresenting = isCapturing
+            }
+            .store(in: &cancellables)
+
+        Task {
+            do {
+                mediaConnection.setScreenMediaTrack(screenMediaTrack)
+                try await screenMediaTrack.startCapture(
+                    withVideoProfile: localPresentationQualityProfile
+                )
+            } catch {
+                stopPresenting()
+                debugPrint(error)
+            }
+        }
     }
 }
