@@ -1276,7 +1276,7 @@
 			repositoryURL = "https://github.com/pexip/pexip-swift-sdk";
 			requirement = {
 				kind = exactVersion;
-				version = 0.2.0;
+				version = 0.3.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

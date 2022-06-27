@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pexip/pexip-swift-sdk",
       "state" : {
-        "revision" : "85f786cba3e772172a3cb437541c1294ae7bbf1d",
-        "version" : "0.2.0"
+        "revision" : "263e34714269dfaf38451f433f148c5a8d05bceb",
+        "version" : "0.3.0"
       }
     }
   ],

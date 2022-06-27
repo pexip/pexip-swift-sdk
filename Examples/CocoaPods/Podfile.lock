@@ -1,15 +1,15 @@
 PODS:
-  - PexipConference (0.2.0):
-    - PexipInfinityClient (= 0.2.0)
-    - PexipMedia (= 0.2.0)
-  - PexipInfinityClient (0.2.0):
-    - PexipUtils (= 0.2.0)
-  - PexipMedia (0.2.0)
-  - PexipRTC (0.2.0):
-    - PexipMedia (= 0.2.0)
-    - PexipUtils (= 0.2.0)
+  - PexipConference (0.3.0):
+    - PexipInfinityClient (= 0.3.0)
+    - PexipMedia (= 0.3.0)
+  - PexipInfinityClient (0.3.0):
+    - PexipUtils (= 0.3.0)
+  - PexipMedia (0.3.0)
+  - PexipRTC (0.3.0):
+    - PexipMedia (= 0.3.0)
+    - PexipUtils (= 0.3.0)
     - WebRTC (= 96.0.4664)
-  - PexipUtils (0.2.0)
+  - PexipUtils (0.3.0)
   - WebRTC (96.0.4664)
 
 DEPENDENCIES:
@@ -26,12 +26,12 @@ SPEC REPOS:
     - WebRTC
 
 SPEC CHECKSUMS:
-  PexipConference: f06ab7f508fbbb9eb901617d3d70eb714e0415c0
-  PexipInfinityClient: 75296c6ddde21ac5ed31f82cf09eda69aa63f14a
-  PexipMedia: e42bd429e6312fbcb530212229623b9d2e2fb00f
-  PexipRTC: 8b1201fe1f699d4bf6545068413f3d938c981422
-  PexipUtils: a3c7d336f6fbff1816833b7793614ebcaca93b04
-  WebRTC: fdeebd23654f4f8133a9f2471a0b6b2819bdbce1
+  PexipConference: db12eaf5b32bb597505d8796ca408908f60d8430
+  PexipInfinityClient: ab79e0f8762d22fcf996bfd974c0d5a247b666da
+  PexipMedia: c7cf392593ad8b132cc09cd80aec640b07777ddc
+  PexipRTC: 228810a0f1a63c40b67ef37c6ea248a6d1a95900
+  PexipUtils: 9fc3bc01588f0114d3ab7fd23554e8487c534ed7
+  WebRTC: 0645c1f1d152945644a9fcc354d128b1bada600d
 
 PODFILE CHECKSUM: db0378f34d11d214a22f96948b53aa2a91f08b4a
 
