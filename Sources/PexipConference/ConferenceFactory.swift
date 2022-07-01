@@ -39,7 +39,6 @@ public struct ConferenceFactory {
         let roster = roster(token: token, service: service)
 
         return InfinityConference(
-            conferenceName: token.conferenceName,
             tokenRefresher: DefaultTokenRefresher(
                 service: service,
                 store: tokenStore,
@@ -57,8 +56,12 @@ public struct ConferenceFactory {
                 tokenStore: tokenStore,
                 logger: logger
             ),
-            chat: chat(token: token, tokenStore: tokenStore, service: service),
             roster: roster,
+            liveCaptionsService: DefaultLiveCaptionsService(
+                tokenStore: tokenStore,
+                participantService: service.participant(id: token.participantId)
+            ),
+            chat: chat(token: token, tokenStore: tokenStore, service: service),
             logger: logger
         )
     }
@@ -91,7 +94,7 @@ public struct ConferenceFactory {
             currentParticipantId: token.participantId,
             currentParticipantName: token.displayName,
             avatarURL: { id in
-                service.participant(id: token.participantId).avatarURL()
+                service.participant(id: id).avatarURL()
             }
         )
     }

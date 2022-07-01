@@ -21,8 +21,6 @@ public protocol RosterDelegate: AnyObject {
 
 /// The full participant list of the conference
 public final class Roster: ObservableObject {
-    public typealias ReloadParticipants = () async throws -> [Participant]
-
     /// The display name of the current participant.
     @Published public private(set) var currentParticipantName: String
 

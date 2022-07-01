@@ -4,6 +4,12 @@ import XCTest
 final class ParticipantServiceTests: APITestCase {
     private let baseURL = URL(string: "https://example.com/participants/1")!
     private var service: ParticipantService!
+    private let responseJSON = """
+        {
+            "status": "success",
+            "result": true
+        }
+        """
 
     // MARK: - Setup
 
@@ -51,12 +57,6 @@ final class ParticipantServiceTests: APITestCase {
 
     func testMute() async throws {
         let token = Token.randomToken()
-        let responseJSON = """
-        {
-            "status": "success",
-            "result": true
-        }
-        """
         try await testJSONRequest(
             withMethod: .POST,
             url: baseURL.appendingPathComponent("mute"),
@@ -72,12 +72,6 @@ final class ParticipantServiceTests: APITestCase {
 
     func testUnmute() async throws {
         let token = Token.randomToken()
-        let responseJSON = """
-        {
-            "status": "success",
-            "result": true
-        }
-        """
         try await testJSONRequest(
             withMethod: .POST,
             url: baseURL.appendingPathComponent("unmute"),
@@ -93,12 +87,6 @@ final class ParticipantServiceTests: APITestCase {
 
     func testVideoMuted() async throws {
         let token = Token.randomToken()
-        let responseJSON = """
-        {
-            "status": "success",
-            "result": true
-        }
-        """
         try await testJSONRequest(
             withMethod: .POST,
             url: baseURL.appendingPathComponent("video_muted"),
@@ -114,12 +102,6 @@ final class ParticipantServiceTests: APITestCase {
 
     func testVideoUnmuted() async throws {
         let token = Token.randomToken()
-        let responseJSON = """
-        {
-            "status": "success",
-            "result": true
-        }
-        """
         try await testJSONRequest(
             withMethod: .POST,
             url: baseURL.appendingPathComponent("video_unmuted"),
@@ -129,6 +111,62 @@ final class ParticipantServiceTests: APITestCase {
             execute: {
                 let result = try await service.videoUnmuted(token: token)
                 XCTAssertTrue(result)
+            }
+        )
+    }
+
+    func testTakeFloor() async throws {
+        let token = Token.randomToken()
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("take_floor"),
+            token: token,
+            body: nil,
+            responseJSON: responseJSON,
+            execute: {
+                try await service.takeFloor(token: token)
+            }
+        )
+    }
+
+    func testReleaseFloor() async throws {
+        let token = Token.randomToken()
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("release_floor"),
+            token: token,
+            body: nil,
+            responseJSON: responseJSON,
+            execute: {
+                try await service.releaseFloor(token: token)
+            }
+        )
+    }
+
+    func testShowLiveCaptions() async throws {
+        let token = Token.randomToken()
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("show_live_captions"),
+            token: token,
+            body: nil,
+            responseJSON: responseJSON,
+            execute: {
+                try await service.showLiveCaptions(token: token)
+            }
+        )
+    }
+
+    func testHideLiveCaptions() async throws {
+        let token = Token.randomToken()
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("hide_live_captions"),
+            token: token,
+            body: nil,
+            responseJSON: responseJSON,
+            execute: {
+                try await service.hideLiveCaptions(token: token)
             }
         )
     }

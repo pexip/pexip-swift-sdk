@@ -11,16 +11,26 @@ import PexipUtils
 public protocol Conference {
     /// The object that acts as the delegate of the conference.
     var delegate: ConferenceDelegate? { get set }
+
     /// The publisher that publishes conference events
     var eventPublisher: AnyPublisher<ConferenceEvent, Never> { get }
+
     /// The object responsible for setting up and controlling a communication session
     var signaling: MediaConnectionSignaling { get }
+
+    /// The full participant list of the conference
+    var roster: Roster { get }
+
     /// The object responsible for sending and receiving text messages in the conference
     var chat: Chat? { get }
-    // The full participant list of the conference
-    var roster: Roster { get }
+
     /// Starts receiving conference events as they occur
     func receiveEvents() async
+
+    /// Starts/stops receiving live caption events.
+    @discardableResult
+    func toggleLiveCaptions(_ show: Bool) async throws -> Bool
+
     /// Leaves the conference. Once left, the ``Conference`` object is no longer valid.
     func leave() async throws
 }
@@ -34,41 +44,42 @@ final class InfinityConference: Conference {
     }
 
     let signaling: MediaConnectionSignaling
-    let chat: Chat?
     let roster: Roster
+    let chat: Chat?
 
-    private let conferenceName: String
     private let tokenRefresher: TokenRefresher
     private let eventSource: EventSource
+    private let liveCaptionsService: LiveCaptionsService
     private let logger: Logger?
     private let isClientDisconnected = Isolated(false)
     private var eventSourceTask: Task<Void, Never>?
     private var eventSubject = PassthroughSubject<ConferenceEvent, Never>()
+    private let status = Isolated<ConferenceStatus?>(nil)
 
     // MARK: - Init
 
     init(
-        conferenceName: String,
         tokenRefresher: TokenRefresher,
         signaling: MediaConnectionSignaling,
         eventSource: EventSource,
-        chat: Chat?,
         roster: Roster,
+        liveCaptionsService: LiveCaptionsService,
+        chat: Chat?,
         logger: Logger?
     ) {
-        self.conferenceName = conferenceName
         self.tokenRefresher = tokenRefresher
         self.signaling = signaling
         self.eventSource = eventSource
-        self.chat = chat
         self.roster = roster
+        self.liveCaptionsService = liveCaptionsService
+        self.chat = chat
         self.logger = logger
 
         Task {
             await tokenRefresher.startRefreshing()
         }
 
-        logger?.info("Joining \(conferenceName) as an API client")
+        logger?.info("Joining the conference as an API client")
     }
 
     // MARK: - Public API
@@ -86,8 +97,20 @@ final class InfinityConference: Conference {
         }
     }
 
+    @discardableResult
+    func toggleLiveCaptions(_ show: Bool) async throws -> Bool {
+        if let status = await status.value {
+            return try await liveCaptionsService.toggleLiveCaptions(
+                show,
+                conferenceStatus: status
+            )
+        } else {
+            return false
+        }
+    }
+
     func leave() async throws {
-        logger?.info("Leaving \(conferenceName)")
+        logger?.info("Leaving the conference")
         eventSourceTask?.cancel()
         await roster.clear()
         await eventSource.close()
@@ -102,6 +125,9 @@ final class InfinityConference: Conference {
     private func handleServerMessage(_ message: ServerEvent.Message) {
         Task {
             switch message {
+            case .conferenceUpdate(let value):
+                await status.setValue(value)
+                sendEvent(.conferenceUpdate(value))
             case .presentationStart(let details):
                 sendEvent(.presentationStart(details))
             case .presentationStop:
@@ -130,6 +156,8 @@ final class InfinityConference: Conference {
                 await isClientDisconnected.setValue(true)
                 sendEvent(.clientDisconnected)
                 logger?.debug("Participant disconnected, reason: \(details.reason)")
+            case .liveCaptions(let captions):
+                sendEvent(.liveCaptions(captions))
             }
         }
     }

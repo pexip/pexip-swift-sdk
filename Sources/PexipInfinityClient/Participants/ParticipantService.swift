@@ -73,6 +73,7 @@ public protocol ParticipantService {
 
     /**
      Starts sending local presentation.
+
      - Parameters:
         - token: Current valid API token
      - Throws: `HTTPError` if a network error was encountered during operation
@@ -81,11 +82,30 @@ public protocol ParticipantService {
 
     /**
      Stops sending local presentation.
+
      - Parameters:
         - token: Current valid API token
      - Throws: `HTTPError` if a network error was encountered during operation
      */
     func releaseFloor(token: Token) async throws
+
+    /**
+     Starts receiving live caption events.
+
+     - Parameters:
+        - token: Current valid API token
+     - Throws: `HTTPError` if a network error was encountered during operation
+     */
+    func showLiveCaptions(token: Token) async throws
+
+    /**
+     Stop receiving live caption events.
+
+     - Parameters:
+        - token: Current valid API token
+     - Throws: `HTTPError` if a network error was encountered during operation
+     */
+    func hideLiveCaptions(token: Token) async throws
 
     /**
      Sets the call ID.
@@ -172,6 +192,24 @@ struct DefaultParticipantService: ParticipantService {
     func releaseFloor(token: Token) async throws {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("release_floor"),
+            httpMethod: .POST
+        )
+        request.setHTTPHeader(.token(token.value))
+        _ = try await client.data(for: request)
+    }
+
+    func showLiveCaptions(token: Token) async throws {
+        var request = URLRequest(
+            url: baseURL.appendingPathComponent("show_live_captions"),
+            httpMethod: .POST
+        )
+        request.setHTTPHeader(.token(token.value))
+        _ = try await client.data(for: request)
+    }
+
+    func hideLiveCaptions(token: Token) async throws {
+        var request = URLRequest(
+            url: baseURL.appendingPathComponent("hide_live_captions"),
             httpMethod: .POST
         )
         request.setHTTPHeader(.token(token.value))

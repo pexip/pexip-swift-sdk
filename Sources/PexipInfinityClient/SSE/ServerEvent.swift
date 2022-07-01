@@ -3,6 +3,8 @@ import Foundation
 @dynamicMemberLookup
 public struct ServerEvent: Hashable {
     public enum Message: Hashable {
+        case conferenceUpdate(ConferenceStatus)
+        case liveCaptions(LiveCaptions)
         case messageReceived(ChatMessage)
         case presentationStart(PresentationStartMessage)
         case presentationStop
@@ -16,6 +18,7 @@ public struct ServerEvent: Hashable {
     }
 
     enum Name: String {
+        case conferenceUpdate = "conference_update"
         case messageReceived = "message_received"
         case presentationStart = "presentation_start"
         case presentationStop = "presentation_stop"
@@ -26,6 +29,7 @@ public struct ServerEvent: Hashable {
         case participantDelete = "participant_delete"
         case callDisconnected = "call_disconnected"
         case clientDisconnected = "disconnect"
+        case liveCaptions = "live_captions"
     }
 
     public let rawEvent: EventSourceEvent
@@ -37,6 +41,43 @@ public struct ServerEvent: Hashable {
 }
 
 // MARK: - Messages
+
+public struct ConferenceStatus: Codable, Hashable {
+    private enum CodingKeys: String, CodingKey {
+        case started
+        case locked
+        case allMuted = "all_muted"
+        case guestsMuted = "guests_muted"
+        case presentationAllowed = "presentation_allowed"
+        case directMedia = "direct_media"
+        case liveCaptionsAvailable = "live_captions_available"
+    }
+
+    public let started: Bool
+    public let locked: Bool
+    public let allMuted: Bool
+    public let guestsMuted: Bool
+    public let presentationAllowed: Bool
+    public let directMedia: Bool
+    public let liveCaptionsAvailable: Bool
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        started = try container.decodeIfPresent(Bool.self, forKey: .started) ?? false
+        locked = try container.decodeIfPresent(Bool.self, forKey: .locked) ?? false
+        allMuted = try container.decodeIfPresent(Bool.self, forKey: .allMuted) ?? false
+        guestsMuted = try container.decodeIfPresent(Bool.self, forKey: .guestsMuted) ?? false
+        presentationAllowed = try container.decodeIfPresent(
+            Bool.self,
+            forKey: .presentationAllowed
+        ) ?? false
+        directMedia = try container.decodeIfPresent(Bool.self, forKey: .directMedia) ?? false
+        liveCaptionsAvailable = try container.decodeIfPresent(
+            Bool.self,
+            forKey: .liveCaptionsAvailable
+        ) ?? false
+    }
+}
 
 public struct PresentationStartMessage: Codable, Hashable {
     private enum CodingKeys: String, CodingKey {
@@ -110,6 +151,33 @@ public struct ChatMessage: Codable, Hashable {
         self.senderId = senderId
         self.type = type
         self.payload = payload
+        self.receivedAt = receivedAt
+    }
+}
+
+public struct LiveCaptions: Codable, Hashable {
+    private enum CodingKeys: String, CodingKey {
+        case data
+        case isFinal = "is_final"
+        case sentAt = "sent_time"
+        case receivedAt = "received_time"
+    }
+
+    public let id = UUID()
+    public let data: String
+    public let isFinal: Bool
+    public let sentAt: TimeInterval
+    public let receivedAt: TimeInterval
+
+    public init(
+        data: String,
+        isFinal: Bool,
+        sentAt: TimeInterval,
+        receivedAt: TimeInterval
+    ) {
+        self.data = data
+        self.isFinal = isFinal
+        self.sentAt = sentAt
         self.receivedAt = receivedAt
     }
 }

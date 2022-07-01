@@ -43,7 +43,7 @@ actor DefaultEventSource: EventSource {
         }
     }
 
-    func open() async {
+    func open() {
         logger?.info("Subscribing to the event stream")
 
         eventSourceTask = Task {
@@ -76,7 +76,7 @@ actor DefaultEventSource: EventSource {
 
                     if await isOpen {
                         reconnectionAttempts += 1
-                        await open()
+                        open()
                     } else {
                         reconnectionAttempts = 0
                     }

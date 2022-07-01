@@ -31,6 +31,9 @@ struct ServerMessageParser {
         data: Data?
     ) throws -> ServerEvent.Message {
         switch name {
+        case .conferenceUpdate:
+            let message = try decoder.decode(ConferenceStatus.self, from: data)
+            return .conferenceUpdate(message)
         case .messageReceived:
             return .messageReceived(try decoder.decode(ChatMessage.self, from: data))
         case .presentationStart:
@@ -55,6 +58,9 @@ struct ServerMessageParser {
         case .clientDisconnected:
             let message = try decoder.decode(ClientDisconnectMessage.self, from: data)
             return .clientDisconnected(message)
+        case .liveCaptions:
+            let message = try decoder.decode(LiveCaptions.self, from: data)
+            return .liveCaptions(message)
         }
     }
 }
