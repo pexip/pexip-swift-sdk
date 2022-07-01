@@ -22,7 +22,6 @@ final class LegacyWindowCapturer: ScreenMediaCapturer {
         qos: .userInteractive
     )
     private let ciContext = CIContext()
-    private var startTimeNs: UInt64?
 
     // MARK: - Init
 
@@ -90,13 +89,11 @@ final class LegacyWindowCapturer: ScreenMediaCapturer {
         pixelBuffer.unlockBaseAddress(.init(rawValue: 0))
 
         let displayTimeNs = self.displayTimeNs()
-        startTimeNs = startTimeNs ?? displayTimeNs
 
         let videoFrame = VideoFrame(
             pixelBuffer: pixelBuffer,
             contentRect: CGRect(x: 0, y: 0, width: cgImage.width, height: cgImage.height),
-            displayTimeNs: displayTimeNs,
-            elapsedTimeNs: displayTimeNs - startTimeNs!
+            displayTimeNs: displayTimeNs
         )
 
         delegate?.screenMediaCapturer(self, didCaptureVideoFrame: videoFrame)

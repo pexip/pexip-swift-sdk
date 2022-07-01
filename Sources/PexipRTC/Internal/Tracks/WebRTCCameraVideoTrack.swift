@@ -4,8 +4,14 @@ import PexipMedia
 final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
     let capturingStatus = CapturingStatus(isCapturing: false)
     var videoProfile: QualityProfile?
+    var videoFilter: VideoFilter? {
+        didSet {
+            processor.videoFilter.mutate { $0 = videoFilter }
+        }
+    }
 
     private var currentDevice: AVCaptureDevice
+    private let processor: WebRTCVideoProcessor
     private let capturer: RTCCameraVideoCapturer
     private let permission: MediaCapturePermission
 
@@ -14,10 +20,12 @@ final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
     init(
         device: AVCaptureDevice,
         rtcTrack: RTCVideoTrack,
+        processor: WebRTCVideoProcessor,
         capturer: RTCCameraVideoCapturer,
         permission: MediaCapturePermission = .video
     ) {
         self.currentDevice = device
+        self.processor = processor
         self.capturer = capturer
         self.permission = permission
         super.init(rtcTrack: rtcTrack)

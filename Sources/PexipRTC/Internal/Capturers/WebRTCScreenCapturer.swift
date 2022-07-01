@@ -21,6 +21,7 @@ final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate 
     private let capturer: ScreenMediaCapturer
     private let logger: Logger?
     private var videoProfile: QualityProfile?
+    private var startTimeNs: UInt64?
 
     // MARK: - Init
 
@@ -78,10 +79,12 @@ final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate 
             cropY: videoFrame.contentY
         )
 
+        startTimeNs = startTimeNs ?? videoFrame.displayTimeNs
+
         let rtcVideoFrame = RTCVideoFrame(
             buffer: rtcPixelBuffer.toI420(),
             rotation: videoFrame.orientation.rtcRotation,
-            timeStampNs: Int64(videoFrame.elapsedTimeNs)
+            timeStampNs: Int64(videoFrame.displayTimeNs - startTimeNs!)
         )
 
         delegate?.capturer(self, didCapture: rtcVideoFrame)

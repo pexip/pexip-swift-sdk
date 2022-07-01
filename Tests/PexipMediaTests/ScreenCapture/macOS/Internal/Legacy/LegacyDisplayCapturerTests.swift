@@ -159,7 +159,6 @@ final class LegacyDisplayCapturerTests: XCTestCase {
                 videoFrame.displayTimeNs,
                 MachAbsoluteTime(time).nanoseconds
             )
-            XCTAssertEqual(videoFrame.elapsedTimeNs, 0)
             XCTAssertEqual(videoFrame.width, UInt32(displayStream.outputWidth))
             XCTAssertEqual(videoFrame.height, UInt32(displayStream.outputHeight))
             XCTAssertEqual(videoFrame.orientation, .up)

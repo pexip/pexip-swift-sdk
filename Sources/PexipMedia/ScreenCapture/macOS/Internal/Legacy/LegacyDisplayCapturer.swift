@@ -15,7 +15,6 @@ final class LegacyDisplayCapturer: ScreenMediaCapturer {
     private(set) var isCapturing = false
 
     private var displayStream: LegacyDisplayStream?
-    private var startTimeNs: UInt64?
     private let processingQueue = DispatchQueue(
         label: "com.pexip.PexipMedia.LegacyDisplayCapturer",
         qos: .userInteractive
@@ -78,7 +77,6 @@ final class LegacyDisplayCapturer: ScreenMediaCapturer {
             displayStream = nil
         }
 
-        startTimeNs = nil
         isCapturing = false
 
         if let result = displayStream?.stop(), result != .success {
@@ -94,7 +92,6 @@ final class LegacyDisplayCapturer: ScreenMediaCapturer {
         ioSurface: IOSurfaceRef?
     ) {
         let displayTimeNs = MachAbsoluteTime(displayTime).nanoseconds
-        startTimeNs = startTimeNs ?? displayTimeNs
 
         switch status {
         case .frameIdle, .frameBlank:
@@ -130,8 +127,7 @@ final class LegacyDisplayCapturer: ScreenMediaCapturer {
                         width: Int(pixelBuffer.width),
                         height: Int(pixelBuffer.height)
                     ),
-                    displayTimeNs: displayTimeNs,
-                    elapsedTimeNs: displayTimeNs - startTimeNs!
+                    displayTimeNs: displayTimeNs
                 )
                 delegate?.screenMediaCapturer(self, didCaptureVideoFrame: videoFrame)
             }

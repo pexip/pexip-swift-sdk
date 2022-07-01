@@ -10,6 +10,9 @@ public protocol CameraVideoTrack: LocalMediaTrack, VideoTrack {
      */
     func startCapture(withVideoProfile videoProfile: QualityProfile) async throws
 
+    /// A video processor that modifies the input video frames.
+    var videoFilter: VideoFilter? { get set }
+
     #if os(iOS)
     /// Toggles between local camera devices,
     /// from front-facing to back-facing camera.

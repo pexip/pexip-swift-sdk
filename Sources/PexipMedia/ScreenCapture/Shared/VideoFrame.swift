@@ -1,6 +1,7 @@
 import CoreVideo
 import ImageIO
 import CoreMedia
+import CoreImage
 
 /// An object that represents a video frame.
 public struct VideoFrame {
@@ -24,9 +25,6 @@ public struct VideoFrame {
     /// The timestamp of when the corresponding frame was displayed (in nanoseconds).
     public let displayTimeNs: UInt64
 
-    /// The elapsed time since the start of video capture (in nanoseconds).
-    public let elapsedTimeNs: UInt64
-
     /// The width of the pixel buffer
     public var width: UInt32 {
         pixelBuffer.width
@@ -49,6 +47,46 @@ public struct VideoFrame {
             height: Int32(contentRect.height.rounded(.down))
         )
     }
+
+    /// The x position of the video content, in pixels
+    public var contentX: Int32 {
+        Int32(contentRect.origin.x.rounded(.down))
+    }
+
+    /// The y position of the video content, in pixels
+    public var contentY: Int32 {
+        Int32(contentRect.origin.y.rounded(.down))
+    }
+
+    // MARK: - Init
+
+    /**
+     Creates a new instance of ``VideoFrame``.
+
+     - Parameters:
+        - pixelBuffer: The pixel buffer
+        - contentRect: The size and location of the video content, in pixels
+        - orientation: The intended display orientation for an image
+        - displayTimeNs: The timestamp of when the frame was displayed (in nanoseconds)
+     */
+    public init(
+        pixelBuffer: CVPixelBuffer,
+        contentRect: CGRect? = nil,
+        orientation: CGImagePropertyOrientation = .up,
+        displayTimeNs: UInt64
+    ) {
+        self.pixelBuffer = pixelBuffer
+        self.contentRect = contentRect ?? CGRect(
+            x: 0,
+            y: 0,
+            width: Int(pixelBuffer.width),
+            height: Int(pixelBuffer.height)
+        )
+        self.orientation = orientation
+        self.displayTimeNs = displayTimeNs
+    }
+
+    // MARK: - Public functions
 
     /**
      Returns new content dimensions with the same aspect ratio as the original,
@@ -77,15 +115,5 @@ public struct VideoFrame {
         }
 
         return from
-    }
-
-    /// The x position of the video content, in pixels
-    public var contentX: Int32 {
-        Int32(contentRect.origin.x.rounded(.down))
-    }
-
-    /// The y position of the video content, in pixels
-    public var contentY: Int32 {
-        Int32(contentRect.origin.y.rounded(.down))
     }
 }

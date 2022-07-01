@@ -3,7 +3,7 @@ import PexipMedia
 import PexipInfinityClient
 import PexipUtils
 
-/// ConferenceFactory provides factory methods to create conference objects.
+/// ``ConferenceFactory`` provides factory methods to create conference objects.
 public struct ConferenceFactory {
     private let logger: Logger?
 

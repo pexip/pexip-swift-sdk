@@ -51,7 +51,6 @@ final class LegacyWindowCapturerTests: XCTestCase {
         let expectation1 = self.expectation(description: "Frame complete 1")
         let expectation2 = self.expectation(description: "Frame complete 2")
         var timeNs = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
-        let startTimeNs = timeNs
 
         capturer.displayTimeNs = { timeNs }
 
@@ -63,7 +62,6 @@ final class LegacyWindowCapturerTests: XCTestCase {
 
         delegate.onVideoFrame = { [weak self] videoFrame in
             XCTAssertEqual(videoFrame.displayTimeNs, timeNs)
-            XCTAssertEqual(videoFrame.elapsedTimeNs, timeNs - startTimeNs)
             XCTAssertEqual(videoFrame.width, UInt32(window.width))
             XCTAssertEqual(videoFrame.height, UInt32(window.height))
             XCTAssertEqual(videoFrame.orientation, .up)

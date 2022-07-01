@@ -6,7 +6,6 @@ final class VideoFrameTests: XCTestCase {
     private let width = 1920
     private let height = 1080
     private let displayTimeNs: UInt64 = 10000
-    private let elapsedTimeNs: UInt64 = 500
     private let pixelFormat = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
     private var videoFrame: VideoFrame!
 
@@ -26,12 +25,10 @@ final class VideoFrameTests: XCTestCase {
             &pixelBuffer
         )
 
-
         videoFrame = VideoFrame(
             pixelBuffer: try XCTUnwrap(pixelBuffer),
             contentRect: CGRect(x: 10.7, y: 10.4, width: 1280.8, height: 720.5),
-            displayTimeNs: displayTimeNs,
-            elapsedTimeNs: elapsedTimeNs
+            displayTimeNs: displayTimeNs
         )
     }
 

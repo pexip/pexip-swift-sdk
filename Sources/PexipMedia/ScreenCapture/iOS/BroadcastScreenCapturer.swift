@@ -15,7 +15,6 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
     private let notificationCenter = BroadcastNotificationCenter.default
     private let userDefaults: UserDefaults?
     private var server: BroadcastServer?
-    private var startTimeNs: UInt64?
     private let isCapturing = Synchronized(false)
     private let processingQueue = DispatchQueue(
         label: "com.pexip.PexipMedia.BroadcastScreenCapturer",
@@ -25,6 +24,13 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
 
     // MARK: - Init
 
+    /**
+     Creates a new instance of ``BroadcastScreenCapturer``
+     - Parameters:
+        - appGroup: The app group identifier
+        - broadcastUploadExtension: Bundle identifier of your broadcast upload extension
+        - fileManager: An optional instance of the file manager
+     */
     public init(
         appGroup: String,
         broadcastUploadExtension: String,
@@ -42,6 +48,12 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
 
     // MARK: - Internal
 
+    /**
+     Starts the screen capture with the given video quality profile.
+
+     - Parameters:
+        - videoProfile: The video ``QualityProfile``
+     */
     public func startCapture(withVideoProfile videoProfile: QualityProfile) async throws {
         guard !isCapturing.value else {
             return
@@ -62,6 +74,7 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
         }
     }
 
+    /// Stops the screen capture.
     public func stopCapture() throws {
         guard isCapturing.value else {
             return
@@ -139,7 +152,6 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
 
     private func processMessage(_ message: BroadcastMessage) {
         let displayTimeNs = message.header.displayTimeNs
-        startTimeNs = startTimeNs ?? displayTimeNs
 
         guard let pixelBuffer = CVPixelBuffer.pixelBuffer(
             fromData: message.body,
@@ -159,8 +171,7 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
                 height: Int(pixelBuffer.height)
             ),
             orientation: .init(rawValue: message.header.videoOrientation) ?? .up,
-            displayTimeNs: displayTimeNs,
-            elapsedTimeNs: displayTimeNs - startTimeNs!
+            displayTimeNs: displayTimeNs
         )
 
         onCapture(videoFrame: videoFrame)
@@ -169,7 +180,6 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
     private func clean() {
         isCapturing.mutate { $0 = false }
         removeNotificationObservers()
-        startTimeNs = nil
         userDefaults?.broadcastFps = nil
     }
 

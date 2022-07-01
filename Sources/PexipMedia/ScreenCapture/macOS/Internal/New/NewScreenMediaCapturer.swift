@@ -25,7 +25,6 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>:
 
     private let streamFactory: Factory
     private var stream: SCStream?
-    private var startTimeNs: UInt64?
     private let dispatchQueue = DispatchQueue(
         label: "com.pexip.PexipMedia.NewScreenMediaCapturer",
         qos: .userInteractive
@@ -68,7 +67,6 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>:
 
     func stopCapture() async throws {
         isCapturing = false
-        startTimeNs = nil
         try stream?.removeStreamOutput(self, type: .screen)
         try await stream?.stopCapture()
         stream = nil
@@ -110,7 +108,6 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>:
         contentRect = contentRect.applying(transform)
 
         let displayTimeNs = MachAbsoluteTime(displayTime).nanoseconds
-        startTimeNs = startTimeNs ?? displayTimeNs
 
         switch status {
         case .idle, .blank, .suspended, .started:
@@ -125,8 +122,7 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>:
                 let videoFrame = VideoFrame(
                     pixelBuffer: pixelBuffer,
                     contentRect: contentRect,
-                    displayTimeNs: displayTimeNs,
-                    elapsedTimeNs: displayTimeNs - startTimeNs!
+                    displayTimeNs: displayTimeNs
                 )
                 delegate?.screenMediaCapturer(self, didCaptureVideoFrame: videoFrame)
             }

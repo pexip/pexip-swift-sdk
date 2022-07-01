@@ -26,6 +26,12 @@ public final class BroadcastSampleHandler {
 
     // MARK: - Init
 
+    /**
+     Creates a new instance of ``BroadcastSampleHandler``
+     - Parameters:
+        - appGroup: The app group identifier.
+        - filemanager: An optional instance of the file manager.
+     */
     public convenience init(
         appGroup: String,
         fileManager: FileManager = .default

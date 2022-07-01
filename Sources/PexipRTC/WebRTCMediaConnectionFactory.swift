@@ -55,14 +55,17 @@ public final class WebRTCMediaConnectionFactory: MediaConnectionFactory {
         )
 
         let videoSource = factory.videoSource()
+        let videoProcessor = WebRTCVideoProcessor(videoSource: videoSource)
         let videoTrack = factory.videoTrack(
             with: videoSource,
             trackId: UUID().uuidString
         )
-        let videoCapturer = RTCCameraVideoCapturer(delegate: videoSource)
+        let videoCapturer = RTCCameraVideoCapturer(delegate: videoProcessor)
+
         return WebRTCCameraVideoTrack(
             device: device,
             rtcTrack: videoTrack,
+            processor: videoProcessor,
             capturer: videoCapturer
         )
     }

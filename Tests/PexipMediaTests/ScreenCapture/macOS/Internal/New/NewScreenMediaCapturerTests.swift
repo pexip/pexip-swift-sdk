@@ -333,7 +333,6 @@ final class NewScreenMediaCapturerTests: XCTestCase {
                 videoFrame.displayTimeNs,
                 MachAbsoluteTime(time).nanoseconds
             )
-            XCTAssertEqual(videoFrame.elapsedTimeNs, 0)
             XCTAssertEqual(videoFrame.width, UInt32(videoProfile.width))
             XCTAssertEqual(videoFrame.height, UInt32(videoProfile.height))
             XCTAssertEqual(videoFrame.orientation, .up)
