@@ -1,9 +1,10 @@
+import CoreMedia
+import ReplayKit
+
 #if os(iOS)
 
 import XCTest
-import CoreMedia
 import ImageIO
-import ReplayKit
 @testable import PexipMedia
 
 final class CMSampleBufferBroadcastTests: XCTestCase {
@@ -23,6 +24,8 @@ final class CMSampleBufferBroadcastTests: XCTestCase {
         )
     }
 }
+
+#endif
 
 // MARK: - Stubs
 
@@ -79,5 +82,3 @@ extension CMSampleBuffer {
         return sampleBuffer!
     }
 }
-
-#endif

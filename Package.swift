@@ -63,7 +63,10 @@ let package = Package(
         ),
         .testTarget(
             name: "PexipMediaTests",
-            dependencies: ["PexipMedia"]
+            dependencies: ["PexipMedia"],
+            resources: [
+                .copy("Resources/testVideo.mp4")
+            ]
         ),
         // PexipRTC
         .target(

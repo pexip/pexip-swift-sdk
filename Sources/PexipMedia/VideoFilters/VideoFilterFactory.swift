@@ -103,7 +103,7 @@ public struct VideoFilterFactory {
         - videoURL: A url to a video file
      - Returns: A new video filter
      */
-    public func virtualBackground(videoURL: URL) -> VideoFilter {
+    func virtualBackground(videoURL: URL) -> VideoFilter {
         VideoBackgroundFilter(
             url: videoURL,
             segmenter: segmenter,
