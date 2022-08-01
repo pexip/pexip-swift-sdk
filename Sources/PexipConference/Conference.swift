@@ -31,6 +31,10 @@ public protocol Conference {
     @discardableResult
     func toggleLiveCaptions(_ show: Bool) async throws -> Bool
 
+    /// Sends DTMF signals to the participant.
+    @discardableResult
+    func dtmf(signals: DTMFSignals) async throws -> Bool
+
     /// Leaves the conference. Once left, the ``Conference`` object is no longer valid.
     func leave() async throws
 }
@@ -49,6 +53,7 @@ final class InfinityConference: Conference {
 
     private let tokenRefresher: TokenRefresher
     private let eventSource: EventSource
+    private let dtmfSender: DTMFSender
     private let liveCaptionsService: LiveCaptionsService
     private let logger: Logger?
     private let isClientDisconnected = Isolated(false)
@@ -63,6 +68,7 @@ final class InfinityConference: Conference {
         signaling: MediaConnectionSignaling,
         eventSource: EventSource,
         roster: Roster,
+        dtmfSender: DTMFSender,
         liveCaptionsService: LiveCaptionsService,
         chat: Chat?,
         logger: Logger?
@@ -71,6 +77,7 @@ final class InfinityConference: Conference {
         self.signaling = signaling
         self.eventSource = eventSource
         self.roster = roster
+        self.dtmfSender = dtmfSender
         self.liveCaptionsService = liveCaptionsService
         self.chat = chat
         self.logger = logger
@@ -107,6 +114,11 @@ final class InfinityConference: Conference {
         } else {
             return false
         }
+    }
+
+    @discardableResult
+    func dtmf(signals: DTMFSignals) async throws -> Bool {
+        try await dtmfSender.send(dtmf: signals)
     }
 
     func leave() async throws {

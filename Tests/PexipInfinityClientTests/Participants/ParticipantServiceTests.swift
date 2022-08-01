@@ -170,4 +170,22 @@ final class ParticipantServiceTests: APITestCase {
             }
         )
     }
+
+    func testDtmf() async throws {
+        let dtmf = try XCTUnwrap(DTMFSignals(rawValue: "1234"))
+        let token = Token.randomToken()
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("dtmf"),
+            token: token,
+            body: JSONEncoder().encode([
+                "digits": dtmf.rawValue
+            ]),
+            responseJSON: responseJSON,
+            execute: {
+                let result = try await service.dtmf(signals: dtmf, token: token)
+                XCTAssertTrue(result)
+            }
+        )
+    }
 }

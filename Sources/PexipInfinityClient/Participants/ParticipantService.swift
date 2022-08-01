@@ -108,6 +108,18 @@ public protocol ParticipantService {
     func hideLiveCaptions(token: Token) async throws
 
     /**
+     Sends DTMF signals to the participant.
+     See [documentation](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#dtmf)
+
+     - Parameters:
+        - signals: The DTMF signals to send
+        - token: Current valid API token
+     - Returns: The result is true if successful, false otherwise.
+     - Throws: `HTTPError` if a network error was encountered during operation
+     */
+    func dtmf(signals: DTMFSignals, token: Token) async throws -> Bool
+
+    /**
      Sets the call ID.
      - Parameters:
         - id: The ID of the call
@@ -214,6 +226,18 @@ struct DefaultParticipantService: ParticipantService {
         )
         request.setHTTPHeader(.token(token.value))
         _ = try await client.data(for: request)
+    }
+
+    func dtmf(signals: DTMFSignals, token: Token) async throws -> Bool {
+        var request = URLRequest(
+            url: baseURL.appendingPathComponent("dtmf"),
+            httpMethod: .POST
+        )
+        request.setHTTPHeader(.token(token.value))
+        try request.setJSONBody([
+            "digits": signals.rawValue
+        ])
+        return try await client.json(for: request)
     }
 
     func call(id: UUID) -> CallService {

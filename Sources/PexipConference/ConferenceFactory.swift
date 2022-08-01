@@ -37,6 +37,7 @@ public struct ConferenceFactory {
         let service = service.node(url: node).conference(alias: alias)
         let tokenStore = DefaultTokenStore(token: token)
         let roster = roster(token: token, service: service)
+        let participantService = service.participant(id: token.participantId)
 
         return InfinityConference(
             tokenRefresher: DefaultTokenRefresher(
@@ -45,7 +46,7 @@ public struct ConferenceFactory {
                 logger: logger
             ),
             signaling: ConferenceSignaling(
-                participantService: service.participant(id: token.participantId),
+                participantService: participantService,
                 tokenStore: tokenStore,
                 roster: roster,
                 iceServers: token.iceServers,
@@ -57,9 +58,13 @@ public struct ConferenceFactory {
                 logger: logger
             ),
             roster: roster,
+            dtmfSender: DefaultDTMFSender(
+                tokenStore: tokenStore,
+                participantService: participantService
+            ),
             liveCaptionsService: DefaultLiveCaptionsService(
                 tokenStore: tokenStore,
-                participantService: service.participant(id: token.participantId)
+                participantService: participantService
             ),
             chat: chat(token: token, tokenStore: tokenStore, service: service),
             logger: logger
