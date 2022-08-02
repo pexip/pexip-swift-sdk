@@ -14,7 +14,7 @@ struct ConferenceView: View {
     #endif
 
     private var showingChat: Binding<Bool?> {
-        if viewModel.chat == nil {
+        if !viewModel.hasChat {
             return .constant(nil)
         } else {
             return Binding(
@@ -136,6 +136,7 @@ struct ConferenceView: View {
             presentationLocalVideo: viewModel.presentationLocalVideo,
             presentationRemoteVideo: viewModel.presentationRemoteVideo,
             presenterName: viewModel.presenterName,
+            captions: viewModel.captions,
             showingChat: showingChat,
             showingParticipants: showingParticipants,
             cameraEnabled: cameraEnabled,
@@ -171,10 +172,9 @@ struct ConferenceView: View {
             Group {
                 switch modal {
                 case .chat:
-                    viewModel.chat.map {
+                    viewModel.chatMessageStore.map {
                         viewFactory.chatView(
-                            chat: $0,
-                            roster: viewModel.roster,
+                            store: $0,
                             onDismiss: {
                                 viewModel.setModal(nil)
                             }
@@ -262,6 +262,7 @@ struct ConferenceView_Previews: PreviewProvider {
                     signaling: conference.signaling
                 ),
                 mediaConnectionFactory: factory,
+                settings: Settings(),
                 onComplete: {}
             )
         )

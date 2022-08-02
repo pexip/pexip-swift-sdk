@@ -28,6 +28,7 @@ protocol ViewFactoryProtocol {
 struct ViewFactory: ViewFactoryProtocol {
     private let apiClientFactory = InfinityClientFactory()
     private let conferenceFactory = ConferenceFactory()
+    private let settings = Settings()
 
     func displayNameView(
         onComplete: @escaping () -> Void
@@ -87,17 +88,17 @@ struct ViewFactory: ViewFactoryProtocol {
             conference: conference,
             mediaConnectionConfig: mediaConnectionConfig,
             mediaConnectionFactory: mediaConnectionFactory,
+            settings: settings,
             onComplete: onComplete
         )
         return ConferenceView(viewModel: viewModel)
     }
 
     func chatView(
-        chat: Chat,
-        roster: Roster,
+        store: ChatMessageStore,
         onDismiss: @escaping () -> Void
     ) -> ChatView {
-        let viewModel = ChatViewModel(chat: chat, roster: roster)
+        let viewModel = ChatViewModel(store: store)
         return ChatView(viewModel: viewModel, onDismiss: onDismiss)
     }
 
@@ -121,6 +122,10 @@ struct ViewFactory: ViewFactoryProtocol {
         return ScreenMediaSourcePicker(viewModel: viewModel)
     }
     #endif
+
+    func settingsView() -> SettingsView {
+        SettingsView(settings: settings)
+    }
 }
 
 // MARK: - Environment

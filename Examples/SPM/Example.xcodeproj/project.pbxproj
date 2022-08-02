@@ -20,30 +20,31 @@
 		DA11B0E127EA0C3100501E50 /* UIViewController+Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0DF27EA0BFF00501E50 /* UIViewController+Keyboard.swift */; };
 		DA11B0E527EA104200501E50 /* UserDefaultsBacked.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0E327EA103F00501E50 /* UserDefaultsBacked.swift */; };
 		DA1329E627A98EC500C2EA89 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA1329D427A98EC500C2EA89 /* Assets.xcassets */; };
-		DA33ABFC2836958400BD73F1 /* PexipConference in Frameworks */ = {isa = PBXBuildFile; productRef = DA33ABFB2836958400BD73F1 /* PexipConference */; };
-		DA33ABFE2836958400BD73F1 /* PexipInfinityClient in Frameworks */ = {isa = PBXBuildFile; productRef = DA33ABFD2836958400BD73F1 /* PexipInfinityClient */; };
-		DA33AC002836958400BD73F1 /* PexipMedia in Frameworks */ = {isa = PBXBuildFile; productRef = DA33ABFF2836958400BD73F1 /* PexipMedia */; };
-		DA33AC022836958400BD73F1 /* PexipRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DA33AC012836958400BD73F1 /* PexipRTC */; };
-		DA33AC042836958400BD73F1 /* PexipUtils in Frameworks */ = {isa = PBXBuildFile; productRef = DA33AC032836958400BD73F1 /* PexipUtils */; };
-		DA33AC062836958900BD73F1 /* PexipConference in Frameworks */ = {isa = PBXBuildFile; productRef = DA33AC052836958900BD73F1 /* PexipConference */; };
-		DA33AC082836958900BD73F1 /* PexipInfinityClient in Frameworks */ = {isa = PBXBuildFile; productRef = DA33AC072836958900BD73F1 /* PexipInfinityClient */; };
-		DA33AC0A2836958900BD73F1 /* PexipMedia in Frameworks */ = {isa = PBXBuildFile; productRef = DA33AC092836958900BD73F1 /* PexipMedia */; };
-		DA33AC0C2836958900BD73F1 /* PexipRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DA33AC0B2836958900BD73F1 /* PexipRTC */; };
-		DA33AC0E2836958900BD73F1 /* PexipUtils in Frameworks */ = {isa = PBXBuildFile; productRef = DA33AC0D2836958900BD73F1 /* PexipUtils */; };
+		DA2F48F728992F2800171338 /* PexipConference in Frameworks */ = {isa = PBXBuildFile; productRef = DA2F48F628992F2800171338 /* PexipConference */; };
+		DA2F48F928992F2800171338 /* PexipInfinityClient in Frameworks */ = {isa = PBXBuildFile; productRef = DA2F48F828992F2800171338 /* PexipInfinityClient */; };
+		DA2F48FB28992F2800171338 /* PexipMedia in Frameworks */ = {isa = PBXBuildFile; productRef = DA2F48FA28992F2800171338 /* PexipMedia */; };
+		DA2F48FD28992F2800171338 /* PexipRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DA2F48FC28992F2800171338 /* PexipRTC */; };
+		DA2F48FF28992F2800171338 /* PexipUtils in Frameworks */ = {isa = PBXBuildFile; productRef = DA2F48FE28992F2800171338 /* PexipUtils */; };
+		DA2F490128992F2800171338 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DA2F490028992F2800171338 /* WebRTC */; };
+		DA2FE597287110CB00D8FCAB /* ConferenceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2FE596287110CB00D8FCAB /* ConferenceState.swift */; };
+		DA2FE598287110CB00D8FCAB /* ConferenceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2FE596287110CB00D8FCAB /* ConferenceState.swift */; };
+		DA2FE59A287110DD00D8FCAB /* ConferenceModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2FE599287110DD00D8FCAB /* ConferenceModal.swift */; };
+		DA2FE59B287110DD00D8FCAB /* ConferenceModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2FE599287110DD00D8FCAB /* ConferenceModal.swift */; };
+		DA35EF29286F9C86008D15A7 /* CGImage+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35EF28286F9C86008D15A7 /* CGImage+Extensions.swift */; };
+		DA35EF2A286F9C86008D15A7 /* CGImage+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35EF28286F9C86008D15A7 /* CGImage+Extensions.swift */; };
+		DA5F0B2F286C946400E9E18B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5F0B2E286C946400E9E18B /* SettingsView.swift */; };
+		DA5F0B30286C946400E9E18B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5F0B2E286C946400E9E18B /* SettingsView.swift */; };
+		DA6196872878332300EA9151 /* ChatMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6196862878332300EA9151 /* ChatMessageStore.swift */; };
+		DA6196882878332300EA9151 /* ChatMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6196862878332300EA9151 /* ChatMessageStore.swift */; };
 		DA7AC0FE281096B400739C4E /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADD2027F5D69A00A9AC3D /* AppCoordinator.swift */; };
 		DA93EE6D284A35200063386F /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA93EE6C284A35200063386F /* Constants.swift */; };
 		DA93EE6E284A35200063386F /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA93EE6C284A35200063386F /* Constants.swift */; };
+		DAB34033286E680E001B59C5 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB34032286E680E001B59C5 /* Settings.swift */; };
+		DAB34034286E680E001B59C5 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB34032286E680E001B59C5 /* Settings.swift */; };
 		DAB78D4F27E3953600CB17C9 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB78D4E27E3953600CB17C9 /* Utils.swift */; };
-		DAEECAC928691E7F00B4774E /* PexipConference in Frameworks */ = {isa = PBXBuildFile; productRef = DAEECAC828691E7F00B4774E /* PexipConference */; };
-		DAEECACB28691E7F00B4774E /* PexipInfinityClient in Frameworks */ = {isa = PBXBuildFile; productRef = DAEECACA28691E7F00B4774E /* PexipInfinityClient */; };
-		DAEECACD28691E7F00B4774E /* PexipMedia in Frameworks */ = {isa = PBXBuildFile; productRef = DAEECACC28691E7F00B4774E /* PexipMedia */; };
-		DAEECACF28691E7F00B4774E /* PexipRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DAEECACE28691E7F00B4774E /* PexipRTC */; };
-		DAEECAD128691E7F00B4774E /* PexipUtils in Frameworks */ = {isa = PBXBuildFile; productRef = DAEECAD028691E7F00B4774E /* PexipUtils */; };
-		DAEECAD328691E7F00B4774E /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DAEECAD228691E7F00B4774E /* WebRTC */; };
 		DAF13287284A259D0089FE8E /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAF13286284A259D0089FE8E /* ReplayKit.framework */; };
 		DAF1328A284A259D0089FE8E /* SampleHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF13289284A259D0089FE8E /* SampleHandler.swift */; };
 		DAF1328E284A259D0089FE8E /* BroadcastExtension (iOS).appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = DAF13285284A259D0089FE8E /* BroadcastExtension (iOS).appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		DAF13294284A26B50089FE8E /* PexipMedia in Frameworks */ = {isa = PBXBuildFile; productRef = DAF13293284A26B50089FE8E /* PexipMedia */; };
 		DAFADC9427F50B6900A9AC3D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA1329D427A98EC500C2EA89 /* Assets.xcassets */; };
 		DAFADC9527F50B6D00A9AC3D /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB78D4E27E3953600CB17C9 /* Utils.swift */; };
 		DAFADCC527F50C1400A9AC3D /* CallButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADC9727F50C1400A9AC3D /* CallButtons.swift */; };
@@ -138,8 +139,14 @@
 		DA11B0E327EA103F00501E50 /* UserDefaultsBacked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsBacked.swift; sourceTree = "<group>"; };
 		DA1329D427A98EC500C2EA89 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DA1329D927A98EC500C2EA89 /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA2FE596287110CB00D8FCAB /* ConferenceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceState.swift; sourceTree = "<group>"; };
+		DA2FE599287110DD00D8FCAB /* ConferenceModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceModal.swift; sourceTree = "<group>"; };
+		DA35EF28286F9C86008D15A7 /* CGImage+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGImage+Extensions.swift"; sourceTree = "<group>"; };
+		DA5F0B2E286C946400E9E18B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		DA6196862878332300EA9151 /* ChatMessageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessageStore.swift; sourceTree = "<group>"; };
 		DA6E026127CFA48700DF88A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DA93EE6C284A35200063386F /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		DAB34032286E680E001B59C5 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		DAB78D4E27E3953600CB17C9 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		DAE8989A282469DD006C30E8 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Configs/Debug.xcconfig; sourceTree = "<group>"; };
 		DAE8989B28246B12006C30E8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Configs/Release.xcconfig; sourceTree = "<group>"; };
@@ -192,17 +199,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAEECACD28691E7F00B4774E /* PexipMedia in Frameworks */,
-				DA33AC002836958400BD73F1 /* PexipMedia in Frameworks */,
-				DAEECAD328691E7F00B4774E /* WebRTC in Frameworks */,
-				DAEECAC928691E7F00B4774E /* PexipConference in Frameworks */,
-				DA33ABFE2836958400BD73F1 /* PexipInfinityClient in Frameworks */,
-				DAEECACF28691E7F00B4774E /* PexipRTC in Frameworks */,
-				DA33AC042836958400BD73F1 /* PexipUtils in Frameworks */,
-				DAEECACB28691E7F00B4774E /* PexipInfinityClient in Frameworks */,
-				DAEECAD128691E7F00B4774E /* PexipUtils in Frameworks */,
-				DA33ABFC2836958400BD73F1 /* PexipConference in Frameworks */,
-				DA33AC022836958400BD73F1 /* PexipRTC in Frameworks */,
+				DA2F48FB28992F2800171338 /* PexipMedia in Frameworks */,
+				DA2F490128992F2800171338 /* WebRTC in Frameworks */,
+				DA2F48F928992F2800171338 /* PexipInfinityClient in Frameworks */,
+				DA2F48FF28992F2800171338 /* PexipUtils in Frameworks */,
+				DA2F48F728992F2800171338 /* PexipConference in Frameworks */,
+				DA2F48FD28992F2800171338 /* PexipRTC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -210,7 +212,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAF13294284A26B50089FE8E /* PexipMedia in Frameworks */,
 				DAF13287284A259D0089FE8E /* ReplayKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -219,11 +220,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA33AC0A2836958900BD73F1 /* PexipMedia in Frameworks */,
-				DA33AC082836958900BD73F1 /* PexipInfinityClient in Frameworks */,
-				DA33AC0E2836958900BD73F1 /* PexipUtils in Frameworks */,
-				DA33AC062836958900BD73F1 /* PexipConference in Frameworks */,
-				DA33AC0C2836958900BD73F1 /* PexipRTC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -332,6 +328,23 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		DA35EF27286F9C75008D15A7 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				DA35EF28286F9C86008D15A7 /* CGImage+Extensions.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		DAB34031286E65D2001B59C5 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				DA5F0B2E286C946400E9E18B /* SettingsView.swift */,
+				DAB34032286E680E001B59C5 /* Settings.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		DAB78D4D27E3952300CB17C9 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -374,6 +387,7 @@
 		DAFADC9327F50B3700A9AC3D /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				DA35EF27286F9C75008D15A7 /* Extensions */,
 				DAFADC9F27F50C1400A9AC3D /* App */,
 				DAFADC9627F50C1400A9AC3D /* Components */,
 				DAFADCA327F50C1400A9AC3D /* Screens */,
@@ -417,6 +431,7 @@
 				DAFADCAC27F50C1400A9AC3D /* Conference */,
 				DAFADCA427F50C1400A9AC3D /* Participants */,
 				DAFADCB227F50C1400A9AC3D /* Chat */,
+				DAB34031286E65D2001B59C5 /* Settings */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -454,6 +469,8 @@
 				DAFADCAE27F50C1400A9AC3D /* ConferenceView.swift */,
 				DAFADCAD27F50C1400A9AC3D /* ConferenceViewModel.swift */,
 				DAFADCB027F50C1400A9AC3D /* PreflightView.swift */,
+				DA2FE596287110CB00D8FCAB /* ConferenceState.swift */,
+				DA2FE599287110DD00D8FCAB /* ConferenceModal.swift */,
 			);
 			path = Conference;
 			sourceTree = "<group>";
@@ -463,6 +480,7 @@
 			children = (
 				DAFADCB327F50C1400A9AC3D /* ChatViewModel.swift */,
 				DAFADCB427F50C1400A9AC3D /* ChatView.swift */,
+				DA6196862878332300EA9151 /* ChatMessageStore.swift */,
 			);
 			path = Chat;
 			sourceTree = "<group>";
@@ -516,17 +534,12 @@
 			);
 			name = "Example (iOS)";
 			packageProductDependencies = (
-				DA33ABFB2836958400BD73F1 /* PexipConference */,
-				DA33ABFD2836958400BD73F1 /* PexipInfinityClient */,
-				DA33ABFF2836958400BD73F1 /* PexipMedia */,
-				DA33AC012836958400BD73F1 /* PexipRTC */,
-				DA33AC032836958400BD73F1 /* PexipUtils */,
-				DAEECAC828691E7F00B4774E /* PexipConference */,
-				DAEECACA28691E7F00B4774E /* PexipInfinityClient */,
-				DAEECACC28691E7F00B4774E /* PexipMedia */,
-				DAEECACE28691E7F00B4774E /* PexipRTC */,
-				DAEECAD028691E7F00B4774E /* PexipUtils */,
-				DAEECAD228691E7F00B4774E /* WebRTC */,
+				DA2F48F628992F2800171338 /* PexipConference */,
+				DA2F48F828992F2800171338 /* PexipInfinityClient */,
+				DA2F48FA28992F2800171338 /* PexipMedia */,
+				DA2F48FC28992F2800171338 /* PexipRTC */,
+				DA2F48FE28992F2800171338 /* PexipUtils */,
+				DA2F490028992F2800171338 /* WebRTC */,
 			);
 			productName = "Example (iOS)";
 			productReference = DA1329D927A98EC500C2EA89 /* Example.app */;
@@ -546,7 +559,6 @@
 			);
 			name = "BroadcastExtension (iOS)";
 			packageProductDependencies = (
-				DAF13293284A26B50089FE8E /* PexipMedia */,
 			);
 			productName = PexipSDKDemoBroadcastExtension;
 			productReference = DAF13285284A259D0089FE8E /* BroadcastExtension (iOS).appex */;
@@ -567,11 +579,6 @@
 			);
 			name = "Example (macOS)";
 			packageProductDependencies = (
-				DA33AC052836958900BD73F1 /* PexipConference */,
-				DA33AC072836958900BD73F1 /* PexipInfinityClient */,
-				DA33AC092836958900BD73F1 /* PexipMedia */,
-				DA33AC0B2836958900BD73F1 /* PexipRTC */,
-				DA33AC0D2836958900BD73F1 /* PexipUtils */,
 			);
 			productName = PexipVideoExample;
 			productReference = DAFADC8227F5083300A9AC3D /* Example (macOS).app */;
@@ -611,7 +618,7 @@
 			);
 			mainGroup = DA1329CC27A98EC400C2EA89;
 			packageReferences = (
-				DAEECAC728691E7F00B4774E /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */,
+				DA2F48F528992F2800171338 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */,
 			);
 			productRefGroup = DA1329DA27A98EC500C2EA89 /* Products */;
 			projectDirPath = "";
@@ -740,10 +747,13 @@
 				DAFADCCD27F50C1400A9AC3D /* ModalView.swift in Sources */,
 				DAB78D4F27E3953600CB17C9 /* Utils.swift in Sources */,
 				DA7AC0FE281096B400739C4E /* AppCoordinator.swift in Sources */,
+				DA6196872878332300EA9151 /* ChatMessageStore.swift in Sources */,
 				DAFADCEF27F50C1400A9AC3D /* ChatView.swift in Sources */,
 				DAFADD0F27F50E8800A9AC3D /* PinChallengeView.swift in Sources */,
+				DA2FE597287110CB00D8FCAB /* ConferenceState.swift in Sources */,
 				DAFADCE527F50C1400A9AC3D /* ConferenceViewModel.swift in Sources */,
 				DAFADCC927F50C1400A9AC3D /* MainVStack.swift in Sources */,
+				DA2FE59A287110DD00D8FCAB /* ConferenceModal.swift in Sources */,
 				DA93EE6D284A35200063386F /* Constants.swift in Sources */,
 				DAFADCC727F50C1400A9AC3D /* GeometryProxy+Extensions.swift in Sources */,
 				DAFADCDD27F50C1400A9AC3D /* AliasViewModel.swift in Sources */,
@@ -753,13 +763,16 @@
 				DAFADCCB27F50C1400A9AC3D /* LinearGradient+Extensions.swift in Sources */,
 				DAFADCCF27F50C1400A9AC3D /* LargeTextFieldStyle.swift in Sources */,
 				DAFADCD927F50C1400A9AC3D /* ViewFactory.swift in Sources */,
+				DA35EF29286F9C86008D15A7 /* CGImage+Extensions.swift in Sources */,
 				DAFADCDB27F50C1400A9AC3D /* ParticipantsView.swift in Sources */,
 				DAFADD0927F50E5D00A9AC3D /* DisplayNameView.swift in Sources */,
+				DAB34033286E680E001B59C5 /* Settings.swift in Sources */,
 				DAFADD0727F50E5D00A9AC3D /* DisplayNameViewModel.swift in Sources */,
 				DAFADD0D27F50E8800A9AC3D /* PinChallengeViewModel.swift in Sources */,
 				DAFADCD727F50C1400A9AC3D /* ExampleApp.swift in Sources */,
 				DAFADCD127F50C1400A9AC3D /* AsyncButton.swift in Sources */,
 				DAFADCC527F50C1400A9AC3D /* CallButtons.swift in Sources */,
+				DA5F0B2F286C946400E9E18B /* SettingsView.swift in Sources */,
 				DAFADCE927F50C1400A9AC3D /* PreflightView.swift in Sources */,
 				DAFADCED27F50C1400A9AC3D /* ChatViewModel.swift in Sources */,
 				DAFADCD327F50C1400A9AC3D /* LargeButton.swift in Sources */,
@@ -780,6 +793,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				DAFADCEA27F50C1400A9AC3D /* PreflightView.swift in Sources */,
+				DA6196882878332300EA9151 /* ChatMessageStore.swift in Sources */,
+				DA2FE59B287110DD00D8FCAB /* ConferenceModal.swift in Sources */,
 				DAFADD1027F50E8800A9AC3D /* PinChallengeView.swift in Sources */,
 				DAFADCD827F50C1400A9AC3D /* ExampleApp.swift in Sources */,
 				DAFADCEC27F50C1400A9AC3D /* CallView.swift in Sources */,
@@ -790,6 +805,7 @@
 				DAFADCDA27F50C1400A9AC3D /* ViewFactory.swift in Sources */,
 				DAFADD1D27F5CD8200A9AC3D /* UserInterfaceSizeClass.swift in Sources */,
 				DAFADCCE27F50C1400A9AC3D /* ModalView.swift in Sources */,
+				DA5F0B30286C946400E9E18B /* SettingsView.swift in Sources */,
 				DAFADCEE27F50C1400A9AC3D /* ChatViewModel.swift in Sources */,
 				DAFADCE627F50C1400A9AC3D /* ConferenceViewModel.swift in Sources */,
 				DAFADC9527F50B6D00A9AC3D /* Utils.swift in Sources */,
@@ -799,11 +815,14 @@
 				DAFADCF027F50C1400A9AC3D /* ChatView.swift in Sources */,
 				DAFADCD227F50C1400A9AC3D /* AsyncButton.swift in Sources */,
 				DAFADD0A27F50E5D00A9AC3D /* DisplayNameView.swift in Sources */,
+				DAB34034286E680E001B59C5 /* Settings.swift in Sources */,
 				DAFADD0E27F50E8800A9AC3D /* PinChallengeViewModel.swift in Sources */,
 				DAFADD1F27F5D02E00A9AC3D /* NSColor+Extensions.swift in Sources */,
 				DAFADD0827F50E5D00A9AC3D /* DisplayNameViewModel.swift in Sources */,
 				DAFADCE827F50C1400A9AC3D /* ConferenceView.swift in Sources */,
+				DA2FE598287110CB00D8FCAB /* ConferenceState.swift in Sources */,
 				DAFADCDC27F50C1400A9AC3D /* ParticipantsView.swift in Sources */,
+				DA35EF2A286F9C86008D15A7 /* CGImage+Extensions.swift in Sources */,
 				DA01A9E82836A41B002A6414 /* ScreenMediaSourcePickerModel.swift in Sources */,
 				DAFADCC827F50C1400A9AC3D /* GeometryProxy+Extensions.swift in Sources */,
 				DAFADCCC27F50C1400A9AC3D /* LinearGradient+Extensions.swift in Sources */,
@@ -1020,7 +1039,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SwiftUI/iOS/iOS.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
 				ENABLE_BITCODE = NO;
 				ENABLE_PREVIEWS = YES;
@@ -1059,9 +1078,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SwiftUI/iOS/iOS.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
 				ENABLE_BITCODE = YES;
 				ENABLE_PREVIEWS = YES;
@@ -1098,7 +1117,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "BroadcastExtension/BroadcastExtension (iOS).entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BroadcastExtension/Info.plist;
@@ -1127,8 +1146,8 @@
 				CODE_SIGN_ENTITLEMENTS = "BroadcastExtension/BroadcastExtension (iOS).entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = U7E3T6C2S4;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BroadcastExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = BroadcastExtension;
@@ -1271,7 +1290,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		DAEECAC728691E7F00B4774E /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */ = {
+		DA2F48F528992F2800171338 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pexip/pexip-swift-sdk";
 			requirement = {
@@ -1282,79 +1301,35 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		DA33ABFB2836958400BD73F1 /* PexipConference */ = {
+		DA2F48F628992F2800171338 /* PexipConference */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DA2F48F528992F2800171338 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
 			productName = PexipConference;
 		};
-		DA33ABFD2836958400BD73F1 /* PexipInfinityClient */ = {
+		DA2F48F828992F2800171338 /* PexipInfinityClient */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DA2F48F528992F2800171338 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
 			productName = PexipInfinityClient;
 		};
-		DA33ABFF2836958400BD73F1 /* PexipMedia */ = {
+		DA2F48FA28992F2800171338 /* PexipMedia */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DA2F48F528992F2800171338 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
 			productName = PexipMedia;
 		};
-		DA33AC012836958400BD73F1 /* PexipRTC */ = {
+		DA2F48FC28992F2800171338 /* PexipRTC */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DA2F48F528992F2800171338 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
 			productName = PexipRTC;
 		};
-		DA33AC032836958400BD73F1 /* PexipUtils */ = {
+		DA2F48FE28992F2800171338 /* PexipUtils */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = DA2F48F528992F2800171338 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
 			productName = PexipUtils;
 		};
-		DA33AC052836958900BD73F1 /* PexipConference */ = {
+		DA2F490028992F2800171338 /* WebRTC */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = PexipConference;
-		};
-		DA33AC072836958900BD73F1 /* PexipInfinityClient */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = PexipInfinityClient;
-		};
-		DA33AC092836958900BD73F1 /* PexipMedia */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = PexipMedia;
-		};
-		DA33AC0B2836958900BD73F1 /* PexipRTC */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = PexipRTC;
-		};
-		DA33AC0D2836958900BD73F1 /* PexipUtils */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = PexipUtils;
-		};
-		DAEECAC828691E7F00B4774E /* PexipConference */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DAEECAC728691E7F00B4774E /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
-			productName = PexipConference;
-		};
-		DAEECACA28691E7F00B4774E /* PexipInfinityClient */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DAEECAC728691E7F00B4774E /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
-			productName = PexipInfinityClient;
-		};
-		DAEECACC28691E7F00B4774E /* PexipMedia */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DAEECAC728691E7F00B4774E /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
-			productName = PexipMedia;
-		};
-		DAEECACE28691E7F00B4774E /* PexipRTC */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DAEECAC728691E7F00B4774E /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
-			productName = PexipRTC;
-		};
-		DAEECAD028691E7F00B4774E /* PexipUtils */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DAEECAC728691E7F00B4774E /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
-			productName = PexipUtils;
-		};
-		DAEECAD228691E7F00B4774E /* WebRTC */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DAEECAC728691E7F00B4774E /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
+			package = DA2F48F528992F2800171338 /* XCRemoteSwiftPackageReference "pexip-swift-sdk" */;
 			productName = WebRTC;
-		};
-		DAF13293284A26B50089FE8E /* PexipMedia */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = PexipMedia;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

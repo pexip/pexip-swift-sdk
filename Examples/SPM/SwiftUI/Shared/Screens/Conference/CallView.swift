@@ -9,6 +9,7 @@ struct CallView: View {
     let presentationLocalVideo: Video?
     let presentationRemoteVideo: Video?
     let presenterName: String?
+    let captions: String
 
     @Binding var showingChat: Bool?
     @Binding var showingParticipants: Bool
@@ -22,6 +23,11 @@ struct CallView: View {
     @State private var toggleButtonsTask: Task<Void, Error>?
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
+    @Environment(\.viewFactory) private var viewFactory: ViewFactory
+
+    private var isPortrait: Bool {
+        vSizeClass == .regular && hSizeClass == .compact
+    }
 
     // MARK: - Body
 
@@ -32,20 +38,12 @@ struct CallView: View {
         .onAppear(perform: {
             hideButtonsAfterDelay()
         })
-        .onTapGesture {
-            withAnimation {
-            showingButtons.toggle()
-                if showingButtons {
-                    hideButtonsAfterDelay()
-                }
-            }
-        }
     }
 
     private func hideButtonsAfterDelay() {
         toggleButtonsTask?.cancel()
         toggleButtonsTask = Task {
-            try await Task.sleep(nanoseconds: UInt64(4 * 1_000_000_000))
+            try await Task.sleep(nanoseconds: UInt64(15 * 1_000_000_000))
             withAnimation {
                 showingButtons = false
             }
@@ -66,18 +64,7 @@ private extension CallView {
                         topBar
                     }
 
-                    HStack {
-                        videoView(
-                            video: mainLocalVideo,
-                            isMirrored: true,
-                            supportsRotation: true,
-                            geometry: geometry
-                        )
-                        .onTapGesture(perform: onToggleCamera)
-                        Spacer()
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 15)
+                    selfView(geometry: geometry)
 
                     Spacer()
                 }
@@ -85,23 +72,23 @@ private extension CallView {
                 VStack(spacing: 0) {
                     Spacer()
 
-                    HStack {
-                        Spacer()
-                        if presentationRemoteVideo != nil {
-                            videoView(video: mainRemoteVideo, geometry: geometry)
-                        } else if presentationLocalVideo != nil {
-                            videoView(
-                                video: presentationLocalVideo,
-                                supportsRotation: true,
-                                geometry: geometry
-                            )
-                        }
+                    if isPortrait {
+                        captionsText
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 15)
 
-                    if showingButtons {
-                        bottomBar
+                    presentationView(geometry: geometry)
+
+                    ZStack {
+                        if !isPortrait {
+                            HStack {
+                                Spacer()
+                                captionsText
+                                Spacer()
+                            }
+                        }
+                        if showingButtons {
+                            bottomBar
+                        }
                     }
                 }
             }
@@ -116,7 +103,48 @@ private extension CallView {
             } else if let video = mainRemoteVideo {
                 VideoComponent(video: video).edgesIgnoringSafeArea(.all)
             }
+        }.onTapGesture {
+            withAnimation {
+                showingButtons.toggle()
+                if showingButtons {
+                    hideButtonsAfterDelay()
+                }
+            }
         }
+    }
+
+    func selfView(geometry: GeometryProxy) -> some View {
+        HStack {
+            videoView(
+                video: mainLocalVideo,
+                isMirrored: true,
+                supportsRotation: true,
+                geometry: geometry
+            )
+            .onTapGesture(perform: onToggleCamera)
+            Spacer()
+        }
+        .padding(.horizontal)
+        .padding(.top, 15)
+    }
+
+    func presentationView(geometry: GeometryProxy) -> some View {
+        HStack(alignment: .bottom) {
+            Spacer()
+            if presentationRemoteVideo != nil {
+                videoView(video: mainRemoteVideo, geometry: geometry)
+            } else if presentationLocalVideo != nil {
+                videoView(
+                    video: presentationLocalVideo,
+                    supportsRotation: true,
+                    geometry: geometry
+                )
+            } else {
+                Spacer()
+            }
+        }
+        .padding(.horizontal)
+        .padding(.bottom, 15)
     }
 
     @ViewBuilder
@@ -170,6 +198,8 @@ private extension CallView {
             Spacer()
             ChatButton(action: { showingChat?.toggle() })
                 .opacity(showingChat != nil ? 1 : 0)
+            viewFactory
+                .settingsView()
         }
         .padding(.horizontal, 2)
         .background(
@@ -195,13 +225,25 @@ private extension CallView {
         .padding([.horizontal, .bottom])
         .transition(.opacity.animation(.easeInOut(duration: 0.3)))
     }
+
+    var captionsText: some View {
+        Text(captions)
+            .padding(20)
+            .foregroundColor(.white)
+            #if os(iOS)
+            .font(.body)
+            #else
+            .font(.title)
+            #endif
+            .multilineTextAlignment(.center)
+            .shadow(radius: 2)
+    }
 }
 
 // MARK: - Helpers
 
 private extension CallView {
     func isLandscape(geometry: GeometryProxy) -> Bool {
-        let isPortrait = vSizeClass == .regular && hSizeClass == .compact
         return geometry.isLandscape && !isPortrait
     }
 
@@ -274,6 +316,7 @@ struct CallView_Previews: PreviewProvider {
                 )
                 : nil,
             presenterName: withRemotePresentation ? "Presenter" : nil,
+            captions: "Hello world! This is live captions.",
             showingChat: .constant(false),
             showingParticipants: .constant(false),
             cameraEnabled: .constant(true),

@@ -3,18 +3,7 @@ import SwiftUI
 import PexipRTC
 import PexipConference
 import PexipMedia
-
-enum ConferenceState {
-    case preflight
-    case connecting
-    case connected
-    case disconnected
-}
-
-enum ConferenceModal {
-    case chat
-    case participants
-}
+import PexipInfinityClient
 
 final class ConferenceViewModel: ObservableObject {
     @Published private(set) var state: ConferenceState
@@ -48,24 +37,37 @@ final class ConferenceViewModel: ObservableObject {
         }
     }
 
+    var captions: String {
+        (finalCaptions + currentCaptions).joined(separator: "\n")
+    }
+
     let remoteVideoContentMode = VideoContentMode.fit_16x9
-    var chat: Chat? { conference.chat }
+    var hasChat: Bool { conference.chat != nil }
     var roster: Roster { conference.roster }
+    private(set) lazy var chatMessageStore = conference.chat.map {
+        ChatMessageStore(chat: $0, roster: roster)
+    }
 
     private let conference: Conference
+    private let settings: Settings
     private let mediaConnectionFactory: MediaConnectionFactory
     private var mediaConnection: MediaConnection
     private let mainLocalAudioTrack: LocalAudioTrack
-    private let cameraVideoTrack: CameraVideoTrack?
+    private var cameraVideoTrack: CameraVideoTrack?
     private let onComplete: () -> Void
     private let videoPermission = MediaCapturePermission.video
     private let audioPermission = MediaCapturePermission.audio
     private var cancellables = Set<AnyCancellable>()
     private let cameraQualityProfile: QualityProfile = .high
     private let localPresentationQualityProfile: QualityProfile = .presentationVeryHigh
+    private let videoFilterFactory = VideoFilterFactory()
+    private var isSinkingLiveCaptionsSettings = false
+    private var hideCaptionsTask: Task<Void, Error>?
     @Published private var mainRemoteVideoTrack: VideoTrack?
     @Published private var presentationRemoteVideoTrack: VideoTrack?
     @Published private var screenMediaTrack: ScreenMediaTrack?
+    @Published private(set) var finalCaptions = [String]()
+    @Published private(set) var currentCaptions = [String]()
 
     // MARK: - Init
 
@@ -73,9 +75,11 @@ final class ConferenceViewModel: ObservableObject {
         conference: Conference,
         mediaConnectionConfig: MediaConnectionConfig,
         mediaConnectionFactory: MediaConnectionFactory,
+        settings: Settings,
         onComplete: @escaping () -> Void
     ) {
         self.conference = conference
+        self.settings = settings
         self.mediaConnectionFactory = mediaConnectionFactory
         self.mediaConnection = mediaConnectionFactory.createMediaConnection(
             config: mediaConnectionConfig
@@ -87,12 +91,20 @@ final class ConferenceViewModel: ObservableObject {
 
         setCameraEnabled(videoPermission.isAuthorized)
         setMicrophoneEnabled(audioPermission.isAuthorized)
-        addMediaConnectionEventListeners()
-        addConferenceEventListeners()
+        sinkMediaConnectionEvents()
+        sinkConferenceEvents()
+        sinkCameraFilterSettings()
     }
 
-    // MARK: - Actions
+    deinit {
+        hideCaptionsTask?.cancel()
+        hideCaptionsTask = nil
+    }
+}
 
+// MARK: - Actions
+
+extension ConferenceViewModel {
     func join() {
         state = .connecting
         mediaConnection.setMainAudioTrack(mainLocalAudioTrack)
@@ -202,10 +214,36 @@ final class ConferenceViewModel: ObservableObject {
             self.modal = modal
         }
     }
+}
 
-    // MARK: - Private
+// MARK: - Subscriptions
 
-    private func addMediaConnectionEventListeners() {
+private extension ConferenceViewModel {
+    func sinkCameraFilterSettings() {
+        settings.$cameraFilter.sink { [weak self] filter in
+            self?.setCameraFilter(filter)
+        }.store(in: &cancellables)
+    }
+
+    func sinkLiveCaptionsSettings() {
+        guard !isSinkingLiveCaptionsSettings else {
+            return
+        }
+
+        isSinkingLiveCaptionsSettings = true
+
+        settings.$showLiveCaptions.sink { show in
+            Task { [weak self] in
+                do {
+                    try await self?.conference.toggleLiveCaptions(show)
+                } catch {
+                    debugPrint(error)
+                }
+            }
+        }.store(in: &cancellables)
+    }
+
+    func sinkMediaConnectionEvents() {
         mediaConnection.statePublisher
             .sink { [weak self] event in
                 guard let self = self else { return }
@@ -239,13 +277,19 @@ final class ConferenceViewModel: ObservableObject {
             .assign(to: &$microphoneEnabled)
     }
 
-    private func addConferenceEventListeners() {
+    func sinkConferenceEvents() {
         conference.eventPublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 guard let self = self else { return }
 
                 do {
                     switch event {
+                    case .conferenceUpdate(let status):
+                        self.settings.isLiveCaptionsAvailable = status.liveCaptionsAvailable
+                        self.sinkLiveCaptionsSettings()
+                    case .liveCaptions(let captions):
+                        self.showLiveCaptions(captions)
                     case .presentationStart(let message):
                         self.stopPresenting()
                         self.presenterName = message.presenterName
@@ -262,8 +306,12 @@ final class ConferenceViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
+}
 
-    private func startScreenCapture(withTrack screenMediaTrack: ScreenMediaTrack) {
+// MARK: - Private
+
+private extension ConferenceViewModel {
+    func startScreenCapture(withTrack screenMediaTrack: ScreenMediaTrack) {
         self.screenMediaTrack = screenMediaTrack
 
         screenMediaTrack.capturingStatus.$isCapturing
@@ -290,6 +338,49 @@ final class ConferenceViewModel: ObservableObject {
                 stopPresenting()
                 debugPrint(error)
             }
+        }
+    }
+
+    func setCameraFilter(_ filter: CameraFilter) {
+        let factory = videoFilterFactory
+
+        switch filter {
+        case .none:
+            cameraVideoTrack?.videoFilter = nil
+        case .gaussianBlur:
+            cameraVideoTrack?.videoFilter = factory.gaussianBlur(radius: 30)
+        case .tentBlur:
+            cameraVideoTrack?.videoFilter = factory.tentBlur(intensity: 0.3)
+        case .boxBlur:
+            cameraVideoTrack?.videoFilter = factory.boxBlur(intensity: 0.3)
+        case .imageBackground:
+            if let image = CGImage.withName("background_image") {
+                cameraVideoTrack?.videoFilter = factory.virtualBackground(image: image)
+            } else {
+                cameraVideoTrack?.videoFilter = nil
+            }
+        }
+    }
+
+    func showLiveCaptions(_ captions: LiveCaptions) {
+        if captions.isFinal {
+            currentCaptions.removeAll()
+            finalCaptions.append(captions.data)
+            if finalCaptions.count > 2 {
+                finalCaptions.removeFirst()
+            }
+        } else {
+            currentCaptions = [captions.data]
+            if finalCaptions.count > 1 {
+                finalCaptions.removeFirst()
+            }
+        }
+
+        hideCaptionsTask?.cancel()
+        hideCaptionsTask = Task { @MainActor in
+            try await Task.sleep(nanoseconds: UInt64(5 * 1_000_000_000))
+            finalCaptions.removeAll()
+            currentCaptions.removeAll()
         }
     }
 }
