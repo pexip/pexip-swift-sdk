@@ -11,6 +11,7 @@ struct PreflightView: View {
     let onJoin: () -> Void
     let onCancel: () -> Void
     @Environment(\.verticalSizeClass) private var sizeClass
+    @Environment(\.viewFactory) private var viewFactory: ViewFactory
 
     var body: some View {
         ZStack {
@@ -18,7 +19,17 @@ struct PreflightView: View {
                 .edgesIgnoringSafeArea(.all)
             localVideoView
                 .edgesIgnoringSafeArea(.all)
+            #if os(macOS)
+            VStack {
+                topBar.padding(.horizontal)
+                Spacer()
+            }
+            #endif
+
             MainVStack(backgroundColor: .clear, content: {
+                #if os(iOS)
+                topBar
+                #endif
                 Spacer()
                 mediaButtons
                 joinButton
@@ -39,6 +50,14 @@ struct PreflightView: View {
                 isMirrored: true
             )
         }
+    }
+
+    private var topBar: some View {
+        HStack {
+            Spacer()
+            viewFactory.settingsView()
+        }
+        .padding(.top)
     }
 
     private var mediaButtons: some View {
@@ -67,7 +86,7 @@ struct PreflightView: View {
         Button(action: onCancel) {
             Text("Cancel")
                 .foregroundColor(.white)
-                .padding()
+                .padding(5)
         }
         .buttonStyle(PlainButtonStyle())
     }

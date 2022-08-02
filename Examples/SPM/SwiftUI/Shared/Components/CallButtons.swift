@@ -78,7 +78,7 @@ struct ParticipantsButton: View {
 
     var body: some View {
         CircleButton(
-            icon: "person.2",
+            icon: "person.2.fill",
             background: Color.clear,
             font: .title2,
             action: action
@@ -93,7 +93,7 @@ struct ChatButton: View {
 
     var body: some View {
         CircleButton(
-            icon: "text.bubble",
+            icon: "text.bubble.fill",
             background: Color.clear,
             font: .title2,
             action: action
@@ -120,12 +120,13 @@ private struct CircleButton<Background: ShapeStyle>: View {
             .background(background)
             .clipShape(Circle())
         }
+        .shadow(radius: 4)
         .preferredColorScheme(.dark)
         .buttonStyle(PlainButtonStyle())
     }
 }
 
-private struct SystemIcon: View {
+struct SystemIcon: View {
     let name: String
     let font: Font
     var foregroundColor: Color = .white

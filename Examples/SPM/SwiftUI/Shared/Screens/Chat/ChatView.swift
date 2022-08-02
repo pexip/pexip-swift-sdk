@@ -41,7 +41,7 @@ struct ChatView: View {
 // MARK: - Subviews
 
 private struct ChatMessageCell: View {
-    let message: ChatViewModel.Message
+    let message: Chat.Message
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
@@ -136,29 +136,33 @@ struct ChatView_Previews: PreviewProvider {
     }
 
     static var chatView: ChatView {
+        let chat = Chat(
+            senderName: "User Name",
+            senderId: UUID(),
+            sendMessage: { _ in true }
+        )
+        let roster = Roster(
+            currentParticipantId: UUID(),
+            currentParticipantName: "User Name",
+            avatarURL: { _ in nil }
+        )
         let viewModel = ChatViewModel(
-            chat: Chat(
-                senderName: "User Name",
-                senderId: UUID(),
-                sendMessage: { _ in true }
-            ),
-            roster: Roster(
-                currentParticipantId: UUID(),
-                currentParticipantName: "User Name",
-                avatarURL: { _ in nil }
-            ),
-            messages: [
-                .init(title: "Chatbot", text: "User Name joined"),
-                .init(title: "User Name", text: "Hello!"),
-                .init(
-                    title: "Participant",
-                    text: """
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                    incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-                    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.
-                    """
-                )
-            ]
+            store: ChatMessageStore(
+                chat: chat,
+                roster: roster,
+                messages: [
+                    .init(title: "Chatbot", text: "User Name joined"),
+                    .init(title: "User Name", text: "Hello!"),
+                    .init(
+                        title: "Participant",
+                        text: """
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+                        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.
+                        """
+                    )
+                ]
+            )
         )
         return ChatView(viewModel: viewModel, onDismiss: {})
     }
