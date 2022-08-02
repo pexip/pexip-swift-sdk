@@ -7,6 +7,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.0] - 2022-08-02
+
+### Added
+
+- [Video filters](https://pexip.github.io/pexip-swift-sdk/sdk/documentation/pexipswiftsdk/videofilters), e.g. background blur, virtual background, custom filters, etc.
+- [Live captions](https://pexip.github.io/pexip-swift-sdk/sdk/documentation/pexipswiftsdk/livecaptions)
+- [DTMF support](https://pexip.github.io/pexip-swift-sdk/frameworks/ios/PexipConference/documentation/pexipconference/conference/dtmf(signals:))
+
 ## [0.3.0] - 2022-06-27
 
 ### Added
@@ -38,7 +46,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Initial release
 
-[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.3.0...HEAD
+[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.4.0
 [0.3.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.3.0
 [0.2.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.2.0
 [0.1.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.1.0
