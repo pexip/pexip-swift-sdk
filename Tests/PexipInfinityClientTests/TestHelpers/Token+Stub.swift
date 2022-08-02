@@ -19,7 +19,8 @@ extension Token {
             turn: nil,
             chatEnabled: true,
             analyticsEnabled: Bool.random(),
-            expiresString: "\(expires)"
+            expiresString: "\(expires)",
+            version: Version(versionId: "10", pseudoVersion: "25010.0.0")
         )
     }
 }

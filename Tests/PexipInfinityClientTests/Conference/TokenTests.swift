@@ -77,7 +77,8 @@ final class TokenTests: XCTestCase {
                 )],
                 chatEnabled: true,
                 analyticsEnabled: true,
-                expiresString: "120"
+                expiresString: "120",
+                version: Version(versionId: "10", pseudoVersion: "25010.0.0")
             )
         )
     }
@@ -98,7 +99,8 @@ final class TokenTests: XCTestCase {
             turn: nil,
             chatEnabled: true,
             analyticsEnabled: false,
-            expiresString: "120"
+            expiresString: "120",
+            version: Version(versionId: "10", pseudoVersion: "25010.0.0")
         )
 
         let newToken = token.updating(
@@ -117,6 +119,7 @@ final class TokenTests: XCTestCase {
         XCTAssertEqual(newToken.conferenceName, token.conferenceName)
         XCTAssertEqual(newToken.stun, token.stun)
         XCTAssertTrue(newToken.chatEnabled)
+        XCTAssertEqual(newToken.version, token.version)
     }
 
     func testTokenExpiration() throws {
@@ -146,7 +149,8 @@ final class TokenTests: XCTestCase {
             turn: [],
             chatEnabled: true,
             analyticsEnabled: false,
-            expiresString: "120"
+            expiresString: "120",
+            version: Version(versionId: "10", pseudoVersion: "25010.0.0")
         )
 
         // updatedAt + 120 seconds
@@ -188,7 +192,8 @@ final class TokenTests: XCTestCase {
             turn: [],
             chatEnabled: false,
             analyticsEnabled: true,
-            expiresString: "test"
+            expiresString: "test",
+            version: Version(versionId: "10", pseudoVersion: "25010.0.0")
         )
         XCTAssertEqual(token.expires, 0)
     }

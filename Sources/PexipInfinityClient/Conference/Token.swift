@@ -28,6 +28,7 @@ public struct Token: Codable, Hashable {
         case turn
         case chatEnabled = "chat_enabled"
         case analyticsEnabled = "analytics_enabled"
+        case version
     }
 
     /// The authentication token for future requests.
@@ -65,6 +66,9 @@ public struct Token: Codable, Hashable {
     /// to Pexip global setting has been enabled on the Pexip installation.
     public let analyticsEnabled: Bool
 
+    /// The version of the Pexip server being communicated with.
+    public let version: Version
+
     /// Validity lifetime in seconds.
     public var expires: TimeInterval {
         TimeInterval(expiresString) ?? 0
@@ -99,7 +103,8 @@ public struct Token: Codable, Hashable {
         turn: [Token.Turn]?,
         chatEnabled: Bool,
         analyticsEnabled: Bool,
-        expiresString: String
+        expiresString: String,
+        version: Version
     ) {
         self.value = value
         self.updatedAt = updatedAt
@@ -113,6 +118,7 @@ public struct Token: Codable, Hashable {
         self.chatEnabled = chatEnabled
         self.analyticsEnabled = analyticsEnabled
         self.expiresString = expiresString
+        self.version = version
     }
 
     // MARK: - Update

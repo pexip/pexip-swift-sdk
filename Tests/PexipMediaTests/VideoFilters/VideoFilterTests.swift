@@ -93,7 +93,7 @@ final class VideoFilterTests: XCTestCase {
         let endTime = mach_absolute_time()
         let seconds = machToSeconds * Double(endTime - startTime)
 
-        XCTAssertTrue(seconds <= 0.05)
+        XCTAssertTrue(seconds <= 0.07)
         XCTAssertEqual(resultPixelBuffer?.width, 1920)
         XCTAssertEqual(resultPixelBuffer?.height, 1080)
         XCTAssertEqual(resultPixelBuffer?.pixelFormat, pixelBuffer.pixelFormat)

@@ -57,7 +57,8 @@ extension Token {
             turn: [],
             chatEnabled: true,
             analyticsEnabled: true,
-            expiresString: "\(expires)"
+            expiresString: "\(expires)",
+            version: Version(versionId: "10", pseudoVersion: "25010.0.0")
         )
     }
 }
