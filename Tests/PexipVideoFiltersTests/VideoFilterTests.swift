@@ -1,7 +1,7 @@
 import XCTest
 import Vision
 import CoreMedia
-@testable import PexipMedia
+@testable import PexipVideoFilters
 
 @available(iOS 15.0, *)
 @available(macOS 12.0, *)
@@ -147,5 +147,21 @@ final class VideoFilterTests: XCTestCase {
         XCTAssertEqual(resultPixelBuffer?.width, 1920)
         XCTAssertEqual(resultPixelBuffer?.height, 1080)
         XCTAssertEqual(resultPixelBuffer?.pixelFormat, pixelBuffer.pixelFormat)
+    }
+}
+
+// MARK: - Private extensions
+
+private extension CVPixelBuffer {
+    var pixelFormat: UInt32 {
+        CVPixelBufferGetPixelFormatType(self)
+    }
+
+    var width: UInt32 {
+        UInt32(CVPixelBufferGetWidth(self))
+    }
+
+    var height: UInt32 {
+        UInt32(CVPixelBufferGetHeight(self))
     }
 }

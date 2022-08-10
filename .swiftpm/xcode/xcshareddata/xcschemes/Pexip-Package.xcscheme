@@ -146,6 +146,48 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "PexipVideoFilters"
+               BuildableName = "PexipVideoFilters"
+               BlueprintName = "PexipVideoFilters"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Pexip_PexipVideoFiltersTests"
+               BuildableName = "Pexip_PexipVideoFiltersTests"
+               BlueprintName = "Pexip_PexipVideoFiltersTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "TestHelpers"
+               BuildableName = "TestHelpers"
+               BlueprintName = "TestHelpers"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -202,6 +244,16 @@
                BlueprintIdentifier = "PexipUtilsTests"
                BuildableName = "PexipUtilsTests"
                BlueprintName = "PexipUtilsTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "PexipVideoFiltersTests"
+               BuildableName = "PexipVideoFiltersTests"
+               BlueprintName = "PexipVideoFiltersTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>

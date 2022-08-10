@@ -42,8 +42,8 @@ final class VideoBackgroundFilter: VideoFilter {
             try? play()
         }
 
-        let width = pixelBuffer.width
-        let height = pixelBuffer.height
+        let width = CVPixelBufferGetWidth(pixelBuffer)
+        let height = CVPixelBufferGetHeight(pixelBuffer)
 
         let newPixelBuffer = segmenter.blendWithMask(
             pixelBuffer: pixelBuffer,

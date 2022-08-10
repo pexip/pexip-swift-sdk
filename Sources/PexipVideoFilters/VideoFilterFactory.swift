@@ -10,7 +10,8 @@ public struct VideoFilterFactory {
     @available(iOS 15.0, *)
     @available(macOS 12.0, *)
     public init() {
-        self.init(segmenter: VisionPersonSegmenter())
+        let segmenter = VisionPersonSegmenter()
+        self.init(segmenter: segmenter)
     }
 
     /**

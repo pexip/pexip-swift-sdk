@@ -30,8 +30,8 @@ final class ImageBackgroundFilter: VideoFilter {
         _ pixelBuffer: CVPixelBuffer,
         orientation: CGImagePropertyOrientation
     ) -> CVPixelBuffer {
-        let width = pixelBuffer.width
-        let height = pixelBuffer.height
+        let width = CVPixelBufferGetWidth(pixelBuffer)
+        let height = CVPixelBufferGetHeight(pixelBuffer)
         let newPixelBuffer = segmenter.blendWithMask(
             pixelBuffer: pixelBuffer,
             ciContext: ciContext,

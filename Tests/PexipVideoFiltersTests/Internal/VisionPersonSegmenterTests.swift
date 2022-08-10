@@ -1,7 +1,8 @@
 import XCTest
 import Vision
 import CoreMedia
-@testable import PexipMedia
+import TestHelpers
+@testable import PexipVideoFilters
 
 @available(iOS 15.0, *)
 @available(macOS 12.0, *)

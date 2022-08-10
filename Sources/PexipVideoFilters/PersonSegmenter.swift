@@ -52,9 +52,9 @@ public extension PersonSegmenter {
             let newImage = blendFilter.outputImage?.oriented(.left),
             let newPixelBuffer = createPixelBuffer(
                 from: newImage,
-                width: Int(pixelBuffer.width),
-                height: Int(pixelBuffer.height),
-                format: pixelBuffer.pixelFormat,
+                width: CVPixelBufferGetWidth(pixelBuffer),
+                height: CVPixelBufferGetHeight(pixelBuffer),
+                format: CVPixelBufferGetPixelFormatType(pixelBuffer),
                 ciContext: ciContext
             )
         else {
@@ -97,9 +97,9 @@ public extension PersonSegmenter {
             return nil
         }
 
-        pixelBuffer.lockBaseAddress(.init(rawValue: 0))
+        CVPixelBufferLockBaseAddress(pixelBuffer, .init(rawValue: 0))
         ciContext.render(image, to: pixelBuffer)
-        pixelBuffer.unlockBaseAddress(.init(rawValue: 0))
+        CVPixelBufferUnlockBaseAddress(pixelBuffer, .init(rawValue: 0))
 
         return pixelBuffer
     }

@@ -1,6 +1,7 @@
 import XCTest
 import CoreGraphics
-@testable import PexipMedia
+import TestHelpers
+@testable import PexipVideoFilters
 
 final class CoreGraphicsVideoFiltersTests: XCTestCase {
     func testCGImageScaledToFill() {

@@ -2,7 +2,7 @@ import Vision
 
 @available(iOS 15.0, *)
 @available(macOS 12.0, *)
-final class VisionPersonSegmenter: PersonSegmenter {
+public final class VisionPersonSegmenter: PersonSegmenter {
     private let requestHandler: VNSequenceRequestHandler
 
     private lazy var segmentationRequest: VNGeneratePersonSegmentationRequest = {
@@ -12,13 +12,13 @@ final class VisionPersonSegmenter: PersonSegmenter {
         return request
     }()
 
-    init(requestHandler: VNSequenceRequestHandler = .init()) {
+    public init(requestHandler: VNSequenceRequestHandler = .init()) {
         self.requestHandler = requestHandler
     }
 
     // MARK: - Perform Requests
 
-    func personMaskPixelBuffer(from pixelBuffer: CVPixelBuffer) -> CVPixelBuffer? {
+    public func personMaskPixelBuffer(from pixelBuffer: CVPixelBuffer) -> CVPixelBuffer? {
         try? requestHandler.perform(
             [segmentationRequest],
             on: pixelBuffer,

@@ -1,6 +1,6 @@
 import XCTest
 import CoreGraphics
-@testable import PexipMedia
+@testable import PexipVideoFilters
 
 final class CoreImageVideoFiltersTests: XCTestCase {
     func testResizedImage() throws {

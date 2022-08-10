@@ -29,6 +29,10 @@ let package = Package(
         .library(
             name: "PexipUtils",
             targets: ["PexipUtils"]
+        ),
+        .library(
+            name: "PexipVideoFilters",
+            targets: ["PexipVideoFilters"]
         )
     ],
     dependencies: [
@@ -63,10 +67,7 @@ let package = Package(
         ),
         .testTarget(
             name: "PexipMediaTests",
-            dependencies: ["PexipMedia"],
-            resources: [
-                .copy("Resources/testVideo.mp4")
-            ]
+            dependencies: ["PexipMedia", "TestHelpers"]
         ),
         // PexipRTC
         .target(
@@ -87,6 +88,19 @@ let package = Package(
         .testTarget(
             name: "PexipUtilsTests",
             dependencies: ["PexipUtils"]
-        )
+        ),
+        // PexipVideoFilters
+        .target(
+            name: "PexipVideoFilters"
+        ),
+        .testTarget(
+            name: "PexipVideoFiltersTests",
+            dependencies: ["PexipVideoFilters", "TestHelpers"],
+            resources: [
+                .copy("Resources/testVideo.mp4")
+            ]
+        ),
+        // TestHelpers
+        .target(name: "TestHelpers", path: "Tests/TestHelpers"),
     ]
 )
