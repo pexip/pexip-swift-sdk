@@ -4,6 +4,7 @@ import PexipRTC
 import PexipConference
 import PexipMedia
 import PexipInfinityClient
+import PexipVideoFilters
 
 final class ConferenceViewModel: ObservableObject {
     @Published private(set) var state: ConferenceState
@@ -60,7 +61,7 @@ final class ConferenceViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let cameraQualityProfile: QualityProfile = .high
     private let localPresentationQualityProfile: QualityProfile = .presentationVeryHigh
-    private let videoFilterFactory = VideoFilterFactory()
+    private let cameraVideoFilter = CameraVideoFilter()
     private var isSinkingLiveCaptionsSettings = false
     private var hideCaptionsTask: Task<Void, Error>?
     @Published private var mainRemoteVideoTrack: VideoTrack?
@@ -89,6 +90,7 @@ final class ConferenceViewModel: ObservableObject {
         self.onComplete = onComplete
         self.state = .preflight
 
+        cameraVideoTrack?.videoFilter = cameraVideoFilter
         setCameraEnabled(videoPermission.isAuthorized)
         setMicrophoneEnabled(audioPermission.isAuthorized)
         sinkMediaConnectionEvents()
@@ -341,25 +343,8 @@ private extension ConferenceViewModel {
         }
     }
 
-    func setCameraFilter(_ filter: CameraFilter) {
-        let factory = videoFilterFactory
-
-        switch filter {
-        case .none:
-            cameraVideoTrack?.videoFilter = nil
-        case .gaussianBlur:
-            cameraVideoTrack?.videoFilter = factory.gaussianBlur(radius: 30)
-        case .tentBlur:
-            cameraVideoTrack?.videoFilter = factory.tentBlur(intensity: 0.3)
-        case .boxBlur:
-            cameraVideoTrack?.videoFilter = factory.boxBlur(intensity: 0.3)
-        case .imageBackground:
-            if let image = CGImage.withName("background_image") {
-                cameraVideoTrack?.videoFilter = factory.virtualBackground(image: image)
-            } else {
-                cameraVideoTrack?.videoFilter = nil
-            }
-        }
+    func setCameraFilter(_ filter: CameraVideoFilter.Kind) {
+        cameraVideoFilter.kind = filter
     }
 
     func showLiveCaptions(_ captions: LiveCaptions) {

@@ -3,7 +3,7 @@
 
 import PackageDescription
 
-let isDevelopment = false
+let isDevelopment = true
 let sdkName = isDevelopment ? "pexip-swift-sdk-sources" : "pexip-swift-sdk"
 let sdkPackage: Package.Dependency = isDevelopment
     ? .package(path: "../../../../\(sdkName)")
@@ -36,7 +36,8 @@ let package = Package(
                 .product(name: "PexipMedia", package: sdkName),
                 .product(name: "PexipInfinityClient", package: sdkName),
                 .product(name: "PexipRTC", package: sdkName),
-                .product(name: "PexipConference", package: sdkName)
+                .product(name: "PexipConference", package: sdkName),
+                .product(name: "PexipVideoFilters", package: sdkName)
             ]
         ),
         .target(

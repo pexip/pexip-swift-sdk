@@ -1,12 +1,12 @@
 {
   "pins" : [
     {
-      "identity" : "pexip-swift-sdk",
+      "identity" : "webrtc-ios-builds",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pexip/pexip-swift-sdk",
+      "location" : "https://github.com/pexip/webrtc-ios-builds",
       "state" : {
-        "revision" : "5c69c5fd07097e0fb8c87b35d7be96097ef08198",
-        "version" : "0.4.0"
+        "revision" : "ac1824faab2848264e78271a297763c8e59c40af",
+        "version" : "96.0.4664"
       }
     }
   ],

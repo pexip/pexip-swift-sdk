@@ -248,7 +248,8 @@ struct ConferenceView_Previews: PreviewProvider {
             turn: nil,
             chatEnabled: false,
             analyticsEnabled: true,
-            expiresString: "1234"
+            expiresString: "1234",
+            version: Version(versionId: "29", pseudoVersion: "29")
         )
     )
 

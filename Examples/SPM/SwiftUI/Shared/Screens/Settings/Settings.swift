@@ -1,7 +1,7 @@
 import SwiftUI
 
 final class Settings: ObservableObject {
-    @Published var cameraFilter: CameraFilter = .none {
+    @Published var cameraFilter: CameraVideoFilter.Kind = .none {
         didSet {
             userDefaults?.cameraFilter = cameraFilter
         }
@@ -33,10 +33,10 @@ final class Settings: ObservableObject {
 // MARK: - Storage
 
 private extension UserDefaults {
-    var cameraFilter: CameraFilter {
+    var cameraFilter: CameraVideoFilter.Kind {
         get {
             string(forKey: "cameraFilter")
-                .flatMap(CameraFilter.init(rawValue:)) ?? .none
+                .flatMap(CameraVideoFilter.Kind.init(rawValue:)) ?? .none
         }
         set { set(newValue.rawValue, forKey: "cameraFilter") }
     }

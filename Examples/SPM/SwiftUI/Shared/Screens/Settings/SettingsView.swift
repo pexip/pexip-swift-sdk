@@ -1,15 +1,5 @@
 import SwiftUI
 
-// MARK: - CameraFilter
-
-enum CameraFilter: String, CaseIterable, Hashable {
-    case none = "None"
-    case gaussianBlur = "Gaussian Blur"
-    case tentBlur = "Tent Blur"
-    case boxBlur = "Box Blur"
-    case imageBackground = "Image Background"
-}
-
 // MARK: - CameraFilterButton
 
 struct SettingsView: View {
@@ -39,7 +29,7 @@ struct SettingsView: View {
 
     private var cameraFilters: some View {
         Menu("Camera Filters") {
-            ForEach(CameraFilter.allCases, id: \.hashValue) { filter in
+            ForEach(CameraVideoFilter.Kind.allCases, id: \.hashValue) { filter in
                 FilterButton(
                     filter: filter,
                     isSelected: filter == settings.cameraFilter,
@@ -65,7 +55,7 @@ struct SettingsView: View {
 // MARK: - Private types
 
 private struct FilterButton: View {
-    let filter: CameraFilter
+    let filter: CameraVideoFilter.Kind
     let isSelected: Bool
     let action: () -> Void
 
