@@ -12,7 +12,7 @@ final class CameraVideoFilter: PexipMedia.VideoFilter {
         case imageBackground = "Image Background"
     }
 
-    private let factory = VideoFilterFactory()
+    private let factory = VideoFilterFactory().background()
     private var videoFilter: PexipVideoFilters.VideoFilter?
 
     var kind: Kind = .none {
