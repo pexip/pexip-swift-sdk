@@ -1,7 +1,7 @@
 import Accelerate
 import CoreImage
 
-final class AccelerateBlurFilter: VideoFilter {
+final class AccelerateBlurFilter: ImageFilter {
     enum Kind {
         case tent
         case box
@@ -15,7 +15,6 @@ final class AccelerateBlurFilter: VideoFilter {
 
     private let kind: Kind
     private let ciContext: CIContext
-    private let segmenter: PersonSegmenter
     private let kernelLength: UInt32
     private var lastSize: CGSize = .zero
     private var scaleTempBuffer: UnsafeMutableRawPointer?
@@ -26,7 +25,6 @@ final class AccelerateBlurFilter: VideoFilter {
     init(
         kind: Kind,
         intensity: Float = AccelerateBlurFilter.defaultIntensity,
-        segmenter: PersonSegmenter,
         ciContext: CIContext
     ) {
         let intensity = min(max(intensity, 0), 1)
@@ -35,7 +33,6 @@ final class AccelerateBlurFilter: VideoFilter {
 
         self.kind = kind
         self.kernelLength = kernelLength
-        self.segmenter = segmenter
         self.ciContext = ciContext
     }
 
@@ -44,23 +41,16 @@ final class AccelerateBlurFilter: VideoFilter {
         scaleTempBuffer = nil
         blurTempBuffer?.deallocate()
         blurTempBuffer = nil
-        ciContext.clearCaches()
     }
 
-    // MARK: - VideoFilter
+    // MARK: - ImageFilter
 
-    func processPixelBuffer(
-        _ pixelBuffer: CVPixelBuffer,
+    func processImage(
+        _ image: CIImage,
+        withSize size: CGSize,
         orientation: CGImagePropertyOrientation
-    ) -> CVPixelBuffer {
-        let newPixelBuffer = segmenter.blendWithMask(
-            pixelBuffer: pixelBuffer,
-            ciContext: ciContext,
-            backgroundImage: { [weak self] originalImage in
-                try? self?.blurredImage(from: originalImage)
-            }
-        )
-        return newPixelBuffer ?? pixelBuffer
+    ) -> CIImage? {
+        try? blurredImage(from: image)
     }
 
     // MARK: - Private

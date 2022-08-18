@@ -19,12 +19,12 @@ final class CGImagePropertyOrientationWebRTCTests: XCTestCase {
     }
 
     func testInitWithRtcRotation() {
-        XCTAssertEqual(CGImagePropertyOrientation(rtcRotation: ._0), .right)
-        XCTAssertEqual(CGImagePropertyOrientation(rtcRotation: ._90), .up)
-        XCTAssertEqual(CGImagePropertyOrientation(rtcRotation: ._270), .down)
-        XCTAssertEqual(CGImagePropertyOrientation(rtcRotation: ._180), .left)
+        XCTAssertEqual(CGImagePropertyOrientation(rtcRotation: ._0), .up)
+        XCTAssertEqual(CGImagePropertyOrientation(rtcRotation: ._90), .left)
+        XCTAssertEqual(CGImagePropertyOrientation(rtcRotation: ._270), .right)
+        XCTAssertEqual(CGImagePropertyOrientation(rtcRotation: ._180), .down)
         XCTAssertEqual(
-            CGImagePropertyOrientation(rtcRotation: .init(rawValue: 1001)!), .right
+            CGImagePropertyOrientation(rtcRotation: .init(rawValue: 1001)!), .up
         )
     }
 }

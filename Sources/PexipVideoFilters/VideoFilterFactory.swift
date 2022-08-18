@@ -3,30 +3,15 @@ import CoreImage
 /// ``VideoFilterFactory`` provides factory methods to create video filters.
 public struct VideoFilterFactory {
     private let ciContext: CIContext
-    private let segmenter: PersonSegmenter
 
-    /// Creates a new instance of ``VideoFilterFactory``
-    /// with default ``PersonSegmenter``.
-    @available(iOS 15.0, *)
-    @available(macOS 12.0, *)
+    // MARK: - Init
+
+    /// Creates a new instance of ``VideoFilterFactory``.
     public init() {
-        let segmenter = VisionPersonSegmenter()
-        self.init(segmenter: segmenter)
-    }
-
-    /**
-     Creates a new instance of ``VideoFilterFactory``.
-
-     - Parameters:
-        - segmenter: A custom image buffer segmenter
-     */
-    public init(segmenter: PersonSegmenter) {
         let options: [CIContextOption: Any] = [
             .useSoftwareRenderer: false,
             .cacheIntermediates: false
         ]
-
-        self.segmenter = segmenter
 
         if let device = MTLCreateSystemDefaultDevice() {
             self.ciContext = CIContext(mtlDevice: device, options: options)
@@ -38,77 +23,113 @@ public struct VideoFilterFactory {
     // MARK: - Public
 
     /**
-     Creates a new filter that applies a Gaussian blur filter to video frames.
+     Creates a new segmentation video filter.
 
      - Parameters:
-        - radius: The blur intensity (0...100)
+        - background: A filter that modifies the background of the video frame.
+        - filters: An optional list of extra filters to apply on the whole video frame.
+
+     - Returns: a new segmentation video filter.
+     */
+    @available(iOS 15.0, *)
+    @available(macOS 12.0, *)
+    public func segmentation(
+        background: Background,
+        filters: [CIFilter] = []
+    ) -> VideoFilter {
+        segmentation(
+            segmenter: VisionPersonSegmenter(),
+            background: background,
+            filters: filters
+        )
+    }
+
+    /**
+     Creates a new segmentation video filter.
+
+     - Parameters:
         - segmenter: A custom image buffer segmenter
-        - ciContext: A custom CoreImage context
-     - Returns: A new video filter
-     */
-    public func gaussianBlur(radius: Float = 40) -> VideoFilter {
-        GaussianBlurFilter(radius: radius, segmenter: segmenter, ciContext: ciContext)
-    }
+        - background: A filter that modifies the background of the video frame.
+        - filters: An optional list of extra filters to apply on the whole video frame.
 
-    /**
-     Creates a new filter that applies a tent blur filter to video frames.
-
-     - Parameters:
-        - intensity: The blur intensity (0...1)
-     - Returns: A new video filter
+     - Returns: a new segmentation video filter.
      */
-    public func tentBlur(intensity: Float = 0.4) -> VideoFilter {
-        AccelerateBlurFilter(
-            kind: .tent,
-            intensity: intensity,
+    public func segmentation(
+        segmenter: PersonSegmenter,
+        background: Background,
+        filters: [CIFilter] = []
+    ) -> VideoFilter {
+        let backgroundFilter: ImageFilter
+
+        switch background {
+        case .gaussianBlur(let radius):
+            backgroundFilter = GaussianBlurFilter(radius: radius)
+        case .tentBlur(let intensity):
+            backgroundFilter = AccelerateBlurFilter(
+                kind: .tent,
+                intensity: intensity,
+                ciContext: ciContext
+            )
+        case .boxBlur(let intensity):
+            backgroundFilter = AccelerateBlurFilter(
+                kind: .box,
+                intensity: intensity,
+                ciContext: ciContext
+            )
+        case .image(let image):
+            backgroundFilter = ImageReplacementFilter(image: image)
+        case .video(let url):
+            backgroundFilter = VideoReplacementFilter(url: url)
+        case .custom(let filter):
+            backgroundFilter = CustomImageFilter(ciFilter: filter)
+        }
+
+        return SegmentationVideoFilter(
             segmenter: segmenter,
+            backgroundFilter: backgroundFilter,
+            globalFilters: filters,
             ciContext: ciContext
         )
     }
 
     /**
-     Creates a new filter that applies a box blur filter to video frames.
-
+     Creates a new custom video filter from the given instance of CIFilter.
      - Parameters:
-        - intensity: The blur intensity (0...1)
-     - Returns: A new video filter
+        - ciFilter: A custom image filter
+     - Returns: a new custom video filter
      */
-    public func boxBlur(intensity: Float = 0.4) -> VideoFilter {
-        AccelerateBlurFilter(
-            kind: .box,
-            intensity: intensity,
-            segmenter: segmenter,
-            ciContext: ciContext
-        )
+    public func customFilter(_ ciFilter: CIFilter) -> VideoFilter {
+        CustomVideoFilter(ciFilter: ciFilter, ciContext: ciContext)
     }
+}
 
-    /**
-     Sets the given image as a background of your video content.
+// MARK: - Background filters
 
-     - Parameters:
-        - image: The virtual background image
-     - Returns: A new video filter
-     */
-    public func virtualBackground(image: CGImage) -> VideoFilter {
-        ImageBackgroundFilter(
-            backgroundImage: image,
-            segmenter: segmenter,
-            ciContext: ciContext
-        )
-    }
+extension VideoFilterFactory {
+    /// Built-in background filters.
+    public enum Background {
+        /// Applies a Gaussian blur filter to the background of every video frame.
+        /// - Parameter radius: The blur intensity (0...100)
+        case gaussianBlur(radius: Float = 40)
 
-    /**
-     Sets the given video as a background of your video content.
+        /// Applies a tent blur filter to the background of every video frame.
+        /// - Parameter intensity: The blur intensity (0...1)
+        case tentBlur(intensity: Float = 0.4)
 
-     - Parameters:
-        - videoURL: A url to a video file
-     - Returns: A new video filter
-     */
-    func virtualBackground(videoURL: URL) -> VideoFilter {
-        VideoBackgroundFilter(
-            url: videoURL,
-            segmenter: segmenter,
-            ciContext: ciContext
-        )
+        /// Applies a box blur filter to the background of every video frame.
+        /// - Parameter intensity: The blur intensity (0...1)
+        case boxBlur(intensity: Float = 0.4)
+
+        /// Sets the given image as a background of your video content.
+        /// - Parameter image: The virtual background image.
+        case image(CGImage)
+
+        /// Sets the given video as a background of your video content.
+        /// - Parameter url: The url to a video file
+        case video(url: URL)
+
+        /// Applies the given CIFilter to the background of every video frame.
+        /// - Parameter filter: A custom image filter
+        case custom(filter: CIFilter)
     }
 }

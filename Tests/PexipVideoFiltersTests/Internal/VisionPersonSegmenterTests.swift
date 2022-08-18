@@ -29,7 +29,6 @@ final class VisionPersonSegmenterTests: XCTestCase {
         XCTAssertEqual(request?.qualityLevel, .balanced)
         XCTAssertEqual(request?.outputPixelFormat, kCVPixelFormatType_OneComponent8)
         XCTAssertEqual(requestHandler.pixelBuffer, pixelBuffer)
-        XCTAssertEqual(requestHandler.orientation, .right)
     }
 }
 
@@ -38,15 +37,12 @@ final class VisionPersonSegmenterTests: XCTestCase {
 private final class RequestHandlerMock: VNSequenceRequestHandler {
     private(set) var requests = [VNRequest]()
     private(set) var pixelBuffer: CVPixelBuffer?
-    private(set) var orientation: CGImagePropertyOrientation?
 
     override func perform(
         _ requests: [VNRequest],
-        on pixelBuffer: CVPixelBuffer,
-        orientation: CGImagePropertyOrientation
+        on pixelBuffer: CVPixelBuffer
     ) throws {
         self.requests = requests
         self.pixelBuffer = pixelBuffer
-        self.orientation = orientation
     }
 }

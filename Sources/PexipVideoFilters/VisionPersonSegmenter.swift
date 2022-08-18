@@ -1,5 +1,6 @@
 import Vision
 
+/// Performs person segmentation in an image using Vision framework.
 @available(iOS 15.0, *)
 @available(macOS 12.0, *)
 public final class VisionPersonSegmenter: PersonSegmenter {
@@ -12,6 +13,8 @@ public final class VisionPersonSegmenter: PersonSegmenter {
         return request
     }()
 
+    // MARK: - Init
+
     public init(requestHandler: VNSequenceRequestHandler = .init()) {
         self.requestHandler = requestHandler
     }
@@ -19,11 +22,7 @@ public final class VisionPersonSegmenter: PersonSegmenter {
     // MARK: - Perform Requests
 
     public func personMaskPixelBuffer(from pixelBuffer: CVPixelBuffer) -> CVPixelBuffer? {
-        try? requestHandler.perform(
-            [segmentationRequest],
-            on: pixelBuffer,
-            orientation: .right
-        )
+        try? requestHandler.perform([segmentationRequest], on: pixelBuffer)
         return segmentationRequest.results?.first?.pixelBuffer
     }
 }

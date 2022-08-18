@@ -1,10 +1,8 @@
 import CoreImage
 import AVFoundation
 
-final class VideoBackgroundFilter: VideoFilter {
+final class VideoReplacementFilter: ImageFilter {
     private let url: URL
-    private let segmenter: PersonSegmenter
-    private let ciContext: CIContext
     private let notificationCenter: NotificationCenter
     private var player: AVPlayer?
     private var playerItemOutput: AVPlayerItemVideoOutput?
@@ -18,13 +16,9 @@ final class VideoBackgroundFilter: VideoFilter {
 
     init(
         url: URL,
-        segmenter: PersonSegmenter,
-        ciContext: CIContext,
         notificationCenter: NotificationCenter = .default
     ) {
         self.url = url
-        self.segmenter = segmenter
-        self.ciContext = ciContext
         self.notificationCenter = notificationCenter
     }
 
@@ -32,44 +26,25 @@ final class VideoBackgroundFilter: VideoFilter {
         stop()
     }
 
-    // MARK: - VideoFilter
+    // MARK: - ImageFilter
 
-    func processPixelBuffer(
-        _ pixelBuffer: CVPixelBuffer,
+    func processImage(
+        _ image: CIImage,
+        withSize size: CGSize,
         orientation: CGImagePropertyOrientation
-    ) -> CVPixelBuffer {
+    ) -> CIImage? {
         if !isPlaying {
             try? play()
         }
 
-        let width = CVPixelBufferGetWidth(pixelBuffer)
-        let height = CVPixelBufferGetHeight(pixelBuffer)
-
-        let newPixelBuffer = segmenter.blendWithMask(
-            pixelBuffer: pixelBuffer,
-            ciContext: ciContext,
-            backgroundImage: { [weak self] _ in
-                guard let self = self else { return nil }
-
-                let isVertical = orientation.isVertical
-
-                let size = CGSize(
-                    width: Int(isVertical ? height : width),
-                    height: Int(isVertical ? width : height)
-                )
-
-                let image = self.currentVideoImage(
-                    forSize: size,
-                    orientation: orientation
-                )
-
-                self.lastFrameImage = image ?? self.lastFrameImage
-
-                return self.lastFrameImage
-            }
+        let newImage = self.currentVideoImage(
+            forSize: size,
+            orientation: orientation
         )
 
-        return newPixelBuffer ?? pixelBuffer
+        self.lastFrameImage = newImage ?? self.lastFrameImage
+
+        return self.lastFrameImage
     }
 
     private func play() throws {
@@ -119,7 +94,6 @@ final class VideoBackgroundFilter: VideoFilter {
         tracksObserver = nil
         lastFrameImage = nil
         isPlaying = false
-        ciContext.clearCaches()
 
         if let playerPlayToEndObserver = playerPlayToEndObserver {
             notificationCenter.removeObserver(playerPlayToEndObserver)

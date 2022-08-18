@@ -22,4 +22,30 @@ extension CIImage {
             y: -rect.minY
         ))
     }
+
+    func pixelBuffer(
+        withTemplate template: CVPixelBuffer,
+        ciContext: CIContext
+    ) -> CVPixelBuffer? {
+        var pixelBuffer: CVPixelBuffer?
+
+        CVPixelBufferCreate(
+            kCFAllocatorDefault,
+            CVPixelBufferGetWidth(template),
+            CVPixelBufferGetHeight(template),
+            CVPixelBufferGetPixelFormatType(template),
+            nil,
+            &pixelBuffer
+        )
+
+        guard let pixelBuffer = pixelBuffer else {
+            return nil
+        }
+
+        CVPixelBufferLockBaseAddress(pixelBuffer, .init(rawValue: 0))
+        ciContext.render(self, to: pixelBuffer)
+        CVPixelBufferUnlockBaseAddress(pixelBuffer, .init(rawValue: 0))
+
+        return pixelBuffer
+    }
 }

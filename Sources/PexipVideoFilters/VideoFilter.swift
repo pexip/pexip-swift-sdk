@@ -10,6 +10,7 @@ public protocol VideoFilter {
      - Parameters:
         - pixelBuffer: The CVPixelBuffer containing the image to be processed.
         - orientation: A value describing the intended display orientation for an image.
+
      - Returns: The CVPixelBuffer containing the resulting image.
      */
     func processPixelBuffer(

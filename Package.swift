@@ -39,6 +39,10 @@ let package = Package(
         .package(
             url: "https://github.com/pexip/webrtc-ios-builds",
             .exactItem("96.0.4664")
+        ),
+        .package(
+            url: "https://github.com/pointfreeco/swift-snapshot-testing.git",
+            from: "1.9.0"
         )
     ],
     targets: [
@@ -95,9 +99,15 @@ let package = Package(
         ),
         .testTarget(
             name: "PexipVideoFiltersTests",
-            dependencies: ["PexipVideoFilters", "TestHelpers"],
+            dependencies: [
+                "PexipVideoFilters",
+                "TestHelpers",
+                .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
+            ],
+            exclude: ["Internal/__Snapshots__/"],
             resources: [
-                .copy("Resources/testVideo.mp4")
+                .copy("Resources/testVideo.mp4"),
+                .copy("Resources/testImage.jpg"),
             ]
         ),
         // TestHelpers

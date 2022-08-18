@@ -37,11 +37,7 @@ public final class CoreMLPersonSegmenter: PersonSegmenter {
 
         request.cancel()
 
-        try? requestHandler.perform(
-            [request],
-            on: pixelBuffer,
-            orientation: .right
-        )
+        try? requestHandler.perform([request], on: pixelBuffer)
 
         guard let observation = request.results?.first as? VNPixelBufferObservation else {
             return nil

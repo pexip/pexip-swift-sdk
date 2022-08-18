@@ -18,15 +18,15 @@ extension CGImagePropertyOrientation {
     init(rtcRotation: RTCVideoRotation) {
         switch rtcRotation {
         case ._0:
-            self = .right
-        case ._90:
             self = .up
-        case ._270:
-            self = .down
-        case ._180:
+        case ._90:
             self = .left
-        @unknown default:
+        case ._270:
             self = .right
+        case ._180:
+            self = .down
+        @unknown default:
+            self = .up
         }
     }
 }

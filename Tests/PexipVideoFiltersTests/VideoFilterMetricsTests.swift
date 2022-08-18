@@ -5,7 +5,7 @@ import CoreMedia
 
 @available(iOS 15.0, *)
 @available(macOS 12.0, *)
-final class VideoFilterTests: XCTestCase {
+final class VideoFilterMetricsTests: XCTestCase {
     private var factory: VideoFilterFactory!
     private var pixelBuffer: CVPixelBuffer!
     private let machToSeconds: Double = {
@@ -31,7 +31,7 @@ final class VideoFilterTests: XCTestCase {
     // MARK: - Tests
 
     func testGaussianBlur() {
-        let filter = factory.gaussianBlur()
+        let filter = factory.segmentation(background: .gaussianBlur())
         var resultPixelBuffer: CVPixelBuffer?
 
         // Run 1
@@ -54,7 +54,7 @@ final class VideoFilterTests: XCTestCase {
     }
 
     func testTentBlur() {
-        let filter = factory.tentBlur()
+        let filter = factory.segmentation(background: .tentBlur())
         var resultPixelBuffer: CVPixelBuffer?
 
         // Run 1
@@ -77,7 +77,7 @@ final class VideoFilterTests: XCTestCase {
     }
 
     func testBoxBlur() {
-        let filter = factory.boxBlur()
+        let filter = factory.segmentation(background: .boxBlur())
         var resultPixelBuffer: CVPixelBuffer?
 
         // Run 1
@@ -101,7 +101,7 @@ final class VideoFilterTests: XCTestCase {
 
     func testVirtualBackgroundImage() throws {
         let image = try XCTUnwrap(CGImage.image(width: 1920, height: 1080))
-        let filter = factory.virtualBackground(image: image)
+        let filter = factory.segmentation(background: .image(image))
         var resultPixelBuffer: CVPixelBuffer?
 
         // Run 1
@@ -127,7 +127,7 @@ final class VideoFilterTests: XCTestCase {
         let url = try XCTUnwrap(
             Bundle.module.url(forResource: "testVideo", withExtension: "mp4")
         )
-        let filter = factory.virtualBackground(videoURL: url)
+        let filter = factory.segmentation(background: .video(url: url))
         var resultPixelBuffer: CVPixelBuffer?
 
         // Run 1
