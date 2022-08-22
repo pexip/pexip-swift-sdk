@@ -6,7 +6,7 @@ final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
     var videoProfile: QualityProfile?
     var videoFilter: VideoFilter? {
         didSet {
-            processor.videoFilter.mutate { $0 = videoFilter }
+            processor.setVideoFilter(videoFilter)
         }
     }
 

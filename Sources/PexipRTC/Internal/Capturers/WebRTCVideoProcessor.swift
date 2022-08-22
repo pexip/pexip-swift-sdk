@@ -1,16 +1,30 @@
 import WebRTC
 import ImageIO
 import PexipMedia
-import PexipUtils
 
 final class WebRTCVideoProcessor: NSObject, RTCVideoCapturerDelegate {
-    var videoFilter = Synchronized<VideoFilter?>(nil)
+    var videoFilter: VideoFilter? {
+        videoFilterLock.lock()
+        defer { videoFilterLock.unlock() }
+        return _videoFilter
+    }
+
+    private var _videoFilter: VideoFilter?
+    private let videoFilterLock = NSLock()
     private let videoSource: RTCVideoSource
 
     // MARK: - Init
 
     init(videoSource: RTCVideoSource) {
         self.videoSource = videoSource
+    }
+
+    // MARK: - Internal
+
+    func setVideoFilter(_ videoFilter: VideoFilter?) {
+        videoFilterLock.lock()
+        _videoFilter = videoFilter
+        videoFilterLock.unlock()
     }
 
     // MARK: - RTCVideoCapturerDelegate
@@ -22,7 +36,7 @@ final class WebRTCVideoProcessor: NSObject, RTCVideoCapturerDelegate {
             videoSource.capturer(capturer, didCapture: rtcVideoFrame)
         }
 
-        guard let videoFilter = videoFilter.value else {
+        guard let videoFilter = videoFilter else {
             return
         }
 

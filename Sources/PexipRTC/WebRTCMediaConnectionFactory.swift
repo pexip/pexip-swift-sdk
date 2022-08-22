@@ -1,6 +1,7 @@
 import WebRTC
 import PexipUtils
 import PexipMedia
+import PexipScreenCapture
 
 public final class WebRTCMediaConnectionFactory: MediaConnectionFactory {
     private let factory: RTCPeerConnectionFactory

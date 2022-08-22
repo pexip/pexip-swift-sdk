@@ -2,6 +2,7 @@ import WebRTC
 import ImageIO
 import PexipMedia
 import PexipUtils
+import PexipScreenCapture
 
 // MARK: - WebRTCScreenCapturerErrorDelegate
 
@@ -41,7 +42,10 @@ final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate 
 
     func startCapture(withVideoProfile videoProfile: QualityProfile) async throws {
         self.videoProfile = videoProfile
-        try await capturer.startCapture(withVideoProfile: videoProfile)
+        try await capturer.startCapture(
+            atFps: videoProfile.fps,
+            outputDimensions: videoProfile.dimensions
+        )
         logger?.info("Screen capture did start.")
     }
 
@@ -60,7 +64,9 @@ final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate 
         var adaptedDimensions = cropDimensions
 
         if let videoProfile = videoProfile {
-            adaptedDimensions = videoFrame.adaptedContentDimensions(to: videoProfile)
+            adaptedDimensions = videoFrame.adaptedContentDimensions(
+                to: videoProfile.dimensions
+            )
 
             videoSource.adaptOutputFormat(
                 toWidth: adaptedDimensions.width,

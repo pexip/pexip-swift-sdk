@@ -1,4 +1,5 @@
 import AVFoundation
+import PexipScreenCapture
 
 /// ``MediaConnectionFactory`` provides factory methods
 /// to create media connection, audio and video tracks, etc.

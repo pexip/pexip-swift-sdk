@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.6
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -33,12 +33,16 @@ let package = Package(
         .library(
             name: "PexipVideoFilters",
             targets: ["PexipVideoFilters"]
+        ),
+        .library(
+            name: "PexipScreenCapture",
+            targets: ["PexipScreenCapture"]
         )
     ],
     dependencies: [
         .package(
             url: "https://github.com/pexip/webrtc-ios-builds",
-            .exactItem("96.0.4664")
+            exact: .init(96, 0, 4664)
         ),
         .package(
             url: "https://github.com/pointfreeco/swift-snapshot-testing.git",
@@ -46,7 +50,8 @@ let package = Package(
         )
     ],
     targets: [
-        // PexipConference
+        // MARK: - PexipConference
+
         .target(
             name: "PexipConference",
             dependencies: ["PexipInfinityClient", "PexipMedia"]
@@ -55,7 +60,9 @@ let package = Package(
             name: "PexipConferenceTests",
             dependencies: ["PexipConference"]
         ),
-        // PexipInfinityClient
+
+        // MARK: - PexipInfinityClient
+
         .target(
             name: "PexipInfinityClient",
             dependencies: ["PexipUtils"]
@@ -64,20 +71,25 @@ let package = Package(
             name: "PexipInfinityClientTests",
             dependencies: ["PexipInfinityClient"]
         ),
-        // PexipMedia
+
+        // MARK: - PexipMedia
+
         .target(
             name: "PexipMedia",
-            dependencies: ["PexipUtils"]
+            dependencies: ["PexipScreenCapture"]
         ),
         .testTarget(
             name: "PexipMediaTests",
             dependencies: ["PexipMedia", "TestHelpers"]
         ),
-        // PexipRTC
+
+        // MARK: - PexipRTC
+
         .target(
             name: "PexipRTC",
             dependencies: [
                 "PexipMedia",
+                "PexipUtils",
                 .product(name: "WebRTC", package: "webrtc-ios-builds")
             ]
         ),
@@ -85,7 +97,9 @@ let package = Package(
             name: "PexipRTCTests",
             dependencies: ["PexipRTC"]
         ),
-        // PexipUtils
+
+        // MARK: -  PexipUtils
+
         .target(
             name: "PexipUtils"
         ),
@@ -93,7 +107,9 @@ let package = Package(
             name: "PexipUtilsTests",
             dependencies: ["PexipUtils"]
         ),
-        // PexipVideoFilters
+
+        // MARK: - PexipVideoFilters
+
         .target(
             name: "PexipVideoFilters"
         ),
@@ -110,7 +126,19 @@ let package = Package(
                 .copy("Resources/testImage.jpg"),
             ]
         ),
-        // TestHelpers
+
+        // MARK: - PexipScreenCapture
+
+        .target(
+            name: "PexipScreenCapture"
+        ),
+        .testTarget(
+            name: "PexipScreenCaptureTests",
+            dependencies: ["PexipScreenCapture", "TestHelpers"]
+        ),
+
+        // MARK: - TestHelpers
+
         .target(name: "TestHelpers", path: "Tests/TestHelpers"),
     ]
 )
