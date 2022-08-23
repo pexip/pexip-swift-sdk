@@ -2,7 +2,6 @@ import XCTest
 import PexipMedia
 @testable import PexipRTC
 
-// swiftlint:disable type_body_length
 final class SDPManglerTests: XCTestCase {
     private func mangle(
         _ sdp: SDP,
@@ -59,7 +58,7 @@ final class SDPManglerTests: XCTestCase {
             "a=mid:5",
             "a=extmap:14 urn:ietf:params:rtp-hdrext:toffset",
             "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
-            "c=IN IP4 91.240.204.48",
+            "c=IN IP4 91.240.204.48"
         ])
         let expectedSDP = SDP([
             "a=mid:3",
@@ -79,7 +78,7 @@ final class SDPManglerTests: XCTestCase {
             "a=content:slides",
             "a=extmap:14 urn:ietf:params:rtp-hdrext:toffset",
             "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
-            "c=IN IP4 91.240.204.48",
+            "c=IN IP4 91.240.204.48"
         ])
         let outSDP = mangle(
             inSDP,

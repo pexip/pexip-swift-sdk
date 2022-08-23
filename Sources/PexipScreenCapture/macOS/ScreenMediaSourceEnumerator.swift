@@ -33,7 +33,7 @@ public extension ScreenMediaSourceEnumerator {
         try await getAllOnScreenWindows().filter {
             $0.windowLayer == 0
                 && $0.title != nil
-                && $0.title != ""
+                && $0.title?.isEmpty == false
                 && $0.application != nil
                 && $0.application?.bundleIdentifier != Bundle.main.bundleIdentifier
         }

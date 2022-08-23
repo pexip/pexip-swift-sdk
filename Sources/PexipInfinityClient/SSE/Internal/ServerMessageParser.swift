@@ -26,6 +26,7 @@ struct ServerMessageParser {
         }
     }
 
+    // swiftlint:disable cyclomatic_complexity
     private func message(
         withName name: ServerEvent.Name,
         data: Data?

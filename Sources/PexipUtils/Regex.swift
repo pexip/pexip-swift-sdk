@@ -20,8 +20,8 @@ public struct Regex {
 
 // MARK: - Match
 
-extension Regex {
-    public struct Match {
+public extension Regex {
+    struct Match {
         fileprivate let string: String
         fileprivate let result: NSTextCheckingResult
 

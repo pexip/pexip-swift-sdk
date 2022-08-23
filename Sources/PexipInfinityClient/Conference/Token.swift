@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Token: Codable, Hashable {
+public struct Token: TokenWithExpiration, Codable, Hashable {
     public enum Role: String, Codable, Hashable {
         case host = "HOST"
         case guest = "GUEST"
@@ -72,19 +72,6 @@ public struct Token: Codable, Hashable {
     /// Validity lifetime in seconds.
     public var expires: TimeInterval {
         TimeInterval(expiresString) ?? 0
-    }
-
-    public var expiresAt: Date {
-        updatedAt.addingTimeInterval(expires)
-    }
-
-    public var refreshDate: Date {
-        let refreshInterval = expires / 2
-        return updatedAt.addingTimeInterval(refreshInterval)
-    }
-
-    public func isExpired(currentDate: Date = .init()) -> Bool {
-        currentDate >= expiresAt
     }
 
     private var expiresString: String

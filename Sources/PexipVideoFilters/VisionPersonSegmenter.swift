@@ -26,4 +26,3 @@ public final class VisionPersonSegmenter: PersonSegmenter {
         return segmentationRequest.results?.first?.pixelBuffer
     }
 }
-

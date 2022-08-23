@@ -12,7 +12,6 @@ final class ServerEventServiceTests: APITestCase {
         service = DefaultServerEventService(baseURL: baseURL, client: client)
     }
 
-    // swiftlint:disable function_body_length
     func testEventStream() async throws {
         // 1. Prepare
         var receivedEvents = [ServerEvent]()

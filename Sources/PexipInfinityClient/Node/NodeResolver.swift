@@ -40,7 +40,7 @@ struct DefaultNodeResolver: NodeResolver {
             nodes = try await resolveARecords(for: host)
         }
 
-        if nodes.isEmpty{
+        if nodes.isEmpty {
             logger?.warn("No SRV or A records were found for \(host)")
         } else {
             logger?.info(

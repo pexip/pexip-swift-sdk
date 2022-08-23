@@ -47,40 +47,46 @@ let package = Package(
         .package(
             url: "https://github.com/pointfreeco/swift-snapshot-testing.git",
             from: "1.9.0"
-        )
+        ),
     ],
     targets: [
         // MARK: - PexipConference
 
         .target(
             name: "PexipConference",
-            dependencies: ["PexipInfinityClient", "PexipMedia"]
+            dependencies: ["PexipInfinityClient", "PexipMedia"],
+            plugins: [.swiftlint]
         ),
         .testTarget(
             name: "PexipConferenceTests",
-            dependencies: ["PexipConference"]
+            dependencies: ["PexipConference"],
+            plugins: [.swiftlint]
         ),
 
         // MARK: - PexipInfinityClient
 
         .target(
             name: "PexipInfinityClient",
-            dependencies: ["PexipUtils"]
+            dependencies: ["PexipUtils"],
+            plugins: [.swiftlint]
         ),
         .testTarget(
             name: "PexipInfinityClientTests",
-            dependencies: ["PexipInfinityClient"]
+            dependencies: ["PexipInfinityClient"],
+            plugins: [.swiftlint]
         ),
 
         // MARK: - PexipMedia
 
         .target(
             name: "PexipMedia",
-            dependencies: ["PexipScreenCapture"]
+            dependencies: ["PexipScreenCapture"],
+            plugins: [.swiftlint]
         ),
         .testTarget(
             name: "PexipMediaTests",
-            dependencies: ["PexipMedia", "TestHelpers"]
+            dependencies: ["PexipMedia", "TestHelpers"],
+            plugins: [.swiftlint]
         ),
 
         // MARK: - PexipRTC
@@ -91,27 +97,32 @@ let package = Package(
                 "PexipMedia",
                 "PexipUtils",
                 .product(name: "WebRTC", package: "webrtc-ios-builds")
-            ]
+            ],
+            plugins: [.swiftlint]
         ),
         .testTarget(
             name: "PexipRTCTests",
-            dependencies: ["PexipRTC"]
+            dependencies: ["PexipRTC"],
+            plugins: [.swiftlint]
         ),
 
         // MARK: -  PexipUtils
 
         .target(
-            name: "PexipUtils"
+            name: "PexipUtils",
+            plugins: [.swiftlint]
         ),
         .testTarget(
             name: "PexipUtilsTests",
-            dependencies: ["PexipUtils"]
+            dependencies: ["PexipUtils"],
+            plugins: [.swiftlint]
         ),
 
         // MARK: - PexipVideoFilters
 
         .target(
-            name: "PexipVideoFilters"
+            name: "PexipVideoFilters",
+            plugins: [.swiftlint]
         ),
         .testTarget(
             name: "PexipVideoFiltersTests",
@@ -124,21 +135,48 @@ let package = Package(
             resources: [
                 .copy("Resources/testVideo.mp4"),
                 .copy("Resources/testImage.jpg"),
-            ]
+            ],
+            plugins: [.swiftlint]
         ),
 
         // MARK: - PexipScreenCapture
 
         .target(
-            name: "PexipScreenCapture"
+            name: "PexipScreenCapture",
+            plugins: [.swiftlint]
         ),
         .testTarget(
             name: "PexipScreenCaptureTests",
-            dependencies: ["PexipScreenCapture", "TestHelpers"]
+            dependencies: ["PexipScreenCapture", "TestHelpers"],
+            plugins: [.swiftlint]
         ),
 
         // MARK: - TestHelpers
 
-        .target(name: "TestHelpers", path: "Tests/TestHelpers"),
+        .target(
+            name: "TestHelpers",
+            path: "Tests/TestHelpers",
+            plugins: [.swiftlint]
+        ),
+
+        // MARK: - Plugins
+
+        .binaryTarget(
+             name: "SwiftLintBinary",
+             url: "https://github.com/realm/SwiftLint/releases/download/0.48.0/SwiftLintBinary-macos.artifactbundle.zip",
+             checksum: "9c255e797260054296f9e4e4cd7e1339a15093d75f7c4227b9568d63edddba50"
+         ),
+
+        .plugin(
+            name: "SwiftLint",
+            capability: .buildTool(),
+            dependencies: [
+                "SwiftLintBinary",
+            ]
+        )
     ]
 )
+
+extension Target.PluginUsage {
+    static let swiftlint = Target.PluginUsage(stringLiteral: "SwiftLint")
+}

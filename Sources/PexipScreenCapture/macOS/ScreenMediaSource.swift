@@ -8,10 +8,10 @@ import ScreenCaptureKit
 public enum ScreenMediaSource: Equatable {
     public static func == (lhs: ScreenMediaSource, rhs: ScreenMediaSource) -> Bool {
         switch (lhs, rhs) {
-        case let (.display(d1), .display(d2)):
-            return d1.displayID == d2.displayID
-        case let (.window(w1), .window(w2)):
-            return w1.windowID == w2.windowID
+        case let (.display(display1), .display(display2)):
+            return display1.displayID == display2.displayID
+        case let (.window(window1), .window(window2)):
+            return window1.windowID == window2.windowID
         default:
             return false
         }

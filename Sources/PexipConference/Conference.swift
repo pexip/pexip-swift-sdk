@@ -133,6 +133,7 @@ final class InfinityConference: Conference {
 
     // MARK: - Server events
 
+    // swiftlint:disable cyclomatic_complexity
     @MainActor
     private func handleServerMessage(_ message: ServerEvent.Message) {
         Task {

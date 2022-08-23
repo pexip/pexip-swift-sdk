@@ -235,7 +235,7 @@ private final class TokenServiceMock: TokenService {
         fields: RequestTokenFields,
         pin: String?
     ) async throws -> Token {
-        fatalError("Should not be called")
+        throw TokenError.invalidPin
     }
 
     func refreshToken(_ token: Token) async throws -> Token {

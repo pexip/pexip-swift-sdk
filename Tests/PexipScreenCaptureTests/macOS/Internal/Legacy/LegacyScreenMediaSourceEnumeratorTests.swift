@@ -19,7 +19,7 @@ final class LegacyScreenMediaSourceEnumeratorTests: XCTestCase {
 
     func testGetShareableDisplays() async throws {
         enumerator.displayMode = { [weak self] _ in self?.displayMode }
-        enumerator.getOnlineDisplayList = { (_, displays, count) -> CGError in
+        enumerator.getOnlineDisplayList = { _, displays, count -> CGError in
             var displaysSource: [UInt32] = [1, 2]
             displays?.initialize(from: &displaysSource, count: displaysSource.count)
 
@@ -46,7 +46,7 @@ final class LegacyScreenMediaSourceEnumeratorTests: XCTestCase {
     }
 
     func testGetShareableDisplaysWithErrorOnDisplayCount() async throws {
-        enumerator.getOnlineDisplayList = { (maxDisplays, _, _) -> CGError in
+        enumerator.getOnlineDisplayList = { maxDisplays, _, _ -> CGError in
             return maxDisplays == .max ? .failure : .success
         }
 
@@ -59,7 +59,7 @@ final class LegacyScreenMediaSourceEnumeratorTests: XCTestCase {
     }
 
     func testGetShareableDisplaysWithErrorOnDisplayList() async throws {
-        enumerator.getOnlineDisplayList = { (maxDisplays, _, _) -> CGError in
+        enumerator.getOnlineDisplayList = { maxDisplays, _, _ -> CGError in
             return maxDisplays == .max ? .success : .failure
         }
 
@@ -72,7 +72,7 @@ final class LegacyScreenMediaSourceEnumeratorTests: XCTestCase {
     }
 
     func testGetAllOnScreenWindows() async throws {
-        enumerator.getWindowInfoList = { option, relativeToWindow -> CFArray? in 
+        enumerator.getWindowInfoList = { _, _ -> CFArray? in
             return [LegacyWindow.stubInfo()] as CFArray
         }
 
@@ -82,7 +82,7 @@ final class LegacyScreenMediaSourceEnumeratorTests: XCTestCase {
     }
 
     func testGetAllOnScreenWindowsWithEmptyWindowInfoList() async throws {
-        enumerator.getWindowInfoList = { option, relativeToWindow -> CFArray? in
+        enumerator.getWindowInfoList = { _, _ -> CFArray? in
             return [] as CFArray
         }
 
@@ -91,7 +91,7 @@ final class LegacyScreenMediaSourceEnumeratorTests: XCTestCase {
     }
 
     func testGetAllOnScreenWindowsWithNoWindowInfoList() async throws {
-        enumerator.getWindowInfoList = { option, relativeToWindow -> CFArray? in
+        enumerator.getWindowInfoList = { _, _ -> CFArray? in
             return nil
         }
 
@@ -100,7 +100,7 @@ final class LegacyScreenMediaSourceEnumeratorTests: XCTestCase {
     }
 
     func testGetAllOnScreenWindowsWithInvalidWindowInfoList() async throws {
-        enumerator.getWindowInfoList = { option, relativeToWindow -> CFArray? in
+        enumerator.getWindowInfoList = { _, _ -> CFArray? in
             return [""] as CFArray
         }
 
@@ -156,7 +156,7 @@ final class LegacyScreenMediaSourceEnumeratorTests: XCTestCase {
             ]
         )
 
-        enumerator.getWindowInfoList = { option, relativeToWindow -> CFArray? in
+        enumerator.getWindowInfoList = { _, _ -> CFArray? in
             return [info1, info2, info3, info4, info5, info6] as CFArray
         }
 

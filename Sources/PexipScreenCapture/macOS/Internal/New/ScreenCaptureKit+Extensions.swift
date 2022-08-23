@@ -4,13 +4,12 @@
 import ScreenCaptureKit
 #endif
 
-/**
- All the protocols and extensions below
- are needed to enable mocking in unit tests.
- */
+// All the protocols and extensions below
+// are needed to enable mocking in unit tests.
 
 // MARK: - ShareableContent
 
+// swiftlint:disable type_name
 @available(macOS 12.3, *)
 protocol ShareableContent {
     associatedtype Content: ShareableContent

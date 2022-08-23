@@ -113,10 +113,14 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         handler = BroadcastSampleHandler(client: client, fps: 15)
         handler.delegate = delegate
 
-        server.sink { [unowned self] event in
+        server.sink { [weak self] event in
+            guard let self = self else {
+                return
+            }
+
             switch event {
             case .start:
-                notificationCenter.post(.serverStarted)
+                self.notificationCenter.post(.serverStarted)
             default:
                 break
             }
@@ -132,7 +136,7 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         }.store(in: &cancellables)
 
         delegate.onError = { error in
-            switch (error as? BroadcastError) {
+            switch error as? BroadcastError {
             case .broadcastFinished(let error):
                 XCTAssertNotNil(error)
                 expectation.fulfill()
@@ -159,24 +163,32 @@ final class BroadcastSampleHandlerTests: XCTestCase {
 
         handler = BroadcastSampleHandler(client: client, fps: 15)
 
-        client.sink { [unowned self] event in
+        client.sink { [weak self] event in
+            guard let self = self else {
+                return
+            }
+
             switch event {
             case .connect:
-                XCTAssertFalse(handler.processSampleBuffer(sampleBuffer, with: .audioApp))
-                XCTAssertFalse(handler.processSampleBuffer(sampleBuffer, with: .audioMic))
+                XCTAssertFalse(self.handler.processSampleBuffer(sampleBuffer, with: .audioApp))
+                XCTAssertFalse(self.handler.processSampleBuffer(sampleBuffer, with: .audioMic))
                 XCTAssertFalse(
-                    handler.processSampleBuffer(sampleBuffer, with: .init(rawValue: 100)!)
+                    self.handler.processSampleBuffer(sampleBuffer, with: .init(rawValue: 100)!)
                 )
-                XCTAssertTrue(handler.processSampleBuffer(sampleBuffer, with: .video))
+                XCTAssertTrue(self.handler.processSampleBuffer(sampleBuffer, with: .video))
             case .stop:
                 break
             }
         }.store(in: &cancellables)
 
-        server.sink { [unowned self] event in
+        server.sink { [weak self] event in
+            guard let self = self else {
+                return
+            }
+
             switch event {
             case .start:
-                notificationCenter.post(.serverStarted)
+                self.notificationCenter.post(.serverStarted)
             case .message(let message):
                 XCTAssertEqual(message.header.videoWidth, UInt32(width))
                 XCTAssertEqual(message.header.videoHeight, UInt32(height))
@@ -213,7 +225,7 @@ final class BroadcastFileManagerMock: FileManager {
             try super.removeItem(atPath: path)
         }
     }
-    
+
     override func containerURL(
         forSecurityApplicationGroupIdentifier groupIdentifier: String
     ) -> URL? {

@@ -66,7 +66,7 @@ final class LegacyWindowTests: XCTestCase {
     }
 
     func testAspectRatio() {
-        XCTAssertEqual(window.aspectRatio, 1920/1080)
+        XCTAssertEqual(window.aspectRatio, 1920 / 1080)
     }
 
     func testVideoDimensions() {

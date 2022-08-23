@@ -1,21 +1,45 @@
 import Foundation
 import PexipUtils
 
+// swiftlint:disable line_length
+
 // MARK: - Protocol
 
+/// Represents the [Other miscellaneous requests](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#misc) section.
 public protocol NodeService {
+    /// The base url.
     var baseURL: URL { get }
+
     /**
      Checks the status of the conferencing node.
+
      - Parameters:
        - nodeAddress: a node address in the form of https://example.com
+
      - Returns: False if the node is in maintenance mode, true if the node is available
      - Throws: `NodeError.nodeNotFound` if supplied `nodeAddress` doesn't have a deployment
      - Throws: `HTTPError.unacceptableStatusCode` if the response wasn't handled by the client
      - Throws: `Error` if another type of error was encountered during operation
      */
     func status() async throws -> Bool
+
+    /**
+     Sets the conference alias.
+
+     - Parameters:
+        - alias: A conference alias
+     - Returns: A conference service for the given alias.
+     */
     func conference(alias: ConferenceAlias) -> ConferenceService
+
+    /**
+     Sets the registration alias.
+
+     - Parameters:
+        - alias: A registration alias
+     - Returns: A registration service for the given alias.
+     */
+    func registration(deviceAlias: String) throws -> RegistrationService
 }
 
 // MARK: - Implementation
@@ -46,9 +70,25 @@ struct DefaultNodeService: NodeService {
     }
 
     func conference(alias: ConferenceAlias) -> ConferenceService {
-        let url =  baseURL.appendingPathComponent("conferences/\(alias.uri)")
         return DefaultConferenceService(
-            baseURL: url,
+            baseURL: baseURL
+                .appendingPathComponent("conferences")
+                .appendingPathComponent(alias.uri),
+            client: client,
+            decoder: decoder,
+            logger: logger
+        )
+    }
+
+    func registration(deviceAlias: String) throws -> RegistrationService {
+        guard !deviceAlias.isEmpty else {
+            throw ValidationError.invalidArgument
+        }
+
+        return DefaultRegistrationService(
+            baseURL: baseURL
+                .appendingPathComponent("registrations")
+                .appendingPathComponent(deviceAlias),
             client: client,
             decoder: decoder,
             logger: logger

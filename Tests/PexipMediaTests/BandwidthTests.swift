@@ -4,7 +4,7 @@ import XCTest
 final class BandwidthTests: XCTestCase {
     func testInit() {
         XCTAssertEqual(Bandwidth(rawValue: 1024)?.rawValue, 1024)
-        XCTAssertNil(Bandwidth(rawValue: 10000))
+        XCTAssertNil(Bandwidth(rawValue: 10_000))
     }
 
     func testLow() {

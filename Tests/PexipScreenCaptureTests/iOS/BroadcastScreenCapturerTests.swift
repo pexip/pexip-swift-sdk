@@ -59,15 +59,19 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         let fps: UInt = 15
         let handler = BroadcastSampleHandler(client: client, fps: fps)
 
-        client.sink { [unowned self] event in
+        client.sink { [weak self] event in
+            guard let self = self else {
+                return
+            }
+
             switch event {
             case .connect:
                 Task {
-                    try await capturer.startCapture(
+                    try await self.capturer.startCapture(
                         atFps: 5,
-                        outputDimensions: outputDimensions
+                        outputDimensions: self.outputDimensions
                     )
-                    XCTAssertEqual(userDefaults.broadcastFps, fps)
+                    XCTAssertEqual(self.userDefaults.broadcastFps, fps)
                     expectation.fulfill()
                 }
             case .stop:
@@ -185,11 +189,15 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         let client = BroadcastClient(filePath: filePath)
         let handler = BroadcastSampleHandler(client: client, fps: fps)
 
-        client.sink { [unowned self] event in
+        client.sink { [weak self] event in
+            guard let self = self else {
+                return
+            }
+
             switch event {
             case .connect:
-                fileManager.fileError = URLError(.badURL)
-                notificationCenter.post(.broadcastFinished)
+                self.fileManager.fileError = URLError(.badURL)
+                self.notificationCenter.post(.broadcastFinished)
             case .stop:
                 break
             }

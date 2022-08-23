@@ -13,7 +13,7 @@ extension NWConnection {
         // The TCP maximum package size - 64K
         receive(
             minimumIncompleteLength: 1,
-            maximumLength: 65536,
+            maximumLength: 65_536,
             completion: completion
         )
     }

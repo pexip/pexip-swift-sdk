@@ -3,6 +3,8 @@ import PexipUtils
 
 // MARK: - Protocols
 
+// swiftlint:disable line_length
+
 /// Represents the token requests from the [Conference control functions](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#conference) section.
 public protocol TokenService {
     /**
@@ -22,7 +24,7 @@ public protocol TokenService {
     ) async throws -> Token
 
     /**
-     Refreshes a token to get a new one.
+     Refreshes the token to get a new one.
      See [documentation](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#refresh_token)
 
      - Parameter token: Current valid API token
@@ -141,7 +143,7 @@ struct DefaultConferenceService: ConferenceService {
     }
 
     func eventSource() -> ServerEventService {
-        return DefaultServerEventService(
+        DefaultServerEventService(
             baseURL: baseURL,
             client: client,
             decoder: decoder,

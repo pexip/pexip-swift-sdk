@@ -4,7 +4,7 @@ import XCTest
 final class VideoComponentTests: XCTestCase {
     func testInitWithTrack() {
         let track = VideoTrackMock()
-        let contentMode = VideoContentMode.fit_16x9
+        let contentMode = VideoContentMode.fit16x9
         let component = VideoComponent(
             track: track,
             contentMode: contentMode,
@@ -20,7 +20,7 @@ final class VideoComponentTests: XCTestCase {
 
     func testInitWithTrackAndDefaultValues() {
         let track = VideoTrackMock()
-        let contentMode = VideoContentMode.fit_16x9
+        let contentMode = VideoContentMode.fit16x9
         let component = VideoComponent(
             track: track,
             contentMode: contentMode
@@ -34,7 +34,7 @@ final class VideoComponentTests: XCTestCase {
 
     func testInitWithVideo() {
         let track = VideoTrackMock()
-        let contentMode = VideoContentMode.fit_16x9
+        let contentMode = VideoContentMode.fit16x9
         let video = Video(track: track, contentMode: contentMode)
         let component = VideoComponent(
             video: video,
@@ -50,7 +50,7 @@ final class VideoComponentTests: XCTestCase {
 
     func testInitWithVideoAndDefaultValues() {
         let track = VideoTrackMock()
-        let contentMode = VideoContentMode.fit_16x9
+        let contentMode = VideoContentMode.fit16x9
         let video = Video(track: track, contentMode: contentMode)
         let component = VideoComponent(video: video)
 
@@ -62,7 +62,7 @@ final class VideoComponentTests: XCTestCase {
 
     func testAspectRatio() {
         let track = VideoTrackMock()
-        let contentMode = VideoContentMode.fit_16x9
+        let contentMode = VideoContentMode.fit16x9
         let component = VideoComponent(
             track: track,
             contentMode: contentMode
@@ -74,7 +74,7 @@ final class VideoComponentTests: XCTestCase {
 
     func testAspectRatioWhenRversed() {
         let track = VideoTrackMock()
-        let contentMode = VideoContentMode.fit_16x9
+        let contentMode = VideoContentMode.fit16x9
         let component = VideoComponent(
             track: track,
             contentMode: contentMode,

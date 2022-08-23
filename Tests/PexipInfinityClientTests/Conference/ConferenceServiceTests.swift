@@ -14,7 +14,6 @@ final class ConferenceServiceTests: APITestCase {
 
     // MARK: - Request token
 
-    // swiftlint:disable function_body_length
     func testRequestTokenWith200() async throws {
         let identityProvider = IdentityProvider(name: "Name", id: UUID().uuidString)
         let ssoToken = UUID().uuidString

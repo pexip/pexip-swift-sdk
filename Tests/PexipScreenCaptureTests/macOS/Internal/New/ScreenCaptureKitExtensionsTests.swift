@@ -51,8 +51,8 @@ struct ShareableContentMock: ShareableContent {
     }
 
     static func clear() {
-        ShareableContentMock.displays.removeAll()
-        ShareableContentMock.windows.removeAll()
+        Self.displays.removeAll()
+        Self.windows.removeAll()
     }
 }
 

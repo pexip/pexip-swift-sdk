@@ -8,6 +8,8 @@ import ScreenCaptureKit
 #endif
 
 @available(macOS 12.3, *)
+// swiftlint:disable file_length
+// swiftlint:disable type_body_length
 final class NewScreenMediaCapturerTests: XCTestCase {
     private var capturer: NewScreenMediaCapturer<ScreenCaptureStreamFactoryMock>!
     private var display: LegacyDisplay!
@@ -191,7 +193,7 @@ final class NewScreenMediaCapturerTests: XCTestCase {
                 .addStreamOutput(.screen),
                 .startCapture,
                 .removeStreamOutput(.screen),
-                .stopCapture,
+                .stopCapture
             ]
         )
         XCTAssertFalse(capturer.isCapturing)
@@ -307,7 +309,6 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         XCTAssertTrue(capturer.isCapturing)
         XCTAssertNil(delegate.status)
     }
-
 
     func testSampleBufferWithStatusStopped() async throws {
         ShareableContentMock.displays = [display]
@@ -491,6 +492,7 @@ final class StreamMock: SCStream {
         onStop?()
     }
 
+    // swiftlint:disable function_body_length
     func createCMSampleBuffer(
         status: SCFrameStatus?,
         displayTime: UInt64?,

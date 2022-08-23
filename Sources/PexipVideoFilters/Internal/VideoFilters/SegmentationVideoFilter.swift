@@ -1,5 +1,4 @@
 import CoreVideo
-import CoreImage
 import CoreImage.CIFilterBuiltins
 
 final class SegmentationVideoFilter: VideoFilter {
@@ -59,7 +58,7 @@ final class SegmentationVideoFilter: VideoFilter {
             originalImage,
             withSize: CGSize(
                 width: Int(isVertical ? originalWidth : originalHeight),
-                height: Int(isVertical ? originalHeight: originalWidth)
+                height: Int(isVertical ? originalHeight : originalWidth)
             ),
             orientation: orientation
         )

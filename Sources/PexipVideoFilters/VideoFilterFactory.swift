@@ -105,9 +105,9 @@ public struct VideoFilterFactory {
 
 // MARK: - Background filters
 
-extension VideoFilterFactory {
+public extension VideoFilterFactory {
     /// Built-in background filters.
-    public enum Background {
+    enum Background {
         /// Applies a Gaussian blur filter to the background of every video frame.
         /// - Parameter radius: The blur intensity (0...100)
         case gaussianBlur(radius: Float = 40)

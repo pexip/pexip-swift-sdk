@@ -70,7 +70,8 @@ final class BroadcastMessageLoop {
 
     // MARK: - Private
 
-    @objc private func onDisplayLink() {
+    @objc
+    private func onDisplayLink() {
         processingQueue.async { [weak self] in
             self?.prepareMessage()
         }

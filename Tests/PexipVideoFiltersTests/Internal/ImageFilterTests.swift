@@ -5,7 +5,7 @@ import TestHelpers
 @testable import PexipVideoFilters
 
 final class ImageFilterTests: XCTestCase {
-    let context = CIContext()
+    private let context = CIContext()
     private let size = CGSize(width: 300, height: 300)
     #if os(iOS)
     private let platform = "iOS"
@@ -109,7 +109,6 @@ final class ImageFilterTests: XCTestCase {
 extension Bundle {
     func testImage() -> CIImage? {
         #if os(iOS)
-
 
         guard let image = UIImage(named: "testImage.jpg", in: self, with: nil),
               let cgImage = image.cgImage

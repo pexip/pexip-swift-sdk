@@ -13,8 +13,7 @@ import ScreenCaptureKit
  https://developer.apple.com/documentation/screencapturekit
  */
 @available(macOS 12.3, *)
-final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>:
-    NSObject,
+final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>: NSObject,
     ScreenMediaCapturer,
     SCStreamOutput,
     SCStreamDelegate
@@ -100,6 +99,7 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>:
         }
 
         // Retrieve the content rectangle, scale, and scale factor.
+        // swiftlint:disable force_cast
         guard let contentRectDict = attachments[.contentRect],
               var contentRect = CGRect(dictionaryRepresentation: contentRectDict as! CFDictionary),
               let scaleFactor = attachments[.scaleFactor] as? CGFloat

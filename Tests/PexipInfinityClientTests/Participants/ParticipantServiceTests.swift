@@ -20,7 +20,6 @@ final class ParticipantServiceTests: APITestCase {
 
     // MARK: - Tests
 
-    // swiftlint:disable function_body_length
     func testCalls() async throws {
         let token = Token.randomToken()
         let callId = UUID()

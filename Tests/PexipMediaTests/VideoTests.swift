@@ -4,7 +4,7 @@ import XCTest
 final class VideoTests: XCTestCase {
     func testInitWithTrackContentMode() {
         let track = VideoTrackMock()
-        let contentMode = VideoContentMode.fit_16x9
+        let contentMode = VideoContentMode.fit16x9
         let video = Video(track: track, contentMode: contentMode)
 
         XCTAssertEqual(video.track as? VideoTrackMock, track)

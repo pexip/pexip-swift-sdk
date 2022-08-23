@@ -44,7 +44,7 @@ final class LegacyWindowCapturerTests: XCTestCase {
     // MARK: - Tests
 
     func testInit() {
-        XCTAssertEqual(capturer.isCapturing, false)
+        XCTAssertFalse(capturer.isCapturing)
         XCTAssertEqual(capturer.window.windowID, window.windowID)
     }
 

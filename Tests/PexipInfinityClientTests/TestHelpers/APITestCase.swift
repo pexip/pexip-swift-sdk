@@ -1,6 +1,7 @@
 import XCTest
 @testable import PexipInfinityClient
 
+// swiftlint:disable test_case_accessibility
 class APITestCase: XCTestCase {
     private(set) var urlSession: URLSession!
     private(set) var client: HTTPClient!
@@ -49,10 +50,11 @@ class APITestCase: XCTestCase {
         }
     }
 
+    // swiftlint:disable function_parameter_count
     func testJSONRequest(
         withMethod method: HTTPMethod,
         url: URL,
-        token: Token?,
+        token: TokenWithExpiration?,
         body: Data?,
         responseJSON: String?,
         assertHTTPErrors: Bool = true,
@@ -92,7 +94,7 @@ class APITestCase: XCTestCase {
     func assertRequest(
         withMethod method: HTTPMethod,
         url: URL,
-        token: Token?,
+        token: TokenWithExpiration?,
         jsonBody: Data?
     ) {
         XCTAssertEqual(lastRequest?.url, url)
@@ -111,7 +113,7 @@ class APITestCase: XCTestCase {
     func assertRequest(
         withMethod method: HTTPMethod,
         url: URL,
-        token: Token? = nil,
+        token: TokenWithExpiration? = nil,
         data: Data?
     ) {
         XCTAssertEqual(lastRequest?.url, url)

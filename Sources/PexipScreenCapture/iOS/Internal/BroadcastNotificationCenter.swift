@@ -38,6 +38,7 @@ final class BroadcastNotificationCenter {
 
         observations.append(observation)
 
+        // swiftlint:disable prefer_self_in_static_references
         let callback: CFNotificationCallback = { _, pointer, name, _, _ in
             guard let name = name?.rawValue as? String else { return }
 

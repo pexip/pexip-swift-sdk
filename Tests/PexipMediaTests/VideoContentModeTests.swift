@@ -5,11 +5,11 @@ import CoreGraphics
 final class VideoContentTests: XCTestCase {
     func testAspectRatio() {
         XCTAssertEqual(
-            VideoContentMode.fit_16x9.aspectRatio,
+            VideoContentMode.fit16x9.aspectRatio,
             CGSize(width: 16, height: 9)
         )
         XCTAssertEqual(
-            VideoContentMode.fit_4x3.aspectRatio,
+            VideoContentMode.fit4x3.aspectRatio,
             CGSize(width: 4, height: 3)
         )
         XCTAssertEqual(

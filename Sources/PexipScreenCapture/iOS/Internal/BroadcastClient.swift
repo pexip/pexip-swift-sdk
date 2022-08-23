@@ -104,7 +104,7 @@ final class BroadcastClient: Publisher {
             return
         }
 
-        connection.receive { [weak self] (data, _, isComplete, error) in
+        connection.receive { [weak self] data, _, isComplete, error in
             guard let self = self else {
                 return
             }

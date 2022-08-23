@@ -37,7 +37,7 @@ struct SessionDescriptionMangler {
                 let isVideoSection = section == "video"
                 let isConnectionLine = line.starts(with: "c=")
 
-                if addBandwidth && isVideoSection && isConnectionLine  {
+                if addBandwidth && isVideoSection && isConnectionLine {
                     modifiedLines.append("b=AS:\(bandwidth.rawValue)")
                     addBandwidth = false
                 }

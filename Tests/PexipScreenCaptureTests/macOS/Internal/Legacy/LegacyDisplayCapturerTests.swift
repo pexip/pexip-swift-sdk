@@ -35,7 +35,7 @@ final class LegacyDisplayCapturerTests: XCTestCase {
     // MARK: - Tests
 
     func testInit() {
-        XCTAssertEqual(capturer.isCapturing, false)
+        XCTAssertFalse(capturer.isCapturing)
         XCTAssertEqual(capturer.display as? LegacyDisplay, display)
         XCTAssertTrue(capturer.displayStreamType is DisplayStreamMock.Type)
     }
@@ -316,7 +316,7 @@ private extension IOSurfaceRef {
             kIOSurfaceBytesPerElement: 4,
             kIOSurfaceBytesPerRow: width * 4,
             kIOSurfaceAllocSize: width * height * 4,
-            kIOSurfacePixelFormat: pixelFormat,
+            kIOSurfacePixelFormat: pixelFormat
         ] as CFDictionary)
     }
 }

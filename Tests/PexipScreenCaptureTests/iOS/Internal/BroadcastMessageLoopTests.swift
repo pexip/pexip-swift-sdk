@@ -86,7 +86,7 @@ final class BroadcastMessageLoopTests: XCTestCase {
         var lastTime: CMTime?
         var iteration = 0
 
-        delegate.onMessage = { message in
+        delegate.onMessage = { _ in
             let currentTime = CMClockGetTime(CMClockGetHostTimeClock())
 
             if let lastTime = lastTime {

@@ -30,7 +30,11 @@ final class BroadcastClientTests: XCTestCase {
     func testStart() throws {
         let expectation = self.expectation(description: "Start")
 
-        client.sink { [unowned self] event in
+        client.sink { [weak self] event in
+            guard let self = self else {
+                return
+            }
+
             switch event {
             case .connect:
                 XCTAssertTrue(self.client.isConnected)
@@ -54,7 +58,11 @@ final class BroadcastClientTests: XCTestCase {
     func testStartWithoutServer() throws {
         let expectation = self.expectation(description: "Start without server")
 
-        client.sink { [unowned self] event in
+        client.sink { [weak self] event in
+            guard let self = self else {
+                return
+            }
+
             switch event {
             case .connect:
                 XCTFail("Invalid client event")

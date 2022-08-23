@@ -84,7 +84,7 @@ final class MediaCapturePermissionTests: XCTestCase {
     func testRequestAccessOpenAudioSettingsIfNeeded() async throws {
         permission = permission(for: .audio)
         CaptureDevice.status = .denied
-        await permission.requestAccess(openSettingsIfNeeded: true)
+        _ = await permission.requestAccess(openSettingsIfNeeded: true)
 
         #if os(iOS)
         XCTAssertEqual(urlOpener.url?.absoluteString, settingsURLString)
@@ -99,7 +99,7 @@ final class MediaCapturePermissionTests: XCTestCase {
     func testRequestAccessOpenVideoSettingsIfNeeded() async throws {
         permission = permission(for: .video)
         CaptureDevice.status = .denied
-        await permission.requestAccess(openSettingsIfNeeded: true)
+        _ = await permission.requestAccess(openSettingsIfNeeded: true)
 
         #if os(iOS)
         XCTAssertEqual(urlOpener.url?.absoluteString, settingsURLString)

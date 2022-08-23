@@ -137,7 +137,7 @@ final class BroadcastServer: Publisher {
     }
 
     private func readHandshake() {
-        connection?.receive { [weak self] (data, _, isComplete, error) in
+        connection?.receive { [weak self] data, _, isComplete, error in
             guard let self = self, data != nil else {
                 return
             }
@@ -165,7 +165,7 @@ final class BroadcastServer: Publisher {
         connection?.receive(
             minimumIncompleteLength: headerLength,
             maximumLength: headerLength,
-            completion: { [weak self] (data, _, isComplete, error) in
+            completion: { [weak self] data, _, isComplete, error in
                 guard let self = self else {
                     return
                 }
@@ -198,7 +198,7 @@ final class BroadcastServer: Publisher {
         connection?.receive(
             minimumIncompleteLength: bodyLength,
             maximumLength: bodyLength,
-            completion: { [weak self] (data, _, isComplete, error) in
+            completion: { [weak self] data, _, isComplete, error in
                 guard let self = self else {
                     return
                 }

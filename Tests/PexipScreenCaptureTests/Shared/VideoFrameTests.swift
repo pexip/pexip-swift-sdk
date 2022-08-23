@@ -6,7 +6,7 @@ import CoreVideo
 final class VideoFrameTests: XCTestCase {
     private let width = 1920
     private let height = 1080
-    private let displayTimeNs: UInt64 = 10000
+    private let displayTimeNs: UInt64 = 10_000
     private let pixelFormat = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
     private var videoFrame: VideoFrame!
 

@@ -91,6 +91,7 @@ final class DNSLookupClient: DNSLookupClientProtocol {
         return try await task.value
     }
 
+    // swiftlint:disable closure_parameter_position
     private static let queryHandler: DNSServiceQueryRecordReply = {
         _, flags, _, _, _, _, _, length, bytes, _, context in
 

@@ -15,7 +15,7 @@ struct BroadcastHeader: Hashable {
 
 extension BroadcastHeader {
     init?(_ buffer: UnsafeMutableRawBufferPointer) {
-        guard let baseAddress = buffer.baseAddress, buffer.count > 0 else {
+        guard let baseAddress = buffer.baseAddress, !buffer.isEmpty else {
             return nil
         }
 
