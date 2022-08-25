@@ -1,14 +1,14 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class EventSourceParserTests: XCTestCase {
-    private var parser: EventSourceParser!
+final class HTTPEventSourceParserTests: XCTestCase {
+    private var parser: HTTPEventSourceParser!
 
     // MARK: - Setup
 
     override func setUp() {
         super.setUp()
-        parser = EventSourceParser()
+        parser = HTTPEventSourceParser()
     }
 
     // MARK: - Stream parsing
@@ -170,7 +170,7 @@ final class EventSourceParserTests: XCTestCase {
         data: data2
         retry: 2000
         """
-        let event = EventSourceParser.event(from: string)
+        let event = HTTPEventSourceParser.event(from: string)
 
         XCTAssertEqual(event?.id, "1")
         XCTAssertEqual(event?.name, "test")
@@ -179,9 +179,9 @@ final class EventSourceParserTests: XCTestCase {
     }
 
     func testEventFromStringWithComment() {
-        XCTAssertNil(EventSourceParser.event(from: ":comment"))
-        XCTAssertNil(EventSourceParser.event(from: ": comment"))
-        XCTAssertNil(EventSourceParser.event(from: ": comment : comment"))
+        XCTAssertNil(HTTPEventSourceParser.event(from: ":comment"))
+        XCTAssertNil(HTTPEventSourceParser.event(from: ": comment"))
+        XCTAssertNil(HTTPEventSourceParser.event(from: ": comment : comment"))
     }
 
     func testEventFromStringWithNoId() {
@@ -189,7 +189,7 @@ final class EventSourceParserTests: XCTestCase {
         event: test
         data: first event
         """
-        let event = EventSourceParser.event(from: string)
+        let event = HTTPEventSourceParser.event(from: string)
 
         XCTAssertNil(event?.id)
         XCTAssertEqual(event?.name, "test")
@@ -202,7 +202,7 @@ final class EventSourceParserTests: XCTestCase {
         id: 1
         event: test
         """
-        let event = EventSourceParser.event(from: string)
+        let event = HTTPEventSourceParser.event(from: string)
 
         XCTAssertEqual(event?.id, "1")
         XCTAssertEqual(event?.name, "test")
@@ -218,7 +218,7 @@ final class EventSourceParserTests: XCTestCase {
         data
         event
         """
-        let event = EventSourceParser.event(from: string)
+        let event = HTTPEventSourceParser.event(from: string)
 
         XCTAssertEqual(event?.id, "")
         XCTAssertNil(event?.name)

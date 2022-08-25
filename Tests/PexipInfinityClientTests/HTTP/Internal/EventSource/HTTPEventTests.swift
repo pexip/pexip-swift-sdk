@@ -1,9 +1,9 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class EventSourceEventTests: XCTestCase {
+final class HTTPEventTests: XCTestCase {
     func testReconnectionTime() {
-        let event = EventSourceEvent(
+        let event = HTTPEvent(
             id: nil,
             name: "message",
             data: nil,
@@ -14,7 +14,7 @@ final class EventSourceEventTests: XCTestCase {
     }
 
     func testReconnectionTimeWithInvalidRetryField() {
-        let event = EventSourceEvent(
+        let event = HTTPEvent(
             id: nil,
             name: "message",
             data: nil,

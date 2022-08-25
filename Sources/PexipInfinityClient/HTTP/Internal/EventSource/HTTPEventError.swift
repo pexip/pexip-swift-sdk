@@ -1,6 +1,6 @@
 import Foundation
 
-public struct EventSourceError: Error {
+public struct HTTPEventError: Error {
     public let response: HTTPURLResponse?
     public let dataStreamError: Error?
 

@@ -35,7 +35,7 @@ public protocol RegistrationService {
     func releaseToken(_ token: RegistrationToken) async throws -> Bool
 
     /// HTTP EventSource which feeds server sent events as they occur.
-    func eventSource() -> ServerEventService
+    func eventSource() -> RegistrationEventService
 }
 
 // MARK: - Implementation
@@ -80,8 +80,8 @@ struct DefaultRegistrationService: RegistrationService {
         return try await client.json(for: request)
     }
 
-    func eventSource() -> ServerEventService {
-        DefaultServerEventService(
+    func eventSource() -> RegistrationEventService {
+        DefaultRegistrationEventService(
             baseURL: baseURL,
             client: client,
             decoder: decoder,

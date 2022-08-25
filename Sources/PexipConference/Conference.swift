@@ -52,7 +52,7 @@ final class InfinityConference: Conference {
     let chat: Chat?
 
     private let tokenRefresher: TokenRefresher
-    private let eventSource: EventSource
+    private let eventSource: ConferenceEventSource
     private let dtmfSender: DTMFSender
     private let liveCaptionsService: LiveCaptionsService
     private let logger: Logger?
@@ -66,7 +66,7 @@ final class InfinityConference: Conference {
     init(
         tokenRefresher: TokenRefresher,
         signaling: MediaConnectionSignaling,
-        eventSource: EventSource,
+        eventSource: ConferenceEventSource,
         roster: Roster,
         dtmfSender: DTMFSender,
         liveCaptionsService: LiveCaptionsService,
@@ -98,8 +98,8 @@ final class InfinityConference: Conference {
 
         await eventSource.open()
         eventSourceTask = Task {
-            for await message in await eventSource.messages() {
-                await handleServerMessage(message)
+            for await event in await eventSource.events() {
+                await handleConferenceEvent(event)
             }
         }
     }
@@ -133,18 +133,12 @@ final class InfinityConference: Conference {
 
     // MARK: - Server events
 
-    // swiftlint:disable cyclomatic_complexity
     @MainActor
-    private func handleServerMessage(_ message: ServerEvent.Message) {
+    private func handleConferenceEvent(_ event: ConferenceEvent) {
         Task {
-            switch message {
+            switch event {
             case .conferenceUpdate(let value):
                 await status.setValue(value)
-                sendEvent(.conferenceUpdate(value))
-            case .presentationStart(let details):
-                sendEvent(.presentationStart(details))
-            case .presentationStop:
-                sendEvent(.presentationStop)
             case .messageReceived(let message):
                 logger?.debug("Chat message received")
                 await chat?.addMessage(message)
@@ -167,11 +161,12 @@ final class InfinityConference: Conference {
                 logger?.debug("Call disconnected, reason: \(details.reason)")
             case .clientDisconnected(let details):
                 await isClientDisconnected.setValue(true)
-                sendEvent(.clientDisconnected)
                 logger?.debug("Participant disconnected, reason: \(details.reason)")
-            case .liveCaptions(let captions):
-                sendEvent(.liveCaptions(captions))
+            default:
+                break
             }
+
+            sendEvent(event)
         }
     }
 

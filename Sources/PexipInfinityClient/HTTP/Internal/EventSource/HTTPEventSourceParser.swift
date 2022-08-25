@@ -1,6 +1,6 @@
 import Foundation
 
-final class EventSourceParser {
+final class HTTPEventSourceParser {
     var bufferString: String? { String(data: buffer, encoding: .utf8) }
 
     private var buffer = Data()
@@ -10,7 +10,7 @@ final class EventSourceParser {
 
     // MARK: - Internal methods
 
-    func events(from data: Data) -> [EventSourceEvent] {
+    func events(from data: Data) -> [HTTPEvent] {
         buffer.append(data)
 
         var events = [String]()
@@ -39,7 +39,7 @@ final class EventSourceParser {
         buffer = Data()
     }
 
-    static func event(from string: String) -> EventSourceEvent? {
+    static func event(from string: String) -> HTTPEvent? {
         guard !string.hasPrefix(":") else {
             return nil
         }
@@ -57,7 +57,7 @@ final class EventSourceParser {
             }
         }
 
-        return EventSourceEvent(
+        return HTTPEvent(
             id: event[.id] ?? nil,
             name: event[.event] ?? nil,
             data: event[.data] ?? nil,

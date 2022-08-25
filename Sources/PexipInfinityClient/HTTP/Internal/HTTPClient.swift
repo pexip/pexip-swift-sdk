@@ -73,7 +73,7 @@ struct HTTPClient {
     func eventSource(
         withRequest request: URLRequest,
         lastEventId: String? = nil
-    ) -> AsyncThrowingStream<EventSourceEvent, Error> {
+    ) -> AsyncThrowingStream<HTTPEvent, Error> {
         let request = request.withUserAgentHeader()
         return session.eventSource(withRequest: request, lastEventId: lastEventId)
     }

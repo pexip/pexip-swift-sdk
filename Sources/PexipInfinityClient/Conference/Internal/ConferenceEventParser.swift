@@ -1,36 +1,40 @@
 import Foundation
 import PexipUtils
 
-struct ServerMessageParser {
+struct ConferenceEventParser {
     var decoder = JSONDecoder()
     var logger: Logger?
 
-    func message(from event: EventSourceEvent) -> ServerEvent.Message? {
+    func conferenceEvent(from event: HTTPEvent) -> ConferenceEvent? {
+        logger?.debug(
+            "Got conference event with ID: \(event.id ?? "?"), name: \(event.name ?? "?")"
+        )
+
         guard let nameString = event.name else {
-            logger?.debug("Received event without a name")
+            logger?.debug("Received conference event without a name")
             return nil
         }
 
-        guard let name = ServerEvent.Name(rawValue: nameString) else {
-            logger?.debug("SSE event: '\(nameString)' was not handled")
+        guard let name = ConferenceEvent.Name(rawValue: nameString) else {
+            logger?.debug("Conference event '\(nameString)' was not handled")
             return nil
         }
 
         let data = event.data?.data(using: .utf8)
 
         do {
-            return try message(withName: name, data: data)
+            return try conferenceEvent(withName: name, data: data)
         } catch {
-            logger?.error("Failed to decode SSE event: '\(name)', error: \(error)")
+            logger?.error("Failed to decode conference event: '\(name)', error: \(error)")
             return nil
         }
     }
 
     // swiftlint:disable cyclomatic_complexity
-    private func message(
-        withName name: ServerEvent.Name,
+    private func conferenceEvent(
+        withName name: ConferenceEvent.Name,
         data: Data?
-    ) throws -> ServerEvent.Message {
+    ) throws -> ConferenceEvent {
         switch name {
         case .conferenceUpdate:
             let message = try decoder.decode(ConferenceStatus.self, from: data)
@@ -66,9 +70,9 @@ struct ServerMessageParser {
     }
 }
 
-// MARK: - Private extensions
+// MARK: - Internal extensions
 
-private extension JSONDecoder {
+extension JSONDecoder {
     func decode<T>(_ type: T.Type, from data: Data?) throws -> T where T: Decodable {
         guard let data = data else {
             throw HTTPError.noDataInResponse

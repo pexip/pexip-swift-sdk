@@ -52,7 +52,7 @@ public struct ConferenceFactory {
                 iceServers: token.iceServers,
                 logger: logger
             ),
-            eventSource: DefaultEventSource(
+            eventSource: DefaultConferenceEventSource(
                 service: service.eventSource(),
                 tokenStore: tokenStore,
                 logger: logger

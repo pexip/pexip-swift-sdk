@@ -11,16 +11,21 @@ extension URLSession {
     func eventSource(
         withRequest request: URLRequest,
         lastEventId: String? = nil
-    ) -> AsyncThrowingStream<EventSourceEvent, Error> {
+    ) -> AsyncThrowingStream<HTTPEvent, Error> {
         var request = request
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         request.timeoutInterval = TimeInterval(INT_MAX)
-        request.setValue(lastEventId, forHTTPHeaderField: "Last-Event-Id")
         request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
         request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
 
-        return AsyncThrowingStream { continuation in
-            let parser = EventSourceParser()
+        if let lastEventId = lastEventId {
+            request.setValue(lastEventId, forHTTPHeaderField: "Last-Event-Id")
+        }
+
+        return AsyncThrowingStream(
+            bufferingPolicy: .bufferingNewest(1)
+        ) { continuation in
+            let parser = HTTPEventSourceParser()
             let dataTaskDelegate = DataTaskDelegate()
             dataTaskDelegate.urlSessionDelegate = delegate
 
@@ -42,7 +47,7 @@ extension URLSession {
             dataTaskDelegate.onComplete = { response, error in
                 urlSession.invalidateAndCancel()
                 continuation.finish(
-                   throwing: EventSourceError(
+                   throwing: HTTPEventError(
                        response: response,
                        dataStreamError: error
                    )

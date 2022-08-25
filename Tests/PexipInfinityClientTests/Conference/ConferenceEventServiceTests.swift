@@ -1,20 +1,20 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class ServerEventServiceTests: APITestCase {
+final class ConferenceEventServiceTests: APITestCase {
     private let baseURL = URL(string: "https://example.com")!
-    private var service: ServerEventService!
+    private var service: ConferenceEventService!
 
     // MARK: - Setup
 
     override func setUp() {
         super.setUp()
-        service = DefaultServerEventService(baseURL: baseURL, client: client)
+        service = DefaultConferenceEventService(baseURL: baseURL, client: client)
     }
 
     func testEventStream() async throws {
         // 1. Prepare
-        var receivedEvents = [ServerEvent]()
+        var receivedEvents = [Event<ConferenceEvent>]()
         let token = Token.randomToken()
         let message = ClientDisconnectMessage(reason: "Test")
         let messageDataString = String(
@@ -35,10 +35,10 @@ final class ServerEventServiceTests: APITestCase {
 
         // 2. Receive events from the stream
         do {
-            for try await event in await service.serverSentEvents(token: token) {
+            for try await event in await service.events(token: token) {
                 receivedEvents.append(event)
             }
-        } catch let error as EventSourceError {
+        } catch let error as HTTPEventError {
             XCTAssertEqual(error.response?.url, lastRequest?.url)
             XCTAssertEqual(error.response?.statusCode, 200)
             XCTAssertTrue(error.response?.allHeaderFields.isEmpty == true)
@@ -57,14 +57,11 @@ final class ServerEventServiceTests: APITestCase {
         XCTAssertEqual(receivedEvents.count, 1)
         XCTAssertEqual(
             receivedEvents.first,
-            ServerEvent(
-                rawEvent: .init(
-                    id: "1",
-                    name: "disconnect",
-                    data: "\(messageDataString)",
-                    retry: nil
-                ),
-                message: .clientDisconnected(
+            Event<ConferenceEvent>(
+                id: "1",
+                name: "disconnect",
+                reconnectionTime: nil,
+                data: .clientDisconnected(
                     .init(reason: "Test")
                 )
             )

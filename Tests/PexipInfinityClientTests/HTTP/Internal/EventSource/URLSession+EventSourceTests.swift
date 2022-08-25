@@ -1,19 +1,19 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class URLSessionEventStreamTests: APITestCase {
+final class URLSessionEventSourceTests: APITestCase {
     private let url = URL(string: "https://test.example.org")!
 
     // MARK: - Tests
 
     // swiftlint:disable function_body_length
-    func testEventStream() async throws {
+    func testEventSource() async throws {
         // 1. Prepare
         let stream = urlSession.eventSource(
             withRequest: URLRequest(url: url, httpMethod: .GET),
             lastEventId: "11"
         )
-        var receivedEvents = [EventSourceEvent]()
+        var receivedEvents = [HTTPEvent]()
         let string = """
         : test stream
 
@@ -35,7 +35,7 @@ final class URLSessionEventStreamTests: APITestCase {
             for try await event in stream {
                 receivedEvents.append(event)
             }
-        } catch let error as EventSourceError {
+        } catch let error as HTTPEventError {
             XCTAssertEqual(error.response?.url, url)
             XCTAssertEqual(error.response?.statusCode, 200)
             XCTAssertTrue(error.response?.allHeaderFields.isEmpty == true)
@@ -69,7 +69,7 @@ final class URLSessionEventStreamTests: APITestCase {
             withRequest: URLRequest(url: url, httpMethod: .GET),
             lastEventId: nil
         )
-        var receivedEvents = [EventSourceEvent]()
+        var receivedEvents = [HTTPEvent]()
 
         setResponseError(URLError(.badURL))
 
@@ -78,7 +78,7 @@ final class URLSessionEventStreamTests: APITestCase {
             for try await event in stream {
                 receivedEvents.append(event)
             }
-        } catch let error as EventSourceError {
+        } catch let error as HTTPEventError {
             XCTAssertNil(error.response)
             XCTAssertEqual((error.dataStreamError as? URLError)?.code, .badURL)
         }

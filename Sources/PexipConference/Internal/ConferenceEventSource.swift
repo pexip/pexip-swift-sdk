@@ -4,32 +4,37 @@ import PexipUtils
 
 // MARK: - Protocol
 
-protocol EventSource {
+protocol ConferenceEventSource {
     var isOpen: Bool { get async }
-    func messages() async -> AsyncStream<ServerEvent.Message>
+    func events() async -> AsyncStream<ConferenceEvent>
     func open() async
     func close() async
 }
 
 // MARK: - Implementation
 
-actor DefaultEventSource: EventSource {
+actor DefaultConferenceEventSource: ConferenceEventSource {
     var isOpen: Bool { get async { eventSourceTask?.isCancelled == false } }
 
     private let decoder = JSONDecoder()
-    private let service: ServerEventService
+    private let service: ConferenceEventService
     private let tokenStore: TokenStore
     private let logger: Logger?
-    private let maxReconnectionTime: TimeInterval = 10
-    private var reconnectionTime: TimeInterval = 3
+    private let maxReconnectionTime: TimeInterval = 5
+    private var reconnectionTime: TimeInterval = 1
     private var reconnectionAttempts: Int = 0
-    private var lastEventId: String?
     private var eventSourceTask: Task<Void, Error>?
-    private var subscribers = [AsyncStream<ServerEvent.Message>.Continuation]()
+    private var subscribers = [AsyncStream<ConferenceEvent>.Continuation]()
+    // Skip initial `presentation_stop` event
+    var skipPresentationStop = true
 
     // MARK: - Init
 
-    init(service: ServerEventService, tokenStore: TokenStore, logger: Logger? = nil) {
+    init(
+        service: ConferenceEventService,
+        tokenStore: TokenStore,
+        logger: Logger? = nil
+    ) {
         self.service = service
         self.tokenStore = tokenStore
         self.logger = logger
@@ -37,24 +42,27 @@ actor DefaultEventSource: EventSource {
 
     // MARK: - Internal methods
 
-    func messages() async -> AsyncStream<ServerEvent.Message> {
-        AsyncStream<ServerEvent.Message> { continuation in
+    func events() async -> AsyncStream<ConferenceEvent> {
+        AsyncStream<ConferenceEvent>(
+            bufferingPolicy: .bufferingNewest(1)
+        ) { continuation in
             subscribers.append(continuation)
         }
     }
 
     func open() {
         logger?.info("Subscribing to the event stream")
+        skipPresentationStop = true
 
         eventSourceTask = Task {
             do {
-                let events = try await service.serverSentEvents(token: tokenStore.token())
+                let events = try await service.events(token: tokenStore.token())
 
                 for try await event in events {
                     reconnectionAttempts = 0
                     handleEvent(event)
                 }
-            } catch let error as EventSourceError {
+            } catch let error as HTTPEventError {
                 if let dataStreamError = error.dataStreamError {
                     logger?.warn("Event source disconnected with error: \(dataStreamError)")
                 } else if let statusCode = error.response?.statusCode {
@@ -63,11 +71,12 @@ actor DefaultEventSource: EventSource {
                     logger?.warn("Event source connection unexpectedly closed")
                 }
 
-                let maxSeconds = min(
+                reconnectionAttempts += 1
+
+                let seconds = min(
                     maxReconnectionTime,
-                    reconnectionTime * pow(2.0, Double(reconnectionAttempts))
+                    reconnectionTime * Double(reconnectionAttempts)
                 )
-                let seconds = maxSeconds / 2 + Double.random(in: 0...(maxSeconds / 2))
 
                 logger?.info("Waiting \(seconds) seconds before reconnecting...")
 
@@ -75,7 +84,6 @@ actor DefaultEventSource: EventSource {
                     try await Task.sleep(seconds: seconds)
 
                     if await isOpen {
-                        reconnectionAttempts += 1
                         open()
                     } else {
                         reconnectionAttempts = 0
@@ -98,12 +106,11 @@ actor DefaultEventSource: EventSource {
 
     // MARK: - Private methods
 
-    private func handleEvent(_ event: ServerEvent) {
-        logger?.debug(
-            "Got an event with ID: \(event.id ?? "None"), name: \(event.name ?? "None")"
-        )
-
-        lastEventId = event.id
+    private func handleEvent(_ event: Event<ConferenceEvent>) {
+        if case .presentationStart = event.data, skipPresentationStop {
+            skipPresentationStop = false
+            return
+        }
 
         if let reconnectionTime = event.reconnectionTime {
             logger?.debug(
@@ -112,10 +119,8 @@ actor DefaultEventSource: EventSource {
             self.reconnectionTime = reconnectionTime
         }
 
-        if let message = event.message {
-            for subscriber in subscribers {
-                subscriber.yield(message)
-            }
+        for subscriber in subscribers {
+            subscriber.yield(event.data)
         }
     }
 }

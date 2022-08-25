@@ -56,7 +56,7 @@ public protocol ConferenceService: TokenService {
     func message(_ message: String, token: Token) async throws -> Bool
 
     /// HTTP EventSource which feeds events from the conference as they occur.
-    func eventSource() -> ServerEventService
+    func eventSource() -> ConferenceEventService
 
     /**
      Sets the participant ID.
@@ -142,8 +142,8 @@ struct DefaultConferenceService: ConferenceService {
         return try await client.json(for: request)
     }
 
-    func eventSource() -> ServerEventService {
-        DefaultServerEventService(
+    func eventSource() -> ConferenceEventService {
+        DefaultConferenceEventService(
             baseURL: baseURL,
             client: client,
             decoder: decoder,

@@ -1,21 +1,18 @@
 import Foundation
 
-@dynamicMemberLookup
-public struct ServerEvent: Hashable {
-    public enum Message: Hashable {
-        case conferenceUpdate(ConferenceStatus)
-        case liveCaptions(LiveCaptions)
-        case messageReceived(ChatMessage)
-        case presentationStart(PresentationStartMessage)
-        case presentationStop
-        case participantSyncBegin
-        case participantSyncEnd
-        case participantCreate(Participant)
-        case participantUpdate(Participant)
-        case participantDelete(ParticipantDeleteMessage)
-        case callDisconnected(CallDisconnectMessage)
-        case clientDisconnected(ClientDisconnectMessage)
-    }
+public enum ConferenceEvent: Hashable {
+    case conferenceUpdate(ConferenceStatus)
+    case liveCaptions(LiveCaptions)
+    case messageReceived(ChatMessage)
+    case presentationStart(PresentationStartMessage)
+    case presentationStop
+    case participantSyncBegin
+    case participantSyncEnd
+    case participantCreate(Participant)
+    case participantUpdate(Participant)
+    case participantDelete(ParticipantDeleteMessage)
+    case callDisconnected(CallDisconnectMessage)
+    case clientDisconnected(ClientDisconnectMessage)
 
     enum Name: String {
         case conferenceUpdate = "conference_update"
@@ -31,16 +28,9 @@ public struct ServerEvent: Hashable {
         case clientDisconnected = "disconnect"
         case liveCaptions = "live_captions"
     }
-
-    public let rawEvent: EventSourceEvent
-    public let message: Message?
-
-    public subscript<T>(dynamicMember keyPath: KeyPath<EventSourceEvent, T>) -> T {
-        rawEvent[keyPath: keyPath]
-    }
 }
 
-// MARK: - Messages
+// MARK: - Events
 
 public struct ConferenceStatus: Codable, Hashable {
     private enum CodingKeys: String, CodingKey {
