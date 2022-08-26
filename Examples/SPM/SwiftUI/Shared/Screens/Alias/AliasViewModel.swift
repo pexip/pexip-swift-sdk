@@ -8,7 +8,7 @@ final class AliasViewModel: ObservableObject {
     struct Output {
         let alias: ConferenceAlias
         let node: URL
-        let token: Result<Token, TokenError>
+        let token: Result<ConferenceToken, ConferenceTokenError>
     }
 
     var isValid: Bool { alias != nil }
@@ -73,13 +73,13 @@ final class AliasViewModel: ObservableObject {
     private func checkPinRequirement(alias: ConferenceAlias, node: URL) async {
         do {
             let conferenceService = service.node(url: node).conference(alias: alias)
-            let fields = RequestTokenFields(displayName: displayName)
+            let fields = ConferenceTokenRequestFields(displayName: displayName)
             let token = try await conferenceService.requestToken(
                 fields: fields,
                 pin: nil
             )
             onComplete(.init(alias: alias, node: node, token: .success(token)))
-        } catch let error as TokenError {
+        } catch let error as ConferenceTokenError {
             debugPrint(error)
             onComplete(.init(alias: alias, node: node, token: .failure(error)))
         } catch {

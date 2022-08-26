@@ -1,6 +1,7 @@
 import PexipMedia
 import Combine
 import AppKit
+import PexipScreenCapture
 
 final class ScreenMediaSourcePickerModel: ObservableObject {
     @Published private(set) var displays = [Display]()

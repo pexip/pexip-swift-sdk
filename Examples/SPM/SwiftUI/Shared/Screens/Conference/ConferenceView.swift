@@ -237,7 +237,7 @@ struct ConferenceView_Previews: PreviewProvider {
         service: InfinityClientFactory().infinityService(),
         node: URL(string: "https://test.com")!,
         alias: ConferenceAlias(uri: "test@example.com")!,
-        token: Token(
+        token: ConferenceToken(
             value: "test",
             participantId: UUID(),
             role: .guest,

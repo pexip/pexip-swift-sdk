@@ -3,6 +3,7 @@ import PexipInfinityClient
 import PexipMedia
 import PexipRTC
 import PexipConference
+import PexipScreenCapture
 
 // MARK: - Protocol
 
@@ -18,7 +19,7 @@ protocol ViewFactoryProtocol {
     func pinChallengeView(
         node: URL,
         alias: ConferenceAlias,
-        tokenError: TokenError,
+        tokenError: ConferenceTokenError,
         onComplete: @escaping PinChallengeViewModel.Complete
     ) -> PinChallengeView
 }
@@ -51,12 +52,12 @@ struct ViewFactory: ViewFactoryProtocol {
     func pinChallengeView(
         node: URL,
         alias: ConferenceAlias,
-        tokenError: TokenError,
+        tokenError: ConferenceTokenError,
         onComplete: @escaping PinChallengeViewModel.Complete
     ) -> PinChallengeView {
         let viewModel = PinChallengeViewModel(
             tokenError: tokenError,
-            tokenService: apiClientFactory
+            service: apiClientFactory
                 .infinityService()
                 .node(url: node)
                 .conference(alias: alias),
@@ -70,7 +71,7 @@ struct ViewFactory: ViewFactoryProtocol {
     func conferenceView(
         node: URL,
         alias: ConferenceAlias,
-        token: Token,
+        token: ConferenceToken,
         onComplete: @escaping () -> Void
     ) -> ConferenceView {
         let mediaConnectionFactory = WebRTCMediaConnectionFactory()

@@ -12,7 +12,7 @@ final class CameraVideoFilter: PexipMedia.VideoFilter {
         case imageBackground = "Image Background"
     }
 
-    private let factory = VideoFilterFactory().background()
+    private let factory = VideoFilterFactory()
     private var videoFilter: PexipVideoFilters.VideoFilter?
 
     var kind: Kind = .none {
@@ -21,14 +21,22 @@ final class CameraVideoFilter: PexipMedia.VideoFilter {
             case .none:
                 videoFilter = nil
             case .gaussianBlur:
-                videoFilter = factory.gaussianBlur(radius: 30)
+                videoFilter = factory.segmentation(
+                    background: .gaussianBlur(radius: 30)
+                )
             case .tentBlur:
-                videoFilter = factory.tentBlur(intensity: 0.3)
+                videoFilter = factory.segmentation(
+                    background: .tentBlur(intensity: 0.3)
+                )
             case .boxBlur:
-                videoFilter = factory.boxBlur(intensity: 0.3)
+                videoFilter = factory.segmentation(
+                    background: .boxBlur(intensity: 0.3)
+                )
             case .imageBackground:
                 if let image = CGImage.withName("background_image") {
-                    videoFilter = factory.virtualBackground(image: image)
+                    videoFilter = factory.segmentation(
+                        background: .image(image)
+                    )
                 } else {
                     videoFilter = nil
                 }

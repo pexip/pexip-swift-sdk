@@ -5,6 +5,7 @@ import PexipConference
 import PexipMedia
 import PexipInfinityClient
 import PexipVideoFilters
+import PexipScreenCapture
 
 final class ConferenceViewModel: ObservableObject {
     @Published private(set) var state: ConferenceState
@@ -42,7 +43,7 @@ final class ConferenceViewModel: ObservableObject {
         (finalCaptions + currentCaptions).joined(separator: "\n")
     }
 
-    let remoteVideoContentMode = VideoContentMode.fit_16x9
+    let remoteVideoContentMode = VideoContentMode.fit16x9
     var hasChat: Bool { conference.chat != nil }
     var roster: Roster { conference.roster }
     private(set) lazy var chatMessageStore = conference.chat.map {
@@ -301,6 +302,9 @@ private extension ConferenceViewModel {
                         try self.mediaConnection.receivePresentation(false)
                     case .clientDisconnected:
                         self.leave()
+                    default:
+                        // Ignore the rest
+                        break
                     }
                 } catch {
                     debugPrint("Cannot handle conference event, error: \(error)")

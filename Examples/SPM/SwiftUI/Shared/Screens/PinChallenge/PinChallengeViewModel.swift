@@ -3,7 +3,7 @@ import PexipInfinityClient
 import PexipConference
 
 final class PinChallengeViewModel: ObservableObject {
-    typealias Complete = (Token) -> Void
+    typealias Complete = (ConferenceToken) -> Void
 
     @Published var pin = ""
     @Published var isPinRequired = false
@@ -13,17 +13,17 @@ final class PinChallengeViewModel: ObservableObject {
         !pin.isEmpty || !isPinRequired
     }
 
-    private let tokenService: TokenService
+    private let service: ConferenceService
     private let onComplete: Complete
 
     // MARK: - Init
 
     init(
-        tokenError: TokenError,
-        tokenService: TokenService,
+        tokenError: ConferenceTokenError,
+        service: ConferenceService,
         onComplete: @escaping Complete
     ) {
-        self.tokenService = tokenService
+        self.service = service
         self.onComplete = onComplete
         handleTokenError(tokenError)
     }
@@ -33,14 +33,14 @@ final class PinChallengeViewModel: ObservableObject {
     @MainActor
     func submitPin() async {
         do {
-            let fields = RequestTokenFields(displayName: displayName)
-            let token = try await tokenService.requestToken(
+            let fields = ConferenceTokenRequestFields(displayName: displayName)
+            let token = try await service.requestToken(
                 fields: fields,
                 pin: pin
             )
             pin = ""
             onComplete(token)
-        } catch let error as TokenError {
+        } catch let error as ConferenceTokenError {
             debugPrint(error)
             handleTokenError(error)
         } catch {
@@ -49,7 +49,7 @@ final class PinChallengeViewModel: ObservableObject {
         }
     }
 
-    private func handleTokenError(_ error: TokenError) {
+    private func handleTokenError(_ error: ConferenceTokenError) {
         switch error {
         case .invalidPin:
             errorMessage = "Incorrect PIN, please try again"
