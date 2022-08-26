@@ -1,13 +1,13 @@
 import Foundation
 @testable import PexipInfinityClient
 
-extension Token {
+extension ConferenceToken {
     static func randomToken(
         updatedAt: Date = .init(),
         expires: TimeInterval = 120,
         stun: [String] = []
-    ) -> Token {
-        Token(
+    ) -> ConferenceToken {
+        ConferenceToken(
             value: UUID().uuidString,
             updatedAt: updatedAt,
             participantId: UUID(),
@@ -15,7 +15,7 @@ extension Token {
             displayName: "Guest",
             serviceType: "conference",
             conferenceName: "Test",
-            stun: stun.map(Token.Stun.init(url:)),
+            stun: stun.map(ConferenceToken.Stun.init(url:)),
             turn: nil,
             chatEnabled: true,
             analyticsEnabled: Bool.random(),

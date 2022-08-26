@@ -113,12 +113,12 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         handler = BroadcastSampleHandler(client: client, fps: 15)
         handler.delegate = delegate
 
-        server.sink { [weak self] event in
+        server.sink { [weak self] httpEvent in
             guard let self = self else {
                 return
             }
 
-            switch event {
+            switch httpEvent {
             case .start:
                 self.notificationCenter.post(.serverStarted)
             default:
@@ -126,8 +126,8 @@ final class BroadcastSampleHandlerTests: XCTestCase {
             }
         }.store(in: &cancellables)
 
-        client.sink { event in
-            switch event {
+        client.sink { httpEvent in
+            switch httpEvent {
             case .connect:
                 try? server.stop()
             case .stop:
@@ -163,12 +163,12 @@ final class BroadcastSampleHandlerTests: XCTestCase {
 
         handler = BroadcastSampleHandler(client: client, fps: 15)
 
-        client.sink { [weak self] event in
+        client.sink { [weak self] httpEvent in
             guard let self = self else {
                 return
             }
 
-            switch event {
+            switch httpEvent {
             case .connect:
                 XCTAssertFalse(self.handler.processSampleBuffer(sampleBuffer, with: .audioApp))
                 XCTAssertFalse(self.handler.processSampleBuffer(sampleBuffer, with: .audioMic))
@@ -181,12 +181,12 @@ final class BroadcastSampleHandlerTests: XCTestCase {
             }
         }.store(in: &cancellables)
 
-        server.sink { [weak self] event in
+        server.sink { [weak self] httpEvent in
             guard let self = self else {
                 return
             }
 
-            switch event {
+            switch httpEvent {
             case .start:
                 self.notificationCenter.post(.serverStarted)
             case .message(let message):

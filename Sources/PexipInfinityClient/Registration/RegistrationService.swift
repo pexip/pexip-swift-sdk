@@ -4,7 +4,7 @@ import PexipUtils
 // MARK: - Protocols
 
 /// Represents the registration control functions section.
-public protocol RegistrationService {
+public protocol RegistrationService: TokenService {
     /**
      Requests a token for the registration alias.
 
@@ -15,24 +15,6 @@ public protocol RegistrationService {
      - Throws: `HTTPError` if a network error was encountered during operation
      */
     func requestToken(username: String, password: String) async throws -> RegistrationToken
-
-    /**
-     Refreshes the token to get a new one.
-
-     - Parameters:
-        - token: Current valid registration token
-     - Returns: New registration token
-     - Throws: `HTTPError` if a network error was encountered during operation
-     */
-    func refreshToken(_ token: RegistrationToken) async throws -> RegistrationToken
-
-    /**
-     Releases the token.
-     - Parameters:
-        - token: Current valid registration token
-     - Throws: `HTTPError` if a network error was encountered during operation
-     */
-    func releaseToken(_ token: RegistrationToken) async throws -> Bool
 
     /// HTTP EventSource which feeds server sent events as they occur.
     func eventSource() -> RegistrationEventService
@@ -61,23 +43,22 @@ struct DefaultRegistrationService: RegistrationService {
         return try await client.json(for: request)
     }
 
-    func refreshToken(_ token: RegistrationToken) async throws -> RegistrationToken {
+    func refreshToken(_ token: InfinityToken) async throws -> TokenRefreshResponse {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("refresh_token"),
             httpMethod: .POST
         )
         request.setHTTPHeader(.token(token.value))
-        let newToken: NewToken = try await client.json(for: request)
-        return token.updating(value: newToken.token, expires: newToken.expires)
+        return try await client.json(for: request)
     }
 
-    func releaseToken(_ token: RegistrationToken) async throws -> Bool {
+    func releaseToken(_ token: InfinityToken) async throws {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("release_token"),
             httpMethod: .POST
         )
         request.setHTTPHeader(.token(token.value))
-        return try await client.json(for: request)
+        _ = try await client.data(for: request)
     }
 
     func eventSource() -> RegistrationEventService {

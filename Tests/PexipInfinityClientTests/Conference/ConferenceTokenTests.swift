@@ -1,7 +1,7 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class TokenTests: XCTestCase {
+final class ConferenceTokenTests: XCTestCase {
     private var calendar: Calendar!
 
     // MARK: - Setup
@@ -45,7 +45,7 @@ final class TokenTests: XCTestCase {
         let date = Date()
         let data = try XCTUnwrap(json.data(using: .utf8))
         let response = try JSONDecoder().decode(
-            ResponseContainer<Token>.self,
+            ResponseContainer<ConferenceToken>.self,
             from: data
         )
         var token = response.result
@@ -59,7 +59,7 @@ final class TokenTests: XCTestCase {
 
         XCTAssertEqual(
             token,
-            Token(
+            ConferenceToken(
                 value: tokenValue,
                 updatedAt: date,
                 participantId: try XCTUnwrap(
@@ -85,7 +85,7 @@ final class TokenTests: XCTestCase {
 
     func testUpdating() throws {
         let date = Date()
-        let token = Token(
+        let token = ConferenceToken(
             value: "token_value",
             updatedAt: date,
             participantId: try XCTUnwrap(
@@ -135,7 +135,7 @@ final class TokenTests: XCTestCase {
             ).date
         )
 
-        let token = Token(
+        let token = ConferenceToken(
             value: "token_value",
             updatedAt: updatedAt,
             participantId: try XCTUnwrap(
@@ -181,7 +181,7 @@ final class TokenTests: XCTestCase {
     }
 
     func testTokenWrongExpiresString() {
-        let token = Token(
+        let token = ConferenceToken(
             value: UUID().uuidString,
             participantId: UUID(),
             role: .guest,

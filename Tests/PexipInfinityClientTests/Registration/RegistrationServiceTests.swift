@@ -109,17 +109,8 @@ final class RegistrationServiceTests: APITestCase {
             responseJSON: responseJSON,
             execute: {
                 let newToken = try await service.refreshToken(currentToken)
-                XCTAssertEqual(newToken.value, newTokenValue)
-                XCTAssertEqual(newToken.expires, 240)
-                XCTAssertTrue(newToken.updatedAt > currentToken.updatedAt)
-
-                var expectedToken = currentToken
-                expectedToken = expectedToken.updating(
-                    value: newTokenValue,
-                    expires: "240",
-                    updatedAt: newToken.updatedAt
-                )
-                XCTAssertEqual(newToken, expectedToken)
+                XCTAssertEqual(newToken.token, newTokenValue)
+                XCTAssertEqual(newToken.expires, "240")
             }
         )
     }
@@ -136,8 +127,7 @@ final class RegistrationServiceTests: APITestCase {
             body: nil,
             responseJSON: responseJSON,
             execute: {
-                let result = try await service.releaseToken(currentToken)
-                XCTAssertTrue(result)
+                try await service.releaseToken(currentToken)
             }
         )
     }

@@ -1,10 +1,9 @@
 import Foundation
-import PexipInfinityClient
 import PexipUtils
 
 // MARK: - Protocol
 
-protocol TokenRefresher {
+public protocol TokenRefresher {
     var isRefreshing: Bool { get async }
 
     @discardableResult
@@ -16,22 +15,22 @@ protocol TokenRefresher {
 
 // MARK: - Implementaion
 
-actor DefaultTokenRefresher: TokenRefresher {
+public actor DefaultTokenRefresher<Token: InfinityToken>: TokenRefresher {
     private let service: TokenService
-    private let store: TokenStore
+    private let store: TokenStore<Token>
     private let logger: Logger?
     private var tokenRefreshTask: Task<Void, Error>?
     private let currentDate: () -> Date
 
-    var isRefreshing: Bool {
+    public var isRefreshing: Bool {
         return tokenRefreshTask != nil
     }
 
     // MARK: - Init
 
-    init(
+    public init(
         service: TokenService,
-        store: TokenStore,
+        store: TokenStore<Token>,
         logger: Logger? = nil,
         currentDateProvider: @escaping () -> Date = { Date() }
     ) {
@@ -44,14 +43,14 @@ actor DefaultTokenRefresher: TokenRefresher {
     // MARK: - TokenRefresher
 
     @discardableResult
-    func startRefreshing() async -> Bool {
+    public func startRefreshing() async -> Bool {
         do {
             guard !isRefreshing else {
                 throw TokenRefresherError.tokenRefreshStarted
             }
 
             let token = try await store.token()
-            try scheduleRefresh(for: token)
+            try await scheduleRefresh(for: token)
             logger?.info("Token refresh operation started ✅")
             return true
         } catch {
@@ -61,13 +60,13 @@ actor DefaultTokenRefresher: TokenRefresher {
     }
 
     @discardableResult
-    func endRefreshing(withTokenRelease: Bool) async -> Bool {
+    public func endRefreshing(withTokenRelease: Bool) async -> Bool {
         do {
             guard isRefreshing else {
                 throw TokenRefresherError.tokenRefreshEnded
             }
 
-            stopRefreshTask()
+            await stopRefreshTask()
 
             let token = try await store.token()
 
@@ -92,8 +91,8 @@ actor DefaultTokenRefresher: TokenRefresher {
 
     // MARK: - Token refresh flow
 
-    private func scheduleRefresh(for token: Token) throws {
-        stopRefreshTask()
+    private func scheduleRefresh(for token: Token) async throws {
+        await stopRefreshTask()
 
         guard !token.isExpired(currentDate: currentDate()) else {
             logger?.warn("Cannot schedule refresh for expired token")
@@ -110,22 +109,28 @@ actor DefaultTokenRefresher: TokenRefresher {
 
                 try await store.updateToken(withTask: Task {
                     logger?.debug("Refreshing a token to get a new one...")
-                    let newToken = try await service.refreshToken(token)
+                    let refreshTokenResponse = try await service.refreshToken(token)
+                    let newToken = token.updating(
+                        value: refreshTokenResponse.token,
+                        expires: refreshTokenResponse.expires,
+                        updatedAt: currentDate()
+                    )
                     logger?.debug("New token received 👌")
-                    try scheduleRefresh(for: newToken)
+                    try await scheduleRefresh(for: newToken)
                     return newToken
                 })
             } catch {
-                stopRefreshTask()
+                await stopRefreshTask()
                 logger?.error("Token refresh failed with error: \(error)")
                 throw error
             }
         }
     }
 
-    private func stopRefreshTask() {
+    private func stopRefreshTask() async {
         tokenRefreshTask?.cancel()
         tokenRefreshTask = nil
+        await store.cancelUpdateIfNeeded()
     }
 }
 

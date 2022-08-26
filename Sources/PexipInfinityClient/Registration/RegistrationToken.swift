@@ -1,7 +1,7 @@
 import Foundation
 
 /// The registration token response.
-public struct RegistrationToken: TokenWithExpiration, Codable, Hashable {
+public struct RegistrationToken: InfinityToken, Codable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case value = "token"
         case registrationId = "registration_uuid"
@@ -58,7 +58,7 @@ public struct RegistrationToken: TokenWithExpiration, Codable, Hashable {
 
     // MARK: - Update
 
-    func updating(
+    public func updating(
         value: String,
         expires: String,
         updatedAt: Date = .init()

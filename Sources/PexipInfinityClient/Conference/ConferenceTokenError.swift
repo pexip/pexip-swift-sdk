@@ -1,6 +1,6 @@
 import Foundation
 
-public enum TokenError: LocalizedError, Hashable {
+public enum ConferenceTokenError: LocalizedError, Hashable {
     /// The supplied `pin` is invalid
     case invalidPin
     /// If a PIN is required for a Host, but not for a Guest,
@@ -26,7 +26,7 @@ public enum TokenError: LocalizedError, Hashable {
 
 // MARK: - Decodable
 
-extension TokenError: Decodable {
+extension ConferenceTokenError: Decodable {
     private enum CodingKeys: String, CodingKey {
         case guestPin = "guest_pin"
         case ext = "conference_extension"

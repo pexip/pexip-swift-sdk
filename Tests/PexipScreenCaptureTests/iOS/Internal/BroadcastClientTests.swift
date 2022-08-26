@@ -30,12 +30,12 @@ final class BroadcastClientTests: XCTestCase {
     func testStart() throws {
         let expectation = self.expectation(description: "Start")
 
-        client.sink { [weak self] event in
+        client.sink { [weak self] httpEvent in
             guard let self = self else {
                 return
             }
 
-            switch event {
+            switch httpEvent {
             case .connect:
                 XCTAssertTrue(self.client.isConnected)
                 expectation.fulfill()
@@ -58,12 +58,12 @@ final class BroadcastClientTests: XCTestCase {
     func testStartWithoutServer() throws {
         let expectation = self.expectation(description: "Start without server")
 
-        client.sink { [weak self] event in
+        client.sink { [weak self] httpEvent in
             guard let self = self else {
                 return
             }
 
-            switch event {
+            switch httpEvent {
             case .connect:
                 XCTFail("Invalid client event")
             case .stop(let error):
@@ -83,8 +83,8 @@ final class BroadcastClientTests: XCTestCase {
 
         let expectation = self.expectation(description: "Stop")
 
-        server.sink { event in
-            switch event {
+        server.sink { httpEvent in
+            switch httpEvent {
             case .stop(let error):
                 XCTAssertTrue(error == nil)
                 expectation.fulfill()
@@ -103,8 +103,8 @@ final class BroadcastClientTests: XCTestCase {
 
         let expectation = self.expectation(description: "Stop")
 
-        server.sink { event in
-            switch event {
+        server.sink { httpEvent in
+            switch httpEvent {
             case .stop(let error):
                 XCTAssertTrue(error == nil)
                 expectation.fulfill()
@@ -126,8 +126,8 @@ final class BroadcastClientTests: XCTestCase {
         let message = try BroadcastMessage.creatStub()
         let sendExpectation = self.expectation(description: "Send message")
 
-        server.sink { event in
-            switch event {
+        server.sink { httpEvent in
+            switch httpEvent {
             case .start, .stop:
                 break
             case .message(let receivedMessage):

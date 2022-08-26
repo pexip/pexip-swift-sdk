@@ -17,14 +17,14 @@ final class ConferenceServiceTests: APITestCase {
     func testRequestTokenWith200() async throws {
         let identityProvider = IdentityProvider(name: "Name", id: UUID().uuidString)
         let ssoToken = UUID().uuidString
-        let fields = RequestTokenFields(
+        let fields = ConferenceTokenRequestFields(
             displayName: "Guest",
             conferenceExtension: "ext",
             idp: identityProvider,
             ssoToken: ssoToken
         )
         let pin = "1234"
-        let expectedToken = Token.randomToken()
+        let expectedToken = ConferenceToken.randomToken()
         let data = try JSONEncoder().encode(Container(result: expectedToken))
         let responseJSON = String(data: data, encoding: .utf8)
 
@@ -51,6 +51,42 @@ final class ConferenceServiceTests: APITestCase {
         )
     }
 
+    func testRequestTokenWithIncomingToken() async throws {
+        let fields = ConferenceTokenRequestFields(displayName: "Guest")
+        let incomingToken = UUID().uuidString
+        let expectedToken = ConferenceToken.randomToken()
+        let data = try JSONEncoder().encode(Container(result: expectedToken))
+        let responseJSON = String(data: data, encoding: .utf8)
+
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("request_token"),
+            token: nil,
+            body: try JSONEncoder().encode(fields),
+            responseJSON: responseJSON,
+            assertHTTPErrors: false,
+            execute: { [weak self] in
+                var token = try await service.requestToken(
+                    fields: fields,
+                    incomingToken: incomingToken
+                )
+                XCTAssertEqual(
+                    self?.lastRequest?.value(forHTTPHeaderField: "token"),
+                    incomingToken
+                )
+                XCTAssertEqual(token.value, expectedToken.value)
+                XCTAssertEqual(token.expires, expectedToken.expires)
+                // Update token to have the same `updatedAt` date as in expected token
+                token = token.updating(
+                    value: expectedToken.value,
+                    expires: "\(expectedToken.expires)",
+                    updatedAt: expectedToken.updatedAt
+                )
+                XCTAssertEqual(token, expectedToken)
+            }
+        )
+    }
+
     func testRequestTokenWithDecodingError() async throws {
         // 1. Mock response
         URLProtocolMock.makeResponse = { _ in
@@ -59,11 +95,11 @@ final class ConferenceServiceTests: APITestCase {
 
         do {
             // 2. Make request
-            let fields = RequestTokenFields(displayName: "Guest")
+            let fields = ConferenceTokenRequestFields(displayName: "Guest")
             _ = try await service.requestToken(fields: fields, pin: nil)
         } catch {
             // 3. Assert error
-            XCTAssertEqual(error as? TokenError, .tokenDecodingFailed)
+            XCTAssertEqual(error as? ConferenceTokenError, .tokenDecodingFailed)
         }
     }
 
@@ -75,7 +111,7 @@ final class ConferenceServiceTests: APITestCase {
 
         do {
             // 2. Make request
-            let fields = RequestTokenFields(displayName: "Guest")
+            let fields = ConferenceTokenRequestFields(displayName: "Guest")
             _ = try await service.requestToken(fields: fields, pin: nil)
         } catch {
             // 3. Assert error
@@ -101,11 +137,11 @@ final class ConferenceServiceTests: APITestCase {
 
         do {
             // 2. Make request
-            let fields = RequestTokenFields(displayName: "Guest")
+            let fields = ConferenceTokenRequestFields(displayName: "Guest")
             _ = try await service.requestToken(fields: fields, pin: nil)
         } catch {
             // 3. Assert error
-            XCTAssertEqual(error as? TokenError, .conferenceExtensionRequired("standard"))
+            XCTAssertEqual(error as? ConferenceTokenError, .conferenceExtensionRequired("standard"))
         }
     }
 
@@ -128,11 +164,11 @@ final class ConferenceServiceTests: APITestCase {
 
         do {
             // 2. Make request
-            let fields = RequestTokenFields(displayName: "Guest")
+            let fields = ConferenceTokenRequestFields(displayName: "Guest")
             _ = try await service.requestToken(fields: fields, pin: nil)
         } catch {
             // 3. Assert error
-            XCTAssertEqual(error as? TokenError, .pinRequired(guestPin: false))
+            XCTAssertEqual(error as? ConferenceTokenError, .pinRequired(guestPin: false))
         }
     }
 
@@ -155,11 +191,11 @@ final class ConferenceServiceTests: APITestCase {
 
         do {
             // 2. Make request
-            let fields = RequestTokenFields(displayName: "Guest")
+            let fields = ConferenceTokenRequestFields(displayName: "Guest")
             _ = try await service.requestToken(fields: fields, pin: "1234")
         } catch {
             // 3. Assert error
-            XCTAssertEqual(error as? TokenError, .invalidPin)
+            XCTAssertEqual(error as? ConferenceTokenError, .invalidPin)
         }
     }
 
@@ -171,7 +207,7 @@ final class ConferenceServiceTests: APITestCase {
 
         do {
             // 2. Make request
-            let fields = RequestTokenFields(displayName: "Guest")
+            let fields = ConferenceTokenRequestFields(displayName: "Guest")
             _ = try await service.requestToken(fields: fields, pin: nil)
         } catch {
             // 3. Assert error
@@ -187,7 +223,7 @@ final class ConferenceServiceTests: APITestCase {
 
         do {
             // 2. Make request
-            let fields = RequestTokenFields(displayName: "Guest")
+            let fields = ConferenceTokenRequestFields(displayName: "Guest")
             _ = try await service.requestToken(fields: fields, pin: nil)
         } catch {
             // 3. Assert error
@@ -198,7 +234,7 @@ final class ConferenceServiceTests: APITestCase {
     // MARK: - Refresh token
 
     func testRefreshToken() async throws {
-        let currentToken = Token.randomToken()
+        let currentToken = ConferenceToken.randomToken()
         let newTokenValue = UUID().uuidString
         let responseJSON = """
         {
@@ -218,23 +254,14 @@ final class ConferenceServiceTests: APITestCase {
             responseJSON: responseJSON,
             execute: {
                 let newToken = try await service.refreshToken(currentToken)
-                XCTAssertEqual(newToken.value, newTokenValue)
-                XCTAssertEqual(newToken.expires, 240)
-                XCTAssertTrue(newToken.updatedAt > currentToken.updatedAt)
-
-                var expectedToken = currentToken
-                expectedToken = expectedToken.updating(
-                    value: newTokenValue,
-                    expires: "240",
-                    updatedAt: newToken.updatedAt
-                )
-                XCTAssertEqual(newToken, expectedToken)
+                XCTAssertEqual(newToken.token, newTokenValue)
+                XCTAssertEqual(newToken.expires, "240")
             }
         )
     }
 
     func testReleaseToken() async throws {
-        let currentToken = Token.randomToken()
+        let currentToken = ConferenceToken.randomToken()
 
         try await testJSONRequest(
             withMethod: .POST,
@@ -249,7 +276,7 @@ final class ConferenceServiceTests: APITestCase {
     }
 
     func testMessage() async throws {
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         let message = "Test message"
         let responseJSON = """
         {

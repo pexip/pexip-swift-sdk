@@ -9,7 +9,7 @@ protocol DTMFSender {
 // MARK: - Implementation
 
 struct DefaultDTMFSender: DTMFSender {
-    let tokenStore: TokenStore
+    let tokenStore: TokenStore<ConferenceToken>
     let participantService: ParticipantService
 
     func send(dtmf: DTMFSignals) async throws -> Bool {

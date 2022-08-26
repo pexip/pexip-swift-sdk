@@ -33,12 +33,12 @@ final class BroadcastServerTests: XCTestCase {
     func testStart() throws {
         let expectation = self.expectation(description: "Start")
 
-        server.sink { [weak self] event in
+        server.sink { [weak self] httpEvent in
             guard let self = self else {
                 return
             }
 
-            switch event {
+            switch httpEvent {
             case .start:
                 XCTAssertTrue(self.server.isRunning)
                 XCTAssertTrue(self.fileManager.fileExists(atPath: self.filePath))
@@ -76,12 +76,12 @@ final class BroadcastServerTests: XCTestCase {
     func testRejectMoreThanOneConnection() throws {
         let startExpectation = self.expectation(description: "Start")
 
-        client.sink { [weak self] event in
+        client.sink { [weak self] httpEvent in
             guard let self = self else {
                 return
             }
 
-            switch event {
+            switch httpEvent {
             case .connect:
                 XCTAssertTrue(self.client.isConnected)
                 startExpectation.fulfill()

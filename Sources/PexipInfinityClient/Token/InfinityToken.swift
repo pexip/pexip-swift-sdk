@@ -1,14 +1,19 @@
 import Foundation
 
-public protocol TokenWithExpiration {
+public protocol InfinityToken {
     var value: String { get }
     var expires: TimeInterval { get }
     var updatedAt: Date { get }
+    func updating(
+        value: String,
+        expires: String,
+        updatedAt: Date
+    ) -> Self
 }
 
 // MARK: - Helper functions
 
-public extension TokenWithExpiration {
+public extension InfinityToken {
     var expiresAt: Date {
         updatedAt.addingTimeInterval(expires)
     }

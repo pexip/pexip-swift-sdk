@@ -1,4 +1,4 @@
-public struct RequestTokenFields: Encodable, Hashable {
+public struct ConferenceTokenRequestFields: Encodable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case displayName = "display_name"
         case conferenceExtension = "conference_extension"
@@ -8,10 +8,13 @@ public struct RequestTokenFields: Encodable, Hashable {
 
     /// The name by which this participant should be known
     public var displayName: String
+
     /// Conference to connect to (when being used with a Virtual Reception)
     public var conferenceExtension: String?
+
     /// The identity provider used to proceed with SSO flow
     public var chosenIdpId: String?
+
     /// The ssoToken received from the SSO flow
     public var ssoToken: String?
 

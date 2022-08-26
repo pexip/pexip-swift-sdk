@@ -12,7 +12,7 @@ protocol LiveCaptionsService {
 // MARK: - Implementation
 
 struct DefaultLiveCaptionsService: LiveCaptionsService {
-    let tokenStore: TokenStore
+    let tokenStore: TokenStore<ConferenceToken>
     let participantService: ParticipantService
 
     func toggleLiveCaptions(

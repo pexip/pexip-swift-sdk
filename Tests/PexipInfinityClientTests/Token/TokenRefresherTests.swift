@@ -1,10 +1,9 @@
 import XCTest
-@testable import PexipConference
 @testable import PexipInfinityClient
 
 final class TokenRefresherTests: XCTestCase {
     private var refresher: TokenRefresher!
-    private var store: TokenStoreMock!
+    private var store: TokenStore<ConferenceToken>!
     private var service: TokenServiceMock!
     private var calendar: Calendar!
     private var updatedAt: Date!
@@ -29,7 +28,7 @@ final class TokenRefresherTests: XCTestCase {
                 second: 11
             ).date
         )
-        store = TokenStoreMock()
+        store = TokenStore(token: .randomToken())
         service = TokenServiceMock()
         refresher = DefaultTokenRefresher(
             service: service,
@@ -43,7 +42,7 @@ final class TokenRefresherTests: XCTestCase {
     // MARK: - Start refreshing tests
 
     func testStartRefreshing() async throws {
-        let token = Token.randomToken(updatedAt: updatedAt)
+        let token = ConferenceToken.randomToken(updatedAt: updatedAt)
         currentDate = updatedAt.addingTimeInterval(60)
 
         try await store.updateToken(token)
@@ -57,7 +56,7 @@ final class TokenRefresherTests: XCTestCase {
     }
 
     func testStartRefreshingWhenRefreshing() async throws {
-        try await store.updateToken(Token.randomToken())
+        try await store.updateToken(ConferenceToken.randomToken())
         await refresher.startRefreshing()
         let started = await refresher.startRefreshing()
 
@@ -68,11 +67,21 @@ final class TokenRefresherTests: XCTestCase {
 
     /// N.B. Testing timers is tricky
     func testTokenRefresh() async throws {
-        let tokenA = Token.randomToken(updatedAt: updatedAt)
-        let tokenB = Token.randomToken(updatedAt: updatedAt)
-
         currentDate = updatedAt.addingTimeInterval(59.8)
-        service.refreshTokenResult = .success(tokenB)
+
+        let tokenA = ConferenceToken.randomToken(updatedAt: updatedAt)
+        let tokenB = tokenA.updating(
+            value: UUID().uuidString,
+            expires: "120",
+            updatedAt: currentDate
+        )
+
+        service.refreshTokenResult = .success(
+            TokenRefreshResponse(
+                token: tokenB.value,
+                expires: tokenB.expiresString
+            )
+        )
 
         // 1. Start refreshing to schedule token refresh
         try await store.updateToken(tokenA)
@@ -102,7 +111,7 @@ final class TokenRefresherTests: XCTestCase {
 
     /// N.B. Testing timers is tricky
     func testTokenRefreshWithServiceError() async throws {
-        let tokenA = Token.randomToken(updatedAt: updatedAt)
+        let tokenA = ConferenceToken.randomToken(updatedAt: updatedAt)
 
         currentDate = updatedAt.addingTimeInterval(60)
         service.refreshTokenResult = .failure(URLError(.badURL))
@@ -111,34 +120,34 @@ final class TokenRefresherTests: XCTestCase {
         try await store.updateToken(tokenA)
         await refresher.startRefreshing()
 
-        let tokenFromStore = try await store.token()
-        let isRefreshing = await refresher.isRefreshing
+        let tokenFromStore1 = try await store.token()
+        let isRefreshing1 = await refresher.isRefreshing
 
-        XCTAssertEqual(tokenFromStore, tokenA)
-        XCTAssertTrue(isRefreshing)
+        XCTAssertEqual(tokenFromStore1, tokenA)
+        XCTAssertTrue(isRefreshing1)
 
-        // 2. Wait to token refresh
-        let waitForRefresh = Task {
-            try await Task.sleep(seconds: 0.1)
+        // 2. Wait for token refresh
+        try await Task.sleep(seconds: 0.1)
 
-            XCTAssertEqual(service.steps, [.refreshToken])
+        let tokenFromStore2 = try await store.token()
+        let isRefreshing2 = await refresher.isRefreshing
 
-            let tokenFromStore = try await store.token()
-            let isRefreshing = await refresher.isRefreshing
-
-            XCTAssertEqual(tokenFromStore, tokenA)
-            XCTAssertFalse(isRefreshing)
-        }
-
-        try await waitForRefresh.value
+        XCTAssertEqual(service.steps, [.refreshToken])
+        XCTAssertEqual(tokenFromStore2, tokenA)
+        XCTAssertFalse(isRefreshing2)
     }
 
     func testTokenRefreshWithExpiredToken() async throws {
-        let tokenA = Token.randomToken(updatedAt: updatedAt.addingTimeInterval(-240))
-        let tokenB = Token.randomToken(updatedAt: updatedAt)
+        let tokenA = ConferenceToken.randomToken(updatedAt: updatedAt.addingTimeInterval(-240))
+        let tokenB = ConferenceToken.randomToken(updatedAt: updatedAt)
 
         currentDate = updatedAt.addingTimeInterval(60)
-        service.refreshTokenResult = .success(tokenB)
+        service.refreshTokenResult = .success(
+            TokenRefreshResponse(
+                token: tokenB.value,
+                expires: tokenB.expiresString
+            )
+        )
 
         // 1. Activate refresher and schedule token refresh
         try await store.updateToken(tokenA)
@@ -154,7 +163,7 @@ final class TokenRefresherTests: XCTestCase {
     // MARK: - End refreshing tests
 
     func testEndRefreshingWithValidToken() async throws {
-        let token = Token.randomToken(updatedAt: updatedAt)
+        let token = ConferenceToken.randomToken(updatedAt: updatedAt)
         service.releaseTokenResult = .success(())
         currentDate = updatedAt.addingTimeInterval(60)
 
@@ -169,7 +178,7 @@ final class TokenRefresherTests: XCTestCase {
     }
 
     func testEndRefreshingWithServiceError() async throws {
-        let token = Token.randomToken(updatedAt: updatedAt)
+        let token = ConferenceToken.randomToken(updatedAt: updatedAt)
 
         service.releaseTokenResult = .failure(URLError(.badURL))
         currentDate = updatedAt.addingTimeInterval(60)
@@ -185,7 +194,7 @@ final class TokenRefresherTests: XCTestCase {
     }
 
     func testEndRefreshingWithExpiredToken() async throws {
-        let token = Token.randomToken(updatedAt: updatedAt)
+        let token = ConferenceToken.randomToken(updatedAt: updatedAt)
         try await store.updateToken(token)
         currentDate = updatedAt.addingTimeInterval(60)
         await refresher.startRefreshing()
@@ -204,7 +213,7 @@ final class TokenRefresherTests: XCTestCase {
     }
 
     func testEndRefreshingWithoutTokenRelease() async throws {
-        let token = Token.randomToken(updatedAt: updatedAt)
+        let token = ConferenceToken.randomToken(updatedAt: updatedAt)
         service.releaseTokenResult = .success(())
         currentDate = updatedAt.addingTimeInterval(60)
 
@@ -227,40 +236,24 @@ private final class TokenServiceMock: TokenService {
         case releaseToken
     }
 
-    var refreshTokenResult: Result<Token, Error> = .failure(URLError(.badURL))
+    var refreshTokenResult: Result<TokenRefreshResponse, Error> = .failure(URLError(.badURL))
     var releaseTokenResult: Result<Void, Error> = .success(())
     private(set) var steps = [Step]()
 
     func requestToken(
-        fields: RequestTokenFields,
+        fields: ConferenceTokenRequestFields,
         pin: String?
-    ) async throws -> Token {
-        throw TokenError.invalidPin
+    ) async throws -> ConferenceToken {
+        throw ConferenceTokenError.invalidPin
     }
 
-    func refreshToken(_ token: Token) async throws -> Token {
+    func refreshToken(_ token: InfinityToken) async throws -> TokenRefreshResponse {
         steps.append(.refreshToken)
         return try refreshTokenResult.get()
     }
 
-    func releaseToken(_ token: Token) async throws {
+    func releaseToken(_ token: InfinityToken) async throws {
         steps.append(.releaseToken)
         try releaseTokenResult.get()
-    }
-}
-
-private final class TokenStoreMock: TokenStore {
-    var token: Token = .randomToken()
-    var updateTokenError: Error?
-
-    func token() async throws -> Token {
-        return token
-    }
-
-    func updateToken(withTask task: Task<Token, Error>) async throws {
-        if let updateTokenError = updateTokenError {
-            throw updateTokenError
-        }
-        token = try await task.value
     }
 }

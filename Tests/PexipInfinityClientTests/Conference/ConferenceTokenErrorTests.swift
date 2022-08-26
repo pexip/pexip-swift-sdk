@@ -1,7 +1,7 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class TokenErrorTests: XCTestCase {
+final class ConferenceTokenErrorTests: XCTestCase {
     private let decoder = JSONDecoder()
 
     // MARK: - Tests
@@ -15,7 +15,7 @@ final class TokenErrorTests: XCTestCase {
         """.data(using: .utf8)
 
         let error = try decoder.decode(
-            TokenError.self,
+            ConferenceTokenError.self,
             from: try XCTUnwrap(data)
         )
 
@@ -31,7 +31,7 @@ final class TokenErrorTests: XCTestCase {
         """.data(using: .utf8)
 
         let error = try decoder.decode(
-            TokenError.self,
+            ConferenceTokenError.self,
             from: try XCTUnwrap(data)
         )
 
@@ -46,7 +46,7 @@ final class TokenErrorTests: XCTestCase {
         """.data(using: .utf8)
 
         let error = try decoder.decode(
-            TokenError.self,
+            ConferenceTokenError.self,
             from: try XCTUnwrap(data)
         )
 
@@ -72,7 +72,7 @@ final class TokenErrorTests: XCTestCase {
         """.data(using: .utf8)
 
         let error = try decoder.decode(
-            TokenError.self,
+            ConferenceTokenError.self,
             from: try XCTUnwrap(data)
         )
 
@@ -98,7 +98,7 @@ final class TokenErrorTests: XCTestCase {
         """.data(using: .utf8)
 
         let error = try decoder.decode(
-            TokenError.self,
+            ConferenceTokenError.self,
             from: try XCTUnwrap(data)
         )
 
@@ -119,7 +119,7 @@ final class TokenErrorTests: XCTestCase {
         """.data(using: .utf8)
 
         let error = try decoder.decode(
-            TokenError.self,
+            ConferenceTokenError.self,
             from: try XCTUnwrap(data)
         )
 

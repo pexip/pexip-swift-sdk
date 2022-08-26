@@ -32,10 +32,10 @@ public struct ConferenceFactory {
         service: InfinityService,
         node: URL,
         alias: ConferenceAlias,
-        token: Token
+        token: ConferenceToken
     ) -> Conference {
         let service = service.node(url: node).conference(alias: alias)
-        let tokenStore = DefaultTokenStore(token: token)
+        let tokenStore = TokenStore(token: token)
         let roster = roster(token: token, service: service)
         let participantService = service.participant(id: token.participantId)
 
@@ -74,8 +74,8 @@ public struct ConferenceFactory {
     // MARK: - Private methods
 
     private func chat(
-        token: Token,
-        tokenStore: TokenStore,
+        token: ConferenceToken,
+        tokenStore: TokenStore<ConferenceToken>,
         service: ConferenceService
     ) -> Chat? {
         guard token.chatEnabled else {
@@ -92,7 +92,7 @@ public struct ConferenceFactory {
     }
 
     private func roster(
-        token: Token,
+        token: ConferenceToken,
         service: ConferenceService
     ) -> Roster {
         Roster(
@@ -107,7 +107,7 @@ public struct ConferenceFactory {
 
 // MARK: - Private extension
 
-private extension Token {
+private extension ConferenceToken {
     var iceServers: [IceServer] {
         let stunIceServers = (stun ?? []).map {
             IceServer(url: $0.url)

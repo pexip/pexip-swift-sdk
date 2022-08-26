@@ -8,7 +8,7 @@ actor ConferenceSignaling: MediaConnectionSignaling {
     let iceServers: [IceServer]
 
     private let participantService: ParticipantService
-    private let tokenStore: TokenStore
+    private let tokenStore: TokenStore<ConferenceToken>
     private let roster: Roster
     private let logger: Logger?
     private var pwds = [String: String]()
@@ -18,7 +18,7 @@ actor ConferenceSignaling: MediaConnectionSignaling {
 
     init(
         participantService: ParticipantService,
-        tokenStore: TokenStore,
+        tokenStore: TokenStore<ConferenceToken>,
         roster: Roster,
         iceServers: [IceServer],
         logger: Logger?

@@ -4,15 +4,15 @@ public enum ConferenceEvent: Hashable {
     case conferenceUpdate(ConferenceStatus)
     case liveCaptions(LiveCaptions)
     case messageReceived(ChatMessage)
-    case presentationStart(PresentationStartMessage)
+    case presentationStart(PresentationStartEvent)
     case presentationStop
     case participantSyncBegin
     case participantSyncEnd
     case participantCreate(Participant)
     case participantUpdate(Participant)
-    case participantDelete(ParticipantDeleteMessage)
-    case callDisconnected(CallDisconnectMessage)
-    case clientDisconnected(ClientDisconnectMessage)
+    case participantDelete(ParticipantDeleteEvent)
+    case callDisconnected(CallDisconnectEvent)
+    case clientDisconnected(ClientDisconnectEvent)
 
     enum Name: String {
         case conferenceUpdate = "conference_update"
@@ -69,7 +69,7 @@ public struct ConferenceStatus: Codable, Hashable {
     }
 }
 
-public struct PresentationStartMessage: Codable, Hashable {
+public struct PresentationStartEvent: Codable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case presenterName = "presenter_name"
         case presenterUri = "presenter_uri"
@@ -81,7 +81,7 @@ public struct PresentationStartMessage: Codable, Hashable {
     public let presenterUri: String
 }
 
-public struct CallDisconnectMessage: Codable, Hashable {
+public struct CallDisconnectEvent: Codable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case callId = "call_uuid"
         case reason
@@ -91,11 +91,11 @@ public struct CallDisconnectMessage: Codable, Hashable {
     public let reason: String
 }
 
-public struct ClientDisconnectMessage: Codable, Hashable {
+public struct ClientDisconnectEvent: Codable, Hashable {
     public let reason: String
 }
 
-public struct ParticipantDeleteMessage: Codable, Hashable {
+public struct ParticipantDeleteEvent: Codable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case id = "uuid"
     }

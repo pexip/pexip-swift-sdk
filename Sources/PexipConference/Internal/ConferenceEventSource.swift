@@ -18,7 +18,7 @@ actor DefaultConferenceEventSource: ConferenceEventSource {
 
     private let decoder = JSONDecoder()
     private let service: ConferenceEventService
-    private let tokenStore: TokenStore
+    private let tokenStore: TokenStore<ConferenceToken>
     private let logger: Logger?
     private let maxReconnectionTime: TimeInterval = 5
     private var reconnectionTime: TimeInterval = 1
@@ -32,7 +32,7 @@ actor DefaultConferenceEventSource: ConferenceEventSource {
 
     init(
         service: ConferenceEventService,
-        tokenStore: TokenStore,
+        tokenStore: TokenStore<ConferenceToken>,
         logger: Logger? = nil
     ) {
         self.service = service

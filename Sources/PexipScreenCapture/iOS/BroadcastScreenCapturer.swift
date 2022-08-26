@@ -133,10 +133,10 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
     }
 
     private func subscribeToEvents(from server: BroadcastServer) {
-        server.sink { [weak self] event in
+        server.sink { [weak self] httpEvent in
             guard let self = self else { return }
 
-            switch event {
+            switch httpEvent {
             case .start:
                 self.notificationCenter.post(.serverStarted)
             case .message(let message):

@@ -1,22 +1,27 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class ConferenceEventServiceTests: APITestCase {
+final class RegistrationEventServiceTests: APITestCase {
     private let baseURL = URL(string: "https://example.com")!
-    private var service: ConferenceEventService!
+    private var service: RegistrationEventService!
 
     // MARK: - Setup
 
     override func setUp() {
         super.setUp()
-        service = DefaultConferenceEventService(baseURL: baseURL, client: client)
+        service = DefaultRegistrationEventService(baseURL: baseURL, client: client)
     }
 
+    // swiftlint:disable function_body_length
     func testEventStream() async throws {
         // 1. Prepare
-        var receivedEvents = [Event<ConferenceEvent>]()
-        let token = ConferenceToken.randomToken()
-        let expectedEvent = ClientDisconnectEvent(reason: "Test")
+        var receivedEvents = [Event<RegistrationEvent>]()
+        let token = RegistrationToken.randomToken()
+        let expectedEvent = IncomingRegistrationEvent(
+            conferenceAlias: "Alias",
+            remoteDisplayName: "Name",
+            token: UUID().uuidString
+        )
         let eventDataString = String(
             data: try JSONEncoder().encode(expectedEvent),
             encoding: .utf8
@@ -24,7 +29,7 @@ final class ConferenceEventServiceTests: APITestCase {
         let string = """
         id: 1
         data:\(eventDataString)
-        event: disconnect
+        event: incoming
 
 
         """
@@ -55,16 +60,23 @@ final class ConferenceEventServiceTests: APITestCase {
 
         // 4. Assert response
         XCTAssertEqual(receivedEvents.count, 1)
-        XCTAssertEqual(
-            receivedEvents.first,
-            Event<ConferenceEvent>(
-                id: "1",
-                name: "disconnect",
-                reconnectionTime: nil,
-                data: .clientDisconnected(
-                    .init(reason: "Test")
-                )
+        XCTAssertEqual(receivedEvents.first?.id, "1")
+        XCTAssertEqual(receivedEvents.first?.name, "incoming")
+        XCTAssertNil(receivedEvents.first?.reconnectionTime)
+
+        switch receivedEvents.first?.data {
+        case .incoming(let incomingEvent):
+            XCTAssertEqual(
+                incomingEvent.conferenceAlias,
+                expectedEvent.conferenceAlias
             )
-        )
+            XCTAssertEqual(
+                incomingEvent.remoteDisplayName,
+                expectedEvent.remoteDisplayName
+            )
+            XCTAssertEqual(incomingEvent.token, expectedEvent.token)
+        default:
+            XCTFail("Unexpected event type")
+        }
     }
 }

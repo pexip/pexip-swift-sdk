@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Token: TokenWithExpiration, Codable, Hashable {
+public struct ConferenceToken: InfinityToken, Codable, Hashable {
     public enum Role: String, Codable, Hashable {
         case host = "HOST"
         case guest = "GUEST"
@@ -74,7 +74,7 @@ public struct Token: TokenWithExpiration, Codable, Hashable {
         TimeInterval(expiresString) ?? 0
     }
 
-    private var expiresString: String
+    private(set) var expiresString: String
 
     // MARK: - Init
 
@@ -82,12 +82,12 @@ public struct Token: TokenWithExpiration, Codable, Hashable {
         value: String,
         updatedAt: Date = Date(),
         participantId: UUID,
-        role: Token.Role,
+        role: ConferenceToken.Role,
         displayName: String,
         serviceType: String,
         conferenceName: String,
-        stun: [Token.Stun]?,
-        turn: [Token.Turn]?,
+        stun: [ConferenceToken.Stun]?,
+        turn: [ConferenceToken.Turn]?,
         chatEnabled: Bool,
         analyticsEnabled: Bool,
         expiresString: String,
@@ -110,11 +110,11 @@ public struct Token: TokenWithExpiration, Codable, Hashable {
 
     // MARK: - Update
 
-    func updating(
+    public func updating(
         value: String,
         expires: String,
         updatedAt: Date = .init()
-    ) -> Token {
+    ) -> ConferenceToken {
         var token = self
         token.value = value
         token.expiresString = expires

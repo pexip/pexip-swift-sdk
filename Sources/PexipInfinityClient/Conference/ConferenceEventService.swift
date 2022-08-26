@@ -20,7 +20,7 @@ public protocol ConferenceEventService {
      - Throws: ``HTTPEventError``
      - Throws: ``HTTPError`` if another network error was encountered during operation
      */
-    func events(token: Token) async -> AsyncThrowingStream<Event<ConferenceEvent>, Error>
+    func events(token: ConferenceToken) async -> AsyncThrowingStream<Event<ConferenceEvent>, Error>
 }
 
 // MARK: - Implementation
@@ -31,41 +31,13 @@ struct DefaultConferenceEventService: ConferenceEventService {
     var decoder = JSONDecoder()
     var logger: Logger?
 
-    func events(token: Token) async -> AsyncThrowingStream<Event<ConferenceEvent>, Error> {
-        let parser = ConferenceEventParser(decoder: decoder, logger: logger)
-        return AsyncThrowingStream(
-            bufferingPolicy: .bufferingNewest(1)
-        ) { continuation in
-            let task = Task {
-                do {
-                    var request = URLRequest(
-                        url: baseURL.appendingPathComponent("events"),
-                        httpMethod: .GET
-                    )
-                    request.setHTTPHeader(.token(token.value))
-
-                    let events = client.eventSource(withRequest: request)
-
-                    for try await event in events {
-                        if let conferenceEvent = parser.conferenceEvent(from: event) {
-                            continuation.yield(
-                                Event(
-                                    id: event.id,
-                                    name: event.name,
-                                    reconnectionTime: event.reconnectionTime,
-                                    data: conferenceEvent
-                                )
-                            )
-                        }
-                    }
-                } catch {
-                    continuation.finish(throwing: error)
-                }
-            }
-
-            continuation.onTermination = { @Sendable _ in
-                task.cancel()
-            }
-        }
+    func events(
+        token: ConferenceToken
+    ) async -> AsyncThrowingStream<Event<ConferenceEvent>, Error> {
+        await InfinityEventFactory(
+            url: baseURL.appendingPathComponent("events"),
+            client: client,
+            parser: ConferenceEventParser(decoder: decoder, logger: logger)
+        ).events(token: token)
     }
 }

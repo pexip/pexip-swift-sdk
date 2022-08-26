@@ -1,16 +1,22 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class ConferenceEventServiceTests: APITestCase {
-    private let baseURL = URL(string: "https://example.com")!
-    private var service: ConferenceEventService!
+final class InfinityEventFactoryTests: APITestCase {
+    private let baseURL = URL(string: "https://example.com/api/conference/name/events")!
+    private var factory: InfinityEventFactory<ConferenceEventParser>!
 
     // MARK: - Setup
 
     override func setUp() {
         super.setUp()
-        service = DefaultConferenceEventService(baseURL: baseURL, client: client)
+        factory = InfinityEventFactory<ConferenceEventParser>(
+            url: baseURL,
+            client: client,
+            parser: ConferenceEventParser()
+        )
     }
+
+    // MARK: - Tests
 
     func testEventStream() async throws {
         // 1. Prepare
@@ -35,7 +41,7 @@ final class ConferenceEventServiceTests: APITestCase {
 
         // 2. Receive events from the stream
         do {
-            for try await event in await service.events(token: token) {
+            for try await event in await factory.events(token: token) {
                 receivedEvents.append(event)
             }
         } catch let error as HTTPEventError {
@@ -48,7 +54,7 @@ final class ConferenceEventServiceTests: APITestCase {
         // 3. Assert request
         assertRequest(
             withMethod: .GET,
-            url: baseURL.appendingPathComponent("events"),
+            url: baseURL,
             token: token,
             data: nil
         )

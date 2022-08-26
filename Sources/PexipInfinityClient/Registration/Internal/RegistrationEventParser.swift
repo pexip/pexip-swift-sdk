@@ -1,11 +1,11 @@
 import Foundation
 import PexipUtils
 
-struct RegistrationEventParser {
+struct RegistrationEventParser: InfinityEventParser {
     var decoder = JSONDecoder()
     var logger: Logger?
 
-    func registrationEvent(from event: HTTPEvent) -> RegistrationEvent? {
+    func parseEventData(from event: HTTPEvent) -> RegistrationEvent? {
         logger?.debug(
             "Got registration event with ID: \(event.id ?? "?"), name: \(event.name ?? "?")"
         )

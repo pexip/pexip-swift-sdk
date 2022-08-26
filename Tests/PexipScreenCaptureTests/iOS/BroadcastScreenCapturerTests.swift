@@ -59,12 +59,12 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         let fps: UInt = 15
         let handler = BroadcastSampleHandler(client: client, fps: fps)
 
-        client.sink { [weak self] event in
+        client.sink { [weak self] httpEvent in
             guard let self = self else {
                 return
             }
 
-            switch event {
+            switch httpEvent {
             case .connect:
                 Task {
                     try await self.capturer.startCapture(
@@ -101,8 +101,8 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         let sampleBuffer = CMSampleBuffer.stub(width: width, height: height)
         let handler = BroadcastSampleHandler(client: client, fps: fps)
 
-        client.sink { event in
-            switch event {
+        client.sink { httpEvent in
+            switch httpEvent {
             case .connect:
                 handler.processSampleBuffer(sampleBuffer, with: .video)
             case .stop:
@@ -189,12 +189,12 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         let client = BroadcastClient(filePath: filePath)
         let handler = BroadcastSampleHandler(client: client, fps: fps)
 
-        client.sink { [weak self] event in
+        client.sink { [weak self] httpEvent in
             guard let self = self else {
                 return
             }
 
-            switch event {
+            switch httpEvent {
             case .connect:
                 self.fileManager.fileError = URLError(.badURL)
                 self.notificationCenter.post(.broadcastFinished)

@@ -15,7 +15,7 @@ public protocol ParticipantService {
      */
     func calls(
         fields: CallsFields,
-        token: Token
+        token: ConferenceToken
     ) async throws -> CallDetails
 
     /**
@@ -33,7 +33,7 @@ public protocol ParticipantService {
      - Throws: `HTTPError` if a network error was encountered during operation
      */
     @discardableResult
-    func mute(token: Token) async throws -> Bool
+    func mute(token: ConferenceToken) async throws -> Bool
 
     /**
      Unmutes a participant's audio.
@@ -45,7 +45,7 @@ public protocol ParticipantService {
      - Throws: `HTTPError` if a network error was encountered during operation
      */
     @discardableResult
-    func unmute(token: Token) async throws -> Bool
+    func unmute(token: ConferenceToken) async throws -> Bool
 
     /**
      Mutes a participant's video.
@@ -57,7 +57,7 @@ public protocol ParticipantService {
      - Throws: `HTTPError` if a network error was encountered during operation
      */
     @discardableResult
-    func videoMuted(token: Token) async throws -> Bool
+    func videoMuted(token: ConferenceToken) async throws -> Bool
 
     /**
      Unmutes a participant's video.
@@ -69,7 +69,7 @@ public protocol ParticipantService {
      - Throws: `HTTPError` if a network error was encountered during operation
      */
     @discardableResult
-    func videoUnmuted(token: Token) async throws -> Bool
+    func videoUnmuted(token: ConferenceToken) async throws -> Bool
 
     /**
      Starts sending local presentation.
@@ -78,7 +78,7 @@ public protocol ParticipantService {
         - token: Current valid API token
      - Throws: `HTTPError` if a network error was encountered during operation
      */
-    func takeFloor(token: Token) async throws
+    func takeFloor(token: ConferenceToken) async throws
 
     /**
      Stops sending local presentation.
@@ -87,7 +87,7 @@ public protocol ParticipantService {
         - token: Current valid API token
      - Throws: `HTTPError` if a network error was encountered during operation
      */
-    func releaseFloor(token: Token) async throws
+    func releaseFloor(token: ConferenceToken) async throws
 
     /**
      Starts receiving live caption events.
@@ -96,7 +96,7 @@ public protocol ParticipantService {
         - token: Current valid API token
      - Throws: `HTTPError` if a network error was encountered during operation
      */
-    func showLiveCaptions(token: Token) async throws
+    func showLiveCaptions(token: ConferenceToken) async throws
 
     /**
      Stop receiving live caption events.
@@ -105,7 +105,7 @@ public protocol ParticipantService {
         - token: Current valid API token
      - Throws: `HTTPError` if a network error was encountered during operation
      */
-    func hideLiveCaptions(token: Token) async throws
+    func hideLiveCaptions(token: ConferenceToken) async throws
 
     /**
      Sends DTMF signals to the participant.
@@ -117,7 +117,7 @@ public protocol ParticipantService {
      - Returns: The result is true if successful, false otherwise.
      - Throws: `HTTPError` if a network error was encountered during operation
      */
-    func dtmf(signals: DTMFSignals, token: Token) async throws -> Bool
+    func dtmf(signals: DTMFSignals, token: ConferenceToken) async throws -> Bool
 
     /**
      Sets the call ID.
@@ -136,7 +136,7 @@ struct DefaultParticipantService: ParticipantService {
 
     func calls(
         fields: CallsFields,
-        token: Token
+        token: ConferenceToken
     ) async throws -> CallDetails {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("calls"),
@@ -153,7 +153,7 @@ struct DefaultParticipantService: ParticipantService {
     }
 
     @discardableResult
-    func mute(token: Token) async throws -> Bool {
+    func mute(token: ConferenceToken) async throws -> Bool {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("mute"),
             httpMethod: .POST
@@ -163,7 +163,7 @@ struct DefaultParticipantService: ParticipantService {
     }
 
     @discardableResult
-    func unmute(token: Token) async throws -> Bool {
+    func unmute(token: ConferenceToken) async throws -> Bool {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("unmute"),
             httpMethod: .POST
@@ -173,7 +173,7 @@ struct DefaultParticipantService: ParticipantService {
     }
 
     @discardableResult
-    func videoMuted(token: Token) async throws -> Bool {
+    func videoMuted(token: ConferenceToken) async throws -> Bool {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("video_muted"),
             httpMethod: .POST
@@ -183,7 +183,7 @@ struct DefaultParticipantService: ParticipantService {
     }
 
     @discardableResult
-    func videoUnmuted(token: Token) async throws -> Bool {
+    func videoUnmuted(token: ConferenceToken) async throws -> Bool {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("video_unmuted"),
             httpMethod: .POST
@@ -192,7 +192,7 @@ struct DefaultParticipantService: ParticipantService {
         return try await client.json(for: request)
     }
 
-    func takeFloor(token: Token) async throws {
+    func takeFloor(token: ConferenceToken) async throws {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("take_floor"),
             httpMethod: .POST
@@ -201,7 +201,7 @@ struct DefaultParticipantService: ParticipantService {
         _ = try await client.data(for: request)
     }
 
-    func releaseFloor(token: Token) async throws {
+    func releaseFloor(token: ConferenceToken) async throws {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("release_floor"),
             httpMethod: .POST
@@ -210,7 +210,7 @@ struct DefaultParticipantService: ParticipantService {
         _ = try await client.data(for: request)
     }
 
-    func showLiveCaptions(token: Token) async throws {
+    func showLiveCaptions(token: ConferenceToken) async throws {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("show_live_captions"),
             httpMethod: .POST
@@ -219,7 +219,7 @@ struct DefaultParticipantService: ParticipantService {
         _ = try await client.data(for: request)
     }
 
-    func hideLiveCaptions(token: Token) async throws {
+    func hideLiveCaptions(token: ConferenceToken) async throws {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("hide_live_captions"),
             httpMethod: .POST
@@ -228,7 +228,7 @@ struct DefaultParticipantService: ParticipantService {
         _ = try await client.data(for: request)
     }
 
-    func dtmf(signals: DTMFSignals, token: Token) async throws -> Bool {
+    func dtmf(signals: DTMFSignals, token: ConferenceToken) async throws -> Bool {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("dtmf"),
             httpMethod: .POST

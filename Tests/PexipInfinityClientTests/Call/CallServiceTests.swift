@@ -15,7 +15,7 @@ final class CallServiceTests: APITestCase {
     // MARK: - Tests
 
     func testNewCandidate() async throws {
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         let iceCandidate = IceCandidate(
             candidate: "candidate",
             mid: "mid",
@@ -35,7 +35,7 @@ final class CallServiceTests: APITestCase {
     }
 
     func testAck() async throws {
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         let responseJSON = """
         {
             "status": "success",
@@ -56,7 +56,7 @@ final class CallServiceTests: APITestCase {
     }
 
     func testUpdate() async throws {
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         let sdp = "SDP"
         let responseJSON = """
         {
@@ -78,7 +78,7 @@ final class CallServiceTests: APITestCase {
     }
 
     func testDisconnect() async throws {
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         try await testJSONRequest(
             withMethod: .POST,
             url: baseURL.appendingPathComponent("disconnect"),

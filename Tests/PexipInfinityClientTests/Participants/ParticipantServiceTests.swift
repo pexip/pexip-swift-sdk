@@ -21,7 +21,7 @@ final class ParticipantServiceTests: APITestCase {
     // MARK: - Tests
 
     func testCalls() async throws {
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         let callId = UUID()
         let inputSDP = UUID().uuidString
         let outputSDP = UUID().uuidString
@@ -55,7 +55,7 @@ final class ParticipantServiceTests: APITestCase {
     }
 
     func testMute() async throws {
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         try await testJSONRequest(
             withMethod: .POST,
             url: baseURL.appendingPathComponent("mute"),
@@ -70,7 +70,7 @@ final class ParticipantServiceTests: APITestCase {
     }
 
     func testUnmute() async throws {
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         try await testJSONRequest(
             withMethod: .POST,
             url: baseURL.appendingPathComponent("unmute"),
@@ -85,7 +85,7 @@ final class ParticipantServiceTests: APITestCase {
     }
 
     func testVideoMuted() async throws {
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         try await testJSONRequest(
             withMethod: .POST,
             url: baseURL.appendingPathComponent("video_muted"),
@@ -100,7 +100,7 @@ final class ParticipantServiceTests: APITestCase {
     }
 
     func testVideoUnmuted() async throws {
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         try await testJSONRequest(
             withMethod: .POST,
             url: baseURL.appendingPathComponent("video_unmuted"),
@@ -115,7 +115,7 @@ final class ParticipantServiceTests: APITestCase {
     }
 
     func testTakeFloor() async throws {
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         try await testJSONRequest(
             withMethod: .POST,
             url: baseURL.appendingPathComponent("take_floor"),
@@ -129,7 +129,7 @@ final class ParticipantServiceTests: APITestCase {
     }
 
     func testReleaseFloor() async throws {
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         try await testJSONRequest(
             withMethod: .POST,
             url: baseURL.appendingPathComponent("release_floor"),
@@ -143,7 +143,7 @@ final class ParticipantServiceTests: APITestCase {
     }
 
     func testShowLiveCaptions() async throws {
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         try await testJSONRequest(
             withMethod: .POST,
             url: baseURL.appendingPathComponent("show_live_captions"),
@@ -157,7 +157,7 @@ final class ParticipantServiceTests: APITestCase {
     }
 
     func testHideLiveCaptions() async throws {
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         try await testJSONRequest(
             withMethod: .POST,
             url: baseURL.appendingPathComponent("hide_live_captions"),
@@ -172,7 +172,7 @@ final class ParticipantServiceTests: APITestCase {
 
     func testDtmf() async throws {
         let dtmf = try XCTUnwrap(DTMFSignals(rawValue: "1234"))
-        let token = Token.randomToken()
+        let token = ConferenceToken.randomToken()
         try await testJSONRequest(
             withMethod: .POST,
             url: baseURL.appendingPathComponent("dtmf"),

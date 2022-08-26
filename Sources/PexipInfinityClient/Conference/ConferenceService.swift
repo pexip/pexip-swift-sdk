@@ -5,8 +5,8 @@ import PexipUtils
 
 // swiftlint:disable line_length
 
-/// Represents the token requests from the [Conference control functions](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#conference) section.
-public protocol TokenService {
+/// Represents the [Conference control functions](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#conference) section.
+public protocol ConferenceService: TokenService {
     /**
      Requests a new token from the Pexip Conferencing Node.
      See [documentation](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#request_token)
@@ -19,32 +19,27 @@ public protocol TokenService {
      - Throws: `HTTPError` if a network error was encountered during operation
      */
     func requestToken(
-        fields: RequestTokenFields,
+        fields: ConferenceTokenRequestFields,
         pin: String?
-    ) async throws -> Token
+    ) async throws -> ConferenceToken
 
     /**
-     Refreshes the token to get a new one.
-     See [documentation](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#refresh_token)
+     Requests a new token from the Pexip Conferencing Node
+     using the given incoming registration token.
+     See [documentation](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#request_token)
 
-     - Parameter token: Current valid API token
-     - Returns: New API token
+     - Parameters:
+        - fields: Request fields
+        - incomingToken The incoming registration token
+     - Returns: A token of the conference
+     - Throws: `TokenError` if "403 Forbidden" is returned. See `TokenError` for more details.
      - Throws: `HTTPError` if a network error was encountered during operation
      */
-    func refreshToken(_ token: Token) async throws -> Token
+    func requestToken(
+        fields: ConferenceTokenRequestFields,
+        incomingToken: String
+    ) async throws -> ConferenceToken
 
-    /**
-     Releases the token (effectively a disconnect for the participant).
-     See [documentation](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#release_token)
-
-     - Parameter token: Current valid API token
-     - Throws: `HTTPError` if a network error was encountered during operation
-     */
-    func releaseToken(_ token: Token) async throws
-}
-
-/// Represents the [Conference control functions](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#conference) section.
-public protocol ConferenceService: TokenService {
     /**
      Sends a message to all participants in the conference.
      - Parameters:
@@ -53,7 +48,7 @@ public protocol ConferenceService: TokenService {
      - Returns: The result is true if successful, false otherwise.
      - Throws: `HTTPError` if a network error was encountered during operation
      */
-    func message(_ message: String, token: Token) async throws -> Bool
+    func message(_ message: String, token: ConferenceToken) async throws -> Bool
 
     /// HTTP EventSource which feeds events from the conference as they occur.
     func eventSource() -> ConferenceEventService
@@ -76,54 +71,29 @@ struct DefaultConferenceService: ConferenceService {
     var logger: Logger?
 
     func requestToken(
-        fields: RequestTokenFields,
+        fields: ConferenceTokenRequestFields,
         pin: String?
-    ) async throws -> Token {
-        var request = URLRequest(
-            url: baseURL.appendingPathComponent("request_token"),
-            httpMethod: .POST
-        )
-        try request.setJSONBody(fields)
-        let pin = (pin?.isEmpty == true ? "none" : pin)
-
-        if let pin = pin {
-            request.setHTTPHeader(.init(name: "pin", value: pin))
-        }
-
-        do {
-            let (data, response) = try await client.data(for: request, validate: false)
-
-            switch response.statusCode {
-            case 200:
-                return try parse200(from: data)
-            case 401:
-                // Bad HTTP credentials
-                throw HTTPError.unauthorized
-            case 403:
-                throw try parse403Error(from: data, pin: pin)
-            case 404:
-                throw HTTPError.resourceNotFound("conference")
-            default:
-                throw HTTPError.unacceptableStatusCode(response.statusCode)
-            }
-        } catch is DecodingError {
-            throw TokenError.tokenDecodingFailed
-        } catch {
-            throw error
-        }
+    ) async throws -> ConferenceToken {
+        try await requestToken(fields: fields, pin: pin, incomingToken: nil)
     }
 
-    func refreshToken(_ token: Token) async throws -> Token {
+    func requestToken(
+        fields: ConferenceTokenRequestFields,
+        incomingToken: String
+    ) async throws -> ConferenceToken {
+        try await requestToken(fields: fields, pin: nil, incomingToken: incomingToken)
+    }
+
+    func refreshToken(_ token: InfinityToken) async throws -> TokenRefreshResponse {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("refresh_token"),
             httpMethod: .POST
         )
         request.setHTTPHeader(.token(token.value))
-        let newToken: NewToken = try await client.json(for: request)
-        return token.updating(value: newToken.token, expires: newToken.expires)
+        return try await client.json(for: request)
     }
 
-    func releaseToken(_ token: Token) async throws {
+    func releaseToken(_ token: InfinityToken) async throws {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("release_token"),
             httpMethod: .POST
@@ -132,7 +102,7 @@ struct DefaultConferenceService: ConferenceService {
         _ = try await client.data(for: request)
     }
 
-    func message(_ message: String, token: Token) async throws -> Bool {
+    func message(_ message: String, token: ConferenceToken) async throws -> Bool {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("message"),
             httpMethod: .POST
@@ -160,31 +130,70 @@ struct DefaultConferenceService: ConferenceService {
 
     // MARK: - Private methods
 
-    private func parse200(from data: Data) throws -> Token {
+    private func requestToken(
+        fields: ConferenceTokenRequestFields,
+        pin: String?,
+        incomingToken: String?
+    ) async throws -> ConferenceToken {
+        var request = URLRequest(
+            url: baseURL.appendingPathComponent("request_token"),
+            httpMethod: .POST
+        )
+        try request.setJSONBody(fields)
+        let pin = (pin?.isEmpty == true ? "none" : pin)
+
+        if let pin = pin {
+            request.setHTTPHeader(.init(name: "pin", value: pin))
+        }
+
+        if let incomingToken = incomingToken {
+            request.setHTTPHeader(.token(incomingToken))
+        }
+
+        do {
+            let (data, response) = try await client.data(
+                for: request,
+                validate: false
+            )
+
+            switch response.statusCode {
+            case 200:
+                return try parse200(from: data)
+            case 401:
+                // Bad HTTP credentials
+                throw HTTPError.unauthorized
+            case 403:
+                throw try parse403Error(from: data, pin: pin)
+            case 404:
+                throw HTTPError.resourceNotFound("conference")
+            default:
+                throw HTTPError.unacceptableStatusCode(response.statusCode)
+            }
+        } catch is DecodingError {
+            throw ConferenceTokenError.tokenDecodingFailed
+        } catch {
+            throw error
+        }
+    }
+
+    private func parse200(from data: Data) throws -> ConferenceToken {
         try decoder.decode(
-            ResponseContainer<Token>.self,
+            ResponseContainer<ConferenceToken>.self,
             from: data
         ).result
     }
 
     private func parse403Error(from data: Data, pin: String?) throws -> Error {
         let error = try decoder.decode(
-            ResponseContainer<TokenError>.self,
+            ResponseContainer<ConferenceTokenError>.self,
             from: data
         ).result
 
         switch error {
         case .pinRequired:
-            return pin != nil ? TokenError.invalidPin : error
+            return pin != nil ? ConferenceTokenError.invalidPin : error
         default:
             return error
         }
     }
-}
-
-// MARK: - Private types
-
-private struct NewToken: Decodable, Hashable {
-    let token: String
-    let expires: String
 }

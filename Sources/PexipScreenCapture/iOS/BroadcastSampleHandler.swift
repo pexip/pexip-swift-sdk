@@ -50,10 +50,10 @@ public final class BroadcastSampleHandler {
         self.fps = fps
         messageLoop = BroadcastMessageLoop(fps: fps)
 
-        client.sink { [weak self] event in
+        client.sink { [weak self] httpEvent in
             guard let self = self else { return }
 
-            switch event {
+            switch httpEvent {
             case .connect:
                 break
             case .stop(let error):

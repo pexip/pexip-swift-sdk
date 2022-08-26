@@ -1,11 +1,11 @@
 import Foundation
 import PexipUtils
 
-struct ConferenceEventParser {
+struct ConferenceEventParser: InfinityEventParser {
     var decoder = JSONDecoder()
     var logger: Logger?
 
-    func conferenceEvent(from event: HTTPEvent) -> ConferenceEvent? {
+    func parseEventData(from event: HTTPEvent) -> ConferenceEvent? {
         logger?.debug(
             "Got conference event with ID: \(event.id ?? "?"), name: \(event.name ?? "?")"
         )
@@ -37,13 +37,13 @@ struct ConferenceEventParser {
     ) throws -> ConferenceEvent {
         switch name {
         case .conferenceUpdate:
-            let message = try decoder.decode(ConferenceStatus.self, from: data)
-            return .conferenceUpdate(message)
+            let status = try decoder.decode(ConferenceStatus.self, from: data)
+            return .conferenceUpdate(status)
         case .messageReceived:
             return .messageReceived(try decoder.decode(ChatMessage.self, from: data))
         case .presentationStart:
-            let message = try decoder.decode(PresentationStartMessage.self, from: data)
-            return .presentationStart(message)
+            let event = try decoder.decode(PresentationStartEvent.self, from: data)
+            return .presentationStart(event)
         case .presentationStop:
             return .presentationStop
         case .participantSyncBegin:
@@ -55,28 +55,17 @@ struct ConferenceEventParser {
         case .participantUpdate:
             return .participantUpdate(try decoder.decode(Participant.self, from: data))
         case .participantDelete:
-            let details = try decoder.decode(ParticipantDeleteMessage.self, from: data)
-            return .participantDelete(details)
+            let event = try decoder.decode(ParticipantDeleteEvent.self, from: data)
+            return .participantDelete(event)
         case .callDisconnected:
-            let message = try decoder.decode(CallDisconnectMessage.self, from: data)
-            return .callDisconnected(message)
+            let event = try decoder.decode(CallDisconnectEvent.self, from: data)
+            return .callDisconnected(event)
         case .clientDisconnected:
-            let message = try decoder.decode(ClientDisconnectMessage.self, from: data)
-            return .clientDisconnected(message)
+            let event = try decoder.decode(ClientDisconnectEvent.self, from: data)
+            return .clientDisconnected(event)
         case .liveCaptions:
-            let message = try decoder.decode(LiveCaptions.self, from: data)
-            return .liveCaptions(message)
+            let details = try decoder.decode(LiveCaptions.self, from: data)
+            return .liveCaptions(details)
         }
-    }
-}
-
-// MARK: - Internal extensions
-
-extension JSONDecoder {
-    func decode<T>(_ type: T.Type, from data: Data?) throws -> T where T: Decodable {
-        guard let data = data else {
-            throw HTTPError.noDataInResponse
-        }
-        return try decode(type, from: data)
     }
 }

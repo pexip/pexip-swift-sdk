@@ -7,7 +7,7 @@ public protocol RegistrationEventService {
     /**
      Creates a new `AsyncThrowingStream` and immediately returns it.
      Creating a steam initiates an asynchronous process to consume server sent
-     events from the conference as they occur.
+     events as they occur.
 
      The caller must break the async for loop or cancel the task when it is
      no longer in use.
@@ -34,40 +34,10 @@ struct DefaultRegistrationEventService: RegistrationEventService {
     func events(
         token: RegistrationToken
     ) async -> AsyncThrowingStream<Event<RegistrationEvent>, Error> {
-        let parser = RegistrationEventParser(decoder: decoder, logger: logger)
-        return AsyncThrowingStream(
-            bufferingPolicy: .bufferingNewest(1)
-        ) { continuation in
-            let task = Task {
-                do {
-                    var request = URLRequest(
-                        url: baseURL.appendingPathComponent("events"),
-                        httpMethod: .GET
-                    )
-                    request.setHTTPHeader(.token(token.value))
-
-                    let events = client.eventSource(withRequest: request)
-
-                    for try await event in events {
-                        if let registrationEvent = parser.registrationEvent(from: event) {
-                            continuation.yield(
-                                Event(
-                                    id: event.id,
-                                    name: event.name,
-                                    reconnectionTime: event.reconnectionTime,
-                                    data: registrationEvent
-                                )
-                            )
-                        }
-                    }
-                } catch {
-                    continuation.finish(throwing: error)
-                }
-            }
-
-            continuation.onTermination = { @Sendable _ in
-                task.cancel()
-            }
-        }
+        await InfinityEventFactory(
+            url: baseURL.appendingPathComponent("events"),
+            client: client,
+            parser: RegistrationEventParser(decoder: decoder, logger: logger)
+        ).events(token: token)
     }
 }

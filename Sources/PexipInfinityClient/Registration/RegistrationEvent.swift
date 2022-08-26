@@ -3,7 +3,6 @@ import Foundation
 public enum RegistrationEvent: Hashable {
     case incoming(IncomingRegistrationEvent)
     case incomingCancelled(IncomingCancelledRegistrationEvent)
-    case failure(FailureRegistrationEvent)
 
     enum Name: String {
         case incoming = "incoming"
@@ -23,12 +22,18 @@ public struct IncomingRegistrationEvent: Codable, Hashable {
     public let conferenceAlias: String
     public let remoteDisplayName: String
     public let token: String
-    public let receivedAt = Date()
+    public private(set) var receivedAt = Date()
 
-    public init(conferenceAlias: String, remoteDisplayName: String, token: String) {
+    public init(
+        conferenceAlias: String,
+        remoteDisplayName: String,
+        token: String,
+        receivedAt: Date = .init()
+    ) {
         self.conferenceAlias = conferenceAlias
         self.remoteDisplayName = remoteDisplayName
         self.token = token
+        self.receivedAt = receivedAt
     }
 }
 
@@ -37,14 +42,11 @@ public struct IncomingCancelledRegistrationEvent: Codable, Hashable {
         case token
     }
 
-    public let receivedAt = Date()
     public let token: String
-
-    public init(token: String) {
-        self.token = token
-    }
-}
-
-public struct FailureRegistrationEvent: Codable, Hashable {
     public private(set) var receivedAt = Date()
+
+    public init(token: String, receivedAt: Date = .init()) {
+        self.token = token
+        self.receivedAt = receivedAt
+    }
 }

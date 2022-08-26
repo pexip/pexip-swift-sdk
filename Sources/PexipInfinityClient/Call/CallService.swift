@@ -11,7 +11,7 @@ public protocol CallService {
      - Returns: The result is true if successful, false otherwise.
      - Throws: `HTTPError` if a network error was encountered during operation
      */
-    func newCandidate(iceCandidate: IceCandidate, token: Token) async throws
+    func newCandidate(iceCandidate: IceCandidate, token: ConferenceToken) async throws
 
     /**
      Starts media for the specified call (WebRTC calls only).
@@ -20,7 +20,7 @@ public protocol CallService {
      - Returns: The result is true if successful, false otherwise.
      - Throws: `HTTPError` if a network error was encountered during operation
      */
-    func ack(token: Token) async throws -> Bool
+    func ack(token: ConferenceToken) async throws -> Bool
 
     /**
      Sends a new local SDP.
@@ -30,7 +30,7 @@ public protocol CallService {
      - Returns: A new remote SDP
      - Throws: `HTTPError` if a network error was encountered during operation
      */
-    func update(sdp: String, token: Token) async throws -> String
+    func update(sdp: String, token: ConferenceToken) async throws -> String
 
     /**
      Disconnects the specified call.
@@ -38,7 +38,7 @@ public protocol CallService {
         - token: Current valid API token
      - Throws: `HTTPError` if a network error was encountered during operation
      */
-    func disconnect(token: Token) async throws
+    func disconnect(token: ConferenceToken) async throws
 }
 
 // MARK: - Implementation
@@ -47,7 +47,7 @@ struct DefaultCallService: CallService {
     let baseURL: URL
     let client: HTTPClient
 
-    func newCandidate(iceCandidate: IceCandidate, token: Token) async throws {
+    func newCandidate(iceCandidate: IceCandidate, token: ConferenceToken) async throws {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("new_candidate"),
             httpMethod: .POST
@@ -57,7 +57,7 @@ struct DefaultCallService: CallService {
         _ = try await client.data(for: request)
     }
 
-    func ack(token: Token) async throws -> Bool {
+    func ack(token: ConferenceToken) async throws -> Bool {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("ack"),
             httpMethod: .POST
@@ -66,7 +66,7 @@ struct DefaultCallService: CallService {
         return try await client.json(for: request)
     }
 
-    func update(sdp: String, token: Token) async throws -> String {
+    func update(sdp: String, token: ConferenceToken) async throws -> String {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("update"),
             httpMethod: .POST
@@ -78,7 +78,7 @@ struct DefaultCallService: CallService {
         return try await client.json(for: request)
     }
 
-    func disconnect(token: Token) async throws {
+    func disconnect(token: ConferenceToken) async throws {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("disconnect"),
             httpMethod: .POST

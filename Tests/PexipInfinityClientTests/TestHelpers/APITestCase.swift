@@ -54,7 +54,7 @@ class APITestCase: XCTestCase {
     func testJSONRequest(
         withMethod method: HTTPMethod,
         url: URL,
-        token: TokenWithExpiration?,
+        token: InfinityToken?,
         body: Data?,
         responseJSON: String?,
         assertHTTPErrors: Bool = true,
@@ -94,7 +94,7 @@ class APITestCase: XCTestCase {
     func assertRequest(
         withMethod method: HTTPMethod,
         url: URL,
-        token: TokenWithExpiration?,
+        token: InfinityToken?,
         jsonBody: Data?
     ) {
         XCTAssertEqual(lastRequest?.url, url)
@@ -113,7 +113,7 @@ class APITestCase: XCTestCase {
     func assertRequest(
         withMethod method: HTTPMethod,
         url: URL,
-        token: TokenWithExpiration? = nil,
+        token: InfinityToken? = nil,
         data: Data?
     ) {
         XCTAssertEqual(lastRequest?.url, url)
