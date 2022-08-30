@@ -14,7 +14,7 @@ final class ConferenceEventServiceTests: APITestCase {
 
     func testEventStream() async throws {
         // 1. Prepare
-        var receivedEvents = [Event<ConferenceEvent>]()
+        var receivedEvents = [ConferenceEvent]()
         let token = ConferenceToken.randomToken()
         let expectedEvent = ClientDisconnectEvent(reason: "Test")
         let eventDataString = String(
@@ -57,13 +57,8 @@ final class ConferenceEventServiceTests: APITestCase {
         XCTAssertEqual(receivedEvents.count, 1)
         XCTAssertEqual(
             receivedEvents.first,
-            Event<ConferenceEvent>(
-                id: "1",
-                name: "disconnect",
-                reconnectionTime: nil,
-                data: .clientDisconnected(
-                    .init(reason: "Test")
-                )
+            ConferenceEvent.clientDisconnected(
+                .init(reason: "Test")
             )
         )
     }

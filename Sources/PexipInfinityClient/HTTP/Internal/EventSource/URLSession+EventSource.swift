@@ -12,6 +12,22 @@ extension URLSession {
         withRequest request: URLRequest,
         lastEventId: String? = nil
     ) -> AsyncThrowingStream<HTTPEvent, Error> {
+        eventSource(
+            withRequest: request,
+            lastEventId: lastEventId,
+            transform: { $0 }
+        )
+    }
+    /**
+     - Parameters:
+        - request: URL request for SSE
+        - lastEventId: optional last event ID used to reestablish the connection
+     */
+    func eventSource<T>(
+        withRequest request: URLRequest,
+        lastEventId: String? = nil,
+        transform: @escaping (HTTPEvent) -> T?
+    ) -> AsyncThrowingStream<T, Error> {
         var request = request
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         request.timeoutInterval = TimeInterval(INT_MAX)
@@ -40,7 +56,9 @@ extension URLSession {
 
             dataTaskDelegate.onReceive = { data in
                 for event in parser.events(from: data) {
-                    continuation.yield(event)
+                    if let outputEvent = transform(event) {
+                        continuation.yield(outputEvent)
+                    }
                 }
             }
 

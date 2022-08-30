@@ -28,7 +28,12 @@ final class TokenRefresherTests: XCTestCase {
                 second: 11
             ).date
         )
-        store = TokenStore(token: .randomToken())
+        store = TokenStore(
+            token: .randomToken(),
+            currentDateProvider: { [unowned self] in
+                self.currentDate
+            }
+        )
         service = TokenServiceMock()
         refresher = DefaultTokenRefresher(
             service: service,
@@ -139,25 +144,20 @@ final class TokenRefresherTests: XCTestCase {
 
     func testTokenRefreshWithExpiredToken() async throws {
         let tokenA = ConferenceToken.randomToken(updatedAt: updatedAt.addingTimeInterval(-240))
-        let tokenB = ConferenceToken.randomToken(updatedAt: updatedAt)
 
         currentDate = updatedAt.addingTimeInterval(60)
-        service.refreshTokenResult = .success(
-            TokenRefreshResponse(
-                token: tokenB.value,
-                expires: tokenB.expiresString
-            )
-        )
 
         // 1. Activate refresher and schedule token refresh
         try await store.updateToken(tokenA)
-        await refresher.startRefreshing()
 
-        let tokenFromStore = try await store.token()
-        let isRefreshing = await refresher.isRefreshing
-
-        XCTAssertEqual(tokenFromStore, tokenA)
-        XCTAssertFalse(isRefreshing)
+        do {
+            await refresher.startRefreshing()
+            _ = try await store.token()
+        } catch {
+            let isRefreshing = await refresher.isRefreshing
+            XCTAssertFalse(isRefreshing)
+            XCTAssertEqual(error as? InfinityTokenError, .tokenExpired)
+        }
     }
 
     // MARK: - End refreshing tests

@@ -20,7 +20,7 @@ public protocol ConferenceEventService {
      - Throws: ``HTTPEventError``
      - Throws: ``HTTPError`` if another network error was encountered during operation
      */
-    func events(token: ConferenceToken) async -> AsyncThrowingStream<Event<ConferenceEvent>, Error>
+    func events(token: ConferenceToken) async -> AsyncThrowingStream<ConferenceEvent, Error>
 }
 
 // MARK: - Implementation
@@ -33,11 +33,16 @@ struct DefaultConferenceEventService: ConferenceEventService {
 
     func events(
         token: ConferenceToken
-    ) async -> AsyncThrowingStream<Event<ConferenceEvent>, Error> {
-        await InfinityEventFactory(
+    ) async -> AsyncThrowingStream<ConferenceEvent, Error> {
+        let parser = ConferenceEventParser(decoder: decoder, logger: logger)
+        var request = URLRequest(
             url: baseURL.appendingPathComponent("events"),
-            client: client,
-            parser: ConferenceEventParser(decoder: decoder, logger: logger)
-        ).events(token: token)
+            httpMethod: .GET
+        )
+        request.setHTTPHeader(.token(token.value))
+
+        return client.eventSource(withRequest: request, transform: {
+            parser.parseEventData(from: $0)
+        })
     }
 }

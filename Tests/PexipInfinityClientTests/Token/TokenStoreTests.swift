@@ -3,12 +3,18 @@ import XCTest
 
 final class TokenStoreTests: XCTestCase {
     private var store: TokenStore<ConferenceToken>!
+    private var currentDate = Date()
 
     // MARK: - Setup
 
     override func setUpWithError() throws {
         try super.setUpWithError()
-        store = TokenStore(token: .randomToken())
+        store = TokenStore(
+            token: .randomToken(),
+            currentDateProvider: { [weak self] in
+                self?.currentDate ?? Date()
+            }
+        )
     }
 
     // MARK: - Tests
@@ -60,6 +66,21 @@ final class TokenStoreTests: XCTestCase {
             XCTFail("Should fail with error")
         } catch {
             XCTAssertEqual(error as? ConferenceTokenError, .tokenDecodingFailed)
+        }
+    }
+
+    func testTokenWhenExpired() async throws {
+        let token = ConferenceToken.randomToken(
+            updatedAt: currentDate.addingTimeInterval(-120)
+        )
+        try await store.updateToken(token)
+
+        // Try to get the token from the store
+        do {
+            _ = try await store.token()
+            XCTFail("Should fail with error")
+        } catch {
+            XCTAssertEqual(error as? InfinityTokenError, .tokenExpired)
         }
     }
 

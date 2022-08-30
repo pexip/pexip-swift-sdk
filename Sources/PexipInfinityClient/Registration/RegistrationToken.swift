@@ -11,6 +11,9 @@ public struct RegistrationToken: InfinityToken, Codable, Hashable {
         case expiresString = "expires"
     }
 
+    /// A textual representation of this instance, suitable for debugging.
+    public let debugDescription = "Registration token"
+
     /// The authentication token for future requests.
     public private(set) var value: String
 

@@ -70,12 +70,16 @@ struct HTTPClient {
         }
     }
 
-    func eventSource(
+    func eventSource<T>(
         withRequest request: URLRequest,
-        lastEventId: String? = nil
-    ) -> AsyncThrowingStream<HTTPEvent, Error> {
-        let request = request.withUserAgentHeader()
-        return session.eventSource(withRequest: request, lastEventId: lastEventId)
+        lastEventId: String? = nil,
+        transform: @escaping (HTTPEvent) -> T?
+    ) -> AsyncThrowingStream<T, Error> {
+        session.eventSource(
+            withRequest: request.withUserAgentHeader(),
+            lastEventId: lastEventId,
+            transform: transform
+        )
     }
 }
 

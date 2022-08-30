@@ -20,7 +20,7 @@ public protocol RegistrationEventService {
      */
     func events(
         token: RegistrationToken
-    ) async -> AsyncThrowingStream<Event<RegistrationEvent>, Error>
+    ) async -> AsyncThrowingStream<RegistrationEvent, Error>
 }
 
 // MARK: - Implementation
@@ -33,11 +33,16 @@ struct DefaultRegistrationEventService: RegistrationEventService {
 
     func events(
         token: RegistrationToken
-    ) async -> AsyncThrowingStream<Event<RegistrationEvent>, Error> {
-        await InfinityEventFactory(
+    ) async -> AsyncThrowingStream<RegistrationEvent, Error> {
+        let parser = RegistrationEventParser(decoder: decoder, logger: logger)
+        var request = URLRequest(
             url: baseURL.appendingPathComponent("events"),
-            client: client,
-            parser: RegistrationEventParser(decoder: decoder, logger: logger)
-        ).events(token: token)
+            httpMethod: .GET
+        )
+        request.setHTTPHeader(.token(token.value))
+
+        return client.eventSource(withRequest: request, transform: {
+            parser.parseEventData(from: $0)
+        })
     }
 }

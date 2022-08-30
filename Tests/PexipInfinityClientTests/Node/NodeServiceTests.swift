@@ -55,14 +55,9 @@ final class NodeServiceTests: APITestCase {
     }
 
     func testRegistration() throws {
-        let registrationService = try service.registration(deviceAlias: "alias")
+        let deviceAlias = try XCTUnwrap(DeviceAlias(uri: "device@conference.com"))
+        let registrationService = service.registration(deviceAlias: deviceAlias)
         XCTAssertTrue(registrationService is DefaultRegistrationService)
-    }
-
-    func testRegistrationWithEmptyDeviceAlias() throws {
-        XCTAssertThrowsError(try service.registration(deviceAlias: "")) { error in
-            XCTAssertTrue((error as? ValidationError) == .invalidArgument)
-        }
     }
 
     // MARK: - Test helpers

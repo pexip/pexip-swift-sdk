@@ -106,21 +106,14 @@ actor DefaultConferenceEventSource: ConferenceEventSource {
 
     // MARK: - Private methods
 
-    private func handleEvent(_ event: Event<ConferenceEvent>) {
-        if case .presentationStart = event.data, skipPresentationStop {
+    private func handleEvent(_ event: ConferenceEvent) {
+        if case .presentationStart = event, skipPresentationStop {
             skipPresentationStop = false
             return
         }
 
-        if let reconnectionTime = event.reconnectionTime {
-            logger?.debug(
-                "Reconnection time is set to \(reconnectionTime)"
-            )
-            self.reconnectionTime = reconnectionTime
-        }
-
         for subscriber in subscribers {
-            subscriber.yield(event.data)
+            subscriber.yield(event)
         }
     }
 }

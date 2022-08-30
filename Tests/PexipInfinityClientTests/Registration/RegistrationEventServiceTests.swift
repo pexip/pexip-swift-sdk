@@ -15,7 +15,7 @@ final class RegistrationEventServiceTests: APITestCase {
     // swiftlint:disable function_body_length
     func testEventStream() async throws {
         // 1. Prepare
-        var receivedEvents = [Event<RegistrationEvent>]()
+        var receivedEvents = [RegistrationEvent]()
         let token = RegistrationToken.randomToken()
         let expectedEvent = IncomingRegistrationEvent(
             conferenceAlias: "Alias",
@@ -60,11 +60,8 @@ final class RegistrationEventServiceTests: APITestCase {
 
         // 4. Assert response
         XCTAssertEqual(receivedEvents.count, 1)
-        XCTAssertEqual(receivedEvents.first?.id, "1")
-        XCTAssertEqual(receivedEvents.first?.name, "incoming")
-        XCTAssertNil(receivedEvents.first?.reconnectionTime)
 
-        switch receivedEvents.first?.data {
+        switch receivedEvents.first {
         case .incoming(let incomingEvent):
             XCTAssertEqual(
                 incomingEvent.conferenceAlias,

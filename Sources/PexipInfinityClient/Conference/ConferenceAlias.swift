@@ -20,7 +20,7 @@ public struct ConferenceAlias: Hashable {
 
     /**
      - Parameters:
-        - alias: Conference alias
+        - alias: Conference or device alias
         - host: Conference host in the form of "example.com"
      */
     public init?(alias: String, host: String) {

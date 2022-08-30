@@ -51,7 +51,7 @@ public actor DefaultTokenRefresher<Token: InfinityToken>: TokenRefresher {
 
             let token = try await store.token()
             try await scheduleRefresh(for: token)
-            logger?.info("Token refresh operation started ✅")
+            logger?.info("\(String(reflecting: token)) refresh operation started ✅")
             return true
         } catch {
             logger?.warn("Wrong use of TokenRefresher.startRefreshing: \(error)")
@@ -72,20 +72,26 @@ public actor DefaultTokenRefresher<Token: InfinityToken>: TokenRefresher {
 
             if withTokenRelease {
                 if !token.isExpired(currentDate: currentDate()) {
-                    logger?.debug("Releasing the token...")
+                    logger?.debug("Releasing the \(String(reflecting: token))...")
                     do {
                         try await service.releaseToken(token)
                     } catch {
-                        logger?.error("Release token request failed: \(error)")
+                        logger?.error("Release \(String(reflecting: token)) request failed: \(error)")
                     }
                 }
             }
 
-            logger?.info("Token refresh operation ended ⛔️")
+            logger?.info("\(String(reflecting: token)) refresh operation ended ⛔️")
             return true
         } catch {
-            logger?.warn("Wrong use of TokenRefresher.endRefreshing: \(error)")
-            return false
+            switch error as? InfinityTokenError {
+            case .tokenExpired:
+                logger?.info("Token refresh operation ended ⛔️")
+                return true
+            case .none:
+                logger?.warn("Wrong use of TokenRefresher.endRefreshing: \(error)")
+                return false
+            }
         }
     }
 
@@ -95,7 +101,7 @@ public actor DefaultTokenRefresher<Token: InfinityToken>: TokenRefresher {
         await stopRefreshTask()
 
         guard !token.isExpired(currentDate: currentDate()) else {
-            logger?.warn("Cannot schedule refresh for expired token")
+            logger?.warn("Cannot schedule refresh for expired \(String(reflecting: token))")
             throw TokenRefresherError.tokenExpired
         }
 
@@ -103,25 +109,25 @@ public actor DefaultTokenRefresher<Token: InfinityToken>: TokenRefresher {
             do {
                 let timeInterval = token.refreshDate.timeIntervalSince(currentDate())
 
-                logger?.debug("Scheduling token refresh in \(timeInterval)")
+                logger?.debug("Scheduling \(String(reflecting: token)) refresh in \(timeInterval)")
 
                 try await Task.sleep(seconds: timeInterval)
 
                 try await store.updateToken(withTask: Task {
-                    logger?.debug("Refreshing a token to get a new one...")
+                    logger?.debug("Refreshing a \(String(reflecting: token)) to get a new one...")
                     let refreshTokenResponse = try await service.refreshToken(token)
                     let newToken = token.updating(
                         value: refreshTokenResponse.token,
                         expires: refreshTokenResponse.expires,
                         updatedAt: currentDate()
                     )
-                    logger?.debug("New token received 👌")
+                    logger?.debug("New \(String(reflecting: token)) received 👌")
                     try await scheduleRefresh(for: newToken)
                     return newToken
                 })
             } catch {
                 await stopRefreshTask()
-                logger?.error("Token refresh failed with error: \(error)")
+                logger?.error("\(String(reflecting: token)) refresh failed with error: \(error)")
                 throw error
             }
         }

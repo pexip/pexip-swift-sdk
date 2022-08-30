@@ -131,7 +131,7 @@ final class InfinityConference: Conference {
         )
     }
 
-    // MARK: - Server events
+    // MARK: - Events
 
     @MainActor
     private func handleConferenceEvent(_ event: ConferenceEvent) {
@@ -169,8 +169,6 @@ final class InfinityConference: Conference {
             sendEvent(event)
         }
     }
-
-    // MARK: - Conference events
 
     private func sendEvent(_ event: ConferenceEvent) {
         Task { @MainActor in

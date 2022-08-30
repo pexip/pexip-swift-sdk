@@ -36,10 +36,10 @@ public protocol NodeService {
      Sets the registration alias.
 
      - Parameters:
-        - alias: A registration alias
+        - alias: A device alias
      - Returns: A registration service for the given alias.
      */
-    func registration(deviceAlias: String) throws -> RegistrationService
+    func registration(deviceAlias: DeviceAlias) -> RegistrationService
 }
 
 // MARK: - Implementation
@@ -80,15 +80,11 @@ struct DefaultNodeService: NodeService {
         )
     }
 
-    func registration(deviceAlias: String) throws -> RegistrationService {
-        guard !deviceAlias.isEmpty else {
-            throw ValidationError.invalidArgument
-        }
-
+    func registration(deviceAlias: DeviceAlias) -> RegistrationService {
         return DefaultRegistrationService(
             baseURL: baseURL
                 .appendingPathComponent("registrations")
-                .appendingPathComponent(deviceAlias),
+                .appendingPathComponent(deviceAlias.alias),
             client: client,
             decoder: decoder,
             logger: logger

@@ -44,4 +44,38 @@ public struct InfinityClientFactory {
             logger: logger
         )
     }
+
+    /**
+     Creates a new instance of ``Registration`` type.
+     - Parameters:
+        - node: A conferencing node address in the form of https://example.com
+        - deviceAlias: A device alias
+        - token: A registration token
+     */
+    public func registration(
+        node: URL,
+        deviceAlias: DeviceAlias,
+        token: RegistrationToken
+    ) -> Registration {
+        let nodeService = infinityService().node(url: node)
+        let registrationService = nodeService.registration(deviceAlias: deviceAlias)
+        let eventService = registrationService.eventSource()
+        let tokenStore = TokenStore(token: token)
+
+        return InfinityRegistration(
+            tokenRefresher: DefaultTokenRefresher(
+                service: registrationService,
+                store: tokenStore,
+                logger: logger
+            ),
+            eventSource: InfinityEventSource<RegistrationEvent>(
+                name: "Registration",
+                logger: logger,
+                stream: {
+                    try await eventService.events(token: tokenStore.token())
+                }
+            ),
+            logger: logger
+        )
+    }
 }
