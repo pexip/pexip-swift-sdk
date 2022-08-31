@@ -1,6 +1,6 @@
 import os.log
 import Foundation
-import PexipUtils
+import PexipCore
 
 public extension DefaultLogger {
     /// Default logger for PexipRTC framework

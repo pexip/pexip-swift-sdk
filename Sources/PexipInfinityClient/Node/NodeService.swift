@@ -1,5 +1,5 @@
 import Foundation
-import PexipUtils
+import PexipCore
 
 // swiftlint:disable line_length
 

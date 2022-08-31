@@ -1,6 +1,6 @@
 import WebRTC
 import PexipMedia
-import PexipUtils
+import PexipCore
 
 final class WebRTCLocalAudioTrack: LocalAudioTrack {
     let capturingStatus = CapturingStatus(isCapturing: false)

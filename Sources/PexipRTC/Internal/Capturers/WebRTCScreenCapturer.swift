@@ -1,7 +1,7 @@
 import WebRTC
 import ImageIO
 import PexipMedia
-import PexipUtils
+import PexipCore
 import PexipScreenCapture
 
 // MARK: - WebRTCScreenCapturerErrorDelegate

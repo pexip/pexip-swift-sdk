@@ -1,6 +1,9 @@
 import Foundation
+import PexipCore
 
 // MARK: - Protocol
+
+public typealias DTMFSignals = PexipCore.DTMFSignals
 
 public protocol CallService {
     /**
@@ -31,6 +34,20 @@ public protocol CallService {
      - Throws: `HTTPError` if a network error was encountered during operation
      */
     func update(sdp: String, token: ConferenceToken) async throws -> String
+
+    /**
+     Sends DTMF digits to the participant (gateway call only).
+     See [documentation](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#call_dtmf)
+
+     - Parameters:
+        - signals: The DTMF signals to send
+        - token: Current valid API token
+
+     - Returns: The result is true if successful, false otherwise.
+     - Throws: `HTTPError` if a network error was encountered during operation
+     */
+    @discardableResult
+    func dtmf(signals: DTMFSignals, token: ConferenceToken) async throws -> Bool
 
     /**
      Disconnects the specified call.
@@ -74,6 +91,19 @@ struct DefaultCallService: CallService {
         request.setHTTPHeader(.token(token.value))
         try request.setJSONBody([
             "sdp": sdp
+        ])
+        return try await client.json(for: request)
+    }
+
+    @discardableResult
+    func dtmf(signals: DTMFSignals, token: ConferenceToken) async throws -> Bool {
+        var request = URLRequest(
+            url: baseURL.appendingPathComponent("dtmf"),
+            httpMethod: .POST
+        )
+        request.setHTTPHeader(.token(token.value))
+        try request.setJSONBody([
+            "digits": signals.rawValue
         ])
         return try await client.json(for: request)
     }

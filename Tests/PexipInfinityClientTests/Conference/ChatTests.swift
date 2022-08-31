@@ -1,6 +1,5 @@
 import XCTest
 import Combine
-@testable import PexipConference
 @testable import PexipInfinityClient
 
 final class ChatTests: XCTestCase {

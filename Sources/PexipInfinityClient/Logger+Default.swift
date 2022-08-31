@@ -1,6 +1,6 @@
 import Foundation
 import os.log
-import PexipUtils
+import PexipCore
 
 public extension DefaultLogger {
     /// Default logger for PexipInfinityClient framework

@@ -6,7 +6,11 @@ extension Participant {
         URL(string: "https://vc.example.com/api/participant/\(id)/avatar.jpg")
     }
 
-    static func stub(withId id: UUID, displayName: String) -> Participant {
+    static func stub(
+        withId id: UUID,
+        displayName: String,
+        isPresenting: Bool = false
+    ) -> Participant {
         Participant(
             id: id,
             displayName: displayName,
@@ -23,7 +27,7 @@ extension Participant {
             isFeccSupported: false,
             isAudioOnlyCall: false,
             isAudioMuted: false,
-            isPresenting: false,
+            isPresenting: isPresenting,
             isVideoCall: true,
             isMuteSupported: true,
             isTransferSupported: true

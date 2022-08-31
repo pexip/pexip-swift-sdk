@@ -1,6 +1,6 @@
 import Foundation
 import PexipMedia
-import PexipUtils
+import PexipCore
 
 /// Responsible for mangling the SDP to set bandwidths and resolutions
 struct SessionDescriptionMangler {

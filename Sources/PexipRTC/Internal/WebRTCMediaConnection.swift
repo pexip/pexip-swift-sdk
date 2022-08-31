@@ -1,6 +1,6 @@
 import Combine
 import WebRTC
-import PexipUtils
+import PexipCore
 import PexipMedia
 
 final class WebRTCMediaConnection: MediaConnection {
@@ -28,6 +28,7 @@ final class WebRTCMediaConnection: MediaConnection {
     private let stateSubject = PassthroughSubject<MediaConnectionState, Never>()
     private var sendOfferTask: Task<String, Error>?
     private var cancellables = Set<AnyCancellable>()
+    private var signalingChannel: SignalingChannel { config.signaling }
 
     // MARK: - Init
 
@@ -162,6 +163,11 @@ final class WebRTCMediaConnection: MediaConnection {
         }
     }
 
+    @discardableResult
+    func dtmf(signals: DTMFSignals) async throws -> Bool {
+        try await signalingChannel.dtmf(signals: signals)
+    }
+
     // MARK: - Private
 
     private func negotiateIfNeeded() {
@@ -201,7 +207,7 @@ final class WebRTCMediaConnection: MediaConnection {
                 presentationVideoMid: presentationVideoTransceiver?.mid
             )
 
-            return try await config.signaling.sendOffer(
+            return try await signalingChannel.sendOffer(
                 callType: "WEBRTC",
                 description: newLocalSdp,
                 presentationInMain: config.presentationInMain
@@ -215,13 +221,17 @@ final class WebRTCMediaConnection: MediaConnection {
 
     private func muteVideo(_ muted: Bool) {
         Task {
-            try await config.signaling.muteVideo(muted)
+            try await signalingChannel.muteVideo(muted)
         }
     }
 
     private func muteAudio(_ muted: Bool) {
         Task {
-            try await config.signaling.muteAudio(muted)
+            do {
+                try await signalingChannel.muteAudio(muted)
+            } catch {
+                logger?.error("Cannot mute audio, error: \(error)")
+            }
         }
     }
 
@@ -236,10 +246,10 @@ final class WebRTCMediaConnection: MediaConnection {
                 case true where transceiver.direction != .sendRecv:
                     setPresentationRemoteVideoTrack(nil)
                     try transceiver.setDirection(.sendRecv)
-                    try await config.signaling.takeFloor()
+                    try await signalingChannel.takeFloor()
                 case false where transceiver.direction == .sendRecv:
                     try transceiver.setDirection(.inactive)
-                    try await config.signaling.releaseFloor()
+                    try await signalingChannel.releaseFloor()
                 default:
                     break
                 }
@@ -310,13 +320,10 @@ extension WebRTCMediaConnection: PeerConnectionDelegate {
         Task {
             do {
                 _ = try await sendOfferTask.value
-                try await config.signaling.addCandidate(
-                    sdp: candidate.sdp,
-                    mid: candidate.sdpMid
-                )
+                try await signalingChannel.addCandidate(candidate.sdp, mid: candidate.sdpMid)
             } catch {
                 logger?.error(
-                    "MediaConnectionSignaling.onCandidate failed with error: \(error)"
+                    "SignalingChannel.addCandidate failed with error: \(error)"
                 )
             }
         }

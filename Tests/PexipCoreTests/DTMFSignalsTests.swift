@@ -1,5 +1,5 @@
 import XCTest
-@testable import PexipInfinityClient
+@testable import PexipCore
 
 final class DTMFSignalsTests: XCTestCase {
     func testInitWithValidRawValue() {

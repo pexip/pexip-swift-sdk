@@ -1,10 +1,8 @@
 import XCTest
 import Combine
-@testable import PexipConference
 @testable import PexipInfinityClient
 
 // swiftlint:disable type_body_length
-// swiftlint:disable file_length
 final class RosterTests: XCTestCase {
     private let currentParticipantId = UUID()
     private let currentParticipantName = "My User"
@@ -371,38 +369,6 @@ final class RosterTests: XCTestCase {
             [[], [participant], []]
         )
         XCTAssertEqual(publishCount, 3)
-    }
-}
-
-// MARK: - Stubs
-
-extension Participant {
-    static func avatarURL(id: UUID) -> URL? {
-        URL(string: "https://vc.example.com/api/participant/\(id)/avatar.jpg")
-    }
-
-    static func stub(withId id: UUID, displayName: String) -> Participant {
-        Participant(
-            id: id,
-            displayName: displayName,
-            role: .guest,
-            serviceType: .conference,
-            callDirection: .inbound,
-            hasMedia: true,
-            isExternal: false,
-            isStreamingConference: false,
-            isVideoMuted: false,
-            canReceivePresentation: true,
-            isConnectionEncrypted: true,
-            isDisconnectSupported: true,
-            isFeccSupported: false,
-            isAudioOnlyCall: false,
-            isAudioMuted: false,
-            isPresenting: false,
-            isVideoCall: true,
-            isMuteSupported: true,
-            isTransferSupported: true
-        )
     }
 }
 

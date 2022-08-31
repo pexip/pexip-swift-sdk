@@ -1,6 +1,7 @@
 import WebRTC
 import ImageIO
 import PexipMedia
+import PexipCore
 
 final class WebRTCVideoProcessor: NSObject, RTCVideoCapturerDelegate {
     var videoFilter: VideoFilter? {

@@ -1,5 +1,5 @@
 import Foundation
-import PexipUtils
+import PexipCore
 
 struct HTTPClient {
     private let session: URLSession

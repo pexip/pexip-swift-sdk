@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Protocol
 
-public protocol ParticipantService {
+public protocol ParticipantService: LiveCaptionsService {
     /**
      Upgrades this connection to have an audio/video call element.
      See [documentation](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#calls)
@@ -90,24 +90,6 @@ public protocol ParticipantService {
     func releaseFloor(token: ConferenceToken) async throws
 
     /**
-     Starts receiving live caption events.
-
-     - Parameters:
-        - token: Current valid API token
-     - Throws: `HTTPError` if a network error was encountered during operation
-     */
-    func showLiveCaptions(token: ConferenceToken) async throws
-
-    /**
-     Stop receiving live caption events.
-
-     - Parameters:
-        - token: Current valid API token
-     - Throws: `HTTPError` if a network error was encountered during operation
-     */
-    func hideLiveCaptions(token: ConferenceToken) async throws
-
-    /**
      Sends DTMF signals to the participant.
      See [documentation](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#dtmf)
 
@@ -117,6 +99,7 @@ public protocol ParticipantService {
      - Returns: The result is true if successful, false otherwise.
      - Throws: `HTTPError` if a network error was encountered during operation
      */
+    @discardableResult
     func dtmf(signals: DTMFSignals, token: ConferenceToken) async throws -> Bool
 
     /**
@@ -228,6 +211,7 @@ struct DefaultParticipantService: ParticipantService {
         _ = try await client.data(for: request)
     }
 
+    @discardableResult
     func dtmf(signals: DTMFSignals, token: ConferenceToken) async throws -> Bool {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("dtmf"),

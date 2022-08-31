@@ -1,5 +1,5 @@
 import WebRTC
-import PexipUtils
+import PexipCore
 import PexipMedia
 
 // MARK: - Delegate

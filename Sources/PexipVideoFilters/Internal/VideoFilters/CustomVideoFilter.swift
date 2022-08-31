@@ -1,5 +1,6 @@
 import CoreVideo
 import CoreImage
+import PexipCore
 
 struct CustomVideoFilter: VideoFilter {
     let ciFilter: CIFilter

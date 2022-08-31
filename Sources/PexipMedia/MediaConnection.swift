@@ -1,5 +1,8 @@
 import AVFoundation
 import Combine
+import PexipCore
+
+public typealias DTMFSignals = PexipCore.DTMFSignals
 
 /// Observable object that holds references to main and presentation remote video tracks.
 public final class RemoteVideoTracks: ObservableObject {
@@ -70,4 +73,13 @@ public protocol MediaConnection {
         - receive: True to add remote presentation track, False to remove it.
      */
     func receivePresentation(_ receive: Bool) throws
+
+    /**
+     Sends a sequence of DTMF signals
+
+     - Parameters:
+        - signals: The DTMF signals to send
+     */
+    @discardableResult
+    func dtmf(signals: DTMFSignals) async throws -> Bool
 }

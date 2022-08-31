@@ -1,5 +1,3 @@
-import PexipInfinityClient
-
 /// The object that acts as the delegate of the conference.
 public protocol ConferenceDelegate: AnyObject {
     /**

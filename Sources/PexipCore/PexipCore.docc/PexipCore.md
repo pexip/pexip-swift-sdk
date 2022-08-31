@@ -1,7 +1,7 @@
-# ``PexipUtils``
+# ``PexipCore``
 
 @Metadata {
-    @DisplayName("PexipUtils", style: symbol)
+    @DisplayName("PexipCore", style: symbol)
 }
 
 Pexip Swift SDK extensions, utilities and shared components.

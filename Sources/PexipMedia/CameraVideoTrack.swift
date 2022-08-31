@@ -1,4 +1,5 @@
 import AVFoundation
+import PexipCore
 
 /// A local camera video track.
 public protocol CameraVideoTrack: LocalMediaTrack, VideoTrack {

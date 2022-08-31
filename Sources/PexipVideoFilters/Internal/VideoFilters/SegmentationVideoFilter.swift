@@ -1,5 +1,6 @@
 import CoreVideo
 import CoreImage.CIFilterBuiltins
+import PexipCore
 
 final class SegmentationVideoFilter: VideoFilter {
     private let segmenter: PersonSegmenter

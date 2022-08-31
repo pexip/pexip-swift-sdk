@@ -1,4 +1,7 @@
 import CoreImage
+import PexipCore
+
+public typealias VideoFilter = PexipCore.VideoFilter
 
 /// ``VideoFilterFactory`` provides factory methods to create video filters.
 public struct VideoFilterFactory {

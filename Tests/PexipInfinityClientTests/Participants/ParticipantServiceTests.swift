@@ -170,6 +170,34 @@ final class ParticipantServiceTests: APITestCase {
         )
     }
 
+    func testToggleLiveCaptions() async throws {
+        let token = ConferenceToken.randomToken()
+
+        // Enabled = true
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("show_live_captions"),
+            token: token,
+            body: nil,
+            responseJSON: responseJSON,
+            execute: {
+                try await service.toggleLiveCaptions(true, token: token)
+            }
+        )
+
+        // Enabled = false
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("hide_live_captions"),
+            token: token,
+            body: nil,
+            responseJSON: responseJSON,
+            execute: {
+                try await service.toggleLiveCaptions(false, token: token)
+            }
+        )
+    }
+
     func testDtmf() async throws {
         let dtmf = try XCTUnwrap(DTMFSignals(rawValue: "1234"))
         let token = ConferenceToken.randomToken()

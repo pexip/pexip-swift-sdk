@@ -1,5 +1,6 @@
 import WebRTC
 import PexipMedia
+import PexipCore
 
 final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
     let capturingStatus = CapturingStatus(isCapturing: false)

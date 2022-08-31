@@ -1,6 +1,6 @@
 import PexipMedia
 import WebRTC
-import PexipUtils
+import PexipCore
 
 #if os(iOS)
 

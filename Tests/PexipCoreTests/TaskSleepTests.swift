@@ -1,5 +1,5 @@
 import XCTest
-@testable import PexipUtils
+@testable import PexipCore
 
 final class TaskSleepTests: XCTestCase {
     func testSleep() async throws {

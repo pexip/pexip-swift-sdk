@@ -1,6 +1,6 @@
 import XCTest
 import os.log
-@testable import PexipUtils
+@testable import PexipCore
 
 final class IsolatedTests: XCTestCase {
     func testInit() async {

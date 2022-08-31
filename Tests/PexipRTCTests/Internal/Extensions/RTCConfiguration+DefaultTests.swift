@@ -1,6 +1,6 @@
 import XCTest
 import WebRTC
-import PexipMedia
+import PexipCore
 @testable import PexipRTC
 
 final class RTCConfigurationDefaultTests: XCTestCase {

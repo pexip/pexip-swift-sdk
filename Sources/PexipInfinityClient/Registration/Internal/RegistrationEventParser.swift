@@ -1,5 +1,5 @@
 import Foundation
-import PexipUtils
+import PexipCore
 
 struct RegistrationEventParser: InfinityEventParser {
     var decoder = JSONDecoder()

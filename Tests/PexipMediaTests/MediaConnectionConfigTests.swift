@@ -1,4 +1,5 @@
 import XCTest
+import PexipCore
 @testable import PexipMedia
 
 final class MediaConnectionConfigTests: XCTestCase {
@@ -34,7 +35,7 @@ final class MediaConnectionConfigTests: XCTestCase {
 
 // MARK: - Mocks
 
-private struct Signaling: MediaConnectionSignaling, Hashable {
+private struct Signaling: SignalingChannel, Hashable {
     var iceServers = [IceServer]()
 
     func sendOffer(
@@ -45,9 +46,10 @@ private struct Signaling: MediaConnectionSignaling, Hashable {
         return ""
     }
 
-    func addCandidate(sdp: String, mid: String?) async throws {}
-    func muteVideo(_ muted: Bool) async throws {}
-    func muteAudio(_ muted: Bool) async throws {}
-    func takeFloor() async throws {}
-    func releaseFloor() async throws {}
+    func addCandidate(_ candidate: String, mid: String?) async throws {}
+    func muteVideo(_ muted: Bool) async throws -> Bool { true }
+    func muteAudio(_ muted: Bool) async throws -> Bool { true }
+    func takeFloor() async throws -> Bool { true }
+    func releaseFloor() async throws -> Bool { true }
+    func dtmf(signals: DTMFSignals) async throws -> Bool { false }
 }

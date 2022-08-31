@@ -1,6 +1,6 @@
 import os.log
 import XCTest
-@testable import PexipUtils
+@testable import PexipCore
 
 final class LoggerTests: XCTestCase {
     private var logger: LoggerMock!
@@ -67,7 +67,7 @@ final class LoggerTests: XCTestCase {
 
 // MARK: - Mocks
 
-private final class LoggerMock: PexipUtils.Logger {
+private final class LoggerMock: PexipCore.Logger {
     private(set) var message: String?
     private(set) var level: LogLevel?
 

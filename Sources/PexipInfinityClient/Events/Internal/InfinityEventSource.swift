@@ -1,5 +1,5 @@
 import Foundation
-import PexipUtils
+import PexipCore
 
 struct InfinityEventSource<Event>: CustomDebugStringConvertible {
     let name: String

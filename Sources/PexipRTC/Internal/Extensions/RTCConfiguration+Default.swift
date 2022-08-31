@@ -1,5 +1,5 @@
 import WebRTC
-import PexipMedia
+import PexipCore
 
 extension RTCConfiguration {
     static func defaultConfiguration(

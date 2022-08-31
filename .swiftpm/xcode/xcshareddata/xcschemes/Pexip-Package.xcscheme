@@ -286,6 +286,20 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "PexipCore"
+               BuildableName = "PexipCore"
+               BlueprintName = "PexipCore"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -362,6 +376,16 @@
                BlueprintIdentifier = "PexipScreenCaptureTests"
                BuildableName = "PexipScreenCaptureTests"
                BlueprintName = "PexipScreenCaptureTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "PexipCoreTests"
+               BuildableName = "PexipCoreTests"
+               BlueprintName = "PexipCoreTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>

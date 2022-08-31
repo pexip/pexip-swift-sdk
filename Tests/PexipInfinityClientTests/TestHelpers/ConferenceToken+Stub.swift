@@ -5,13 +5,14 @@ extension ConferenceToken {
     static func randomToken(
         updatedAt: Date = .init(),
         expires: TimeInterval = 120,
-        stun: [String] = []
+        stun: [String] = [],
+        role: Role = .guest
     ) -> ConferenceToken {
         ConferenceToken(
             value: UUID().uuidString,
             updatedAt: updatedAt,
             participantId: UUID(),
-            role: .guest,
+            role: role,
             displayName: "Guest",
             serviceType: "conference",
             conferenceName: "Test",

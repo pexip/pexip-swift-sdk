@@ -1,5 +1,5 @@
 import XCTest
-@testable import PexipMedia
+@testable import PexipCore
 
 final class IceServerTests: XCTestCase {
     func testInitWithDefaults() {

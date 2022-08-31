@@ -1,6 +1,6 @@
 import Foundation
 import Combine
-import PexipUtils
+import PexipCore
 
 // MARK: - Protocol
 
@@ -22,7 +22,7 @@ public protocol Registration {
 
 // MARK: - Implementation
 
-final class InfinityRegistration: Registration {
+final class DefaultRegistration: Registration {
     weak var delegate: RegistrationDelegate?
     var eventPublisher: AnyPublisher<RegistrationEvent, Never> {
         eventSubject.eraseToAnyPublisher()

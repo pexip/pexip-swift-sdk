@@ -1,17 +1,15 @@
-import PexipMedia
-import PexipInfinityClient
-import PexipUtils
+import PexipCore
 
-actor ConferenceSignaling: MediaConnectionSignaling {
+actor ConferenceSignalingChannel: SignalingChannel {
     private typealias CallDetailsTask = Task<CallDetails, Error>
 
     let iceServers: [IceServer]
+    private(set) var pwds = [String: String]()
 
     private let participantService: ParticipantService
     private let tokenStore: TokenStore<ConferenceToken>
     private let roster: Roster
     private let logger: Logger?
-    private var pwds = [String: String]()
     private var callsRequestTask: CallDetailsTask?
 
     // MARK: - Init
@@ -21,7 +19,7 @@ actor ConferenceSignaling: MediaConnectionSignaling {
         tokenStore: TokenStore<ConferenceToken>,
         roster: Roster,
         iceServers: [IceServer],
-        logger: Logger?
+        logger: Logger? = nil
     ) {
         self.participantService = participantService
         self.tokenStore = tokenStore
@@ -61,25 +59,25 @@ actor ConferenceSignaling: MediaConnectionSignaling {
         }
     }
 
-    func addCandidate(sdp: String, mid: String?) async throws {
+    func addCandidate(_ candidate: String, mid: String?) async throws {
         guard let callService = try await callService else {
             logger?.warn("Tried to send a new ICE candidate before starting a call")
-            return
+            throw ConferenceSignalingError.callNotStarted
         }
 
         guard !pwds.isEmpty else {
             logger?.warn("ConferenceSignaling.onCandidate - pwds are not set")
-            return
+            throw ConferenceSignalingError.pwdsMissing
         }
 
-        guard let ufrag = candidateUfrag(from: sdp) else {
-            logger?.warn("ConferenceSignaling.onCandidate - ufrag are not set")
-            return
+        guard let ufrag = candidateUfrag(from: candidate) else {
+            logger?.warn("ConferenceSignaling.onCandidate - ufrag is not set")
+            throw ConferenceSignalingError.ufragMissing
         }
 
         try await callService.newCandidate(
             iceCandidate: IceCandidate(
-                candidate: sdp,
+                candidate: candidate,
                 mid: mid,
                 ufrag: ufrag,
                 pwd: pwds[ufrag]
@@ -88,44 +86,62 @@ actor ConferenceSignaling: MediaConnectionSignaling {
         )
     }
 
-    func muteVideo(_ muted: Bool) async throws {
+    @discardableResult
+    func dtmf(signals: DTMFSignals) async throws -> Bool {
+        guard let callService = try await callService else {
+            logger?.warn("Tried to send DTMF signals before starting a call")
+            throw ConferenceSignalingError.callNotStarted
+        }
+        return try await callService.dtmf(
+            signals: signals,
+            token: tokenStore.token()
+        )
+    }
+
+    @discardableResult
+    func muteVideo(_ muted: Bool) async throws -> Bool {
         if muted {
-            try await participantService.videoMuted(token: tokenStore.token())
+            return try await participantService.videoMuted(token: tokenStore.token())
         } else {
-            try await participantService.videoUnmuted(token: tokenStore.token())
+            return try await participantService.videoUnmuted(token: tokenStore.token())
         }
     }
 
-    func muteAudio(_ muted: Bool) async throws {
+    @discardableResult
+    func muteAudio(_ muted: Bool) async throws -> Bool {
         let token = try await tokenStore.token()
 
         guard token.role == .host else {
-            return
+            return false
         }
 
         if muted {
-            try await participantService.mute(token: token)
+            return try await participantService.mute(token: token)
         } else {
-            try await participantService.unmute(token: token)
+            return try await participantService.unmute(token: token)
         }
     }
 
-    func takeFloor() async throws {
+    @discardableResult
+    func takeFloor() async throws -> Bool {
         guard roster.currentParticipant?.isPresenting == false else {
-            return
+            return false
         }
 
         let token = try await tokenStore.token()
         try await participantService.takeFloor(token: token)
+        return true
     }
 
-    func releaseFloor() async throws {
+    @discardableResult
+    func releaseFloor() async throws -> Bool {
         guard roster.currentParticipant?.isPresenting == true else {
-            return
+            return false
         }
 
         let token = try await tokenStore.token()
         try await participantService.releaseFloor(token: token)
+        return true
     }
 
     // MARK: - Private
@@ -167,7 +183,7 @@ actor ConferenceSignaling: MediaConnectionSignaling {
 
 // MARK: - Private extensions
 
-private extension PexipUtils.Regex {
+private extension PexipCore.Regex {
     static let sdpUfrag = Regex("^a=ice-ufrag:(.+)$")
     static let sdpPwd = Regex("^a=ice-pwd:(.+)$")
     static let candicateUfrag = Regex(".*\\bufrag\\s+(.+?)\\s+.*")

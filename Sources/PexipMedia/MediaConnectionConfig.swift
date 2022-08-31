@@ -1,3 +1,5 @@
+import PexipCore
+
 /// ``MediaConnection`` configuration.
 public struct MediaConnectionConfig {
     /// The list of Google STUN urls
@@ -12,7 +14,7 @@ public struct MediaConnectionConfig {
     public static let googleIceServer = IceServer(urls: googleStunUrls)
 
     /// The object responsible for setting up and controlling a communication session.
-    public let signaling: MediaConnectionSignaling
+    public let signaling: SignalingChannel
 
     /// The list of ice servers.
     public let iceServers: [IceServer]
@@ -42,7 +44,7 @@ public struct MediaConnectionConfig {
         - presentationInMain: Sets whether presentation will be mixed with main video feed.
      */
     public init(
-        signaling: MediaConnectionSignaling,
+        signaling: SignalingChannel,
         iceServers: [IceServer] = [],
         bandwidth: Bandwidth = .high,
         dscp: Bool = false,
