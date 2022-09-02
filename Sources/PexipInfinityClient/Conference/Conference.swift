@@ -30,7 +30,7 @@ public protocol Conference {
     func toggleLiveCaptions(_ show: Bool) async throws -> Bool
 
     /// Leaves the conference. Once left, the ``Conference`` object is no longer valid.
-    func leave() async throws
+    func leave() async
 }
 
 // MARK: - Implementation
@@ -81,7 +81,9 @@ final class DefaultConference: Conference {
         self.logger = logger
 
         Task {
-            await tokenRefresher.startRefreshing()
+            await tokenRefresher.startRefreshing(onError: { [weak self] in
+                self?.sendEvent(.failure(FailureEvent(error: $0)))
+            })
         }
 
         logger?.info("Joining the conference as an API client")
@@ -101,8 +103,13 @@ final class DefaultConference: Conference {
         await skipPresentationStop.setValue(true)
 
         await eventSourceTask.setValue(Task {
-            for await event in eventSource.events() {
-                await handleEvent(event)
+            do {
+                for try await event in eventSource.events() {
+                    await handleEvent(event)
+                }
+            } catch {
+                await handleEvent(.failure(FailureEvent(error: error)))
+                await eventSourceTask.setValue(nil)
             }
         })
     }
@@ -118,7 +125,7 @@ final class DefaultConference: Conference {
         return true
     }
 
-    func leave() async throws {
+    func leave() async {
         logger?.info("Leaving the conference")
         await eventSourceTask.value?.cancel()
         await eventSourceTask.setValue(nil)

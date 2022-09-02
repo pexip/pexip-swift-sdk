@@ -1,3 +1,9 @@
+excluded:
+  - .build
+  - .docs
+  - .release
+  - .swiftpm
+  - Package.swift
 analyzer_rules:
   - unused_declaration
   - unused_import

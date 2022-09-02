@@ -1,7 +1,8 @@
 import PackagePlugin
 import Foundation
 
-@main struct SwiftLintPlugin: BuildToolPlugin {
+@main
+struct SwiftLintPlugin: BuildToolPlugin {
     func createBuildCommands(
         context: PluginContext,
         target: Target
@@ -14,9 +15,9 @@ import Foundation
                 executable: tool.path,
                 arguments: [
                     "lint",
-                     "--in-process-sourcekit",
-                     "--config",
-                     "\(context.package.directory.string)/.swiftlint.yml",
+                    "--in-process-sourcekit",
+                    "--config",
+                    "\(context.package.directory.string)/.swiftlint.yml",
                     target.directory.string
                 ]
             )

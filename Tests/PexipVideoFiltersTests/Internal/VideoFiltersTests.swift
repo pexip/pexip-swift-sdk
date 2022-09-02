@@ -10,18 +10,12 @@ final class VideoFilterTests: XCTestCase {
     private let context = CIContext()
     private let size = CGSize(width: 300, height: 300)
 
-    #if os(iOS)
-    private let platform = "iOS"
-    #else
-    private let platform = "macOS"
-    #endif
-
     // MARK: - Tests
 
     func testCustomVideoFilter() throws {
         let filter = CustomVideoFilter(ciFilter: .sepiaTone(), ciContext: context)
         let image = try processPixelBuffer(with: filter)
-        assertSnapshot(matching: image, as: .image, named: platform)
+        assertSnapshot(matching: image, as: .image, named: snapshotName)
     }
 
     #if os(macOS)
@@ -36,7 +30,7 @@ final class VideoFilterTests: XCTestCase {
             ciContext: context
         )
         let image = try processPixelBuffer(with: filter)
-        assertSnapshot(matching: image, as: .image, named: platform)
+        assertSnapshot(matching: image, as: .image, named: snapshotName)
     }
 
     // Vision segmentation doesn't work properly on iOS simulator
@@ -49,7 +43,7 @@ final class VideoFilterTests: XCTestCase {
             ciContext: context
         )
         let image = try processPixelBuffer(with: filter)
-        assertSnapshot(matching: image, as: .image, named: platform)
+        assertSnapshot(matching: image, as: .image, named: snapshotName)
     }
 
     #endif

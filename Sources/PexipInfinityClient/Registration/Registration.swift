@@ -17,7 +17,7 @@ public protocol Registration {
     func receiveEvents() async
 
     /// Cancels all registration activities. Once cancelled, the ``Registration`` object is no longer valid.
-    func cancel() async throws
+    func cancel() async
 }
 
 // MARK: - Implementation
@@ -48,7 +48,9 @@ final class DefaultRegistration: Registration {
         self.logger = logger
 
         Task {
-            await tokenRefresher.startRefreshing()
+            await tokenRefresher.startRefreshing(onError: { [weak self] in
+                self?.handleEvent(.failure(FailureEvent(error: $0)))
+            })
         }
 
         logger?.info("Creating a new registration.")
@@ -60,13 +62,18 @@ final class DefaultRegistration: Registration {
         }
 
         await eventSourceTask.setValue(Task {
-            for await event in eventSource.events() {
-                handleEvent(event)
+            do {
+                for try await event in eventSource.events() {
+                    handleEvent(event)
+                }
+            } catch {
+                handleEvent(.failure(FailureEvent(error: error)))
+                await eventSourceTask.setValue(nil)
             }
         })
     }
 
-    func cancel() async throws {
+    func cancel() async {
         logger?.info("Cancelling all registration activities")
         await eventSourceTask.value?.cancel()
         await eventSourceTask.setValue(nil)

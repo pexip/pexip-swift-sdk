@@ -3,11 +3,11 @@ import PexipCore
 
 // MARK: - Protocol
 
-public protocol TokenRefresher {
+protocol TokenRefresher {
     var isRefreshing: Bool { get async }
 
     @discardableResult
-    func startRefreshing() async -> Bool
+    func startRefreshing(onError: ((Error) -> Void)?) async -> Bool
 
     @discardableResult
     func endRefreshing(withTokenRelease: Bool) async -> Bool
@@ -15,20 +15,20 @@ public protocol TokenRefresher {
 
 // MARK: - Implementaion
 
-public actor DefaultTokenRefresher<Token: InfinityToken>: TokenRefresher {
+actor DefaultTokenRefresher<Token: InfinityToken>: TokenRefresher {
     private let service: TokenService
     private let store: TokenStore<Token>
     private let logger: Logger?
-    private var tokenRefreshTask: Task<Void, Error>?
     private let currentDate: () -> Date
+    private var tokenRefreshTask: Task<Void, Error>?
 
-    public var isRefreshing: Bool {
+    var isRefreshing: Bool {
         return tokenRefreshTask != nil
     }
 
     // MARK: - Init
 
-    public init(
+    init(
         service: TokenService,
         store: TokenStore<Token>,
         logger: Logger? = nil,
@@ -43,14 +43,14 @@ public actor DefaultTokenRefresher<Token: InfinityToken>: TokenRefresher {
     // MARK: - TokenRefresher
 
     @discardableResult
-    public func startRefreshing() async -> Bool {
+    func startRefreshing(onError: ((Error) -> Void)? = nil) async -> Bool {
         do {
             guard !isRefreshing else {
                 throw TokenRefresherError.tokenRefreshStarted
             }
 
             let token = try await store.token()
-            try await scheduleRefresh(for: token)
+            try await scheduleRefresh(for: token, onError: onError)
             logger?.info("\(String(reflecting: token)) refresh operation started ✅")
             return true
         } catch {
@@ -60,7 +60,7 @@ public actor DefaultTokenRefresher<Token: InfinityToken>: TokenRefresher {
     }
 
     @discardableResult
-    public func endRefreshing(withTokenRelease: Bool) async -> Bool {
+    func endRefreshing(withTokenRelease: Bool) async -> Bool {
         do {
             guard isRefreshing else {
                 throw TokenRefresherError.tokenRefreshEnded
@@ -97,7 +97,10 @@ public actor DefaultTokenRefresher<Token: InfinityToken>: TokenRefresher {
 
     // MARK: - Token refresh flow
 
-    private func scheduleRefresh(for token: Token) async throws {
+    private func scheduleRefresh(
+        for token: Token,
+        onError: ((Error) -> Void)? = nil
+    ) async throws {
         await stopRefreshTask()
 
         guard !token.isExpired(currentDate: currentDate()) else {
@@ -128,6 +131,7 @@ public actor DefaultTokenRefresher<Token: InfinityToken>: TokenRefresher {
             } catch {
                 await stopRefreshTask()
                 logger?.error("\(String(reflecting: token)) refresh failed with error: \(error)")
+                onError?(error)
                 throw error
             }
         }

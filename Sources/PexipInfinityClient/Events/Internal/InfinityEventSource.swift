@@ -16,8 +16,8 @@ struct InfinityEventSource<Event>: CustomDebugStringConvertible {
     /// Event stream with retry mechanism.
     /// On error, there will be an attempt to reconnect
     /// until the connection is established or async stream is cancelled
-    func events() -> AsyncStream<Event> {
-        AsyncStream(
+    func events() -> AsyncThrowingStream<Event, Error> {
+        AsyncThrowingStream(
             bufferingPolicy: .bufferingNewest(1)
         ) { continuation in
             let logPrefix = String(reflecting: self)
@@ -64,7 +64,7 @@ struct InfinityEventSource<Event>: CustomDebugStringConvertible {
                     try await task.value
                 } catch {
                     logger?.error("\(name) error: failed to connect.")
-                    continuation.finish()
+                    continuation.finish(throwing: error)
                 }
             }
         }

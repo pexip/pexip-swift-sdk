@@ -308,17 +308,51 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES"
       codeCoverageEnabled = "YES">
+      <CodeCoverageTargets>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "PexipInfinityClient"
+            BuildableName = "PexipInfinityClient"
+            BlueprintName = "PexipInfinityClient"
+            ReferencedContainer = "container:">
+         </BuildableReference>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "PexipMedia"
+            BuildableName = "PexipMedia"
+            BlueprintName = "PexipMedia"
+            ReferencedContainer = "container:">
+         </BuildableReference>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "PexipRTC"
+            BuildableName = "PexipRTC"
+            BlueprintName = "PexipRTC"
+            ReferencedContainer = "container:">
+         </BuildableReference>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "PexipScreenCapture"
+            BuildableName = "PexipScreenCapture"
+            BlueprintName = "PexipScreenCapture"
+            ReferencedContainer = "container:">
+         </BuildableReference>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "PexipVideoFilters"
+            BuildableName = "PexipVideoFilters"
+            BlueprintName = "PexipVideoFilters"
+            ReferencedContainer = "container:">
+         </BuildableReference>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "PexipCore"
+            BuildableName = "PexipCore"
+            BlueprintName = "PexipCore"
+            ReferencedContainer = "container:">
+         </BuildableReference>
+      </CodeCoverageTargets>
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "PexipConferenceTests"
-               BuildableName = "PexipConferenceTests"
-               BlueprintName = "PexipConferenceTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
          <TestableReference
             skipped = "NO">
             <BuildableReference
@@ -346,16 +380,6 @@
                BlueprintIdentifier = "PexipRTCTests"
                BuildableName = "PexipRTCTests"
                BlueprintName = "PexipRTCTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "PexipUtilsTests"
-               BuildableName = "PexipUtilsTests"
-               BlueprintName = "PexipUtilsTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>

@@ -51,9 +51,8 @@ final class ConferenceEventParserTests: XCTestCase {
             payload: "Test"
         )
         let httpEvent = try HTTPEvent.stub(for: chatMessage, name: "message_received")
-        let event = parser.parseEventData(from: httpEvent)
 
-        switch event {
+        switch parser.parseEventData(from: httpEvent) {
         case .messageReceived(let message):
             XCTAssertEqual(message.senderName, chatMessage.senderName)
             XCTAssertEqual(message.senderId, chatMessage.senderId)
@@ -70,8 +69,14 @@ final class ConferenceEventParserTests: XCTestCase {
             presenterUri: "URI"
         )
         let httpEvent = try HTTPEvent.stub(for: expectedEvent, name: "presentation_start")
-        let parsedEvent = parser.parseEventData(from: httpEvent)
-        XCTAssertEqual(parsedEvent, .presentationStart(expectedEvent))
+
+        switch parser.parseEventData(from: httpEvent) {
+        case .presentationStart(let event):
+            XCTAssertEqual(event.presenterName, expectedEvent.presenterName)
+            XCTAssertEqual(event.presenterUri, expectedEvent.presenterUri)
+        default:
+            XCTFail("Invalid event type")
+        }
     }
 
     func testPresentationStop() throws {
@@ -109,22 +114,38 @@ final class ConferenceEventParserTests: XCTestCase {
     func testParticipantDelete() throws {
         let expectedEvent = ParticipantDeleteEvent(id: UUID())
         let httpEvent = try HTTPEvent.stub(for: expectedEvent, name: "participant_delete")
-        let parsedEvent = parser.parseEventData(from: httpEvent)
-        XCTAssertEqual(parsedEvent, .participantDelete(expectedEvent))
+
+        switch parser.parseEventData(from: httpEvent) {
+        case .participantDelete(let event):
+            XCTAssertEqual(event.id, expectedEvent.id)
+        default:
+            XCTFail("Invalid event type")
+        }
     }
 
     func testCallDisconnected() throws {
         let expectedEvent = CallDisconnectEvent(callId: UUID(), reason: "Test")
         let httpEvent = try HTTPEvent.stub(for: expectedEvent, name: "call_disconnected")
-        let parsedEvent = parser.parseEventData(from: httpEvent)
-        XCTAssertEqual(parsedEvent, .callDisconnected(expectedEvent))
+
+        switch parser.parseEventData(from: httpEvent) {
+        case .callDisconnected(let event):
+            XCTAssertEqual(event.callId, expectedEvent.callId)
+            XCTAssertEqual(event.reason, expectedEvent.reason)
+        default:
+            XCTFail("Invalid event type")
+        }
     }
 
     func testClientDisconnected() throws {
         let expectedEvent = ClientDisconnectEvent(reason: "Test")
         let httpEvent = try HTTPEvent.stub(for: expectedEvent, name: "disconnect")
-        let parsedEvent = parser.parseEventData(from: httpEvent)
-        XCTAssertEqual(parsedEvent, .clientDisconnected(expectedEvent))
+
+        switch parser.parseEventData(from: httpEvent) {
+        case .clientDisconnected(let event):
+            XCTAssertEqual(event.reason, expectedEvent.reason)
+        default:
+            XCTFail("Invalid event type")
+        }
     }
 
     func testUnknown() throws {

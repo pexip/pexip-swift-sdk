@@ -29,6 +29,10 @@ let package = Package(
         .library(
             name: "PexipScreenCapture",
             targets: ["PexipScreenCapture"]
+        ),
+        .library(
+            name: "PexipCore",
+            targets: ["PexipCore"]
         )
     ],
     dependencies: [

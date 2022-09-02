@@ -1,13 +1,13 @@
 import Foundation
 
-public actor TokenStore<Token: InfinityToken> {
+actor TokenStore<Token: InfinityToken> {
     private var token: Token
     private var updateTask: Task<Token, Error>?
     private let currentDate: () -> Date
 
     // MARK: - Init
 
-    public init(
+    init(
         token: Token,
         currentDateProvider: @escaping () -> Date = { Date() }
     ) {
@@ -17,7 +17,7 @@ public actor TokenStore<Token: InfinityToken> {
 
     // MARK: - Internal
 
-    public func token() async throws -> Token {
+    func token() async throws -> Token {
         let token: Token
 
         if let updateTask = updateTask {
@@ -33,17 +33,17 @@ public actor TokenStore<Token: InfinityToken> {
         }
     }
 
-    public func updateToken(_ token: Token) async throws {
+    func updateToken(_ token: Token) async throws {
         try await updateToken(withTask: Task { token })
     }
 
-    public func updateToken(withTask task: Task<Token, Error>) async throws {
+    func updateToken(withTask task: Task<Token, Error>) async throws {
         updateTask = task
         token = try await task.value
         updateTask = nil
     }
 
-    public func cancelUpdateIfNeeded() {
+    func cancelUpdateIfNeeded() {
         updateTask?.cancel()
         updateTask = nil
     }

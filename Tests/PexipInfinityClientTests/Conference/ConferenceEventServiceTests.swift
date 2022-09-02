@@ -55,11 +55,12 @@ final class ConferenceEventServiceTests: APITestCase {
 
         // 4. Assert response
         XCTAssertEqual(receivedEvents.count, 1)
-        XCTAssertEqual(
-            receivedEvents.first,
-            ConferenceEvent.clientDisconnected(
-                .init(reason: "Test")
-            )
-        )
+
+        switch receivedEvents.first {
+        case .clientDisconnected(let event):
+            XCTAssertEqual(event.reason, "Test")
+        default:
+            XCTFail("Invalid event type")
+        }
     }
 }

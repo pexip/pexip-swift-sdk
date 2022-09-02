@@ -1,5 +1,6 @@
 import Foundation
 
+/// An alias of the conference you are connecting to.
 public struct ConferenceAlias: Hashable {
     public let uri: String
     public let alias: String

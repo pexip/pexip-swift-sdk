@@ -24,6 +24,7 @@ final class InfinityEventSourceTests: XCTestCase {
 
         XCTAssertEqual(output.events, inputEvents)
         XCTAssertTrue(output.errors.isEmpty)
+        XCTAssertNil(output.streamError)
     }
 
     func testEventsWithRetry() async {
@@ -41,6 +42,7 @@ final class InfinityEventSourceTests: XCTestCase {
         XCTAssertEqual(output.events, inputEvents)
         XCTAssertEqual(output.errors.count, 2)
         XCTAssertTrue(output.errors.allSatisfy { $0 is HTTPEventError })
+        XCTAssertNil(output.streamError)
     }
 
     func testEventsWithMaxRetries() async {
@@ -59,6 +61,7 @@ final class InfinityEventSourceTests: XCTestCase {
         XCTAssertEqual(output.events, inputEvents)
         XCTAssertEqual(output.errors.count, 3)
         XCTAssertTrue(output.errors.allSatisfy { $0 is HTTPEventError })
+        XCTAssertTrue(output.streamError is HTTPEventError)
     }
 
     func testEventsWith401Error() async {
@@ -80,6 +83,7 @@ final class InfinityEventSourceTests: XCTestCase {
         XCTAssertEqual(output.events, inputEvents)
         XCTAssertEqual(output.errors.count, 1)
         XCTAssertTrue(output.errors.first is HTTPEventError)
+        XCTAssertTrue(output.streamError is HTTPEventError)
     }
 
     func testEventsWith403Error() async {
@@ -101,6 +105,7 @@ final class InfinityEventSourceTests: XCTestCase {
         XCTAssertEqual(output.events, inputEvents)
         XCTAssertEqual(output.errors.count, 1)
         XCTAssertTrue(output.errors.first is HTTPEventError)
+        XCTAssertTrue(output.streamError is HTTPEventError)
     }
 
     func testEventsWithUnknownError() async {
@@ -116,6 +121,7 @@ final class InfinityEventSourceTests: XCTestCase {
         XCTAssertEqual(output.events, inputEvents)
         XCTAssertEqual(output.errors.count, 1)
         XCTAssertEqual(output.errors.first as? URLError, error)
+        XCTAssertEqual(output.streamError as? URLError, error)
     }
 
     // MARK: - Private
@@ -146,11 +152,15 @@ final class InfinityEventSourceTests: XCTestCase {
             }
         )
 
-        for await event in eventSource.events() {
-            output.events.append(event)
-            if output.events.count + output.errors.count == inputCount {
-                break
+        do {
+            for try await event in eventSource.events() {
+                output.events.append(event)
+                if output.events.count + output.errors.count == inputCount {
+                    break
+                }
             }
+        } catch {
+            output.streamError = error
         }
 
         return output
@@ -162,4 +172,5 @@ final class InfinityEventSourceTests: XCTestCase {
 private struct StreamOutput {
     var events: [String]
     var errors: [Error]
+    var streamError: Error?
 }

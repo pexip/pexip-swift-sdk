@@ -7,36 +7,31 @@ import TestHelpers
 final class ImageFilterTests: XCTestCase {
     private let context = CIContext()
     private let size = CGSize(width: 300, height: 300)
-    #if os(iOS)
-    private let platform = "iOS"
-    #else
-    private let platform = "macOS"
-    #endif
 
     // MARK: - Tests
 
     func testTentBlur() throws {
         let filter = AccelerateBlurFilter(kind: .tent, ciContext: context)
         let image = try processImage(with: filter)
-        assertSnapshot(matching: image, as: .image, named: platform)
+        assertSnapshot(matching: image, as: .image, named: snapshotName)
     }
 
     func testBoxBlur() throws {
         let filter = AccelerateBlurFilter(kind: .box, ciContext: context)
         let image = try processImage(with: filter)
-        assertSnapshot(matching: image, as: .image, named: platform)
+        assertSnapshot(matching: image, as: .image, named: snapshotName)
     }
 
     func testCustomImageFilter() throws {
         let filter = CustomImageFilter(ciFilter: CIFilter.sepiaTone())
         let image = try processImage(with: filter)
-        assertSnapshot(matching: image, as: .image, named: platform)
+        assertSnapshot(matching: image, as: .image, named: snapshotName)
     }
 
     func testGaussianBlurFilter() throws {
         let filter = GaussianBlurFilter(radius: 30)
         let image = try processImage(with: filter)
-        assertSnapshot(matching: image, as: .image, named: platform)
+        assertSnapshot(matching: image, as: .image, named: snapshotName)
     }
 
     func testImageReplacementFilter() throws {
@@ -49,7 +44,7 @@ final class ImageFilterTests: XCTestCase {
             )
         )
         let image = try processImage(with: filter)
-        assertSnapshot(matching: image, as: .image, named: platform)
+        assertSnapshot(matching: image, as: .image, named: snapshotName)
     }
 
     func testVideoReplacementFilter() async throws {
@@ -70,7 +65,7 @@ final class ImageFilterTests: XCTestCase {
 
         // 3. Process image again
         let image = try processImage(with: filter)
-        assertSnapshot(matching: image, as: .image, named: platform)
+        assertSnapshot(matching: image, as: .image, named: snapshotName)
     }
 
     // MARK: - Test helpers

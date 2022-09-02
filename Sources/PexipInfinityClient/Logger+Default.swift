@@ -9,7 +9,7 @@ public extension DefaultLogger {
             subsystem: Bundle(
                 for: HTTPEventSourceParser.self
             ).bundleIdentifier!,
-            category: "conference"
+            category: "infinityClient"
         )
     )
 }

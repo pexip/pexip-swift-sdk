@@ -2,7 +2,7 @@ import XCTest
 @testable import PexipInfinityClient
 
 final class TokenRefresherTests: XCTestCase {
-    private var refresher: TokenRefresher!
+    private var refresher: DefaultTokenRefresher<ConferenceToken>!
     private var store: TokenStore<ConferenceToken>!
     private var service: TokenServiceMock!
     private var calendar: Calendar!
@@ -117,13 +117,16 @@ final class TokenRefresherTests: XCTestCase {
     /// N.B. Testing timers is tricky
     func testTokenRefreshWithServiceError() async throws {
         let tokenA = ConferenceToken.randomToken(updatedAt: updatedAt)
+        var refreshError: Error?
 
         currentDate = updatedAt.addingTimeInterval(60)
         service.refreshTokenResult = .failure(URLError(.badURL))
 
         // 1. Start refreshing to schedule token refresh
         try await store.updateToken(tokenA)
-        await refresher.startRefreshing()
+        await refresher.startRefreshing(onError: { error in
+            refreshError = error
+        })
 
         let tokenFromStore1 = try await store.token()
         let isRefreshing1 = await refresher.isRefreshing
@@ -139,6 +142,7 @@ final class TokenRefresherTests: XCTestCase {
 
         XCTAssertEqual(service.steps, [.refreshToken])
         XCTAssertEqual(tokenFromStore2, tokenA)
+        XCTAssertEqual(refreshError as? URLError, URLError(.badURL))
         XCTAssertFalse(isRefreshing2)
     }
 
