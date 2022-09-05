@@ -29,7 +29,7 @@ struct SettingsView: View {
 
     private var cameraFilters: some View {
         Menu("Camera Filters") {
-            ForEach(CameraVideoFilter.Kind.allCases, id: \.hashValue) { filter in
+            ForEach(CameraVideoFilter.allCases, id: \.hashValue) { filter in
                 FilterButton(
                     filter: filter,
                     isSelected: filter == settings.cameraFilter,
@@ -55,7 +55,7 @@ struct SettingsView: View {
 // MARK: - Private types
 
 private struct FilterButton: View {
-    let filter: CameraVideoFilter.Kind
+    let filter: CameraVideoFilter
     let isSelected: Bool
     let action: () -> Void
 

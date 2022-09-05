@@ -1,6 +1,5 @@
 import SwiftUI
 import PexipInfinityClient
-import PexipConference
 
 struct AppCoordinator: View {
     private enum Screen: Equatable {
@@ -9,12 +8,12 @@ struct AppCoordinator: View {
         case pinChallenge(
             alias: ConferenceAlias,
             node: URL,
-            tokenError: TokenError
+            tokenError: ConferenceTokenError
         )
         case conference(
             alias: ConferenceAlias,
             node: URL,
-            token: Token
+            token: ConferenceToken
         )
     }
 

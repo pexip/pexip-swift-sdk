@@ -1,5 +1,5 @@
 import SwiftUI
-import PexipConference
+import PexipInfinityClient
 
 struct ChatView: View {
     @StateObject var viewModel: ChatViewModel

@@ -1,10 +1,10 @@
 import Combine
 import SwiftUI
 import PexipRTC
-import PexipConference
 import PexipMedia
 import PexipInfinityClient
 import PexipVideoFilters
+import PexipScreenCapture
 
 final class ConferenceViewModel: ObservableObject {
     @Published private(set) var state: ConferenceState
@@ -42,7 +42,7 @@ final class ConferenceViewModel: ObservableObject {
         (finalCaptions + currentCaptions).joined(separator: "\n")
     }
 
-    let remoteVideoContentMode = VideoContentMode.fit_16x9
+    let remoteVideoContentMode = VideoContentMode.fit16x9
     var hasChat: Bool { conference.chat != nil }
     var roster: Roster { conference.roster }
     private(set) lazy var chatMessageStore = conference.chat.map {
@@ -61,7 +61,7 @@ final class ConferenceViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let cameraQualityProfile: QualityProfile = .high
     private let localPresentationQualityProfile: QualityProfile = .presentationVeryHigh
-    private let cameraVideoFilter = CameraVideoFilter()
+    private let videoFilterFactory = VideoFilterFactory()
     private var isSinkingLiveCaptionsSettings = false
     private var hideCaptionsTask: Task<Void, Error>?
     @Published private var mainRemoteVideoTrack: VideoTrack?
@@ -90,7 +90,6 @@ final class ConferenceViewModel: ObservableObject {
         self.onComplete = onComplete
         self.state = .preflight
 
-        cameraVideoTrack?.videoFilter = cameraVideoFilter
         setCameraEnabled(videoPermission.isAuthorized)
         setMicrophoneEnabled(audioPermission.isAuthorized)
         sinkMediaConnectionEvents()
@@ -115,7 +114,7 @@ extension ConferenceViewModel {
         Task { @MainActor in
             do {
                 try await mediaConnection.start()
-                await conference.receiveEvents()
+                conference.receiveEvents()
             } catch {
                 state = .preflight
                 debugPrint(error)
@@ -127,7 +126,7 @@ extension ConferenceViewModel {
         state = .disconnected
 
         Task {
-            try await conference.leave()
+            await conference.leave()
             mediaConnection.stop()
             setCameraEnabled(false)
             setMicrophoneEnabled(false)
@@ -141,7 +140,7 @@ extension ConferenceViewModel {
         setCameraEnabled(false)
         setMicrophoneEnabled(false)
         Task {
-            try await conference.leave()
+            await conference.leave()
             onComplete()
         }
     }
@@ -301,6 +300,9 @@ private extension ConferenceViewModel {
                         try self.mediaConnection.receivePresentation(false)
                     case .clientDisconnected:
                         self.leave()
+                    default:
+                        // Ignore the rest
+                        break
                     }
                 } catch {
                     debugPrint("Cannot handle conference event, error: \(error)")
@@ -343,8 +345,8 @@ private extension ConferenceViewModel {
         }
     }
 
-    func setCameraFilter(_ filter: CameraVideoFilter.Kind) {
-        cameraVideoFilter.kind = filter
+    func setCameraFilter(_ filter: CameraVideoFilter) {
+        cameraVideoTrack?.videoFilter = videoFilterFactory.videoFilter(for: filter)
     }
 
     func showLiveCaptions(_ captions: LiveCaptions) {

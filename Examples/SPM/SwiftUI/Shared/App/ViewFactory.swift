@@ -2,7 +2,7 @@ import SwiftUI
 import PexipInfinityClient
 import PexipMedia
 import PexipRTC
-import PexipConference
+import PexipScreenCapture
 
 // MARK: - Protocol
 
@@ -18,7 +18,7 @@ protocol ViewFactoryProtocol {
     func pinChallengeView(
         node: URL,
         alias: ConferenceAlias,
-        tokenError: TokenError,
+        tokenError: ConferenceTokenError,
         onComplete: @escaping PinChallengeViewModel.Complete
     ) -> PinChallengeView
 }
@@ -27,7 +27,6 @@ protocol ViewFactoryProtocol {
 
 struct ViewFactory: ViewFactoryProtocol {
     private let apiClientFactory = InfinityClientFactory()
-    private let conferenceFactory = ConferenceFactory()
     private let settings = Settings()
 
     func displayNameView(
@@ -51,12 +50,12 @@ struct ViewFactory: ViewFactoryProtocol {
     func pinChallengeView(
         node: URL,
         alias: ConferenceAlias,
-        tokenError: TokenError,
+        tokenError: ConferenceTokenError,
         onComplete: @escaping PinChallengeViewModel.Complete
     ) -> PinChallengeView {
         let viewModel = PinChallengeViewModel(
             tokenError: tokenError,
-            tokenService: apiClientFactory
+            service: apiClientFactory
                 .infinityService()
                 .node(url: node)
                 .conference(alias: alias),
@@ -70,18 +69,18 @@ struct ViewFactory: ViewFactoryProtocol {
     func conferenceView(
         node: URL,
         alias: ConferenceAlias,
-        token: Token,
+        token: ConferenceToken,
         onComplete: @escaping () -> Void
     ) -> ConferenceView {
         let mediaConnectionFactory = WebRTCMediaConnectionFactory()
-        let conference = conferenceFactory.conference(
+        let conference = apiClientFactory.conference(
             service: apiClientFactory.infinityService(),
             node: node,
             alias: alias,
             token: token
         )
         let mediaConnectionConfig = MediaConnectionConfig(
-            signaling: conference.signaling,
+            signaling: conference.signalingChannel,
             presentationInMain: false
         )
         let viewModel = ConferenceViewModel(

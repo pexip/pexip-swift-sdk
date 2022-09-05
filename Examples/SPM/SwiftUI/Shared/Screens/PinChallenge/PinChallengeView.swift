@@ -1,6 +1,5 @@
 import SwiftUI
 import PexipInfinityClient
-import PexipConference
 
 struct PinChallengeView: View {
     @StateObject var viewModel: PinChallengeViewModel
@@ -43,7 +42,7 @@ struct PinChallengeView_Previews: PreviewProvider {
         PinChallengeView(
             viewModel: PinChallengeViewModel(
                 tokenError: .pinRequired(guestPin: true),
-                tokenService: InfinityClientFactory()
+                service: InfinityClientFactory()
                     .infinityService()
                     .node(url: URL(string: "https://test.example.com")!)
                     .conference(alias: ConferenceAlias(uri: "test@example.com")!),

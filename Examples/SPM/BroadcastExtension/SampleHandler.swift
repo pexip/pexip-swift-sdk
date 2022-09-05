@@ -1,5 +1,5 @@
 import ReplayKit
-import PexipMedia
+import PexipScreenCapture
 
 final class SampleHandler: RPBroadcastSampleHandler, BroadcastSampleHandlerDelegate {
     private lazy var handler: BroadcastSampleHandler = {

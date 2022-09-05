@@ -1,5 +1,5 @@
 import Foundation
-import PexipConference
+import PexipInfinityClient
 import Combine
 
 final class ChatMessageStore: ObservableObject {

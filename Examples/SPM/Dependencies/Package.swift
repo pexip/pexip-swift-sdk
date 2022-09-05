@@ -32,19 +32,18 @@ let package = Package(
         .target(
             name: "App",
             dependencies: [
-                .product(name: "PexipUtils", package: sdkName),
+                .product(name: "PexipCore", package: sdkName),
                 .product(name: "PexipMedia", package: sdkName),
                 .product(name: "PexipInfinityClient", package: sdkName),
                 .product(name: "PexipRTC", package: sdkName),
-                .product(name: "PexipConference", package: sdkName),
-                .product(name: "PexipVideoFilters", package: sdkName)
+                .product(name: "PexipVideoFilters", package: sdkName),
+                .product(name: "PexipScreenCapture", package: sdkName)
             ]
         ),
         .target(
             name: "BroadcastExtension",
             dependencies: [
-                .product(name: "PexipUtils", package: sdkName),
-                .product(name: "PexipMedia", package: sdkName)
+                .product(name: "PexipScreenCapture", package: sdkName)
             ]
         )
     ]

@@ -1,5 +1,5 @@
 import SwiftUI
-import PexipMedia
+import PexipScreenCapture
 
 struct ScreenMediaSourcePicker: View {
     private enum Tab: Int {

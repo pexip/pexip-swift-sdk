@@ -1,7 +1,6 @@
 import SwiftUI
 import PexipMedia
 import PexipRTC
-import PexipConference
 
 struct CallView: View {
     let mainLocalVideo: Video?
@@ -301,18 +300,18 @@ struct CallView_Previews: PreviewProvider {
             ),
             mainRemoteVideo: Video(
                 track: VideoTrackMock(.darkGray),
-                contentMode: .fit_16x9
+                contentMode: .fit16x9
             ),
             presentationLocalVideo: withLocalPresentation
                 ? Video(
                     track: VideoTrackMock(.purple),
-                    contentMode: .fit_16x9
+                    contentMode: .fit16x9
                 )
                 : nil,
             presentationRemoteVideo: withRemotePresentation
                 ? Video(
                     track: VideoTrackMock(.purple),
-                    contentMode: .fit_16x9
+                    contentMode: .fit16x9
                 )
                 : nil,
             presenterName: withRemotePresentation ? "Presenter" : nil,
