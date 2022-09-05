@@ -1,6 +1,5 @@
 import SwiftUI
 import PexipInfinityClient
-import PexipConference
 
 struct AppCoordinator: View {
     private enum Screen: Equatable {

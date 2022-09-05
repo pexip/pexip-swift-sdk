@@ -1,6 +1,5 @@
 import SwiftUI
 import PexipInfinityClient
-import PexipConference
 
 struct PinChallengeView: View {
     @StateObject var viewModel: PinChallengeViewModel

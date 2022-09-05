@@ -3,7 +3,6 @@ import Combine
 import PexipInfinityClient
 import PexipMedia
 import PexipRTC
-import PexipConference
 
 struct ConferenceView: View {
     @StateObject var viewModel: ConferenceViewModel
@@ -233,7 +232,7 @@ struct ConferenceView: View {
 // MARK: - Previews
 
 struct ConferenceView_Previews: PreviewProvider {
-    private static let conference = ConferenceFactory().conference(
+    private static let conference = InfinityClientFactory().conference(
         service: InfinityClientFactory().infinityService(),
         node: URL(string: "https://test.com")!,
         alias: ConferenceAlias(uri: "test@example.com")!,
@@ -260,7 +259,7 @@ struct ConferenceView_Previews: PreviewProvider {
             viewModel: ConferenceViewModel(
                 conference: conference,
                 mediaConnectionConfig: MediaConnectionConfig(
-                    signaling: conference.signaling
+                    signaling: conference.signalingChannel
                 ),
                 mediaConnectionFactory: factory,
                 settings: Settings(),

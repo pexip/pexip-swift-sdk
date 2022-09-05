@@ -1,6 +1,5 @@
 import SwiftUI
 import PexipInfinityClient
-import PexipConference
 
 struct AliasView: View {
     @StateObject var viewModel: AliasViewModel

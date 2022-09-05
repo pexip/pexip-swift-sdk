@@ -1,6 +1,5 @@
 import SwiftUI
 import PexipInfinityClient
-import PexipConference
 
 struct ParticipantsView: View {
     @ObservedObject var roster: Roster
@@ -43,7 +42,7 @@ struct ParticipantsView: View {
             nameAbbreviation: Utils.abbreviation(
                 forName: roster.currentParticipantName
             ),
-            avatarURL: roster.currentParticipantavatarURL,
+            avatarURL: roster.currentParticipantAvatarURL,
             isMe: true
         )
     }

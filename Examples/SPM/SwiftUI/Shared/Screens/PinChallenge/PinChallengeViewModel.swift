@@ -1,6 +1,5 @@
 import SwiftUI
 import PexipInfinityClient
-import PexipConference
 
 final class PinChallengeViewModel: ObservableObject {
     typealias Complete = (ConferenceToken) -> Void

@@ -1,7 +1,6 @@
 import SwiftUI
 import PexipMedia
 import PexipRTC
-import PexipConference
 
 struct CallView: View {
     let mainLocalVideo: Video?

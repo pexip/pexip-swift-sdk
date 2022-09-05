@@ -1,6 +1,6 @@
 import Foundation
 import Combine
-import PexipConference
+import PexipInfinityClient
 
 final class ChatViewModel: ObservableObject {
     @Published private(set) var messages: [Chat.Message]

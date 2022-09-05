@@ -2,7 +2,6 @@ import SwiftUI
 import PexipInfinityClient
 import PexipMedia
 import PexipRTC
-import PexipConference
 import PexipScreenCapture
 
 // MARK: - Protocol
@@ -28,7 +27,6 @@ protocol ViewFactoryProtocol {
 
 struct ViewFactory: ViewFactoryProtocol {
     private let apiClientFactory = InfinityClientFactory()
-    private let conferenceFactory = ConferenceFactory()
     private let settings = Settings()
 
     func displayNameView(
@@ -75,14 +73,14 @@ struct ViewFactory: ViewFactoryProtocol {
         onComplete: @escaping () -> Void
     ) -> ConferenceView {
         let mediaConnectionFactory = WebRTCMediaConnectionFactory()
-        let conference = conferenceFactory.conference(
+        let conference = apiClientFactory.conference(
             service: apiClientFactory.infinityService(),
             node: node,
             alias: alias,
             token: token
         )
         let mediaConnectionConfig = MediaConnectionConfig(
-            signaling: conference.signaling,
+            signaling: conference.signalingChannel,
             presentationInMain: false
         )
         let viewModel = ConferenceViewModel(
