@@ -109,6 +109,7 @@ struct ViewFactory: ViewFactoryProtocol {
     }
 
     #if os(macOS)
+
     func screenMediaSourcePicker(
         onShare: @escaping (ScreenMediaSource) -> Void,
         onCancel: @escaping () -> Void
@@ -120,6 +121,20 @@ struct ViewFactory: ViewFactoryProtocol {
         )
         return ScreenMediaSourcePicker(viewModel: viewModel)
     }
+
+    func registrationView(
+        onComplete: @escaping (RegistrationToken) -> Void,
+        onCancel: @escaping () -> Void
+    ) -> RegistrationView {
+        let viewModel = RegistrationViewModel(
+            nodeResolver: apiClientFactory.nodeResolver(dnssec: false),
+            service: apiClientFactory.infinityService(),
+            onComplete: onComplete,
+            onCancel: onCancel
+        )
+        return RegistrationView(viewModel: viewModel)
+    }
+
     #endif
 
     func settingsView() -> SettingsView {

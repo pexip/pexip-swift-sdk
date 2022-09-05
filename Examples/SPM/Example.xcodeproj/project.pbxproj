@@ -36,6 +36,9 @@
 		DA7AC0FE281096B400739C4E /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADD2027F5D69A00A9AC3D /* AppCoordinator.swift */; };
 		DA93EE6D284A35200063386F /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA93EE6C284A35200063386F /* Constants.swift */; };
 		DA93EE6E284A35200063386F /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA93EE6C284A35200063386F /* Constants.swift */; };
+		DAAC9A7428C69F4100BFCA5C /* RegistrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAC9A7328C69F4100BFCA5C /* RegistrationView.swift */; };
+		DAAC9A7628C69F5300BFCA5C /* RegistrationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAC9A7528C69F5300BFCA5C /* RegistrationViewModel.swift */; };
+		DAAC9A7928C6A3A400BFCA5C /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = DAAC9A7828C6A3A400BFCA5C /* KeychainAccess */; };
 		DAB34033286E680E001B59C5 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB34032286E680E001B59C5 /* Settings.swift */; };
 		DAB34034286E680E001B59C5 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB34032286E680E001B59C5 /* Settings.swift */; };
 		DAB78D4F27E3953600CB17C9 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB78D4E27E3953600CB17C9 /* Utils.swift */; };
@@ -146,6 +149,8 @@
 		DA6196862878332300EA9151 /* ChatMessageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessageStore.swift; sourceTree = "<group>"; };
 		DA6E026127CFA48700DF88A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DA93EE6C284A35200063386F /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		DAAC9A7328C69F4100BFCA5C /* RegistrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationView.swift; sourceTree = "<group>"; };
+		DAAC9A7528C69F5300BFCA5C /* RegistrationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationViewModel.swift; sourceTree = "<group>"; };
 		DAB34032286E680E001B59C5 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		DAB78D4E27E3953600CB17C9 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		DAE8989A282469DD006C30E8 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Configs/Debug.xcconfig; sourceTree = "<group>"; };
@@ -217,6 +222,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DAAC9A7928C6A3A400BFCA5C /* KeychainAccess in Frameworks */,
 				DA217DDF28995D8F006E5169 /* App in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -343,6 +349,15 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		DAAC9A7228C69F2500BFCA5C /* Registration */ = {
+			isa = PBXGroup;
+			children = (
+				DAAC9A7328C69F4100BFCA5C /* RegistrationView.swift */,
+				DAAC9A7528C69F5300BFCA5C /* RegistrationViewModel.swift */,
+			);
+			path = Registration;
+			sourceTree = "<group>";
+		};
 		DAB34031286E65D2001B59C5 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
@@ -373,6 +388,7 @@
 		DAFADC8327F5083300A9AC3D /* macOS */ = {
 			isa = PBXGroup;
 			children = (
+				DAAC9A7228C69F2500BFCA5C /* Registration */,
 				DA01A9E62836A3C5002A6414 /* ScreenCapture */,
 				DAFADC8D27F5083400A9AC3D /* macOS.entitlements */,
 				DAFADD1C27F5CD8200A9AC3D /* UserInterfaceSizeClass.swift */,
@@ -584,6 +600,7 @@
 			name = "Example (macOS)";
 			packageProductDependencies = (
 				DA217DDE28995D8F006E5169 /* App */,
+				DAAC9A7828C6A3A400BFCA5C /* KeychainAccess */,
 			);
 			productName = PexipVideoExample;
 			productReference = DAFADC8227F5083300A9AC3D /* Example (macOS).app */;
@@ -623,6 +640,7 @@
 			);
 			mainGroup = DA1329CC27A98EC400C2EA89;
 			packageReferences = (
+				DAAC9A7728C6A3A400BFCA5C /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 			);
 			productRefGroup = DA1329DA27A98EC500C2EA89 /* Products */;
 			projectDirPath = "";
@@ -800,6 +818,7 @@
 				DAFADCEA27F50C1400A9AC3D /* PreflightView.swift in Sources */,
 				DA6196882878332300EA9151 /* ChatMessageStore.swift in Sources */,
 				DA2FE59B287110DD00D8FCAB /* ConferenceModal.swift in Sources */,
+				DAAC9A7628C69F5300BFCA5C /* RegistrationViewModel.swift in Sources */,
 				DAFADD1027F50E8800A9AC3D /* PinChallengeView.swift in Sources */,
 				DAFADCD827F50C1400A9AC3D /* ExampleApp.swift in Sources */,
 				DAFADCEC27F50C1400A9AC3D /* CallView.swift in Sources */,
@@ -833,6 +852,7 @@
 				DAFADCC827F50C1400A9AC3D /* GeometryProxy+Extensions.swift in Sources */,
 				DAFADCCC27F50C1400A9AC3D /* LinearGradient+Extensions.swift in Sources */,
 				DAFADCD027F50C1400A9AC3D /* LargeTextFieldStyle.swift in Sources */,
+				DAAC9A7428C69F4100BFCA5C /* RegistrationView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1295,6 +1315,17 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		DAAC9A7728C6A3A400BFCA5C /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.2.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		DA217DDA28995C27006E5169 /* BroadcastExtension */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -1307,6 +1338,11 @@
 		DA217DDE28995D8F006E5169 /* App */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = App;
+		};
+		DAAC9A7828C6A3A400BFCA5C /* KeychainAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DAAC9A7728C6A3A400BFCA5C /* XCRemoteSwiftPackageReference "KeychainAccess" */;
+			productName = KeychainAccess;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
