@@ -197,4 +197,76 @@ final class ConferenceTokenTests: XCTestCase {
         )
         XCTAssertEqual(token.expires, 0)
     }
+
+    func testIceServersWithStunAndTurn() {
+        let token = ConferenceToken.randomToken(
+            stun: ["url1", "url2"],
+            turn: [ConferenceToken.Turn(
+                urls: ["url1", "url2"],
+                username: "username",
+                credential: "password"
+            )]
+        )
+        XCTAssertEqual(
+            token.iceServers,
+            [
+                IceServer(url: "url1"),
+                IceServer(url: "url2"),
+                IceServer(
+                    urls: ["url1", "url2"],
+                    username: "username",
+                    password: "password"
+                )
+            ]
+        )
+    }
+
+    func testIceServersWithoutStunAndTurn() {
+        let token = ConferenceToken.randomToken(stun: nil, turn: nil)
+        XCTAssertTrue(token.iceServers.isEmpty)
+    }
+
+    func testIceServersWithStun() {
+        let token = ConferenceToken.randomToken(
+            stun: ["url1", "url2"],
+            turn: nil
+        )
+        XCTAssertEqual(
+            token.iceServers,
+            [IceServer(url: "url1"), IceServer(url: "url2")]
+        )
+    }
+
+    func testIceServersWithTurn() {
+        let token = ConferenceToken.randomToken(
+            stun: [],
+            turn: [
+                ConferenceToken.Turn(
+                    urls: ["url1", "url2"],
+                    username: "username",
+                    credential: "password"
+                ),
+                ConferenceToken.Turn(
+                    urls: ["url3", "url4"],
+                    username: "username2",
+                    credential: "password2"
+                )
+            ]
+        )
+        XCTAssertEqual(
+            token.iceServers,
+            [
+                IceServer(
+                    urls: ["url1", "url2"],
+                    username: "username",
+                    password: "password"
+                ),
+                IceServer(
+                    urls: ["url3", "url4"],
+                    username: "username2",
+                    password: "password2"
+                )
+            ]
+        )
+    }
 }

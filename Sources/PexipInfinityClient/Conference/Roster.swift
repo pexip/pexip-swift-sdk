@@ -40,6 +40,12 @@ public final class Roster: ObservableObject {
     /// The object that acts as the delegate of the roster list.
     public weak var delegate: RosterDelegate?
 
+    var isSyncing: Bool {
+        get async {
+            await storage.isSyncing
+        }
+    }
+
     private let eventSubject = PassthroughSubject<ParticipantEvent, Never>()
     private let storage: Storage
     private let _avatarURL: (UUID) -> URL?
@@ -74,7 +80,7 @@ public final class Roster: ObservableObject {
     /**
      Returns the image representing the current participant.
      */
-    public var currentParticipantavatarURL: URL? {
+    public var currentParticipantAvatarURL: URL? {
         _avatarURL(currentParticipantId)
     }
 

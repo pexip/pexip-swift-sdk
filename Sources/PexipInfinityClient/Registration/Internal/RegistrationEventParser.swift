@@ -7,7 +7,7 @@ struct RegistrationEventParser: InfinityEventParser {
 
     func parseEventData(from event: HTTPEvent) -> RegistrationEvent? {
         logger?.debug(
-            "Got registration event with ID: \(event.id ?? "?"), name: \(event.name ?? "?")"
+            "Got registration event with ID: \(event.id.debug), name: \(event.name.debug)"
         )
 
         guard let nameString = event.name else {
@@ -44,6 +44,19 @@ struct RegistrationEventParser: InfinityEventParser {
                 IncomingCancelledRegistrationEvent.self,
                 from: data
             ))
+        }
+    }
+}
+
+// MARK: - Private extensions
+
+extension Optional where Wrapped == String {
+    var debug: String {
+        switch self {
+        case .none:
+            return "none"
+        case .some(let wrapped):
+            return wrapped
         }
     }
 }

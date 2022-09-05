@@ -26,11 +26,11 @@ actor TokenStore<Token: InfinityToken> {
             token = self.token
         }
 
-        if token.isExpired(currentDate: currentDate()) {
+        guard !token.isExpired(currentDate: currentDate()) else {
             throw InfinityTokenError.tokenExpired
-        } else {
-            return token
         }
+
+        return token
     }
 
     func updateToken(_ token: Token) async throws {

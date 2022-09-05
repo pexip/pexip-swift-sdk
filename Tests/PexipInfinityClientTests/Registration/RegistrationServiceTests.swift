@@ -50,6 +50,24 @@ final class RegistrationServiceTests: APITestCase {
         )
     }
 
+    func testRequestTokenWithoutUsername() async throws {
+        do {
+            _ = try await service.requestToken(username: "", password: "1234")
+            XCTFail("Should fail with error")
+        } catch {
+            XCTAssertEqual(error as? ValidationError, .invalidArgument)
+        }
+    }
+
+    func testRequestTokenWithoutPassword() async throws {
+        do {
+            _ = try await service.requestToken(username: "username", password: "")
+            XCTFail("Should fail with error")
+        } catch {
+            XCTAssertEqual(error as? ValidationError, .invalidArgument)
+        }
+    }
+
     func testRequestTokenWithDecodingError() async throws {
         // 1. Mock response
         URLProtocolMock.makeResponse = { _ in

@@ -15,7 +15,7 @@ final class ConferenceEventParserTests: XCTestCase {
 
     func testParseEventDataWithoutName() throws {
         let event = HTTPEvent(
-            id: "1",
+            id: nil,
             name: nil,
             data: "",
             retry: nil
@@ -41,6 +41,38 @@ final class ConferenceEventParserTests: XCTestCase {
             retry: nil
         )
         XCTAssertNil(parser.parseEventData(from: event))
+    }
+
+    func testConferenceUpdate() throws {
+        let expectedStatus = ConferenceStatus(
+            started: true,
+            locked: false,
+            allMuted: false,
+            guestsMuted: false,
+            presentationAllowed: true,
+            directMedia: false,
+            liveCaptionsAvailable: true
+        )
+        let httpEvent = try HTTPEvent.stub(for: expectedStatus, name: "conference_update")
+
+        switch parser.parseEventData(from: httpEvent) {
+        case .conferenceUpdate(let status):
+            XCTAssertEqual(status.started, expectedStatus.started)
+            XCTAssertEqual(status.locked, expectedStatus.locked)
+            XCTAssertEqual(status.allMuted, expectedStatus.allMuted)
+            XCTAssertEqual(status.guestsMuted, expectedStatus.guestsMuted)
+            XCTAssertEqual(
+                status.presentationAllowed,
+                expectedStatus.presentationAllowed
+            )
+            XCTAssertEqual(status.directMedia, expectedStatus.directMedia)
+            XCTAssertEqual(
+                status.liveCaptionsAvailable,
+                expectedStatus.liveCaptionsAvailable
+            )
+        default:
+            XCTFail("Unexpected event type")
+        }
     }
 
     func testMessageReceived() throws {
@@ -145,6 +177,23 @@ final class ConferenceEventParserTests: XCTestCase {
             XCTAssertEqual(event.reason, expectedEvent.reason)
         default:
             XCTFail("Invalid event type")
+        }
+    }
+
+    func testLiveCaptions() throws {
+        let expectedLiveCaptions = LiveCaptions(
+            data: "Test",
+            isFinal: true,
+            sentAt: Date().timeIntervalSinceReferenceDate,
+            receivedAt: Date().timeIntervalSinceReferenceDate
+        )
+        let httpEvent = try HTTPEvent.stub(for: expectedLiveCaptions, name: "live_captions")
+
+        switch parser.parseEventData(from: httpEvent) {
+        case .liveCaptions(let liveCaptions):
+            XCTAssertEqual(liveCaptions, expectedLiveCaptions)
+        default:
+            XCTFail("Unexpected event type")
         }
     }
 

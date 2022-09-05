@@ -22,8 +22,11 @@ public protocol Conference {
     /// The object responsible for sending and receiving text messages in the conference
     var chat: Chat? { get }
 
-    /// Starts receiving conference events as they occur
-    func receiveEvents() async
+    /// Receives conference events as they occur
+    /// - Returns: False if has already subscribed to the event source
+    ///            or client was disconnected, True otherwise
+    @discardableResult
+    func receiveEvents() -> Bool
 
     /// Starts/stops receiving live caption events.
     @discardableResult
@@ -44,6 +47,8 @@ final class DefaultConference: Conference {
     let signalingChannel: SignalingChannel
     let roster: Roster
     let chat: Chat?
+    var isClientDisconnected: Bool { _isClientDisconnected.value }
+    var status: ConferenceStatus? { _status.value }
 
     private typealias EventSourceTask = Task<Void, Never>
 
@@ -52,12 +57,12 @@ final class DefaultConference: Conference {
     private let eventSource: InfinityEventSource<ConferenceEvent>
     private let liveCaptionsService: LiveCaptionsService
     private let logger: Logger?
-    private let isClientDisconnected = Isolated(false)
-    private let eventSourceTask = Isolated<EventSourceTask?>(nil)
+    private let eventSourceTask = Synchronized<EventSourceTask?>(nil)
     private var eventSubject = PassthroughSubject<ConferenceEvent, Never>()
-    private let status = Isolated<ConferenceStatus?>(nil)
     // Skip initial `presentation_stop` event
-    private let skipPresentationStop = Isolated(true)
+    private let skipPresentationStop = Synchronized(true)
+    private let _status = Synchronized<ConferenceStatus?>(nil)
+    private let _isClientDisconnected = Synchronized(false)
 
     // MARK: - Init
 
@@ -81,8 +86,10 @@ final class DefaultConference: Conference {
         self.logger = logger
 
         Task {
-            await tokenRefresher.startRefreshing(onError: { [weak self] in
-                self?.sendEvent(.failure(FailureEvent(error: $0)))
+            await tokenRefresher.startRefreshing(onError: { error in
+                Task { [weak self] in
+                    await self?.sendEvent(.failure(FailureEvent(error: error)))
+                }
             })
         }
 
@@ -91,32 +98,35 @@ final class DefaultConference: Conference {
 
     // MARK: - Public API
 
-    func receiveEvents() async {
-        guard await eventSourceTask.value == nil else {
-            return
+    @discardableResult
+    func receiveEvents() -> Bool {
+        guard eventSourceTask.value == nil else {
+            return false
         }
 
-        guard await !isClientDisconnected.value else {
-            return
+        guard !_isClientDisconnected.value else {
+            return false
         }
 
-        await skipPresentationStop.setValue(true)
+        skipPresentationStop.setValue(true)
 
-        await eventSourceTask.setValue(Task {
+        eventSourceTask.setValue(Task {
             do {
                 for try await event in eventSource.events() {
                     await handleEvent(event)
                 }
             } catch {
+                eventSourceTask.setValue(nil)
                 await handleEvent(.failure(FailureEvent(error: error)))
-                await eventSourceTask.setValue(nil)
             }
         })
+
+        return true
     }
 
     @discardableResult
     func toggleLiveCaptions(_ enabled: Bool) async throws -> Bool {
-        guard let status = await status.value, status.liveCaptionsAvailable else {
+        guard let status = status, status.liveCaptionsAvailable else {
             return false
         }
 
@@ -127,26 +137,26 @@ final class DefaultConference: Conference {
 
     func leave() async {
         logger?.info("Leaving the conference")
-        await eventSourceTask.value?.cancel()
-        await eventSourceTask.setValue(nil)
-        await roster.clear()
+        eventSourceTask.value?.cancel()
+        eventSourceTask.setValue(nil)
         await tokenRefresher.endRefreshing(
-            withTokenRelease: await !isClientDisconnected.value
+            withTokenRelease: !isClientDisconnected
         )
+        await roster.clear()
     }
 
     // MARK: - Events
 
     // swiftlint:disable cyclomatic_complexity
     private func handleEvent(_ event: ConferenceEvent) async {
-        if case .presentationStop = event, await skipPresentationStop.value {
-            await skipPresentationStop.setValue(false)
+        if case .presentationStop = event, skipPresentationStop.value {
+            skipPresentationStop.setValue(false)
             return
         }
 
         switch event {
         case .conferenceUpdate(let value):
-            await status.setValue(value)
+            _status.setValue(value)
         case .messageReceived(let message):
             logger?.debug("Chat message received")
             await chat?.addMessage(message)
@@ -168,19 +178,18 @@ final class DefaultConference: Conference {
         case .callDisconnected(let details):
             logger?.debug("Call disconnected, reason: \(details.reason)")
         case .clientDisconnected(let details):
-            await isClientDisconnected.setValue(true)
+            _isClientDisconnected.setValue(true)
             logger?.debug("Participant disconnected, reason: \(details.reason)")
         default:
             break
         }
 
-        sendEvent(event)
+        await sendEvent(event)
     }
 
+    @MainActor
     private func sendEvent(_ event: ConferenceEvent) {
-        Task { @MainActor in
-            delegate?.conference(self, didReceiveEvent: event)
-            eventSubject.send(event)
-        }
+        delegate?.conference(self, didReceiveEvent: event)
+        eventSubject.send(event)
     }
 }

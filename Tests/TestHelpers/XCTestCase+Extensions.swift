@@ -19,4 +19,16 @@ public extension XCTestCase {
     var snapshotName: String {
         Self.snapshotName
     }
+
+    func wait(
+        for operation: (XCTestExpectation) -> Void,
+        after: () -> Void,
+        timeout: TimeInterval = 0.3
+    ) {
+        let expectation = expectation(description: "Test expectation")
+        operation(expectation)
+
+        after()
+        wait(for: [expectation], timeout: timeout)
+    }
 }

@@ -63,9 +63,9 @@ final class RosterTests: XCTestCase {
         XCTAssertFalse(roster.isCurrentParticipant(participantB))
     }
 
-    func testCurrentParticipantavatarURL() {
+    func testCurrentParticipantAvatarURL() {
         XCTAssertEqual(
-            roster.currentParticipantavatarURL,
+            roster.currentParticipantAvatarURL,
             Participant.avatarURL(id: currentParticipantId)
         )
     }

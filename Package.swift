@@ -55,7 +55,7 @@ let package = Package(
         ),
         .testTarget(
             name: "PexipInfinityClientTests",
-            dependencies: ["PexipInfinityClient"],
+            dependencies: ["PexipInfinityClient", "TestHelpers"],
             plugins: [.swiftlint]
         ),
 

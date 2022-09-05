@@ -38,9 +38,7 @@ extension URLSession {
             request.setValue(lastEventId, forHTTPHeaderField: "Last-Event-Id")
         }
 
-        return AsyncThrowingStream(
-            bufferingPolicy: .bufferingNewest(1)
-        ) { continuation in
+        return AsyncThrowingStream { continuation in
             let parser = HTTPEventSourceParser()
             let dataTaskDelegate = DataTaskDelegate()
             dataTaskDelegate.urlSessionDelegate = delegate

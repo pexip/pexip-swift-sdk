@@ -42,21 +42,21 @@ actor ConferenceSignalingChannel: SignalingChannel {
                 sdp: description,
                 token: token
             )
-        } else {
-            pwds = sdpPwds(from: description)
-            callsRequestTask = CallDetailsTask {
-                try await participantService.calls(
-                    fields: CallsFields(
-                        callType: callType,
-                        sdp: description,
-                        present: presentationInMain ? .main : nil
-                    ),
-                    token: token
-                )
-            }
-            _ = try await callService?.ack(token: await tokenStore.token())
-            return try await callsRequestTask!.value.sdp
         }
+
+        pwds = sdpPwds(from: description)
+        callsRequestTask = CallDetailsTask {
+            try await participantService.calls(
+                fields: CallsFields(
+                    callType: callType,
+                    sdp: description,
+                    present: presentationInMain ? .main : nil
+                ),
+                token: token
+            )
+        }
+        _ = try await callService?.ack(token: await tokenStore.token())
+        return try await callsRequestTask!.value.sdp
     }
 
     func addCandidate(_ candidate: String, mid: String?) async throws {
@@ -102,9 +102,9 @@ actor ConferenceSignalingChannel: SignalingChannel {
     func muteVideo(_ muted: Bool) async throws -> Bool {
         if muted {
             return try await participantService.videoMuted(token: tokenStore.token())
-        } else {
-            return try await participantService.videoUnmuted(token: tokenStore.token())
         }
+
+        return try await participantService.videoUnmuted(token: tokenStore.token())
     }
 
     @discardableResult
@@ -117,9 +117,9 @@ actor ConferenceSignalingChannel: SignalingChannel {
 
         if muted {
             return try await participantService.mute(token: token)
-        } else {
-            return try await participantService.unmute(token: token)
         }
+
+        return try await participantService.unmute(token: token)
     }
 
     @discardableResult
@@ -148,11 +148,10 @@ actor ConferenceSignalingChannel: SignalingChannel {
 
     private var callService: CallService? {
         get async throws {
-            if let callDetailsTask = callsRequestTask {
-                return try await participantService.call(id: callDetailsTask.value.id)
-            } else {
+            guard let callDetailsTask = callsRequestTask else {
                 return nil
             }
+            return try await participantService.call(id: callDetailsTask.value.id)
         }
     }
 

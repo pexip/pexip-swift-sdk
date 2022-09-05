@@ -14,7 +14,10 @@ public protocol Registration {
     var eventPublisher: AnyPublisher<RegistrationEvent, Never> { get }
 
     /// Receives registration events as they occur
-    func receiveEvents() async
+    /// - Returns: False if has already subscribed to the event source,
+    ///            True otherwise
+    @discardableResult
+    func receiveEvents() -> Bool
 
     /// Cancels all registration activities. Once cancelled, the ``Registration`` object is no longer valid.
     func cancel() async
@@ -33,7 +36,7 @@ final class DefaultRegistration: Registration {
     private let tokenRefresher: TokenRefresher
     private let eventSource: InfinityEventSource<RegistrationEvent>
     private let logger: Logger?
-    private let eventSourceTask = Isolated<EventSourceTask?>(nil)
+    private let eventSourceTask = Synchronized<EventSourceTask?>(nil)
     private var eventSubject = PassthroughSubject<RegistrationEvent, Never>()
 
     // MARK: - Init
@@ -48,44 +51,48 @@ final class DefaultRegistration: Registration {
         self.logger = logger
 
         Task {
-            await tokenRefresher.startRefreshing(onError: { [weak self] in
-                self?.handleEvent(.failure(FailureEvent(error: $0)))
+            await tokenRefresher.startRefreshing(onError: { error in
+                Task { [weak self] in
+                    await self?.handleEvent(.failure(FailureEvent(error: error)))
+                }
             })
         }
 
         logger?.info("Creating a new registration.")
     }
 
-    func receiveEvents() async {
-        guard await eventSourceTask.value == nil else {
-            return
+    @discardableResult
+    func receiveEvents() -> Bool {
+        guard eventSourceTask.value == nil else {
+            return false
         }
 
-        await eventSourceTask.setValue(Task {
+        eventSourceTask.setValue(Task {
             do {
                 for try await event in eventSource.events() {
-                    handleEvent(event)
+                    await handleEvent(event)
                 }
             } catch {
-                handleEvent(.failure(FailureEvent(error: error)))
-                await eventSourceTask.setValue(nil)
+                eventSourceTask.setValue(nil)
+                await handleEvent(.failure(FailureEvent(error: error)))
             }
         })
+
+        return true
     }
 
     func cancel() async {
         logger?.info("Cancelling all registration activities")
-        await eventSourceTask.value?.cancel()
-        await eventSourceTask.setValue(nil)
+        eventSourceTask.value?.cancel()
+        eventSourceTask.setValue(nil)
         await tokenRefresher.endRefreshing(withTokenRelease: true)
     }
 
     // MARK: - Events
 
+    @MainActor
     private func handleEvent(_ event: RegistrationEvent) {
-        Task { @MainActor in
-            delegate?.registration(self, didReceiveEvent: event)
-            eventSubject.send(event)
-        }
+        delegate?.registration(self, didReceiveEvent: event)
+        eventSubject.send(event)
     }
 }

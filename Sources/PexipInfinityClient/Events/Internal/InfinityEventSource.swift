@@ -17,9 +17,7 @@ struct InfinityEventSource<Event>: CustomDebugStringConvertible {
     /// On error, there will be an attempt to reconnect
     /// until the connection is established or async stream is cancelled
     func events() -> AsyncThrowingStream<Event, Error> {
-        AsyncThrowingStream(
-            bufferingPolicy: .bufferingNewest(1)
-        ) { continuation in
+        AsyncThrowingStream { continuation in
             let logPrefix = String(reflecting: self)
             let task = Task {
                 var attempts: Int = 0

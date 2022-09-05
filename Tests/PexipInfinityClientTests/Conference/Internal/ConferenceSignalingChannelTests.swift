@@ -49,11 +49,73 @@ final class ConferenceSignalingChannelTests: XCTestCase {
 
     func testSendOfferOnFirstCall() async throws {
         let expectedSdpAnswer = UUID().uuidString
-        let sdpAnswer = try await sendOffer(answer: expectedSdpAnswer)
+        let sdpAnswer = try await sendOffer(
+            offer: sdpOffer,
+            answer: expectedSdpAnswer,
+            presentationInMain: false
+        )
         let pwds = await channel.pwds
 
         XCTAssertEqual(sdpAnswer, expectedSdpAnswer)
         XCTAssertEqual(pwds, ["ToQx": "jSThfoPwGg6gKmxeTmTqz8ea"])
+        XCTAssertEqual(
+            participantService.callFields,
+            CallsFields(callType: "WEBRTC", sdp: sdpOffer, present: nil)
+        )
+        XCTAssertEqual(participantService.actions, [.calls])
+        XCTAssertEqual(callService.actions, [.ack])
+        XCTAssertEqual(participantService.token, token)
+        XCTAssertEqual(callService.token, token)
+    }
+
+    func testSendOfferOnFirstCallWithPresentationInMain() async throws {
+        let expectedSdpAnswer = UUID().uuidString
+        let sdpAnswer = try await sendOffer(
+            offer: sdpOffer,
+            answer: expectedSdpAnswer,
+            presentationInMain: true
+        )
+        let pwds = await channel.pwds
+
+        XCTAssertEqual(sdpAnswer, expectedSdpAnswer)
+        XCTAssertEqual(pwds, ["ToQx": "jSThfoPwGg6gKmxeTmTqz8ea"])
+        XCTAssertEqual(
+            participantService.callFields,
+            CallsFields(callType: "WEBRTC", sdp: sdpOffer, present: .main)
+        )
+        XCTAssertEqual(participantService.actions, [.calls])
+        XCTAssertEqual(callService.actions, [.ack])
+        XCTAssertEqual(participantService.token, token)
+        XCTAssertEqual(callService.token, token)
+    }
+
+    func testSendOfferOnFirstCallWithoutPwds() async throws {
+        let sdpOffer = """
+            a=ice-ufrag:ToQx\r
+            """
+        let expectedSdpAnswer = UUID().uuidString
+        let sdpAnswer = try await sendOffer(offer: sdpOffer, answer: expectedSdpAnswer)
+        let pwds = await channel.pwds
+
+        XCTAssertEqual(sdpAnswer, expectedSdpAnswer)
+        XCTAssertTrue(pwds.isEmpty)
+        XCTAssertEqual(participantService.actions, [.calls])
+        XCTAssertEqual(callService.actions, [.ack])
+        XCTAssertEqual(participantService.token, token)
+        XCTAssertEqual(callService.token, token)
+    }
+
+    func testSendOfferOnFirstCallWithInvalidPwdsLine() async throws {
+        let sdpOffer = """
+            a=ice-ufrag:ToQx\r
+            a=ice-options:trickle renomination\r
+            """
+        let expectedSdpAnswer = UUID().uuidString
+        let sdpAnswer = try await sendOffer(offer: sdpOffer, answer: expectedSdpAnswer)
+        let pwds = await channel.pwds
+
+        XCTAssertEqual(sdpAnswer, expectedSdpAnswer)
+        XCTAssertTrue(pwds.isEmpty)
         XCTAssertEqual(participantService.actions, [.calls])
         XCTAssertEqual(callService.actions, [.ack])
         XCTAssertEqual(participantService.token, token)
@@ -308,7 +370,8 @@ final class ConferenceSignalingChannelTests: XCTestCase {
     @discardableResult
     private func sendOffer(
         offer: String? = nil,
-        answer: String = UUID().uuidString
+        answer: String = UUID().uuidString,
+        presentationInMain: Bool = false
     ) async throws -> String {
         participantService.results = [
             .calls: .success(CallDetails(id: UUID(), sdp: answer))
@@ -320,7 +383,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         return try await channel.sendOffer(
             callType: "WEBRTC",
             description: offer ?? sdpOffer,
-            presentationInMain: false
+            presentationInMain: presentationInMain
         )
     }
 }
@@ -345,9 +408,11 @@ private final class ParticipantServiceMock: ParticipantService {
     private(set) var actions = [Action]()
     private(set) var callService = CallServiceMock()
     private(set) var token: ConferenceToken?
+    private(set) var callFields: CallsFields?
 
     func calls(fields: CallsFields, token: ConferenceToken) async throws -> CallDetails {
-        try performAction(.calls, token: token)
+        callFields = fields
+        return try performAction(.calls, token: token)
     }
 
     func mute(token: ConferenceToken) async throws -> Bool {

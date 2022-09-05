@@ -215,4 +215,16 @@ final class ParticipantServiceTests: APITestCase {
             }
         )
     }
+
+    func testCall() throws {
+        let id = UUID()
+        let service = service.call(id: id) as? DefaultCallService
+
+        XCTAssertEqual(
+            service?.baseURL,
+            baseURL
+                .appendingPathComponent("calls")
+                .appendingPathComponent(id.uuidString.lowercased())
+        )
+    }
 }

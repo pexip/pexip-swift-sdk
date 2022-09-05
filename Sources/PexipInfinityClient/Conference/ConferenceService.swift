@@ -6,7 +6,7 @@ import PexipCore
 // swiftlint:disable line_length
 
 /// Represents the [Conference control functions](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#conference) section.
-public protocol ConferenceService: TokenService {
+public protocol ConferenceService: TokenService, ChatService {
     /**
      Requests a new token from the Pexip Conferencing Node.
      See [documentation](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#request_token)
@@ -39,16 +39,6 @@ public protocol ConferenceService: TokenService {
         fields: ConferenceTokenRequestFields,
         incomingToken: String
     ) async throws -> ConferenceToken
-
-    /**
-     Sends a message to all participants in the conference.
-     - Parameters:
-        - message: Text message
-        - token: Current valid API token
-     - Returns: The result is true if successful, false otherwise.
-     - Throws: `HTTPError` if a network error was encountered during operation
-     */
-    func message(_ message: String, token: ConferenceToken) async throws -> Bool
 
     /// HTTP EventSource which feeds events from the conference as they occur.
     func eventSource() -> ConferenceEventService

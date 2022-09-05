@@ -1,7 +1,7 @@
 import Foundation
 import PexipCore
 
-public typealias IceServer = PexipCore.IceServer
+public typealias SignalingChannel = PexipCore.SignalingChannel
 
 public struct InfinityClientFactory {
     private let session: URLSession
@@ -83,12 +83,9 @@ public struct InfinityClientFactory {
                 store: tokenStore,
                 logger: logger
             ),
-            eventSource: InfinityEventSource<RegistrationEvent>(
-                name: "Registration",
-                logger: logger,
-                stream: {
-                    try await eventService.events(token: tokenStore.token())
-                }
+            eventSource: registrationEventSource(
+                tokenStore: tokenStore,
+                eventService: eventService
             ),
             logger: logger
         )
@@ -131,12 +128,9 @@ public struct InfinityClientFactory {
                 iceServers: token.iceServers,
                 logger: logger
             ),
-            eventSource: InfinityEventSource<ConferenceEvent>(
-                name: "Conference",
-                logger: logger,
-                stream: {
-                    try await eventService.events(token: tokenStore.token())
-                }
+            eventSource: conferenceEventSource(
+                tokenStore: tokenStore,
+                eventService: eventService
             ),
             roster: roster,
             liveCaptionsService: participantService,
@@ -149,12 +143,38 @@ public struct InfinityClientFactory {
         )
     }
 
-    // MARK: - Private methods
+    // MARK: - Internal methods
 
-    private func chat(
+    func conferenceEventSource(
+        tokenStore: TokenStore<ConferenceToken>,
+        eventService: ConferenceEventService
+    ) -> InfinityEventSource<ConferenceEvent> {
+        InfinityEventSource<ConferenceEvent>(
+            name: "Conference",
+            logger: logger,
+            stream: {
+                try await eventService.events(token: tokenStore.token())
+            }
+        )
+    }
+
+    func registrationEventSource(
+        tokenStore: TokenStore<RegistrationToken>,
+        eventService: RegistrationEventService
+    ) -> InfinityEventSource<RegistrationEvent> {
+        InfinityEventSource<RegistrationEvent>(
+            name: "Registration",
+            logger: logger,
+            stream: {
+                try await eventService.events(token: tokenStore.token())
+            }
+        )
+    }
+
+    func chat(
         token: ConferenceToken,
         tokenStore: TokenStore<ConferenceToken>,
-        service: ConferenceService
+        service: ChatService
     ) -> Chat? {
         guard token.chatEnabled else {
             return nil
@@ -169,7 +189,7 @@ public struct InfinityClientFactory {
         )
     }
 
-    private func roster(
+    func roster(
         token: ConferenceToken,
         service: ConferenceService
     ) -> Roster {
@@ -180,19 +200,5 @@ public struct InfinityClientFactory {
                 service.participant(id: id).avatarURL()
             }
         )
-    }
-}
-
-// MARK: - Private extension
-
-private extension ConferenceToken {
-    var iceServers: [IceServer] {
-        let stunIceServers = (stun ?? []).map {
-            IceServer(url: $0.url)
-        }
-        let turnIceServers = (turn ?? []).map {
-            IceServer(urls: $0.urls, username: $0.username, password: $0.credential)
-        }
-        return stunIceServers + turnIceServers
     }
 }

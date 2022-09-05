@@ -54,10 +54,30 @@ final class NodeServiceTests: APITestCase {
         }
     }
 
+    func testConference() throws {
+        let alias = try XCTUnwrap(DeviceAlias(uri: "name@conference.com"))
+        let service = service.conference(alias: alias) as? DefaultConferenceService
+
+        XCTAssertEqual(
+            service?.baseURL,
+            baseURL
+                .appendingPathComponent("conferences")
+                .appendingPathComponent(alias.uri)
+        )
+    }
+
     func testRegistration() throws {
         let deviceAlias = try XCTUnwrap(DeviceAlias(uri: "device@conference.com"))
-        let registrationService = service.registration(deviceAlias: deviceAlias)
-        XCTAssertTrue(registrationService is DefaultRegistrationService)
+        let service = service.registration(
+            deviceAlias: deviceAlias
+        ) as? DefaultRegistrationService
+
+        XCTAssertEqual(
+            service?.baseURL,
+            baseURL
+                .appendingPathComponent("registrations")
+                .appendingPathComponent(deviceAlias.alias)
+        )
     }
 
     // MARK: - Test helpers

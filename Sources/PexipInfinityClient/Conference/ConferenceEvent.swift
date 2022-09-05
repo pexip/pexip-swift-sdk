@@ -305,7 +305,6 @@ public struct LiveCaptions: Codable, Hashable {
         case receivedAt = "received_time"
     }
 
-    public let id = UUID()
     public let data: String
     public let isFinal: Bool
     public let sentAt: TimeInterval

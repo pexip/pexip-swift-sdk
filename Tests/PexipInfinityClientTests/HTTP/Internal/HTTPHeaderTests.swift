@@ -7,6 +7,20 @@ final class HTTPHeaderTests: XCTestCase {
         XCTAssertEqual(header.description, "Name: value")
     }
 
+    func testDefaultUserAgent() throws {
+        let bundle = Bundle.main
+        let name = try XCTUnwrap(bundle.object(forInfoDictionaryKey: "CFBundleName"))
+        let version = try XCTUnwrap(
+            bundle.object(
+                forInfoDictionaryKey: "CFBundleShortVersionString"
+            ) as? String
+        )
+        let header = HTTPHeader.defaultUserAgent
+
+        XCTAssertEqual(header.name, "User-Agent")
+        XCTAssertEqual(header.value, "\(name)/\(version)")
+    }
+
     func testUserAgent() {
         let header = HTTPHeader.userAgent("value")
         XCTAssertEqual(header.name, "User-Agent")

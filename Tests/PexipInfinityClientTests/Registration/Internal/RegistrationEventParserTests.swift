@@ -15,7 +15,7 @@ final class RegistrationEventParserTests: XCTestCase {
 
     func testParseEventDataWithoutName() throws {
         let event = HTTPEvent(
-            id: "1",
+            id: nil,
             name: nil,
             data: "",
             retry: nil
@@ -86,5 +86,10 @@ final class RegistrationEventParserTests: XCTestCase {
         )
         let event = parser.parseEventData(from: httpEvent)
         XCTAssertNil(event)
+    }
+
+    func testOptionalStringDebug() {
+        XCTAssertEqual(("Test" as String?).debug, "Test")
+        XCTAssertEqual(String?.none.debug, "none")
     }
 }

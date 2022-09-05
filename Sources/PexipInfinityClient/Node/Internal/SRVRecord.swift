@@ -22,9 +22,9 @@ struct SRVRecord: Hashable, Comparable {
             return true
         } else if lhs.priority == rhs.priority {
             return lhs.weight > rhs.weight
-        } else {
-            return false
         }
+
+        return false
     }
 }
 

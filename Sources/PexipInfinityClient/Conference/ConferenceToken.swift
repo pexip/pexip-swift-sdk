@@ -1,4 +1,5 @@
 import Foundation
+import PexipCore
 
 public struct ConferenceToken: InfinityToken, Codable, Hashable {
     public enum Role: String, Codable, Hashable {
@@ -123,5 +124,22 @@ public struct ConferenceToken: InfinityToken, Codable, Hashable {
         token.expiresString = expires
         token.updatedAt = updatedAt
         return token
+    }
+}
+
+// MARK: - Ice server
+
+public typealias IceServer = PexipCore.IceServer
+
+public extension ConferenceToken {
+    /// The list of ice servers.
+    var iceServers: [IceServer] {
+        let stunIceServers = (stun ?? []).map {
+            IceServer(url: $0.url)
+        }
+        let turnIceServers = (turn ?? []).map {
+            IceServer(urls: $0.urls, username: $0.username, password: $0.credential)
+        }
+        return stunIceServers + turnIceServers
     }
 }

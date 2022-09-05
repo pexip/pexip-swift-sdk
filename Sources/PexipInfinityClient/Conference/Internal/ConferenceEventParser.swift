@@ -7,7 +7,7 @@ struct ConferenceEventParser: InfinityEventParser {
 
     func parseEventData(from event: HTTPEvent) -> ConferenceEvent? {
         logger?.debug(
-            "Got conference event with ID: \(event.id ?? "?"), name: \(event.name ?? "?")"
+            "Got conference event with ID: \(event.id.debug), name: \(event.name.debug)"
         )
 
         guard let nameString = event.name else {

@@ -12,6 +12,8 @@ final class RegistrationTokenTests: XCTestCase {
         calendar.timeZone = try XCTUnwrap(TimeZone(abbreviation: "GMT"))
     }
 
+    // MARK: - Tests
+
     func testDecoding() throws {
         let tokenValue = "SE9TVAltZ...etc...zNiZjlmNjFhMTlmMTJiYTE%3D"
         let registrationId = UUID()

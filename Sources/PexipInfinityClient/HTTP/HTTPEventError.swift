@@ -18,12 +18,13 @@ public struct HTTPEventError: LocalizedError, CustomStringConvertible {
 
     public var description: String {
         if let dataStreamError = dataStreamError {
-            return "Event source disconnected with error: \(dataStreamError)"
+            let errorDescription = dataStreamError.localizedDescription
+            return "Event source disconnected with error: \(errorDescription)"
         } else if let statusCode = response?.statusCode {
             return "Event source connection closed, status code: \(statusCode)"
-        } else {
-            return "Event source connection unexpectedly closed"
         }
+
+        return "Event source connection unexpectedly closed"
     }
 
     public var errorDescription: String? {

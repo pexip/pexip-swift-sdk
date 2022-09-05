@@ -103,11 +103,6 @@ actor DefaultTokenRefresher<Token: InfinityToken>: TokenRefresher {
     ) async throws {
         await stopRefreshTask()
 
-        guard !token.isExpired(currentDate: currentDate()) else {
-            logger?.warn("Cannot schedule refresh for expired \(String(reflecting: token))")
-            throw TokenRefresherError.tokenExpired
-        }
-
         tokenRefreshTask = Task<Void, Error> {
             do {
                 let timeInterval = token.refreshDate.timeIntervalSince(currentDate())
@@ -141,24 +136,5 @@ actor DefaultTokenRefresher<Token: InfinityToken>: TokenRefresher {
         tokenRefreshTask?.cancel()
         tokenRefreshTask = nil
         await store.cancelUpdateIfNeeded()
-    }
-}
-
-// MARK: - Errors
-
-private enum TokenRefresherError: LocalizedError, CustomStringConvertible {
-    case tokenRefreshStarted
-    case tokenRefreshEnded
-    case tokenExpired
-
-    var description: String {
-        switch self {
-        case .tokenRefreshStarted:
-            return "Token refresh has already started"
-        case .tokenRefreshEnded:
-            return "Token refresh has already ended"
-        case .tokenExpired:
-            return "Cannot schedule refresh for expired token"
-        }
     }
 }
