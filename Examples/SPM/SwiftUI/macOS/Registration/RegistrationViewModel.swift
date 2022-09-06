@@ -59,14 +59,16 @@ final class RegistrationViewModel: ObservableObject {
             return
         }
 
-        guard let node = await resolveNode() else {
+        guard let node = try? await service.resolveNode(
+            forHost: deviceAlias.host,
+            using: nodeResolver
+        ) else {
             errorMessage = "Looks like the address you typed in doesn't exist"
             return
         }
 
         do {
-            let token = try await service
-                .node(url: node)
+            let token = try await node
                 .registration(deviceAlias: deviceAlias)
                 .requestToken(username: username, password: password)
             onComplete(token)
@@ -78,24 +80,6 @@ final class RegistrationViewModel: ObservableObject {
 
     func cancel() {
         onCancel()
-    }
-
-    private func resolveNode() async -> URL? {
-        guard let deviceAlias = deviceAlias else {
-            return nil
-        }
-
-        do {
-            for url in try await nodeResolver.resolveNodes(for: deviceAlias.host) {
-                if try await service.node(url: url).status() {
-                    return url
-                }
-            }
-        } catch {
-            return nil
-        }
-
-        return nil
     }
 }
 

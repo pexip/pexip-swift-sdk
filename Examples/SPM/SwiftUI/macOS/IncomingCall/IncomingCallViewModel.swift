@@ -44,7 +44,10 @@ final class IncomingCallViewModel: ObservableObject {
     func accept() async {
         guard
             let alias = ConferenceAlias(uri: details.conferenceAlias),
-            let node = await resolveNode(for: alias.host)
+            let node = try? await service.resolveNode(
+                forHost: alias.host,
+                using: nodeResolver
+            )
         else {
             decline(withMessage: "Cannot join the call. Invalid address.")
             return
@@ -53,8 +56,7 @@ final class IncomingCallViewModel: ObservableObject {
         do {
             let displayName = self.displayName
             let fields = ConferenceTokenRequestFields(displayName: displayName)
-            let token = try await service
-                .node(url: node)
+            let token = try await node
                 .conference(alias: alias)
                 .requestToken(fields: fields, incomingToken: details.token)
             onAccept(token)
@@ -66,20 +68,6 @@ final class IncomingCallViewModel: ObservableObject {
 
     func decline() {
         onDecline()
-    }
-
-    private func resolveNode(for host: String) async -> URL? {
-        do {
-            for url in try await nodeResolver.resolveNodes(for: host) {
-                if try await service.node(url: url).status() {
-                    return url
-                }
-            }
-        } catch {
-            return nil
-        }
-
-        return nil
     }
 
     private func decline(withMessage message: String) {
