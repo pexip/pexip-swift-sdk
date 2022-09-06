@@ -101,6 +101,22 @@ struct ChatButton: View {
     }
 }
 
+// MARK: - Incoming call
+
+struct AcceptButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        CircleButton(
+            icon: "phone.fill",
+            background: Color.blue,
+            action: action
+        )
+    }
+}
+
+typealias DeclineButton = DisconnectButton
+
 // MARK: - Private types
 
 private struct CircleButton<Background: ShapeStyle>: View {
@@ -159,6 +175,7 @@ struct CircleButton_Previews: PreviewProvider {
             ToggleCameraButton(action: {})
             DisconnectButton(action: {})
             ChatButton(action: {})
+            AcceptButton(action: {})
         }
         .background(.black)
         .previewLayout(.sizeThatFits)

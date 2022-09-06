@@ -29,11 +29,14 @@
 		DA2FE59B287110DD00D8FCAB /* ConferenceModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2FE599287110DD00D8FCAB /* ConferenceModal.swift */; };
 		DA35EF29286F9C86008D15A7 /* CGImage+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35EF28286F9C86008D15A7 /* CGImage+Extensions.swift */; };
 		DA35EF2A286F9C86008D15A7 /* CGImage+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35EF28286F9C86008D15A7 /* CGImage+Extensions.swift */; };
+		DA46569928C6B442008E77FD /* IncomingCallListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA46569828C6B442008E77FD /* IncomingCallListener.swift */; };
+		DA46569B28C6B81F008E77FD /* IncomingCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA46569A28C6B81F008E77FD /* IncomingCallView.swift */; };
 		DA5F0B2F286C946400E9E18B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5F0B2E286C946400E9E18B /* SettingsView.swift */; };
 		DA5F0B30286C946400E9E18B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5F0B2E286C946400E9E18B /* SettingsView.swift */; };
 		DA6196872878332300EA9151 /* ChatMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6196862878332300EA9151 /* ChatMessageStore.swift */; };
 		DA6196882878332300EA9151 /* ChatMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6196862878332300EA9151 /* ChatMessageStore.swift */; };
 		DA7AC0FE281096B400739C4E /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADD2027F5D69A00A9AC3D /* AppCoordinator.swift */; };
+		DA934F0228C7A67B002434DC /* IncomingCallViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA934F0128C7A67B002434DC /* IncomingCallViewModel.swift */; };
 		DA93EE6D284A35200063386F /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA93EE6C284A35200063386F /* Constants.swift */; };
 		DA93EE6E284A35200063386F /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA93EE6C284A35200063386F /* Constants.swift */; };
 		DAAC9A7428C69F4100BFCA5C /* RegistrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAC9A7328C69F4100BFCA5C /* RegistrationView.swift */; };
@@ -145,9 +148,12 @@
 		DA2FE596287110CB00D8FCAB /* ConferenceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceState.swift; sourceTree = "<group>"; };
 		DA2FE599287110DD00D8FCAB /* ConferenceModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceModal.swift; sourceTree = "<group>"; };
 		DA35EF28286F9C86008D15A7 /* CGImage+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGImage+Extensions.swift"; sourceTree = "<group>"; };
+		DA46569828C6B442008E77FD /* IncomingCallListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallListener.swift; sourceTree = "<group>"; };
+		DA46569A28C6B81F008E77FD /* IncomingCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallView.swift; sourceTree = "<group>"; };
 		DA5F0B2E286C946400E9E18B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		DA6196862878332300EA9151 /* ChatMessageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessageStore.swift; sourceTree = "<group>"; };
 		DA6E026127CFA48700DF88A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DA934F0128C7A67B002434DC /* IncomingCallViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallViewModel.swift; sourceTree = "<group>"; };
 		DA93EE6C284A35200063386F /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		DAAC9A7328C69F4100BFCA5C /* RegistrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationView.swift; sourceTree = "<group>"; };
 		DAAC9A7528C69F5300BFCA5C /* RegistrationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationViewModel.swift; sourceTree = "<group>"; };
@@ -349,6 +355,16 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		DA934F0328C7CB3F002434DC /* IncomingCall */ = {
+			isa = PBXGroup;
+			children = (
+				DA46569828C6B442008E77FD /* IncomingCallListener.swift */,
+				DA46569A28C6B81F008E77FD /* IncomingCallView.swift */,
+				DA934F0128C7A67B002434DC /* IncomingCallViewModel.swift */,
+			);
+			path = IncomingCall;
+			sourceTree = "<group>";
+		};
 		DAAC9A7228C69F2500BFCA5C /* Registration */ = {
 			isa = PBXGroup;
 			children = (
@@ -388,6 +404,7 @@
 		DAFADC8327F5083300A9AC3D /* macOS */ = {
 			isa = PBXGroup;
 			children = (
+				DA934F0328C7CB3F002434DC /* IncomingCall */,
 				DAAC9A7228C69F2500BFCA5C /* Registration */,
 				DA01A9E62836A3C5002A6414 /* ScreenCapture */,
 				DAFADC8D27F5083400A9AC3D /* macOS.entitlements */,
@@ -826,6 +843,7 @@
 				DAFADCDE27F50C1400A9AC3D /* AliasViewModel.swift in Sources */,
 				DA01A9EA283794FD002A6414 /* ScreenMediaSourcePicker.swift in Sources */,
 				DAFADD2127F5D69A00A9AC3D /* AppCoordinator.swift in Sources */,
+				DA934F0228C7A67B002434DC /* IncomingCallViewModel.swift in Sources */,
 				DAFADCDA27F50C1400A9AC3D /* ViewFactory.swift in Sources */,
 				DAFADD1D27F5CD8200A9AC3D /* UserInterfaceSizeClass.swift in Sources */,
 				DAFADCCE27F50C1400A9AC3D /* ModalView.swift in Sources */,
@@ -840,6 +858,7 @@
 				DAFADCD227F50C1400A9AC3D /* AsyncButton.swift in Sources */,
 				DAFADD0A27F50E5D00A9AC3D /* DisplayNameView.swift in Sources */,
 				DAB34034286E680E001B59C5 /* Settings.swift in Sources */,
+				DA46569928C6B442008E77FD /* IncomingCallListener.swift in Sources */,
 				DAEBE68428A3D8AD00951E3C /* CameraFilter.swift in Sources */,
 				DAFADD0E27F50E8800A9AC3D /* PinChallengeViewModel.swift in Sources */,
 				DAFADD1F27F5D02E00A9AC3D /* NSColor+Extensions.swift in Sources */,
@@ -850,6 +869,7 @@
 				DA35EF2A286F9C86008D15A7 /* CGImage+Extensions.swift in Sources */,
 				DA01A9E82836A41B002A6414 /* ScreenMediaSourcePickerModel.swift in Sources */,
 				DAFADCC827F50C1400A9AC3D /* GeometryProxy+Extensions.swift in Sources */,
+				DA46569B28C6B81F008E77FD /* IncomingCallView.swift in Sources */,
 				DAFADCCC27F50C1400A9AC3D /* LinearGradient+Extensions.swift in Sources */,
 				DAFADCD027F50C1400A9AC3D /* LargeTextFieldStyle.swift in Sources */,
 				DAAC9A7428C69F4100BFCA5C /* RegistrationView.swift in Sources */,
