@@ -25,15 +25,16 @@ while the host address might be either the same as the conference alias (`exampl
 ```swift
 import PexipInfinityClient
 
-// 1. Create an instance of NodeResolver
+// 1. Create an instance of NodeResolver and InfinityService
 let apiClientFactory = InfinityClientFactory(logger: DefaultLogger.infinityClient)
 let nodeResolver = apiClientFactory.nodeResolver(dnssec: false)
+let infinityService = apiClientFactory.infinityService()
 
 // 2. Create a conference alias (force unwrapping is for example only)
 let alias = ConferenceAlias(uri: "conference@example.com")!
 
 // 3. Resolve the address of the first available Conferencing Node for the provided host
-let node = try await service.resolveNodeURL(
+let node = try await infinityService.resolveNodeURL(
     forHost: alias.host,
     using: nodeResolver
 )
@@ -58,10 +59,7 @@ import PexipInfinityClient
 // 1. Create the name by which this participant should be known
 let displayName = "Guest"
 
-// 2. Create an instance of InfinityService
-let infinityService = apiClientFactory.infinityService()
-
-// 3. Request a token from the Pexip Conferencing Node
+// 2. Request a token from the Pexip Conferencing Node
 do {
     let conferenceService = infinityService.node(url: node).conference(alias: alias)
     // Check ConferenceTokenRequestFields documentation to read more about all possible request properties

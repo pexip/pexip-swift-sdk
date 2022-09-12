@@ -8,8 +8,9 @@ macOS platform specific documentation.
 <doc:GettingStarted>
 <doc:Examples>
 <doc:macOSScreenSharing>
+<doc:Registration>
 
-## Documentation for frameworks:
+## API reference:
 
 - [PexipInfinityClient](https://pexip.github.io/pexip-swift-sdk/frameworks/macos/PexipInfinityClient/documentation/pexipinfinityclient/)
 - [PexipMedia](https://pexip.github.io/pexip-swift-sdk/frameworks/macos/PexipMedia/documentation/pexipmedia/)

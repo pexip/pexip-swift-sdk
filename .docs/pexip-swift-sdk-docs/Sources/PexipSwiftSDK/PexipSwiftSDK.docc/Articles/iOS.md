@@ -9,7 +9,7 @@ iOS platform specific documentation.
 <doc:Examples>
 <doc:iOSScreenSharing>
 
-## Documentation for frameworks:
+## API reference:
 
 - [PexipInfinityClient](https://pexip.github.io/pexip-swift-sdk/frameworks/ios/PexipInfinityClient/documentation/pexipinfinityclient/)
 - [PexipMedia](https://pexip.github.io/pexip-swift-sdk/frameworks/ios/PexipMedia/documentation/pexipmedia/)
