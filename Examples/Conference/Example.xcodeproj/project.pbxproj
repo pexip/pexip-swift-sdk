@@ -55,8 +55,8 @@
 		DAB34033286E680E001B59C5 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB34032286E680E001B59C5 /* Settings.swift */; };
 		DAB34034286E680E001B59C5 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB34032286E680E001B59C5 /* Settings.swift */; };
 		DAB78D4F27E3953600CB17C9 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB78D4E27E3953600CB17C9 /* Utils.swift */; };
-		DAEBE68328A3D8AD00951E3C /* CameraFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEBE68228A3D8AD00951E3C /* CameraFilter.swift */; };
-		DAEBE68428A3D8AD00951E3C /* CameraFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEBE68228A3D8AD00951E3C /* CameraFilter.swift */; };
+		DAEBE68328A3D8AD00951E3C /* CameraVideoFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEBE68228A3D8AD00951E3C /* CameraVideoFilter.swift */; };
+		DAEBE68428A3D8AD00951E3C /* CameraVideoFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEBE68228A3D8AD00951E3C /* CameraVideoFilter.swift */; };
 		DAEDA11128C93D970091193C /* IncomingCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEDA11028C93D970091193C /* IncomingCall.swift */; };
 		DAF13287284A259D0089FE8E /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAF13286284A259D0089FE8E /* ReplayKit.framework */; };
 		DAF1328A284A259D0089FE8E /* SampleHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF13289284A259D0089FE8E /* SampleHandler.swift */; };
@@ -179,7 +179,7 @@
 		DAC1891C28C8182C004EA7D3 /* Example--macOS--Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Example--macOS--Info.plist"; sourceTree = "<group>"; };
 		DAE8989A282469DD006C30E8 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Configs/Debug.xcconfig; sourceTree = "<group>"; };
 		DAE8989B28246B12006C30E8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Configs/Release.xcconfig; sourceTree = "<group>"; };
-		DAEBE68228A3D8AD00951E3C /* CameraFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraFilter.swift; sourceTree = "<group>"; };
+		DAEBE68228A3D8AD00951E3C /* CameraVideoFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraVideoFilter.swift; sourceTree = "<group>"; };
 		DAEDA11028C93D970091193C /* IncomingCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCall.swift; sourceTree = "<group>"; };
 		DAF13285284A259D0089FE8E /* BroadcastExtension (iOS).appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "BroadcastExtension (iOS).appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAF13286284A259D0089FE8E /* ReplayKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ReplayKit.framework; path = System/Library/Frameworks/ReplayKit.framework; sourceTree = SDKROOT; };
@@ -547,7 +547,7 @@
 				DAFADCB027F50C1400A9AC3D /* PreflightView.swift */,
 				DA2FE596287110CB00D8FCAB /* ConferenceState.swift */,
 				DA2FE599287110DD00D8FCAB /* ConferenceModal.swift */,
-				DAEBE68228A3D8AD00951E3C /* CameraFilter.swift */,
+				DAEBE68228A3D8AD00951E3C /* CameraVideoFilter.swift */,
 			);
 			path = Conference;
 			sourceTree = "<group>";
@@ -852,7 +852,7 @@
 				DAFADCC527F50C1400A9AC3D /* CallButtons.swift in Sources */,
 				DA5F0B2F286C946400E9E18B /* SettingsView.swift in Sources */,
 				DAFADCE927F50C1400A9AC3D /* PreflightView.swift in Sources */,
-				DAEBE68328A3D8AD00951E3C /* CameraFilter.swift in Sources */,
+				DAEBE68328A3D8AD00951E3C /* CameraVideoFilter.swift in Sources */,
 				DAFADCED27F50C1400A9AC3D /* ChatViewModel.swift in Sources */,
 				DAFADCD327F50C1400A9AC3D /* LargeButton.swift in Sources */,
 			);
@@ -904,7 +904,7 @@
 				DAFADD0A27F50E5D00A9AC3D /* DisplayNameView.swift in Sources */,
 				DAB34034286E680E001B59C5 /* Settings.swift in Sources */,
 				DA46569928C6B442008E77FD /* RegistrationService.swift in Sources */,
-				DAEBE68428A3D8AD00951E3C /* CameraFilter.swift in Sources */,
+				DAEBE68428A3D8AD00951E3C /* CameraVideoFilter.swift in Sources */,
 				DAFADD0E27F50E8800A9AC3D /* PinChallengeViewModel.swift in Sources */,
 				DAFADD1F27F5D02E00A9AC3D /* NSColor+Extensions.swift in Sources */,
 				DAFADD0827F50E5D00A9AC3D /* DisplayNameViewModel.swift in Sources */,
