@@ -107,12 +107,11 @@ final class ConferenceViewModel: ObservableObject {
 
 extension ConferenceViewModel {
     func join() {
-        state = .connecting
-        mediaConnection.setMainAudioTrack(mainLocalAudioTrack)
-        mediaConnection.setMainVideoTrack(cameraVideoTrack)
-
         Task { @MainActor in
             do {
+                state = .connecting
+                mediaConnection.setMainAudioTrack(mainLocalAudioTrack)
+                mediaConnection.setMainVideoTrack(cameraVideoTrack)
                 try await mediaConnection.start()
                 conference.receiveEvents()
             } catch {

@@ -1,98 +1,53 @@
-import PexipMedia
-import Combine
 import SwiftUI
 import PexipInfinityClient
-import KeychainAccess
 
 final class RegistrationViewModel: ObservableObject {
-    typealias Complete = (RegistrationToken) -> Void
-
-    @AppStorage("deviceAlias") var alias = ""
+    @Published var alias = ""
     @Published var username: String
     @Published var password: String
+    @Published var isRegistered = false
     @Published private(set) var errorMessage: String?
 
-    private let keychain = Keychain()
-    private let nodeResolver: NodeResolver
-    private let service: InfinityService
-    private let onComplete: Complete
-    private let onCancel: () -> Void
-    private var cancellables = Set<AnyCancellable>()
-    private var deviceAlias: DeviceAlias? {
-        DeviceAlias(uri: alias)
-    }
+    private let service: RegistrationService
 
     var isValid: Bool {
-        deviceAlias != nil && !username.isEmpty && !password.isEmpty
+        DeviceAlias(uri: alias) != nil && !username.isEmpty && !password.isEmpty
     }
 
     // MARK: - Init
 
-    init(
-        nodeResolver: NodeResolver,
-        service: InfinityService,
-        onComplete: @escaping Complete,
-        onCancel: @escaping () -> Void
-    ) {
-        self.nodeResolver = nodeResolver
+    init(service: RegistrationService) {
         self.service = service
-        self.onComplete = onComplete
-        self.onCancel = onCancel
-        self.username = keychain[string: .username] ?? ""
-        self.password = keychain[string: .password] ?? ""
-
-        $username.sink { [weak self] newValue in
-            self?.keychain[string: .username] = newValue
-        }.store(in: &cancellables)
-
-        $password.sink { [weak self] newValue in
-            self?.keychain[string: .password] = newValue
-        }.store(in: &cancellables)
+        self.alias = service.deviceAlias ?? ""
+        self.username = service.username ?? ""
+        self.password = service.password ?? ""
+        self.isRegistered = service.isRegistered
     }
 
     // MARK: - Actions
 
     @MainActor
     func register() async {
-        guard let deviceAlias = deviceAlias, isValid else {
+        guard isValid else {
             errorMessage = "Required fields are missing"
             return
         }
 
-        guard let node = try? await service.resolveNode(
-            forHost: deviceAlias.host,
-            using: nodeResolver
-        ) else {
-            errorMessage = "Looks like the address you typed in doesn't exist"
-            return
-        }
-
         do {
-            let token = try await node
-                .registration(deviceAlias: deviceAlias)
-                .requestToken(username: username, password: password)
-            onComplete(token)
+            try await service.register(
+                deviceAlias: alias,
+                username: username,
+                password: password
+            )
+            isRegistered = true
         } catch {
-            debugPrint(error)
-            errorMessage = "Registration failed. Please double-check your credentials."
+            errorMessage = error.localizedDescription
         }
     }
 
-    func cancel() {
-        onCancel()
-    }
-}
-
-// MARK: - Private extensions
-
-private extension Keychain {
-    enum Key: String {
-        case username
-        case password
-    }
-
-    subscript(string key: Key) -> String? {
-        get { self[key.rawValue] }
-        set { self[key.rawValue] = newValue }
+    @MainActor
+    func unregister() async {
+        await service.unregister()
+        isRegistered = false
     }
 }

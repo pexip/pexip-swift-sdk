@@ -7,11 +7,39 @@ struct RegistrationView: View {
     // MARK: - Body
 
     var body: some View {
+        ZStack {
+            if viewModel.isRegistered {
+                registrationDetails
+            } else {
+                form
+            }
+        }
+        .frame(
+            minWidth: 300,
+            idealWidth: 400,
+            maxWidth: 400,
+            minHeight: 200,
+            idealHeight: 200,
+            maxHeight: 200
+        )
+    }
+
+    // MARK: - Subviews
+
+    private var form: some View {
         Form {
             TextField("Alias", text: $viewModel.alias)
             TextField("Username", text: $viewModel.username)
             TextField("Password", text: $viewModel.password)
-            buttons.padding(.top)
+
+            HStack {
+                Spacer()
+                AsyncButton(action: viewModel.register) {
+                    Text("Register")
+                }
+                .disabled(!viewModel.isValid)
+            }
+
             viewModel.errorMessage.map {
                 Label($0, systemImage: "xmark.octagon.fill")
                     .foregroundColor(.red)
@@ -22,16 +50,17 @@ struct RegistrationView: View {
         .disableAutocorrection(true)
     }
 
-    // MARK: - Subviews
-
-    private var buttons: some View {
-        HStack {
-            Spacer()
-            Button("Cancel", role: .cancel, action: viewModel.cancel)
-            AsyncButton(action: viewModel.register) {
-                Text("Register")
+    private var registrationDetails: some View {
+        VStack {
+            Text("The device is registered with the alias:")
+            Text(viewModel.alias)
+            HStack {
+                Spacer()
+                AsyncButton(action: viewModel.unregister) {
+                    Text("Unregister")
+                }
+                .disabled(!viewModel.isValid)
             }
-            .disabled(!viewModel.isValid)
         }
     }
 }
@@ -41,12 +70,9 @@ struct RegistrationView: View {
 struct RegistrationView_Previews: PreviewProvider {
     static var previews: some View {
         RegistrationView(viewModel: RegistrationViewModel(
-            nodeResolver: InfinityClientFactory().nodeResolver(
-                dnssec: false
-            ),
-            service: InfinityClientFactory().infinityService(),
-            onComplete: { _ in },
-            onCancel: {}
+            service: RegistrationService(
+                factory: InfinityClientFactory()
+            )
         ))
     }
 }

@@ -3,7 +3,7 @@ import SwiftUI
 import PexipInfinityClient
 
 final class IncomingCallViewModel: ObservableObject {
-    typealias Accept = (ConferenceToken) -> Void
+    typealias Accept = (IncomingCall) -> Void
 
     enum State {
         case calling
@@ -44,7 +44,7 @@ final class IncomingCallViewModel: ObservableObject {
     func accept() async {
         guard
             let alias = ConferenceAlias(uri: details.conferenceAlias),
-            let node = try? await service.resolveNode(
+            let nodeURL = try? await service.resolveNodeURL(
                 forHost: alias.host,
                 using: nodeResolver
             )
@@ -56,10 +56,10 @@ final class IncomingCallViewModel: ObservableObject {
         do {
             let displayName = self.displayName
             let fields = ConferenceTokenRequestFields(displayName: displayName)
-            let token = try await node
+            let token = try await service.node(url: nodeURL)
                 .conference(alias: alias)
                 .requestToken(fields: fields, incomingToken: details.token)
-            onAccept(token)
+            onAccept(IncomingCall(node: nodeURL, alias: alias, token: token))
         } catch {
             debugPrint(error)
             decline(withMessage: "Cannot join the call. Invalid token.")

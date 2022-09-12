@@ -26,8 +26,8 @@ protocol ViewFactoryProtocol {
 // MARK: - Implementation
 
 struct ViewFactory: ViewFactoryProtocol {
-    private let apiClientFactory = InfinityClientFactory()
-    private let settings = Settings()
+    let apiClientFactory: InfinityClientFactory
+    let settings: Settings
 
     func displayNameView(
         onComplete: @escaping () -> Void
@@ -123,34 +123,30 @@ struct ViewFactory: ViewFactoryProtocol {
     }
 
     func registrationView(
-        onComplete: @escaping (RegistrationToken) -> Void,
-        onCancel: @escaping () -> Void
+        service: RegistrationService
     ) -> RegistrationView {
-        let viewModel = RegistrationViewModel(
+        let viewModel = RegistrationViewModel(service: service)
+        return RegistrationView(viewModel: viewModel)
+    }
+
+    func incomingCallView(
+        event: IncomingRegistrationEvent,
+        onAccept: @escaping IncomingCallViewModel.Accept,
+        onDecline: @escaping () -> Void
+    ) -> IncomingCallView {
+        let viewModel = IncomingCallViewModel(
+            event: event,
             nodeResolver: apiClientFactory.nodeResolver(dnssec: false),
             service: apiClientFactory.infinityService(),
-            onComplete: onComplete,
-            onCancel: onCancel
+            onAccept: onAccept,
+            onDecline: onDecline
         )
-        return RegistrationView(viewModel: viewModel)
+        return IncomingCallView(viewModel: viewModel)
     }
 
     #endif
 
     func settingsView() -> SettingsView {
         SettingsView(settings: settings)
-    }
-}
-
-// MARK: - Environment
-
-private struct ViewFactoryKey: EnvironmentKey {
-    static let defaultValue = ViewFactory()
-}
-
-extension EnvironmentValues {
-    var viewFactory: ViewFactory {
-        get { self[ViewFactoryKey.self] }
-        set { self[ViewFactoryKey.self] = newValue }
     }
 }
