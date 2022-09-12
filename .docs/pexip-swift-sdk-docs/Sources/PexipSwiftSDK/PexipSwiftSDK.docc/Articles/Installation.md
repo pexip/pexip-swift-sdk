@@ -31,7 +31,7 @@ let package = Package(
         .target(
             name: "MyLibrary",
             dependencies: [
-                .product(name: "PexipConference", package: "pexip-swift-sdk"),
+                .product(name: "PexipInfinityClient", package: "pexip-swift-sdk"),
                 .product(name: "PexipRTC", package: "pexip-swift-sdk"),
                 // ...
             ],
@@ -45,7 +45,7 @@ let package = Package(
 ```ruby
 source 'https://github.com/pexip/pexip-pod-specs.git'
 
-pod 'PexipConference'
+pod 'PexipInfinityClient'
 pod 'PexipRTC'
 ```
 

@@ -32,7 +32,6 @@ final class InfinityClientFactoryTests: XCTestCase {
 
     func testConference() throws {
         let conference = factory.conference(
-            service: factory.infinityService(),
             node: try XCTUnwrap(URL(string: "https://example.com/conference")),
             alias: try XCTUnwrap(ConferenceAlias(uri: "conference@conference.com")),
             token: .randomToken()

@@ -15,11 +15,12 @@ media signaling technologies in the future, or Infinity might be interchanged wi
 
 ## Products
 
-- **PexipConference** - core components for working with conferences hosted on the Pexip Infinity platform: conference controls, conference events, media signaling and token refreshing.
-- **PexipInfinityClient** - a fluent client for Pexip Infinity REST API v2.
+- **PexipInfinityClient** - a fluent client for Pexip Infinity REST API v2, conference controls, conference events, media signaling and token refreshing.
 - **PexipRTC** - Pexip WebRTC-based media stack for sending and receiving video streams
 - **PexipMedia** - core components for working with audio and video
-- **PexipUtils** - extensions, utilities and shared components
+- **PexipVideoFilters** - a set of built-in video filters ready to use in your video conferencing app (background blur, background replacement, etc)
+- **PexipScreenCapture** - high level APIs for screen capture on iOS and macOS
+- **PexipCore** - extensions, utilities and shared components
 - **WebRTC** - WebRTC binaries for Apple platforms
 
 ## WIP

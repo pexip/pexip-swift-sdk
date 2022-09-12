@@ -97,7 +97,6 @@ public struct InfinityClientFactory {
      Creates a new instance of ``Conference`` type.
 
      - Parameters:
-        - service: A client for Infinity REST API v2
         - node: A conferencing node address in the form of https://example.com
         - alias: A conference alias
         - token: A token of the conference
@@ -105,12 +104,11 @@ public struct InfinityClientFactory {
      - Returns: A new instance of ``Conference``.
      */
     public func conference(
-        service: InfinityService,
         node: URL,
         alias: ConferenceAlias,
         token: ConferenceToken
     ) -> Conference {
-        let conferenceService = service.node(url: node).conference(alias: alias)
+        let conferenceService = infinityService().node(url: node).conference(alias: alias)
         let tokenStore = TokenStore(token: token)
         let roster = roster(token: token, service: conferenceService)
         let eventService = conferenceService.eventSource()

@@ -11,9 +11,11 @@ Stream desktop content like displays, apps, and windows in a conference call usi
 ### Retrieve the displays and windows for screen capture
 
 ```swift
+import PexipScreenCapture
+
 let enumerator = ScreenMediaSource.createEnumerator()
-displays = try await enumerator.getShareableDisplays()
-windows = try await enumerator.getShareableWindows()
+let displays = try await enumerator.getShareableDisplays()
+let windows = try await enumerator.getShareableWindows()
 
 // Choose first available display
 let screenMediaSource = ScreenMediaSource.display(displays.first!)
@@ -22,13 +24,14 @@ let screenMediaSource = ScreenMediaSource.display(displays.first!)
 ### Start screen capture
 
 ```swift
-import PexipRTC
 import PexipMedia
+import PexipRTC
+import PexipScreenCapture
 
-let mediaConnectionFactory = WebRTCMediaConnectionFactory(logger: DefaultLogger.mediaWebRTC)
+let mediaFactory = WebRTCMediaFactory(logger: DefaultLogger.mediaWebRTC)
 
 // 1. Create a new screen media track.
-let screenMediaTrack = mediaConnectionFactory.createScreenMediaTrack(
+let screenMediaTrack = mediaFactory.createScreenMediaTrack(
     mediaSource: screenMediaSource
 )
 

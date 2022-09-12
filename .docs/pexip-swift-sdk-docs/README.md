@@ -1,3 +1,3 @@
 # pexip-swift-sdk-docs
 
-A description of this package.
+Pexip Swift SDK documentation.

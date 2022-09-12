@@ -8,7 +8,7 @@ Initiate or connect to conferences hosted on the Pexip Infinity platform using R
 
 ## Overview
 
-``PexipInfinityClient`` is a fluent wrapper for [Pexip Infinity Client REST API](https://docs.pexip.com/api_client/api_rest.htm), designed for use by non-web-based, third-party voice/video applications.
+``PexipInfinityClient`` is a fluent wrapper for [Pexip Infinity Client REST API](https://docs.pexip.com/api_client/api_rest.htm), conference controls, conference events, media signaling and token refreshing.
 
 ## Topics
 

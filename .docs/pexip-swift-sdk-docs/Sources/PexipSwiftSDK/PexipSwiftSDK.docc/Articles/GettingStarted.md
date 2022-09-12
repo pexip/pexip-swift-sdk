@@ -32,21 +32,14 @@ let nodeResolver = apiClientFactory.nodeResolver(dnssec: false)
 // 2. Create a conference alias (force unwrapping is for example only)
 let alias = ConferenceAlias(uri: "conference@example.com")!
 
-// 3. Resolve the address of a Conferencing Node for the provided host
-let nodes = try await nodeResolver.resolveNodes(for: alias.host)
-
-// 4. Find the first available node
-var node: URL?
-
-for node in nodes {
-    if try await service.node(url: url).status() {
-        node = url
-        break
-    }
-}
+// 3. Resolve the address of the first available Conferencing Node for the provided host
+let node = try await service.resolveNodeURL(
+    forHost: alias.host,
+    using: nodeResolver
+)
 ```
 
-## Request a token
+## Request a conference token
 
 In order to start a `Conference` you need to have a token. You can request a token for 
 the conference alias alongside some properties:
@@ -71,15 +64,15 @@ let infinityService = apiClientFactory.infinityService()
 // 3. Request a token from the Pexip Conferencing Node
 do {
     let conferenceService = infinityService.node(url: node).conference(alias: alias)
-    // Check RequestTokenFields documentation to read more about all possible request properties
-    let fields = RequestTokenFields(displayName: displayName)
+    // Check ConferenceTokenRequestFields documentation to read more about all possible request properties
+    let fields = ConferenceTokenRequestFields(displayName: displayName)
     let token = try await conferenceService.requestToken(
         fields: fields,
         pin: nil
     )
-} catch let error as TokenError {
+} catch let error as ConferenceTokenError {
     // The server might respond with a pin challenge, require SSO or conference extension.
-    // Check TokenError documentation to read more about all possible error types.
+    // Check ConferenceTokenError documentation to read more about all possible error types.
 } catch {
     // ...
 }
@@ -91,13 +84,10 @@ When requesting a token you will get a response token. The response token is use
 create a `Conference` along with the node from the previous steps and the conference alias.
 
 ```swift
-import PexipConference
-
-let conferenceFactory = ConferenceFactory(logger: DefaultLogger.conference)
+import PexipInfinityClient
 
 // Conference object starts refreshing the token when created.
-let conference = conferenceFactory.conference(
-    service: infinityService,
+let conference = apiClientFactory.conference(
     node: node,
     alias: alias,
     token: token
@@ -113,14 +103,14 @@ set up `Media Connection` and `Conference`.
 import PexipMedia
 import PexipRTC
 
-let mediaConnectionFactory = WebRTCMediaConnectionFactory(logger: DefaultLogger.mediaWebRTC)
+let mediaFactory = WebRTCMediaFactory(logger: DefaultLogger.mediaWebRTC)
 
 // 1. Create a new local audio track and start audio capture
-let audioTrack = mediaConnectionFactory.createLocalAudioTrack()
+let audioTrack = mediaFactory.createLocalAudioTrack()
 try await audioTrack.startCapture()
 
 // 2. Create a new camera track and start video capture
-let cameraVideoTrack = mediaConnectionFactory.createCameraVideoTrack()
+let cameraVideoTrack = mediaFactory.createCameraVideoTrack()
 try await cameraVideoTrack?.startCapture(withVideoProfile: .high)
 
 // 3. Subscribe to capturing status updates
@@ -144,15 +134,14 @@ from the previous steps, to create a `Media Connection`. At the same time you ca
 import PexipMedia
 import PexipRTC
 
-let mediaConnectionFactory = WebRTCMediaConnectionFactory(logger: DefaultLogger.mediaWebRTC)
+let mediaFactory = WebRTCMediaFactory(logger: DefaultLogger.mediaWebRTC)
 
 let config = MediaConnectionConfig(
     signaling: conference.signaling,
-    iceServers: [IceServer(urls: token.stunUrlStrings)],
     dscp: false,
     presentationInMain: false
 )
-let mediaConnection = mediaConnectionFactory.createMediaConnection(config: config)
+let mediaConnection = mediaFactory.createMediaConnection(config: config)
 ```
 
 When having an active `Media Connection` you are able to do things like:
@@ -161,10 +150,10 @@ When having an active `Media Connection` you are able to do things like:
 
 ```swift
 // 1. Set local audio and video track
-mediaConnection.setMainVideoTrack(cameraVideoTrack)
 mediaConnection.setMainAudioTrack(audioTrack)
+mediaConnection.setMainVideoTrack(cameraVideoTrack)
 
-// 2. Start a media session
+// 2. Start the media connection
 try await mediaConnection.start()
 ```
 
@@ -203,18 +192,25 @@ Subscribe to conference events in order to:
 - Be notified when the participant is being disconnected from the Pexip side
 
 ```swift
-await conference.receiveEvents()
+conference.receiveEvents()
 
 conference.eventPublisher
     .sink { event in
         do {
             switch event {
+            case .conferenceUpdate(let status):
+                print(status)
+            case .liveCaptions(let captions):
+                print(captions)
             case .presentationStart(let message):
                 try mediaConnection.receivePresentation(true)
             case .presentationStop:
                 try mediaConnection.receivePresentation(false)
             case .clientDisconnected:
                 // Leave the conference here
+                break
+            default:
+                // Ignore the rest
                 break
             }
         } catch {
@@ -236,13 +232,13 @@ import PexipMedia
 // Regular
 VideoComponent(
     track: mediaConnection.remoteVideoTracks.mainTrack,
-    contentMode: .fit_16x9,
+    contentMode: .fit16x9,
 )
 
 // Vertical video
 VideoComponent(
     track: mediaConnection.remoteVideoTracks.presentationTrack,
-    contentMode: .fit_16x9,
+    contentMode: .fit16x9,
     isReversed: true
 )
 
@@ -315,7 +311,7 @@ roster.eventPublisher.sink(receiveValue: { event in
 
 ```swift
 // 1. Release the token, unsubscribe from conference events, etc
-try await conference.leave()
+await conference.leave()
 
 // 2. Terminate all media and deallocate resources
 mediaConnection.stop()

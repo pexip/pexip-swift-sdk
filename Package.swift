@@ -15,12 +15,12 @@ let package = Package(
             targets: ["PexipInfinityClient"]
         ),
         .library(
-            name: "PexipMedia",
-            targets: ["PexipMedia"]
-        ),
-        .library(
             name: "PexipRTC",
             targets: ["PexipRTC"]
+        ),
+        .library(
+            name: "PexipMedia",
+            targets: ["PexipMedia"]
         ),
         .library(
             name: "PexipVideoFilters",
@@ -57,6 +57,20 @@ let package = Package(
             dependencies: ["PexipInfinityClient", "TestHelpers"]
         ),
 
+        // MARK: - PexipRTC
+
+        .target(
+            name: "PexipRTC",
+            dependencies: [
+                "PexipMedia",
+                .product(name: "WebRTC", package: "webrtc-ios-builds")
+            ]
+        ),
+        .testTarget(
+            name: "PexipRTCTests",
+            dependencies: ["PexipRTC"]
+        ),
+
         // MARK: - PexipMedia
 
         .target(
@@ -66,21 +80,6 @@ let package = Package(
         .testTarget(
             name: "PexipMediaTests",
             dependencies: ["PexipMedia", "TestHelpers"]
-        ),
-
-        // MARK: - PexipRTC
-
-        .target(
-            name: "PexipRTC",
-            dependencies: [
-                "PexipMedia",
-                "PexipCore",
-                .product(name: "WebRTC", package: "webrtc-ios-builds")
-            ]
-        ),
-        .testTarget(
-            name: "PexipRTCTests",
-            dependencies: ["PexipRTC"]
         ),
 
         // MARK: -  PexipCore

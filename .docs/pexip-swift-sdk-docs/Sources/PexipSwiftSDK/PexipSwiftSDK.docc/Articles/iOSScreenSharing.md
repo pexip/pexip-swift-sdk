@@ -37,7 +37,7 @@ Utilize [BroadcastSampleHandler](https://pexip.github.io/pexip-swift-sdk/framewo
 
 ```swift
 import ReplayKit
-import PexipMedia
+import PexipScreenCapture
 
 final class SampleHandler: RPBroadcastSampleHandler, BroadcastSampleHandlerDelegate {
     private lazy var handler: BroadcastSampleHandler = {
@@ -86,13 +86,14 @@ final class SampleHandler: RPBroadcastSampleHandler, BroadcastSampleHandlerDeleg
 ### Start screen broadcast in the main app
 
 ```swift
-import PexipRTC
 import PexipMedia
+import PexipRTC
+import PexipScreenCapture
 
-let mediaConnectionFactory = WebRTCMediaConnectionFactory(logger: DefaultLogger.mediaWebRTC)
+let mediaFactory = WebRTCMediaFactory(logger: DefaultLogger.mediaWebRTC)
 
 // 1. Create a new screen media track.
-let screenMediaTrack = mediaConnectionFactory.createScreenMediaTrack(
+let screenMediaTrack = mediaFactory.createScreenMediaTrack(
     appGroup: "your_app_group_id",
     broadcastUploadExtension: "your_broadcast_upload_extension_bundle_id"
 )
