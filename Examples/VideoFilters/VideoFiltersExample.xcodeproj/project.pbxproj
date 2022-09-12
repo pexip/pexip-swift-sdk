@@ -36,6 +36,8 @@
 		DA7EF2D228A67DD1006827CA /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		DA7EF2D428A67DD5006827CA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DA7EF2D728A67DD5006827CA /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		DA7FE89428CF41BD00CA0BE9 /* Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Configs/Release.xcconfig; sourceTree = "<group>"; };
+		DA7FE89528CF41BD00CA0BE9 /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Configs/Debug.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +85,8 @@
 		DA7EF2C428A67DD1006827CA = {
 			isa = PBXGroup;
 			children = (
+				DA7FE89528CF41BD00CA0BE9 /* Debug.xcconfig */,
+				DA7FE89428CF41BD00CA0BE9 /* Release.xcconfig */,
 				DA7EF2CF28A67DD1006827CA /* VideoFiltersExample */,
 				DA7EF2CE28A67DD1006827CA /* Products */,
 				DA7EF2E028A67F2D006827CA /* Frameworks */,
@@ -278,6 +282,7 @@
 /* Begin XCBuildConfiguration section */
 		DA7EF2D928A67DD5006827CA /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA7FE89528CF41BD00CA0BE9 /* Debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -338,6 +343,7 @@
 		};
 		DA7EF2DA28A67DD5006827CA /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA7FE89428CF41BD00CA0BE9 /* Release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -399,7 +405,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"VideoFiltersExample/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = "${DEVELOPMENT_TEAM}";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This will make sure the other participants are able to see you";
@@ -430,7 +436,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"VideoFiltersExample/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = "${DEVELOPMENT_TEAM}";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This will make sure the other participants are able to see you";

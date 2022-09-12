@@ -51,7 +51,7 @@ final class ConferenceViewModel: ObservableObject {
 
     private let conference: Conference
     private let settings: Settings
-    private let mediaConnectionFactory: MediaConnectionFactory
+    private let mediaFactory: MediaFactory
     private var mediaConnection: MediaConnection
     private let mainLocalAudioTrack: LocalAudioTrack
     private var cameraVideoTrack: CameraVideoTrack?
@@ -75,18 +75,18 @@ final class ConferenceViewModel: ObservableObject {
     init(
         conference: Conference,
         mediaConnectionConfig: MediaConnectionConfig,
-        mediaConnectionFactory: MediaConnectionFactory,
+        mediaFactory: MediaFactory,
         settings: Settings,
         onComplete: @escaping () -> Void
     ) {
         self.conference = conference
         self.settings = settings
-        self.mediaConnectionFactory = mediaConnectionFactory
-        self.mediaConnection = mediaConnectionFactory.createMediaConnection(
+        self.mediaFactory = mediaFactory
+        self.mediaConnection = mediaFactory.createMediaConnection(
             config: mediaConnectionConfig
         )
-        self.cameraVideoTrack = mediaConnectionFactory.createCameraVideoTrack()
-        self.mainLocalAudioTrack = mediaConnectionFactory.createLocalAudioTrack()
+        self.cameraVideoTrack = mediaFactory.createCameraVideoTrack()
+        self.mainLocalAudioTrack = mediaFactory.createLocalAudioTrack()
         self.onComplete = onComplete
         self.state = .preflight
 
@@ -107,12 +107,11 @@ final class ConferenceViewModel: ObservableObject {
 
 extension ConferenceViewModel {
     func join() {
-        state = .connecting
-        mediaConnection.setMainAudioTrack(mainLocalAudioTrack)
-        mediaConnection.setMainVideoTrack(cameraVideoTrack)
-
         Task { @MainActor in
             do {
+                state = .connecting
+                mediaConnection.setMainAudioTrack(mainLocalAudioTrack)
+                mediaConnection.setMainVideoTrack(cameraVideoTrack)
                 try await mediaConnection.start()
                 conference.receiveEvents()
             } catch {
@@ -186,7 +185,7 @@ extension ConferenceViewModel {
     #if os(iOS)
 
     func startPresenting() {
-        let track = mediaConnectionFactory.createScreenMediaTrack(
+        let track = mediaFactory.createScreenMediaTrack(
             appGroup: Constants.appGroup,
             broadcastUploadExtension: Constants.broadcastUploadExtension
         )
@@ -196,7 +195,7 @@ extension ConferenceViewModel {
     #else
 
     func startPresenting(_ screenMediaSource: ScreenMediaSource) {
-        let track = mediaConnectionFactory.createScreenMediaTrack(
+        let track = mediaFactory.createScreenMediaTrack(
             mediaSource: screenMediaSource
         )
         startScreenCapture(withTrack: track)

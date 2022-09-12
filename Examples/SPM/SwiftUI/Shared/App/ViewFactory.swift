@@ -26,8 +26,8 @@ protocol ViewFactoryProtocol {
 // MARK: - Implementation
 
 struct ViewFactory: ViewFactoryProtocol {
-    private let apiClientFactory = InfinityClientFactory()
-    private let settings = Settings()
+    let apiClientFactory: InfinityClientFactory
+    let settings: Settings
 
     func displayNameView(
         onComplete: @escaping () -> Void
@@ -72,7 +72,7 @@ struct ViewFactory: ViewFactoryProtocol {
         token: ConferenceToken,
         onComplete: @escaping () -> Void
     ) -> ConferenceView {
-        let mediaConnectionFactory = WebRTCMediaConnectionFactory()
+        let mediaFactory = WebRTCMediaFactory()
         let conference = apiClientFactory.conference(
             service: apiClientFactory.infinityService(),
             node: node,
@@ -86,7 +86,7 @@ struct ViewFactory: ViewFactoryProtocol {
         let viewModel = ConferenceViewModel(
             conference: conference,
             mediaConnectionConfig: mediaConnectionConfig,
-            mediaConnectionFactory: mediaConnectionFactory,
+            mediaFactory: mediaFactory,
             settings: settings,
             onComplete: onComplete
         )
@@ -109,6 +109,7 @@ struct ViewFactory: ViewFactoryProtocol {
     }
 
     #if os(macOS)
+
     func screenMediaSourcePicker(
         onShare: @escaping (ScreenMediaSource) -> Void,
         onCancel: @escaping () -> Void
@@ -120,22 +121,32 @@ struct ViewFactory: ViewFactoryProtocol {
         )
         return ScreenMediaSourcePicker(viewModel: viewModel)
     }
+
+    func registrationView(
+        service: RegistrationService
+    ) -> RegistrationView {
+        let viewModel = RegistrationViewModel(service: service)
+        return RegistrationView(viewModel: viewModel)
+    }
+
+    func incomingCallView(
+        event: IncomingCallEvent,
+        onAccept: @escaping IncomingCallViewModel.Accept,
+        onDecline: @escaping () -> Void
+    ) -> IncomingCallView {
+        let viewModel = IncomingCallViewModel(
+            event: event,
+            nodeResolver: apiClientFactory.nodeResolver(dnssec: false),
+            service: apiClientFactory.infinityService(),
+            onAccept: onAccept,
+            onDecline: onDecline
+        )
+        return IncomingCallView(viewModel: viewModel)
+    }
+
     #endif
 
     func settingsView() -> SettingsView {
         SettingsView(settings: settings)
-    }
-}
-
-// MARK: - Environment
-
-private struct ViewFactoryKey: EnvironmentKey {
-    static let defaultValue = ViewFactory()
-}
-
-extension EnvironmentValues {
-    var viewFactory: ViewFactory {
-        get { self[ViewFactoryKey.self] }
-        set { self[ViewFactoryKey.self] = newValue }
     }
 }

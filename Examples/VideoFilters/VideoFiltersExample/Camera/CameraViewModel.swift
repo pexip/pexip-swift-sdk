@@ -18,8 +18,8 @@ final class CameraViewModel: ObservableObject {
     // MARK: - Init
 
     init() {
-        let mediaConnectionFactory = WebRTCMediaConnectionFactory()
-        videoTrack = mediaConnectionFactory.createCameraVideoTrack()!
+        let mediaFactory = WebRTCMediaFactory()
+        videoTrack = mediaFactory.createCameraVideoTrack()!
         video = Video(track: videoTrack, contentMode: .fill)
 
         startCapture()
@@ -39,63 +39,59 @@ final class CameraViewModel: ObservableObject {
 
     private func videoFilter(
         for filterSettings: Settings.Filter
-    ) -> PexipMedia.VideoFilter? {
-        let filter: PexipVideoFilters.VideoFilter?
-
+    ) -> VideoFilter? {
         switch filterSettings {
         case .none:
-            filter = nil
+            return nil
         case .gaussianBlur:
-            filter = filterFactory.segmentation(
+            return filterFactory.segmentation(
                 segmenter: segmenter,
                 background: .gaussianBlur(radius: 30)
             )
         case .tentBlur:
-            filter = filterFactory.segmentation(
+            return filterFactory.segmentation(
                 segmenter: segmenter,
                 background: .tentBlur(intensity: 0.3)
             )
         case .boxBlur:
-            filter = filterFactory.segmentation(
+            return filterFactory.segmentation(
                 segmenter: segmenter,
                 background: .boxBlur(intensity: 0.3)
             )
         case .imageBackground:
             if let image = UIImage(named: "background_image")?.cgImage {
-                filter = filterFactory.segmentation(
+                return filterFactory.segmentation(
                     segmenter: segmenter,
                     background: .image(image)
                 )
             } else {
-                filter = nil
+                return nil
             }
         case .videoBackground:
             if let url = Bundle.main.url(
                 forResource: "video_background",
                 withExtension: "mp4"
             ) {
-                filter = filterFactory.segmentation(
+                return filterFactory.segmentation(
                     segmenter: segmenter,
                     background: .video(url: url)
                 )
             } else {
-                filter = nil
+                return nil
             }
         case .sepiaTone:
-            filter = filterFactory.customFilter(CIFilter.sepiaTone())
+            return filterFactory.customFilter(CIFilter.sepiaTone())
         case .blackAndWhite:
-            filter = filterFactory.customFilter(CIFilter.photoEffectTonal())
+            return filterFactory.customFilter(CIFilter.photoEffectTonal())
         case .instantStyle:
-            filter = filterFactory.customFilter(CIFilter.photoEffectInstant())
+            return filterFactory.customFilter(CIFilter.photoEffectInstant())
         case .instantStyleWithGaussianBlur:
-            filter = filterFactory.segmentation(
+            return filterFactory.segmentation(
                 segmenter: segmenter,
                 background: .gaussianBlur(radius: 30),
                 filters: [CIFilter.photoEffectInstant()]
             )
         }
-
-        return filter.map(VideoFilter.init)
     }
 
     private func segmenter(

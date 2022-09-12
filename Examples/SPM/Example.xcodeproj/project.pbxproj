@@ -29,18 +29,35 @@
 		DA2FE59B287110DD00D8FCAB /* ConferenceModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2FE599287110DD00D8FCAB /* ConferenceModal.swift */; };
 		DA35EF29286F9C86008D15A7 /* CGImage+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35EF28286F9C86008D15A7 /* CGImage+Extensions.swift */; };
 		DA35EF2A286F9C86008D15A7 /* CGImage+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35EF28286F9C86008D15A7 /* CGImage+Extensions.swift */; };
+		DA46569928C6B442008E77FD /* RegistrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA46569828C6B442008E77FD /* RegistrationService.swift */; };
+		DA46569B28C6B81F008E77FD /* IncomingCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA46569A28C6B81F008E77FD /* IncomingCallView.swift */; };
+		DA476CCE28C8E414001FE9F4 /* Screen.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA476CCD28C8E414001FE9F4 /* Screen.swift */; };
+		DA476CCF28C8E414001FE9F4 /* Screen.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA476CCD28C8E414001FE9F4 /* Screen.swift */; };
 		DA5F0B2F286C946400E9E18B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5F0B2E286C946400E9E18B /* SettingsView.swift */; };
 		DA5F0B30286C946400E9E18B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5F0B2E286C946400E9E18B /* SettingsView.swift */; };
 		DA6196872878332300EA9151 /* ChatMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6196862878332300EA9151 /* ChatMessageStore.swift */; };
 		DA6196882878332300EA9151 /* ChatMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6196862878332300EA9151 /* ChatMessageStore.swift */; };
+		DA74550928C9465200D2323C /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA74550828C9465200D2323C /* AppViewModel.swift */; };
+		DA74550B28C948F300D2323C /* AppWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA74550A28C948F300D2323C /* AppWindow.swift */; };
+		DA74550D28C9490800D2323C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA74550C28C9490800D2323C /* AppDelegate.swift */; };
 		DA7AC0FE281096B400739C4E /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADD2027F5D69A00A9AC3D /* AppCoordinator.swift */; };
+		DA934F0228C7A67B002434DC /* IncomingCallViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA934F0128C7A67B002434DC /* IncomingCallViewModel.swift */; };
+		DA934F0528C7D1B1002434DC /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA934F0428C7D1B1002434DC /* App.swift */; };
+		DA934F0828C7D8E3002434DC /* UserDefaults+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA934F0728C7D8E3002434DC /* UserDefaults+Extensions.swift */; };
+		DA934F0928C7D8E3002434DC /* UserDefaults+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA934F0728C7D8E3002434DC /* UserDefaults+Extensions.swift */; };
+		DA934F0B28C7F41E002434DC /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA934F0A28C7F41E002434DC /* Environment.swift */; };
+		DA934F0C28C7F41E002434DC /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA934F0A28C7F41E002434DC /* Environment.swift */; };
 		DA93EE6D284A35200063386F /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA93EE6C284A35200063386F /* Constants.swift */; };
 		DA93EE6E284A35200063386F /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA93EE6C284A35200063386F /* Constants.swift */; };
+		DAAC9A7428C69F4100BFCA5C /* RegistrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAC9A7328C69F4100BFCA5C /* RegistrationView.swift */; };
+		DAAC9A7628C69F5300BFCA5C /* RegistrationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAC9A7528C69F5300BFCA5C /* RegistrationViewModel.swift */; };
+		DAAC9A7928C6A3A400BFCA5C /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = DAAC9A7828C6A3A400BFCA5C /* KeychainAccess */; };
 		DAB34033286E680E001B59C5 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB34032286E680E001B59C5 /* Settings.swift */; };
 		DAB34034286E680E001B59C5 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB34032286E680E001B59C5 /* Settings.swift */; };
 		DAB78D4F27E3953600CB17C9 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB78D4E27E3953600CB17C9 /* Utils.swift */; };
 		DAEBE68328A3D8AD00951E3C /* CameraFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEBE68228A3D8AD00951E3C /* CameraFilter.swift */; };
 		DAEBE68428A3D8AD00951E3C /* CameraFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEBE68228A3D8AD00951E3C /* CameraFilter.swift */; };
+		DAEDA11128C93D970091193C /* IncomingCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEDA11028C93D970091193C /* IncomingCall.swift */; };
 		DAF13287284A259D0089FE8E /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAF13286284A259D0089FE8E /* ReplayKit.framework */; };
 		DAF1328A284A259D0089FE8E /* SampleHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF13289284A259D0089FE8E /* SampleHandler.swift */; };
 		DAF1328E284A259D0089FE8E /* BroadcastExtension (iOS).appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = DAF13285284A259D0089FE8E /* BroadcastExtension (iOS).appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -63,7 +80,6 @@
 		DAFADCD327F50C1400A9AC3D /* LargeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADC9E27F50C1400A9AC3D /* LargeButton.swift */; };
 		DAFADCD427F50C1400A9AC3D /* LargeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADC9E27F50C1400A9AC3D /* LargeButton.swift */; };
 		DAFADCD727F50C1400A9AC3D /* ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADCA127F50C1400A9AC3D /* ExampleApp.swift */; };
-		DAFADCD827F50C1400A9AC3D /* ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADCA127F50C1400A9AC3D /* ExampleApp.swift */; };
 		DAFADCD927F50C1400A9AC3D /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADCA227F50C1400A9AC3D /* ViewFactory.swift */; };
 		DAFADCDA27F50C1400A9AC3D /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADCA227F50C1400A9AC3D /* ViewFactory.swift */; };
 		DAFADCDB27F50C1400A9AC3D /* ParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADCA527F50C1400A9AC3D /* ParticipantsView.swift */; };
@@ -142,15 +158,29 @@
 		DA2FE596287110CB00D8FCAB /* ConferenceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceState.swift; sourceTree = "<group>"; };
 		DA2FE599287110DD00D8FCAB /* ConferenceModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceModal.swift; sourceTree = "<group>"; };
 		DA35EF28286F9C86008D15A7 /* CGImage+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGImage+Extensions.swift"; sourceTree = "<group>"; };
+		DA46569828C6B442008E77FD /* RegistrationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationService.swift; sourceTree = "<group>"; };
+		DA46569A28C6B81F008E77FD /* IncomingCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallView.swift; sourceTree = "<group>"; };
+		DA476CCD28C8E414001FE9F4 /* Screen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Screen.swift; sourceTree = "<group>"; };
 		DA5F0B2E286C946400E9E18B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		DA6196862878332300EA9151 /* ChatMessageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessageStore.swift; sourceTree = "<group>"; };
 		DA6E026127CFA48700DF88A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DA74550828C9465200D2323C /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
+		DA74550A28C948F300D2323C /* AppWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppWindow.swift; sourceTree = "<group>"; };
+		DA74550C28C9490800D2323C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		DA934F0128C7A67B002434DC /* IncomingCallViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallViewModel.swift; sourceTree = "<group>"; };
+		DA934F0428C7D1B1002434DC /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
+		DA934F0728C7D8E3002434DC /* UserDefaults+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+Extensions.swift"; sourceTree = "<group>"; };
+		DA934F0A28C7F41E002434DC /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
 		DA93EE6C284A35200063386F /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		DAAC9A7328C69F4100BFCA5C /* RegistrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationView.swift; sourceTree = "<group>"; };
+		DAAC9A7528C69F5300BFCA5C /* RegistrationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationViewModel.swift; sourceTree = "<group>"; };
 		DAB34032286E680E001B59C5 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		DAB78D4E27E3953600CB17C9 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		DAC1891C28C8182C004EA7D3 /* Example--macOS--Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Example--macOS--Info.plist"; sourceTree = "<group>"; };
 		DAE8989A282469DD006C30E8 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Configs/Debug.xcconfig; sourceTree = "<group>"; };
 		DAE8989B28246B12006C30E8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Configs/Release.xcconfig; sourceTree = "<group>"; };
 		DAEBE68228A3D8AD00951E3C /* CameraFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraFilter.swift; sourceTree = "<group>"; };
+		DAEDA11028C93D970091193C /* IncomingCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCall.swift; sourceTree = "<group>"; };
 		DAF13285284A259D0089FE8E /* BroadcastExtension (iOS).appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "BroadcastExtension (iOS).appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAF13286284A259D0089FE8E /* ReplayKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ReplayKit.framework; path = System/Library/Frameworks/ReplayKit.framework; sourceTree = SDKROOT; };
 		DAF13289284A259D0089FE8E /* SampleHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleHandler.swift; sourceTree = "<group>"; };
@@ -217,6 +247,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DAAC9A7928C6A3A400BFCA5C /* KeychainAccess in Frameworks */,
 				DA217DDF28995D8F006E5169 /* App in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -302,6 +333,7 @@
 			children = (
 				DA6E026127CFA48700DF88A1 /* Info.plist */,
 				DAFADC9127F508CE00A9AC3D /* iOS.entitlements */,
+				DAFADCA127F50C1400A9AC3D /* ExampleApp.swift */,
 				DA93EE6C284A35200063386F /* Constants.swift */,
 			);
 			path = iOS;
@@ -339,8 +371,40 @@
 			isa = PBXGroup;
 			children = (
 				DA35EF28286F9C86008D15A7 /* CGImage+Extensions.swift */,
+				DA934F0728C7D8E3002434DC /* UserDefaults+Extensions.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		DA74550728C9461700D2323C /* App */ = {
+			isa = PBXGroup;
+			children = (
+				DA934F0428C7D1B1002434DC /* App.swift */,
+				DA74550828C9465200D2323C /* AppViewModel.swift */,
+				DA74550A28C948F300D2323C /* AppWindow.swift */,
+				DA74550C28C9490800D2323C /* AppDelegate.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		DA934F0328C7CB3F002434DC /* IncomingCall */ = {
+			isa = PBXGroup;
+			children = (
+				DA46569A28C6B81F008E77FD /* IncomingCallView.swift */,
+				DA934F0128C7A67B002434DC /* IncomingCallViewModel.swift */,
+				DAEDA11028C93D970091193C /* IncomingCall.swift */,
+			);
+			path = IncomingCall;
+			sourceTree = "<group>";
+		};
+		DAAC9A7228C69F2500BFCA5C /* Registration */ = {
+			isa = PBXGroup;
+			children = (
+				DAAC9A7328C69F4100BFCA5C /* RegistrationView.swift */,
+				DA46569828C6B442008E77FD /* RegistrationService.swift */,
+				DAAC9A7528C69F5300BFCA5C /* RegistrationViewModel.swift */,
+			);
+			path = Registration;
 			sourceTree = "<group>";
 		};
 		DAB34031286E65D2001B59C5 /* Settings */ = {
@@ -373,9 +437,13 @@
 		DAFADC8327F5083300A9AC3D /* macOS */ = {
 			isa = PBXGroup;
 			children = (
+				DA74550728C9461700D2323C /* App */,
+				DA934F0328C7CB3F002434DC /* IncomingCall */,
+				DAAC9A7228C69F2500BFCA5C /* Registration */,
 				DA01A9E62836A3C5002A6414 /* ScreenCapture */,
 				DAFADC8D27F5083400A9AC3D /* macOS.entitlements */,
 				DAFADD1C27F5CD8200A9AC3D /* UserInterfaceSizeClass.swift */,
+				DAC1891C28C8182C004EA7D3 /* Example--macOS--Info.plist */,
 				DAFADD1E27F5D02E00A9AC3D /* NSColor+Extensions.swift */,
 			);
 			path = macOS;
@@ -423,8 +491,9 @@
 			isa = PBXGroup;
 			children = (
 				DAFADD2027F5D69A00A9AC3D /* AppCoordinator.swift */,
-				DAFADCA127F50C1400A9AC3D /* ExampleApp.swift */,
 				DAFADCA227F50C1400A9AC3D /* ViewFactory.swift */,
+				DA934F0A28C7F41E002434DC /* Environment.swift */,
+				DA476CCD28C8E414001FE9F4 /* Screen.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -584,6 +653,7 @@
 			name = "Example (macOS)";
 			packageProductDependencies = (
 				DA217DDE28995D8F006E5169 /* App */,
+				DAAC9A7828C6A3A400BFCA5C /* KeychainAccess */,
 			);
 			productName = PexipVideoExample;
 			productReference = DAFADC8227F5083300A9AC3D /* Example (macOS).app */;
@@ -623,6 +693,7 @@
 			);
 			mainGroup = DA1329CC27A98EC400C2EA89;
 			packageReferences = (
+				DAAC9A7728C6A3A400BFCA5C /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 			);
 			productRefGroup = DA1329DA27A98EC500C2EA89 /* Products */;
 			projectDirPath = "";
@@ -766,11 +837,14 @@
 				DAFADCDF27F50C1400A9AC3D /* AliasView.swift in Sources */,
 				DAFADCCB27F50C1400A9AC3D /* LinearGradient+Extensions.swift in Sources */,
 				DAFADCCF27F50C1400A9AC3D /* LargeTextFieldStyle.swift in Sources */,
+				DA934F0828C7D8E3002434DC /* UserDefaults+Extensions.swift in Sources */,
 				DAFADCD927F50C1400A9AC3D /* ViewFactory.swift in Sources */,
 				DA35EF29286F9C86008D15A7 /* CGImage+Extensions.swift in Sources */,
 				DAFADCDB27F50C1400A9AC3D /* ParticipantsView.swift in Sources */,
 				DAFADD0927F50E5D00A9AC3D /* DisplayNameView.swift in Sources */,
+				DA476CCE28C8E414001FE9F4 /* Screen.swift in Sources */,
 				DAB34033286E680E001B59C5 /* Settings.swift in Sources */,
+				DA934F0B28C7F41E002434DC /* Environment.swift in Sources */,
 				DAFADD0727F50E5D00A9AC3D /* DisplayNameViewModel.swift in Sources */,
 				DAFADD0D27F50E8800A9AC3D /* PinChallengeViewModel.swift in Sources */,
 				DAFADCD727F50C1400A9AC3D /* ExampleApp.swift in Sources */,
@@ -800,39 +874,51 @@
 				DAFADCEA27F50C1400A9AC3D /* PreflightView.swift in Sources */,
 				DA6196882878332300EA9151 /* ChatMessageStore.swift in Sources */,
 				DA2FE59B287110DD00D8FCAB /* ConferenceModal.swift in Sources */,
+				DA74550928C9465200D2323C /* AppViewModel.swift in Sources */,
+				DAAC9A7628C69F5300BFCA5C /* RegistrationViewModel.swift in Sources */,
+				DA934F0928C7D8E3002434DC /* UserDefaults+Extensions.swift in Sources */,
 				DAFADD1027F50E8800A9AC3D /* PinChallengeView.swift in Sources */,
-				DAFADCD827F50C1400A9AC3D /* ExampleApp.swift in Sources */,
 				DAFADCEC27F50C1400A9AC3D /* CallView.swift in Sources */,
 				DAFADCD427F50C1400A9AC3D /* LargeButton.swift in Sources */,
 				DAFADCDE27F50C1400A9AC3D /* AliasViewModel.swift in Sources */,
 				DA01A9EA283794FD002A6414 /* ScreenMediaSourcePicker.swift in Sources */,
 				DAFADD2127F5D69A00A9AC3D /* AppCoordinator.swift in Sources */,
+				DA934F0228C7A67B002434DC /* IncomingCallViewModel.swift in Sources */,
 				DAFADCDA27F50C1400A9AC3D /* ViewFactory.swift in Sources */,
+				DA74550B28C948F300D2323C /* AppWindow.swift in Sources */,
 				DAFADD1D27F5CD8200A9AC3D /* UserInterfaceSizeClass.swift in Sources */,
 				DAFADCCE27F50C1400A9AC3D /* ModalView.swift in Sources */,
+				DA476CCF28C8E414001FE9F4 /* Screen.swift in Sources */,
 				DA5F0B30286C946400E9E18B /* SettingsView.swift in Sources */,
 				DAFADCEE27F50C1400A9AC3D /* ChatViewModel.swift in Sources */,
 				DAFADCE627F50C1400A9AC3D /* ConferenceViewModel.swift in Sources */,
+				DA934F0528C7D1B1002434DC /* App.swift in Sources */,
 				DAFADC9527F50B6D00A9AC3D /* Utils.swift in Sources */,
 				DAFADCE027F50C1400A9AC3D /* AliasView.swift in Sources */,
+				DA74550D28C9490800D2323C /* AppDelegate.swift in Sources */,
 				DAFADCCA27F50C1400A9AC3D /* MainVStack.swift in Sources */,
 				DAFADCC627F50C1400A9AC3D /* CallButtons.swift in Sources */,
 				DAFADCF027F50C1400A9AC3D /* ChatView.swift in Sources */,
+				DAEDA11128C93D970091193C /* IncomingCall.swift in Sources */,
 				DAFADCD227F50C1400A9AC3D /* AsyncButton.swift in Sources */,
 				DAFADD0A27F50E5D00A9AC3D /* DisplayNameView.swift in Sources */,
 				DAB34034286E680E001B59C5 /* Settings.swift in Sources */,
+				DA46569928C6B442008E77FD /* RegistrationService.swift in Sources */,
 				DAEBE68428A3D8AD00951E3C /* CameraFilter.swift in Sources */,
 				DAFADD0E27F50E8800A9AC3D /* PinChallengeViewModel.swift in Sources */,
 				DAFADD1F27F5D02E00A9AC3D /* NSColor+Extensions.swift in Sources */,
 				DAFADD0827F50E5D00A9AC3D /* DisplayNameViewModel.swift in Sources */,
 				DAFADCE827F50C1400A9AC3D /* ConferenceView.swift in Sources */,
+				DA934F0C28C7F41E002434DC /* Environment.swift in Sources */,
 				DA2FE598287110CB00D8FCAB /* ConferenceState.swift in Sources */,
 				DAFADCDC27F50C1400A9AC3D /* ParticipantsView.swift in Sources */,
 				DA35EF2A286F9C86008D15A7 /* CGImage+Extensions.swift in Sources */,
 				DA01A9E82836A41B002A6414 /* ScreenMediaSourcePickerModel.swift in Sources */,
 				DAFADCC827F50C1400A9AC3D /* GeometryProxy+Extensions.swift in Sources */,
+				DA46569B28C6B81F008E77FD /* IncomingCallView.swift in Sources */,
 				DAFADCCC27F50C1400A9AC3D /* LinearGradient+Extensions.swift in Sources */,
 				DAFADCD027F50C1400A9AC3D /* LargeTextFieldStyle.swift in Sources */,
+				DAAC9A7428C69F4100BFCA5C /* RegistrationView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1193,6 +1279,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "SwiftUI/macOS/Example--macOS--Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This will make sure the other participants are able to see you";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -1227,6 +1314,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "SwiftUI/macOS/Example--macOS--Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This will make sure the other participants are able to see you";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -1295,6 +1383,17 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		DAAC9A7728C6A3A400BFCA5C /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.2.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		DA217DDA28995C27006E5169 /* BroadcastExtension */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -1307,6 +1406,11 @@
 		DA217DDE28995D8F006E5169 /* App */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = App;
+		};
+		DAAC9A7828C6A3A400BFCA5C /* KeychainAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DAAC9A7728C6A3A400BFCA5C /* XCRemoteSwiftPackageReference "KeychainAccess" */;
+			productName = KeychainAccess;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

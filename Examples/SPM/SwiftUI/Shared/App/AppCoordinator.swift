@@ -2,21 +2,6 @@ import SwiftUI
 import PexipInfinityClient
 
 struct AppCoordinator: View {
-    private enum Screen: Equatable {
-        case displayName
-        case alias
-        case pinChallenge(
-            alias: ConferenceAlias,
-            node: URL,
-            tokenError: ConferenceTokenError
-        )
-        case conference(
-            alias: ConferenceAlias,
-            node: URL,
-            token: ConferenceToken
-        )
-    }
-
     @State private var screen: Screen = .displayName
     @State private var reversedTransitions = false
     @Environment(\.viewFactory) private var viewFactory: ViewFactory
