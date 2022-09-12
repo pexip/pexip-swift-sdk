@@ -3,10 +3,10 @@ import Foundation
 /// Registration-related events.
 public enum RegistrationEvent: Hashable {
     /// An event to be sent when there is a new icoming call.
-    case incoming(IncomingRegistrationEvent)
+    case incoming(IncomingCallEvent)
 
     /// An event to be sent when the incoming call was cancelled.
-    case incomingCancelled(IncomingCancelledRegistrationEvent)
+    case incomingCancelled(IncomingCallCancelledEvent)
 
     /// Unhandled error occured during the registration operations.
     case failure(FailureEvent)
@@ -20,7 +20,7 @@ public enum RegistrationEvent: Hashable {
 // MARK: - Events
 
 /// An event to be sent when there is a new icoming call.
-public struct IncomingRegistrationEvent: Codable, Hashable {
+public struct IncomingCallEvent: Codable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case conferenceAlias = "conference_alias"
         case remoteDisplayName = "remote_display_name"
@@ -39,7 +39,7 @@ public struct IncomingRegistrationEvent: Codable, Hashable {
     /// A date when the event was received.
     public private(set) var receivedAt = Date()
 
-    /// Creates a new instance of ``IncomingRegistrationEvent``
+    /// Creates a new instance of ``IncomingCallEvent``
     ///
     /// - Parameters:
     ///   - conferenceAlias: An alias of the conference
@@ -60,7 +60,7 @@ public struct IncomingRegistrationEvent: Codable, Hashable {
 }
 
 /// An event to be sent when the incoming call was cancelled.
-public struct IncomingCancelledRegistrationEvent: Codable, Hashable {
+public struct IncomingCallCancelledEvent: Codable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case token
     }
@@ -71,7 +71,7 @@ public struct IncomingCancelledRegistrationEvent: Codable, Hashable {
     /// A date when the event was received.
     public private(set) var receivedAt = Date()
 
-    /// Creates a new instance of ``IncomingCancelledRegistrationEvent``
+    /// Creates a new instance of ``IncomingCallCancelledEvent``
     ///
     /// - Parameters:
     ///   - token: The incoming registration token

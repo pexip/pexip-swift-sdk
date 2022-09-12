@@ -17,7 +17,7 @@ final class RegistrationEventServiceTests: APITestCase {
         // 1. Prepare
         var receivedEvents = [RegistrationEvent]()
         let token = RegistrationToken.randomToken()
-        let expectedEvent = IncomingRegistrationEvent(
+        let expectedEvent = IncomingCallEvent(
             conferenceAlias: "Alias",
             remoteDisplayName: "Name",
             token: UUID().uuidString

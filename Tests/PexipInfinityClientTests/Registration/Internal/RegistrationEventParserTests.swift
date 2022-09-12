@@ -44,7 +44,7 @@ final class RegistrationEventParserTests: XCTestCase {
     }
 
     func testIncoming() throws {
-        let expectedEvent = IncomingRegistrationEvent(
+        let expectedEvent = IncomingCallEvent(
             conferenceAlias: "Alias",
             remoteDisplayName: "Name",
             token: UUID().uuidString
@@ -64,7 +64,7 @@ final class RegistrationEventParserTests: XCTestCase {
     }
 
     func testIncomingCancelled() throws {
-        let expectedEvent = IncomingCancelledRegistrationEvent(
+        let expectedEvent = IncomingCallCancelledEvent(
             token: UUID().uuidString
         )
         let httpEvent = try HTTPEvent.stub(for: expectedEvent, name: "incoming_cancelled")
@@ -81,7 +81,7 @@ final class RegistrationEventParserTests: XCTestCase {
 
     func testUnknown() throws {
         let httpEvent = try HTTPEvent.stub(
-            for: IncomingCancelledRegistrationEvent(token: UUID().uuidString),
+            for: IncomingCallCancelledEvent(token: UUID().uuidString),
             name: "unknown"
         )
         let event = parser.parseEventData(from: httpEvent)

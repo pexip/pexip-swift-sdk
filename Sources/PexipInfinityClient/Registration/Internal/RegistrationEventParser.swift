@@ -37,11 +37,11 @@ struct RegistrationEventParser: InfinityEventParser {
         switch name {
         case .incoming:
             return .incoming(
-                try decoder.decode(IncomingRegistrationEvent.self, from: data)
+                try decoder.decode(IncomingCallEvent.self, from: data)
             )
         case .incomingCancelled:
             return .incomingCancelled(try decoder.decode(
-                IncomingCancelledRegistrationEvent.self,
+                IncomingCallCancelledEvent.self,
                 from: data
             ))
         }
