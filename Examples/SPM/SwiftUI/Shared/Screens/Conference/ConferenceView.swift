@@ -253,7 +253,7 @@ struct ConferenceView_Previews: PreviewProvider {
     )
 
     static var previews: some View {
-        let factory = WebRTCMediaConnectionFactory()
+        let factory = WebRTCMediaFactory()
 
         ConferenceView(
             viewModel: ConferenceViewModel(
@@ -261,7 +261,7 @@ struct ConferenceView_Previews: PreviewProvider {
                 mediaConnectionConfig: MediaConnectionConfig(
                     signaling: conference.signalingChannel
                 ),
-                mediaConnectionFactory: factory,
+                mediaFactory: factory,
                 settings: Settings(),
                 onComplete: {}
             )

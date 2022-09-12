@@ -11,7 +11,7 @@ final class IncomingCallViewModel: ObservableObject {
         case error(String)
     }
 
-    let details: IncomingRegistrationEvent
+    let details: IncomingCallEvent
     @Published private(set) var state = State.calling
 
     @AppStorage("displayName") private var displayName = "Guest"
@@ -23,7 +23,7 @@ final class IncomingCallViewModel: ObservableObject {
     // MARK: - Init
 
     init(
-        event: IncomingRegistrationEvent,
+        event: IncomingCallEvent,
         nodeResolver: NodeResolver,
         service: InfinityService,
         state: State = .calling,

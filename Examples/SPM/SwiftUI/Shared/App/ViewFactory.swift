@@ -72,7 +72,7 @@ struct ViewFactory: ViewFactoryProtocol {
         token: ConferenceToken,
         onComplete: @escaping () -> Void
     ) -> ConferenceView {
-        let mediaConnectionFactory = WebRTCMediaConnectionFactory()
+        let mediaFactory = WebRTCMediaFactory()
         let conference = apiClientFactory.conference(
             service: apiClientFactory.infinityService(),
             node: node,
@@ -86,7 +86,7 @@ struct ViewFactory: ViewFactoryProtocol {
         let viewModel = ConferenceViewModel(
             conference: conference,
             mediaConnectionConfig: mediaConnectionConfig,
-            mediaConnectionFactory: mediaConnectionFactory,
+            mediaFactory: mediaFactory,
             settings: settings,
             onComplete: onComplete
         )
@@ -130,7 +130,7 @@ struct ViewFactory: ViewFactoryProtocol {
     }
 
     func incomingCallView(
-        event: IncomingRegistrationEvent,
+        event: IncomingCallEvent,
         onAccept: @escaping IncomingCallViewModel.Accept,
         onDecline: @escaping () -> Void
     ) -> IncomingCallView {

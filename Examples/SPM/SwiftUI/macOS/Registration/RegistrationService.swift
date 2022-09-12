@@ -6,8 +6,8 @@ final class RegistrationService {
     var deviceAlias: String? { userDefaults[string: .deviceAlias] }
     var username: String? { keychain[string: .username] }
     var password: String? { keychain[string: .password] }
-    var onCallReceived: ((IncomingRegistrationEvent) -> Void)?
-    var onCallCancelled: ((IncomingCancelledRegistrationEvent) -> Void)?
+    var onCallReceived: ((IncomingCallEvent) -> Void)?
+    var onCallCancelled: ((IncomingCallCancelledEvent) -> Void)?
 
     var isRegistered: Bool {
         registration != nil

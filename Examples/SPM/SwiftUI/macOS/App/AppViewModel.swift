@@ -3,7 +3,7 @@ import AppKit
 import PexipInfinityClient
 
 final class AppViewModel: ObservableObject {
-    @Published var incomingCallEvent: IncomingRegistrationEvent?
+    @Published var incomingCallEvent: IncomingCallEvent?
 
     let infinityClientFactory: InfinityClientFactory
     let registrationService: RegistrationService
