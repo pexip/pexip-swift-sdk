@@ -50,13 +50,10 @@ final class AliasViewModel: ObservableObject {
         var node: URL?
 
         do {
-            let nodes = try await nodeResolver.resolveNodes(for: alias.host)
-            for url in nodes {
-                if try await service.node(url: url).status() {
-                    node = url
-                    break
-                }
-            }
+            node = try await service.resolveNodeURL(
+                forHost: alias.host,
+                using: nodeResolver
+            )
         } catch {
             debugPrint(error)
         }

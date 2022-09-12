@@ -74,7 +74,6 @@ struct ViewFactory: ViewFactoryProtocol {
     ) -> ConferenceView {
         let mediaFactory = WebRTCMediaFactory()
         let conference = apiClientFactory.conference(
-            service: apiClientFactory.infinityService(),
             node: node,
             alias: alias,
             token: token
