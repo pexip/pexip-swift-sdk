@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		DA4B731528A6841000B5A58B /* App in Frameworks */ = {isa = PBXBuildFile; productRef = DA4B731428A6841000B5A58B /* App */; };
 		DA4B731728A6842000B5A58B /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4B731628A6842000B5A58B /* CameraViewModel.swift */; };
-		DA4B731928A68C2300B5A58B /* CameraVideoFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4B731828A68C2300B5A58B /* CameraVideoFilter.swift */; };
 		DA4B731D28A69A7200B5A58B /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4B731C28A69A7200B5A58B /* Settings.swift */; };
 		DA4B732028A6A97100B5A58B /* SettingsItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4B731F28A6A97100B5A58B /* SettingsItemView.swift */; };
 		DA4B732428A6AACF00B5A58B /* MLKitPersonSegmenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4B732328A6AACF00B5A58B /* MLKitPersonSegmenter.swift */; };
@@ -26,7 +25,6 @@
 		89DE4F21CF72F6543FDE7A39 /* Pods-VideoFiltersExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VideoFiltersExample.release.xcconfig"; path = "Target Support Files/Pods-VideoFiltersExample/Pods-VideoFiltersExample.release.xcconfig"; sourceTree = "<group>"; };
 		C2CFF80445C1011D2C63F1A9 /* Pods_VideoFiltersExample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_VideoFiltersExample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA4B731628A6842000B5A58B /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
-		DA4B731828A68C2300B5A58B /* CameraVideoFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraVideoFilter.swift; sourceTree = "<group>"; };
 		DA4B731C28A69A7200B5A58B /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		DA4B731F28A6A97100B5A58B /* SettingsItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsItemView.swift; sourceTree = "<group>"; };
 		DA4B732328A6AACF00B5A58B /* MLKitPersonSegmenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLKitPersonSegmenter.swift; sourceTree = "<group>"; };
@@ -76,7 +74,6 @@
 			children = (
 				DA4B731628A6842000B5A58B /* CameraViewModel.swift */,
 				DA7EF2D228A67DD1006827CA /* CameraView.swift */,
-				DA4B731828A68C2300B5A58B /* CameraVideoFilter.swift */,
 				DA4B732328A6AACF00B5A58B /* MLKitPersonSegmenter.swift */,
 			);
 			path = Camera;
@@ -268,7 +265,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA4B732028A6A97100B5A58B /* SettingsItemView.swift in Sources */,
-				DA4B731928A68C2300B5A58B /* CameraVideoFilter.swift in Sources */,
 				DA4B732428A6AACF00B5A58B /* MLKitPersonSegmenter.swift in Sources */,
 				DA7EF2D328A67DD1006827CA /* CameraView.swift in Sources */,
 				DA7EF2D128A67DD1006827CA /* ExampleApp.swift in Sources */,
