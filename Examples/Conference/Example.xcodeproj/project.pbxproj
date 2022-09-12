@@ -60,7 +60,7 @@
 		DAEDA11128C93D970091193C /* IncomingCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEDA11028C93D970091193C /* IncomingCall.swift */; };
 		DAF13287284A259D0089FE8E /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAF13286284A259D0089FE8E /* ReplayKit.framework */; };
 		DAF1328A284A259D0089FE8E /* SampleHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF13289284A259D0089FE8E /* SampleHandler.swift */; };
-		DAF1328E284A259D0089FE8E /* BroadcastExtension (iOS).appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = DAF13285284A259D0089FE8E /* BroadcastExtension (iOS).appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		DAF1328E284A259D0089FE8E /* BroadcastExtension (iOS).appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DAF13285284A259D0089FE8E /* BroadcastExtension (iOS).appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		DAFADC9427F50B6900A9AC3D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA1329D427A98EC500C2EA89 /* Assets.xcassets */; };
 		DAFADC9527F50B6D00A9AC3D /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB78D4E27E3953600CB17C9 /* Utils.swift */; };
 		DAFADCC527F50C1400A9AC3D /* CallButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFADC9727F50C1400A9AC3D /* CallButtons.swift */; };
@@ -124,15 +124,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		DAF1328F284A259D0089FE8E /* Embed App Extensions */ = {
+		DAF1328F284A259D0089FE8E /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				DAF1328E284A259D0089FE8E /* BroadcastExtension (iOS).appex in Embed App Extensions */,
+				DAF1328E284A259D0089FE8E /* BroadcastExtension (iOS).appex in Embed Foundation Extensions */,
 			);
-			name = "Embed App Extensions";
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -602,7 +602,7 @@
 				DA1329D627A98EC500C2EA89 /* Frameworks */,
 				DA1329D727A98EC500C2EA89 /* Resources */,
 				DA1A977627AD420200ADFD23 /* SwiftLint */,
-				DAF1328F284A259D0089FE8E /* Embed App Extensions */,
+				DAF1328F284A259D0089FE8E /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
@@ -667,7 +667,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1330;
-				LastUpgradeCheck = 1330;
+				LastUpgradeCheck = 1400;
 				TargetAttributes = {
 					DA11B0B927E9EA3900501E50 = {
 						CreatedOnToolsVersion = 13.2.1;
@@ -745,6 +745,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		DA11B0D227E9EC2500501E50 /* SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -763,6 +764,7 @@
 		};
 		DA1A977627AD420200ADFD23 /* SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -781,6 +783,7 @@
 		};
 		DAFADD1B27F5100000A9AC3D /* SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -1044,7 +1047,9 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_BITCODE = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1104,7 +1109,9 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_BITCODE = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1174,7 +1181,7 @@
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
-				ENABLE_BITCODE = YES;
+				ENABLE_BITCODE = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SwiftUI/iOS/Info.plist;
@@ -1274,6 +1281,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = "${DEVELOPMENT_TEAM}";
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1309,6 +1317,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = "${DEVELOPMENT_TEAM}";
 				ENABLE_HARDENED_RUNTIME = YES;
