@@ -65,6 +65,6 @@ Pod::Spec.new do |s|
     }
     s.vendored_frameworks = 'PexipRTC.xcframework'
     s.dependency 'WebRTC', '96.0.4664'
-    s.dependency 'PexipUtils', "#{s.version}"
+    s.dependency 'PexipCore', "#{s.version}"
     s.dependency 'PexipMedia', "#{s.version}"
 end

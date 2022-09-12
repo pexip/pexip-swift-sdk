@@ -1,0 +1,488 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DA4B731528A6841000B5A58B /* App in Frameworks */ = {isa = PBXBuildFile; productRef = DA4B731428A6841000B5A58B /* App */; };
+		DA4B731728A6842000B5A58B /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4B731628A6842000B5A58B /* CameraViewModel.swift */; };
+		DA4B731D28A69A7200B5A58B /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4B731C28A69A7200B5A58B /* Settings.swift */; };
+		DA4B732028A6A97100B5A58B /* SettingsItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4B731F28A6A97100B5A58B /* SettingsItemView.swift */; };
+		DA4B732428A6AACF00B5A58B /* MLKitPersonSegmenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4B732328A6AACF00B5A58B /* MLKitPersonSegmenter.swift */; };
+		DA4B732628A8557800B5A58B /* video_background.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = DA4B732528A8557800B5A58B /* video_background.mp4 */; };
+		DA7EF2D128A67DD1006827CA /* ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7EF2D028A67DD1006827CA /* ExampleApp.swift */; };
+		DA7EF2D328A67DD1006827CA /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7EF2D228A67DD1006827CA /* CameraView.swift */; };
+		DA7EF2D528A67DD5006827CA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA7EF2D428A67DD5006827CA /* Assets.xcassets */; };
+		DA7EF2D828A67DD5006827CA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA7EF2D728A67DD5006827CA /* Preview Assets.xcassets */; };
+		E349A69FB4A6F37404C77513 /* Pods_VideoFiltersExample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2CFF80445C1011D2C63F1A9 /* Pods_VideoFiltersExample.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		26280B55961288FE815744E1 /* Pods-VideoFiltersExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VideoFiltersExample.debug.xcconfig"; path = "Target Support Files/Pods-VideoFiltersExample/Pods-VideoFiltersExample.debug.xcconfig"; sourceTree = "<group>"; };
+		89DE4F21CF72F6543FDE7A39 /* Pods-VideoFiltersExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VideoFiltersExample.release.xcconfig"; path = "Target Support Files/Pods-VideoFiltersExample/Pods-VideoFiltersExample.release.xcconfig"; sourceTree = "<group>"; };
+		C2CFF80445C1011D2C63F1A9 /* Pods_VideoFiltersExample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_VideoFiltersExample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA4B731628A6842000B5A58B /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
+		DA4B731C28A69A7200B5A58B /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		DA4B731F28A6A97100B5A58B /* SettingsItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsItemView.swift; sourceTree = "<group>"; };
+		DA4B732328A6AACF00B5A58B /* MLKitPersonSegmenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLKitPersonSegmenter.swift; sourceTree = "<group>"; };
+		DA4B732528A8557800B5A58B /* video_background.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = video_background.mp4; sourceTree = "<group>"; };
+		DA7EF2CD28A67DD1006827CA /* VideoFiltersExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VideoFiltersExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA7EF2D028A67DD1006827CA /* ExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleApp.swift; sourceTree = "<group>"; };
+		DA7EF2D228A67DD1006827CA /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		DA7EF2D428A67DD5006827CA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DA7EF2D728A67DD5006827CA /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		DA7FE89428CF41BD00CA0BE9 /* Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Configs/Release.xcconfig; sourceTree = "<group>"; };
+		DA7FE89528CF41BD00CA0BE9 /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Configs/Debug.xcconfig; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DA7EF2CA28A67DD1006827CA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA4B731528A6841000B5A58B /* App in Frameworks */,
+				E349A69FB4A6F37404C77513 /* Pods_VideoFiltersExample.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		CBC86406CA14D8999AFF1C51 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				26280B55961288FE815744E1 /* Pods-VideoFiltersExample.debug.xcconfig */,
+				89DE4F21CF72F6543FDE7A39 /* Pods-VideoFiltersExample.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		DA4B732128A6A97400B5A58B /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				DA4B731F28A6A97100B5A58B /* SettingsItemView.swift */,
+				DA4B731C28A69A7200B5A58B /* Settings.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		DA4B732228A6AA0400B5A58B /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				DA4B731628A6842000B5A58B /* CameraViewModel.swift */,
+				DA7EF2D228A67DD1006827CA /* CameraView.swift */,
+				DA4B732328A6AACF00B5A58B /* MLKitPersonSegmenter.swift */,
+			);
+			path = Camera;
+			sourceTree = "<group>";
+		};
+		DA7EF2C428A67DD1006827CA = {
+			isa = PBXGroup;
+			children = (
+				DA7FE89528CF41BD00CA0BE9 /* Debug.xcconfig */,
+				DA7FE89428CF41BD00CA0BE9 /* Release.xcconfig */,
+				DA7EF2CF28A67DD1006827CA /* VideoFiltersExample */,
+				DA7EF2CE28A67DD1006827CA /* Products */,
+				DA7EF2E028A67F2D006827CA /* Frameworks */,
+				CBC86406CA14D8999AFF1C51 /* Pods */,
+			);
+			sourceTree = "<group>";
+		};
+		DA7EF2CE28A67DD1006827CA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DA7EF2CD28A67DD1006827CA /* VideoFiltersExample.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DA7EF2CF28A67DD1006827CA /* VideoFiltersExample */ = {
+			isa = PBXGroup;
+			children = (
+				DA7EF2D028A67DD1006827CA /* ExampleApp.swift */,
+				DA4B732528A8557800B5A58B /* video_background.mp4 */,
+				DA7EF2D428A67DD5006827CA /* Assets.xcassets */,
+				DA4B732228A6AA0400B5A58B /* Camera */,
+				DA4B732128A6A97400B5A58B /* Settings */,
+				DA7EF2D628A67DD5006827CA /* Preview Content */,
+			);
+			path = VideoFiltersExample;
+			sourceTree = "<group>";
+		};
+		DA7EF2D628A67DD5006827CA /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				DA7EF2D728A67DD5006827CA /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		DA7EF2E028A67F2D006827CA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C2CFF80445C1011D2C63F1A9 /* Pods_VideoFiltersExample.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DA7EF2CC28A67DD1006827CA /* VideoFiltersExample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DA7EF2DB28A67DD5006827CA /* Build configuration list for PBXNativeTarget "VideoFiltersExample" */;
+			buildPhases = (
+				649BBF3584578F78F4349098 /* [CP] Check Pods Manifest.lock */,
+				DA7EF2C928A67DD1006827CA /* Sources */,
+				DA7EF2CA28A67DD1006827CA /* Frameworks */,
+				DA7EF2CB28A67DD1006827CA /* Resources */,
+				E7921AD692A4DCC7CADDD7FF /* [CP] Embed Pods Frameworks */,
+				8EB066A2108A701D6745E4C6 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VideoFiltersExample;
+			packageProductDependencies = (
+				DA4B731428A6841000B5A58B /* App */,
+			);
+			productName = VideoFiltersExample;
+			productReference = DA7EF2CD28A67DD1006827CA /* VideoFiltersExample.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DA7EF2C528A67DD1006827CA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1340;
+				LastUpgradeCheck = 1340;
+				TargetAttributes = {
+					DA7EF2CC28A67DD1006827CA = {
+						CreatedOnToolsVersion = 13.4.1;
+					};
+				};
+			};
+			buildConfigurationList = DA7EF2C828A67DD1006827CA /* Build configuration list for PBXProject "VideoFiltersExample" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = DA7EF2C428A67DD1006827CA;
+			productRefGroup = DA7EF2CE28A67DD1006827CA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DA7EF2CC28A67DD1006827CA /* VideoFiltersExample */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DA7EF2CB28A67DD1006827CA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA4B732628A8557800B5A58B /* video_background.mp4 in Resources */,
+				DA7EF2D828A67DD5006827CA /* Preview Assets.xcassets in Resources */,
+				DA7EF2D528A67DD5006827CA /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		649BBF3584578F78F4349098 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-VideoFiltersExample-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8EB066A2108A701D6745E4C6 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-VideoFiltersExample/Pods-VideoFiltersExample-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-VideoFiltersExample/Pods-VideoFiltersExample-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-VideoFiltersExample/Pods-VideoFiltersExample-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E7921AD692A4DCC7CADDD7FF /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-VideoFiltersExample/Pods-VideoFiltersExample-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-VideoFiltersExample/Pods-VideoFiltersExample-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-VideoFiltersExample/Pods-VideoFiltersExample-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DA7EF2C928A67DD1006827CA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA4B732028A6A97100B5A58B /* SettingsItemView.swift in Sources */,
+				DA4B732428A6AACF00B5A58B /* MLKitPersonSegmenter.swift in Sources */,
+				DA7EF2D328A67DD1006827CA /* CameraView.swift in Sources */,
+				DA7EF2D128A67DD1006827CA /* ExampleApp.swift in Sources */,
+				DA4B731728A6842000B5A58B /* CameraViewModel.swift in Sources */,
+				DA4B731D28A69A7200B5A58B /* Settings.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		DA7EF2D928A67DD5006827CA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA7FE89528CF41BD00CA0BE9 /* Debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		DA7EF2DA28A67DD5006827CA /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA7FE89428CF41BD00CA0BE9 /* Release.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		DA7EF2DC28A67DD5006827CA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 26280B55961288FE815744E1 /* Pods-VideoFiltersExample.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"VideoFiltersExample/Preview Content\"";
+				DEVELOPMENT_TEAM = "${DEVELOPMENT_TEAM}";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This will make sure the other participants are able to see you";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pexip.VideoFiltersExample;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DA7EF2DD28A67DD5006827CA /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 89DE4F21CF72F6543FDE7A39 /* Pods-VideoFiltersExample.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"VideoFiltersExample/Preview Content\"";
+				DEVELOPMENT_TEAM = "${DEVELOPMENT_TEAM}";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This will make sure the other participants are able to see you";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pexip.VideoFiltersExample;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DA7EF2C828A67DD1006827CA /* Build configuration list for PBXProject "VideoFiltersExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA7EF2D928A67DD5006827CA /* Debug */,
+				DA7EF2DA28A67DD5006827CA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DA7EF2DB28A67DD5006827CA /* Build configuration list for PBXNativeTarget "VideoFiltersExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA7EF2DC28A67DD5006827CA /* Debug */,
+				DA7EF2DD28A67DD5006827CA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DA4B731428A6841000B5A58B /* App */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = App;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = DA7EF2C528A67DD1006827CA /* Project object */;
+}

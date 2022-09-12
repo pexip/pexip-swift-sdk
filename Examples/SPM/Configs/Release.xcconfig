@@ -1,8 +1,0 @@
-// Create ReleaseLocal.xcconfig with the following settings.
-// (Don't add it to the project)
-
-// DEVELOPMENT_TEAM = team number
-// PROVISIONING_PROFILE_SPECIFIER = provisioning profile name
-// PROVISIONING_PROFILE_BROADCAST_EXTENSION_SPECIFIER = provisioning profile name
-
-#include? "ReleaseLocal.xcconfig"

@@ -24,11 +24,12 @@ media signaling technologies in the future, or Infinity might be interchanged wi
 
 ## Products
 
-- **PexipConference** - core components for working with conferences hosted on the Pexip Infinity platform: conference controls, conference events, media signaling and token refreshing.
-- **PexipInfinityClient** - a fluent client for Pexip Infinity REST API v2.
+- **PexipInfinityClient** - a fluent client for Pexip Infinity REST API v2, conference controls, conference events, media signaling and token refreshing.
 - **PexipRTC** - Pexip WebRTC-based media stack for sending and receiving video streams
 - **PexipMedia** - core components for working with audio and video
-- **PexipUtils** - extensions, utilities and shared components
+- **PexipVideoFilters** - a set of built-in video filters ready to use in your video conferencing app (background blur, background replacement, etc)
+- **PexipScreenCapture** - high level APIs for screen capture on iOS and macOS
+- **PexipCore** - extensions, utilities and shared components
 - **WebRTC** - WebRTC binaries for Apple platforms
 
 ## Requirements
@@ -62,7 +63,7 @@ let package = Package(
         .target(
             name: "MyLibrary",
             dependencies: [
-                .product(name: "PexipConference", package: "pexip-swift-sdk"),
+                .product(name: "PexipInfinityClient", package: "pexip-swift-sdk"),
                 .product(name: "PexipRTC", package: "pexip-swift-sdk"),
                 // ...
             ],
@@ -76,7 +77,7 @@ let package = Package(
 ```ruby
 source 'https://github.com/pexip/pexip-pod-specs.git'
 
-pod 'PexipConference'
+pod 'PexipInfinityClient'
 pod 'PexipRTC'
 ```
 
@@ -87,9 +88,14 @@ pod 'PexipRTC'
 
 ## Examples
 
-- Check [Swift Package Manager example app](https://github.com/pexip/pexip-swift-sdk/tree/main/Examples/SPM) to learn how to integrate **Pexip Swift SDK** in your app.
+- Check [Swift Package Manager example app](https://github.com/pexip/pexip-swift-sdk/tree/main/Examples/Conference) to learn how to integrate **Pexip Swift SDK** in your app.
+
+- Check [Video Filters example app](https://github.com/pexip/pexip-swift-sdk/tree/main/Examples/VideoFilters) to learn how to apply various video filters and use [ML Kit's Selfie Segmentation API](https://developers.google.com/ml-kit) instead of default [Vision Person Segmentation](https://developer.apple.com/documentation/vision/vngeneratepersonsegmentationrequest), which is available only on iOS 15.0+ and macOS 12.0+.
+
 - Check [CocoaPods example app](https://github.com/pexip/pexip-swift-sdk/tree/main/Examples/CocoaPods) to 
 see how to install **Pexip Swift SDK** with Cocoa Pods.
+
+- [SDK documentation and API reference](https://pexip.github.io/pexip-swift-sdk)
 
 ## WIP
 

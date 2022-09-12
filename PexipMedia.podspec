@@ -64,4 +64,6 @@ Pod::Spec.new do |s|
       headers: ['Accept: application/octet-stream']
     }
     s.vendored_frameworks = 'PexipMedia.xcframework'
+    s.dependency 'PexipCore', "#{s.version}"
+    s.dependency 'PexipScreenCapture', "#{s.version}"
 end
