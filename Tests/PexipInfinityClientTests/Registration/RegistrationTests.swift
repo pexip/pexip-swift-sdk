@@ -5,7 +5,7 @@ import TestHelpers
 
 final class RegistrationTests: XCTestCase {
     private var registration: Registration!
-    private var tokenRefresher: TokenRefresherMock!
+    private var tokenRefreshTask: TokenRefreshTaskMock!
     private var eventSource: InfinityEventSource<RegistrationEvent>!
     private var delegateMock: RegistrationDelegateMock!
     private var eventSender: TestResultSender<RegistrationEvent>!
@@ -18,7 +18,7 @@ final class RegistrationTests: XCTestCase {
     override func setUp() async throws {
         try await super.setUp()
         isEventSourceTerminated = false
-        tokenRefresher = TokenRefresherMock()
+        tokenRefreshTask = TokenRefreshTaskMock()
         delegateMock = RegistrationDelegateMock()
         eventSender = TestResultSender()
 
@@ -41,19 +41,16 @@ final class RegistrationTests: XCTestCase {
         )
 
         registration = DefaultRegistration(
-            tokenRefresher: tokenRefresher,
-            eventSource: eventSource,
+            connection: InfinityConnection(
+                tokenRefreshTask: tokenRefreshTask,
+                eventSource: eventSource
+            ),
             logger: nil
         )
         registration.delegate = delegateMock
     }
 
     // MARK: - Tests
-
-    func testInit() async {
-        let isRefreshing = await tokenRefresher.isRefreshing
-        XCTAssertTrue(isRefreshing)
-    }
 
     func testFailureEventOnTokenRefreshError() {
         let error = URLError(.unknown)
@@ -68,7 +65,10 @@ final class RegistrationTests: XCTestCase {
                 }.store(in: &cancellables)
             },
             after: {
-                tokenRefresher.onError?(error)
+                Task(priority: .low) {
+                    tokenRefreshTask.subject.send(.tokenReleased)
+                    tokenRefreshTask.subject.send(.failed(error))
+                }
             }
         )
 
@@ -145,8 +145,32 @@ final class RegistrationTests: XCTestCase {
         registration.receiveEvents()
 
         // 2. Cancel
+        registration.cancel()
+
+        wait(for: [cancelExpectation!], timeout: 0.1)
+
+        // 3. Assert
+        let assertExpectation = expectation(description: "Assert expectation")
+
         Task {
-            await registration.cancel()
+            XCTAssertFalse(tokenRefreshTask.isCancelCalled)
+            XCTAssertTrue(tokenRefreshTask.isCancelAndReleaseCalled)
+            XCTAssertTrue(isEventSourceTerminated)
+            assertExpectation.fulfill()
+        }
+
+        wait(for: [assertExpectation], timeout: 0.1)
+    }
+
+    func testDeinit() {
+        cancelExpectation = expectation(description: "Cancel expectation")
+
+        // 1. Subscribe to events
+        registration.receiveEvents()
+
+        // 2. Cancel
+        Task { @MainActor in
+            registration = nil
         }
 
         wait(for: [cancelExpectation!], timeout: 0.1)
@@ -155,9 +179,8 @@ final class RegistrationTests: XCTestCase {
         let assertExpectation = expectation(description: "Assert expectation")
 
         Task {
-            let isRefreshing = await tokenRefresher.isRefreshing
-            XCTAssertFalse(isRefreshing)
-            XCTAssertTrue(tokenRefresher.withTokenRelease)
+            XCTAssertTrue(tokenRefreshTask.isCancelCalled)
+            XCTAssertTrue(tokenRefreshTask.isCancelAndReleaseCalled)
             XCTAssertTrue(isEventSourceTerminated)
             assertExpectation.fulfill()
         }

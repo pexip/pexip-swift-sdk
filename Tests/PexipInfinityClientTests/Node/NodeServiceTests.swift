@@ -76,7 +76,7 @@ final class NodeServiceTests: APITestCase {
             service?.baseURL,
             baseURL
                 .appendingPathComponent("registrations")
-                .appendingPathComponent(deviceAlias.alias)
+                .appendingPathComponent(deviceAlias.uri)
         )
     }
 

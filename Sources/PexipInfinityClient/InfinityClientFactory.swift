@@ -78,14 +78,16 @@ public struct InfinityClientFactory {
         let tokenStore = TokenStore(token: token)
 
         return DefaultRegistration(
-            tokenRefresher: DefaultTokenRefresher(
-                service: registrationService,
-                store: tokenStore,
-                logger: logger
-            ),
-            eventSource: registrationEventSource(
-                tokenStore: tokenStore,
-                eventService: eventService
+            connection: InfinityConnection(
+                tokenRefreshTask: DefaultTokenRefreshTask(
+                    store: tokenStore,
+                    service: registrationService,
+                    logger: logger
+                ),
+                eventSource: registrationEventSource(
+                    tokenStore: tokenStore,
+                    eventService: eventService
+                )
             ),
             logger: logger
         )
@@ -115,22 +117,24 @@ public struct InfinityClientFactory {
         let participantService = conferenceService.participant(id: token.participantId)
 
         return DefaultConference(
-            tokenStore: tokenStore,
-            tokenRefresher: DefaultTokenRefresher(
-                service: conferenceService,
-                store: tokenStore,
-                logger: logger
+            connection: InfinityConnection(
+                tokenRefreshTask: DefaultTokenRefreshTask(
+                    store: tokenStore,
+                    service: conferenceService,
+                    logger: logger
+                ),
+                eventSource: conferenceEventSource(
+                    tokenStore: tokenStore,
+                    eventService: eventService
+                )
             ),
+            tokenStore: tokenStore,
             signalingChannel: ConferenceSignalingChannel(
                 participantService: participantService,
                 tokenStore: tokenStore,
                 roster: roster,
                 iceServers: token.iceServers,
                 logger: logger
-            ),
-            eventSource: conferenceEventSource(
-                tokenStore: tokenStore,
-                eventService: eventService
             ),
             roster: roster,
             liveCaptionsService: participantService,

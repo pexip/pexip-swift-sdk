@@ -61,7 +61,7 @@ struct InfinityEventSource<Event>: CustomDebugStringConvertible {
                 do {
                     try await task.value
                 } catch {
-                    logger?.error("\(name) error: failed to connect.")
+                    logger?.error("\(name) event source error: failed to connect: \(error)")
                     continuation.finish(throwing: error)
                 }
             }

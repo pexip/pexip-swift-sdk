@@ -32,8 +32,8 @@ public struct ConferenceToken: InfinityToken, Codable, Hashable {
         case version
     }
 
-    /// A textual representation of this instance, suitable for debugging.
-    public let debugDescription = "Conference token"
+    /// A textual representation of this type, suitable for debugging.
+    public static let name = "Conference token"
 
     /// The authentication token for future requests.
     public private(set) var value: String

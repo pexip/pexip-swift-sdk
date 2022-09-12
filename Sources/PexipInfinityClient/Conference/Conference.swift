@@ -6,7 +6,7 @@ import PexipCore
 
 /// Conference is responsible for media signaling, token refreshing
 /// and handling of the conference events.
-public protocol Conference {
+public protocol Conference: AnyObject {
     /// The object that acts as the delegate of the conference.
     var delegate: ConferenceDelegate? { get set }
 
@@ -53,12 +53,11 @@ final class DefaultConference: Conference {
     private typealias EventSourceTask = Task<Void, Never>
 
     private let tokenStore: TokenStore<ConferenceToken>
-    private let tokenRefresher: TokenRefresher
-    private let eventSource: InfinityEventSource<ConferenceEvent>
+    private let connection: InfinityConnection<ConferenceEvent>
     private let liveCaptionsService: LiveCaptionsService
     private let logger: Logger?
-    private let eventSourceTask = Synchronized<EventSourceTask?>(nil)
     private var eventSubject = PassthroughSubject<ConferenceEvent, Never>()
+    private var eventTask: Task<Void, Never>?
     // Skip initial `presentation_stop` event
     private let skipPresentationStop = Synchronized(true)
     private let _status = Synchronized<ConferenceStatus?>(nil)
@@ -67,61 +66,59 @@ final class DefaultConference: Conference {
     // MARK: - Init
 
     init(
+        connection: InfinityConnection<ConferenceEvent>,
         tokenStore: TokenStore<ConferenceToken>,
-        tokenRefresher: TokenRefresher,
         signalingChannel: SignalingChannel,
-        eventSource: InfinityEventSource<ConferenceEvent>,
         roster: Roster,
         liveCaptionsService: LiveCaptionsService,
         chat: Chat?,
         logger: Logger?
     ) {
+        self.connection = connection
         self.tokenStore = tokenStore
-        self.tokenRefresher = tokenRefresher
         self.signalingChannel = signalingChannel
-        self.eventSource = eventSource
         self.roster = roster
         self.liveCaptionsService = liveCaptionsService
         self.chat = chat
         self.logger = logger
 
-        Task {
-            await tokenRefresher.startRefreshing(onError: { error in
-                Task { [weak self] in
-                    await self?.sendEvent(.failure(FailureEvent(error: error)))
+        eventTask = Task { [weak self] in
+            guard let events = self?.connection.events() else {
+                return
+            }
+
+            for await event in events {
+                do {
+                    await self?.handleEvent(try event.get())
+                } catch {
+                    await self?.handleEvent(
+                        .failure(FailureEvent(error: error))
+                    )
                 }
-            })
+            }
         }
 
         logger?.info("Joining the conference as an API client")
+    }
+
+    deinit {
+        cancelTasks()
     }
 
     // MARK: - Public API
 
     @discardableResult
     func receiveEvents() -> Bool {
-        guard eventSourceTask.value == nil else {
+        guard !isClientDisconnected else {
             return false
         }
 
-        guard !_isClientDisconnected.value else {
-            return false
+        if connection.receiveEvents() {
+            skipPresentationStop.setValue(true)
+            return true
         }
 
-        skipPresentationStop.setValue(true)
-
-        eventSourceTask.setValue(Task {
-            do {
-                for try await event in eventSource.events() {
-                    await handleEvent(event)
-                }
-            } catch {
-                eventSourceTask.setValue(nil)
-                await handleEvent(.failure(FailureEvent(error: error)))
-            }
-        })
-
-        return true
+        return false
     }
 
     @discardableResult
@@ -137,17 +134,20 @@ final class DefaultConference: Conference {
 
     func leave() async {
         logger?.info("Leaving the conference")
-        eventSourceTask.value?.cancel()
-        eventSourceTask.setValue(nil)
-        await tokenRefresher.endRefreshing(
-            withTokenRelease: !isClientDisconnected
-        )
+        cancelTasks()
         await roster.clear()
     }
 
-    // MARK: - Events
+    // MARK: - Private
+
+    private func cancelTasks() {
+        eventTask?.cancel()
+        eventTask = nil
+        connection.cancel(withTokenRelease: !isClientDisconnected)
+    }
 
     // swiftlint:disable cyclomatic_complexity
+    @MainActor
     private func handleEvent(_ event: ConferenceEvent) async {
         if case .presentationStop = event, skipPresentationStop.value {
             skipPresentationStop.setValue(false)
@@ -184,11 +184,6 @@ final class DefaultConference: Conference {
             break
         }
 
-        await sendEvent(event)
-    }
-
-    @MainActor
-    private func sendEvent(_ event: ConferenceEvent) {
         delegate?.conference(self, didReceiveEvent: event)
         eventSubject.send(event)
     }

@@ -1,6 +1,8 @@
 import Foundation
 
-public protocol InfinityToken: CustomDebugStringConvertible {
+public protocol InfinityToken {
+    static var name: String { get }
+
     var value: String { get }
     var expires: TimeInterval { get }
     var updatedAt: Date { get }

@@ -6,7 +6,7 @@ import PexipCore
 
 /// Registration is responsible for subscribing to
 /// and handling of the registration events.
-public protocol Registration {
+public protocol Registration: AnyObject {
     /// The object that acts as the delegate of the registration.
     var delegate: RegistrationDelegate? { get set }
 
@@ -20,7 +20,7 @@ public protocol Registration {
     func receiveEvents() -> Bool
 
     /// Cancels all registration activities. Once cancelled, the ``Registration`` object is no longer valid.
-    func cancel() async
+    func cancel()
 }
 
 // MARK: - Implementation
@@ -31,67 +31,63 @@ final class DefaultRegistration: Registration {
         eventSubject.eraseToAnyPublisher()
     }
 
-    private typealias EventSourceTask = Task<Void, Never>
-
-    private let tokenRefresher: TokenRefresher
-    private let eventSource: InfinityEventSource<RegistrationEvent>
+    private let connection: InfinityConnection<RegistrationEvent>
     private let logger: Logger?
-    private let eventSourceTask = Synchronized<EventSourceTask?>(nil)
     private var eventSubject = PassthroughSubject<RegistrationEvent, Never>()
+    private var eventTask: Task<Void, Never>?
 
     // MARK: - Init
 
     init(
-        tokenRefresher: TokenRefresher,
-        eventSource: InfinityEventSource<RegistrationEvent>,
+        connection: InfinityConnection<RegistrationEvent>,
         logger: Logger?
     ) {
-        self.tokenRefresher = tokenRefresher
-        self.eventSource = eventSource
+        self.connection = connection
         self.logger = logger
 
-        Task {
-            await tokenRefresher.startRefreshing(onError: { error in
-                Task { [weak self] in
-                    await self?.handleEvent(.failure(FailureEvent(error: error)))
+        eventTask = Task { [weak self] in
+            guard let events = self?.connection.events() else {
+                return
+            }
+
+            for await event in events {
+                do {
+                    await self?.handleEvent(try event.get())
+                } catch {
+                    await self?.handleEvent(
+                        .failure(FailureEvent(error: error))
+                    )
                 }
-            })
+            }
         }
 
         logger?.info("Creating a new registration.")
     }
 
+    deinit {
+        cancelTasks()
+    }
+
     @discardableResult
     func receiveEvents() -> Bool {
-        guard eventSourceTask.value == nil else {
-            return false
-        }
-
-        eventSourceTask.setValue(Task {
-            do {
-                for try await event in eventSource.events() {
-                    await handleEvent(event)
-                }
-            } catch {
-                eventSourceTask.setValue(nil)
-                await handleEvent(.failure(FailureEvent(error: error)))
-            }
-        })
-
-        return true
+        connection.receiveEvents()
     }
 
-    func cancel() async {
+    func cancel() {
         logger?.info("Cancelling all registration activities")
-        eventSourceTask.value?.cancel()
-        eventSourceTask.setValue(nil)
-        await tokenRefresher.endRefreshing(withTokenRelease: true)
+        cancelTasks()
     }
 
-    // MARK: - Events
+    // MARK: - Private
+
+    private func cancelTasks() {
+        eventTask?.cancel()
+        eventTask = nil
+        connection.cancel(withTokenRelease: true)
+    }
 
     @MainActor
-    private func handleEvent(_ event: RegistrationEvent) {
+    private func handleEvent(_ event: RegistrationEvent) async {
         delegate?.registration(self, didReceiveEvent: event)
         eventSubject.send(event)
     }

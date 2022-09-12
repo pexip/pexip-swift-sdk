@@ -14,6 +14,10 @@ final class RegistrationTokenTests: XCTestCase {
 
     // MARK: - Tests
 
+    func testName() {
+        XCTAssertEqual(RegistrationToken.name, "Registration token")
+    }
+
     func testDecoding() throws {
         let tokenValue = "SE9TVAltZ...etc...zNiZjlmNjFhMTlmMTJiYTE%3D"
         let registrationId = UUID()

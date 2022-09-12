@@ -84,7 +84,7 @@ struct DefaultNodeService: NodeService {
         return DefaultRegistrationService(
             baseURL: baseURL
                 .appendingPathComponent("registrations")
-                .appendingPathComponent(deviceAlias.alias),
+                .appendingPathComponent(deviceAlias.uri),
             client: client,
             decoder: decoder,
             logger: logger

@@ -12,6 +12,12 @@ final class ConferenceTokenTests: XCTestCase {
         calendar.timeZone = try XCTUnwrap(TimeZone(abbreviation: "GMT"))
     }
 
+    // MARK: - Tests
+
+    func testName() {
+        XCTAssertEqual(ConferenceToken.name, "Conference token")
+    }
+
     // swiftlint:disable function_body_length
     func testDecoding() throws {
         let tokenValue = "SE9TVAltZ...etc...zNiZjlmNjFhMTlmMTJiYTE%3D"

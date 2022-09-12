@@ -8,7 +8,7 @@ import TestHelpers
 final class ConferenceTests: XCTestCase {
     private var conference: DefaultConference!
     private var tokenStore: TokenStore<ConferenceToken>!
-    private var tokenRefresher: TokenRefresherMock!
+    private var tokenRefreshTask: TokenRefreshTaskMock!
     private var eventSource: InfinityEventSource<ConferenceEvent>!
     private var liveCaptionsService: LiveCaptionsServiceMock!
     private var roster: Roster!
@@ -26,7 +26,7 @@ final class ConferenceTests: XCTestCase {
 
         let token = ConferenceToken.randomToken()
         tokenStore = TokenStore<ConferenceToken>(token: token)
-        tokenRefresher = TokenRefresherMock()
+        tokenRefreshTask = TokenRefreshTaskMock()
         liveCaptionsService = LiveCaptionsServiceMock()
         delegateMock = ConferenceDelegateMock()
         eventSender = TestResultSender()
@@ -58,10 +58,12 @@ final class ConferenceTests: XCTestCase {
         chat = Chat(senderName: "Test", senderId: UUID(), sendMessage: { _ in true })
 
         conference = DefaultConference(
+            connection: InfinityConnection(
+                tokenRefreshTask: tokenRefreshTask,
+                eventSource: eventSource
+            ),
             tokenStore: tokenStore,
-            tokenRefresher: tokenRefresher,
             signalingChannel: SignalingChannelMock(),
-            eventSource: eventSource,
             roster: roster,
             liveCaptionsService: liveCaptionsService,
             chat: chat,
@@ -80,11 +82,6 @@ final class ConferenceTests: XCTestCase {
 
     // MARK: - Tests
 
-    func testInit() async {
-        let isRefreshing = await tokenRefresher.isRefreshing
-        XCTAssertTrue(isRefreshing)
-    }
-
     func testFailureEventOnTokenRefreshError() {
         let error = URLError(.unknown)
         var receivedEvents = [ConferenceEvent]()
@@ -98,7 +95,9 @@ final class ConferenceTests: XCTestCase {
                 }.store(in: &cancellables)
             },
             after: {
-                tokenRefresher.onError?(error)
+                Task(priority: .low) {
+                    tokenRefreshTask.subject.send(.failed(error))
+                }
             }
         )
 
@@ -413,9 +412,8 @@ final class ConferenceTests: XCTestCase {
         let assertExpectation = expectation(description: "Assert expectation")
 
         Task { @MainActor in
-            let isRefreshing = await tokenRefresher.isRefreshing
-            XCTAssertFalse(isRefreshing)
-            XCTAssertTrue(tokenRefresher.withTokenRelease)
+            XCTAssertFalse(tokenRefreshTask.isCancelCalled)
+            XCTAssertTrue(tokenRefreshTask.isCancelAndReleaseCalled)
             XCTAssertTrue(isEventSourceTerminated)
             XCTAssertTrue(roster.participants.isEmpty)
             assertExpectation.fulfill()
@@ -456,11 +454,76 @@ final class ConferenceTests: XCTestCase {
         let assertExpectation = expectation(description: "Assert expectation")
 
         Task { @MainActor in
-            let isRefreshing = await tokenRefresher.isRefreshing
-            XCTAssertFalse(isRefreshing)
-            XCTAssertFalse(tokenRefresher.withTokenRelease)
+            XCTAssertTrue(tokenRefreshTask.isCancelCalled)
+            XCTAssertFalse(tokenRefreshTask.isCancelAndReleaseCalled)
             XCTAssertTrue(isEventSourceTerminated)
             XCTAssertTrue(roster.participants.isEmpty)
+            assertExpectation.fulfill()
+        }
+
+        wait(for: [assertExpectation], timeout: 0.1)
+    }
+
+    func testDeinit() {
+        leaveExpectation = expectation(description: "Leave expectation")
+
+        // 1. Subscribe to events
+        conference.receiveEvents()
+
+        // 2. Deinit
+        Task { @MainActor in
+            conference = nil
+        }
+
+        wait(for: [leaveExpectation!], timeout: 0.1)
+
+        // 3. Assert
+        let assertExpectation = expectation(description: "Assert expectation")
+
+        Task { @MainActor in
+            XCTAssertTrue(tokenRefreshTask.isCancelCalled)
+            XCTAssertTrue(tokenRefreshTask.isCancelAndReleaseCalled)
+            XCTAssertTrue(isEventSourceTerminated)
+            assertExpectation.fulfill()
+        }
+
+        wait(for: [assertExpectation], timeout: 0.1)
+    }
+
+    func testDeinitWhenDisconnected() {
+        leaveExpectation = expectation(description: "Leave expectation")
+
+        // 1. Subscribe to events
+        conference.receiveEvents()
+
+        // 2. Send events
+        wait(
+            for: { expectation in
+                conference.eventPublisher.sink { _ in
+                    expectation.fulfill()
+                }.store(in: &cancellables)
+            },
+            after: {
+                eventSender.send(
+                    .success(.clientDisconnected(.init(reason: "Unknown")))
+                )
+            }
+        )
+
+        // 3. Deinit
+        Task { @MainActor in
+            conference = nil
+        }
+
+        wait(for: [leaveExpectation!], timeout: 0.1)
+
+        // 4. Assert
+        let assertExpectation = expectation(description: "Assert expectation")
+
+        Task { @MainActor in
+            XCTAssertTrue(tokenRefreshTask.isCancelCalled)
+            XCTAssertFalse(tokenRefreshTask.isCancelAndReleaseCalled)
+            XCTAssertTrue(isEventSourceTerminated)
             assertExpectation.fulfill()
         }
 

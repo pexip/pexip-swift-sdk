@@ -14,6 +14,28 @@ public protocol InfinityService {
     func node(url: URL) -> NodeService
 }
 
+public extension InfinityService {
+    /// Resolves the first available conferencing node.
+    /// 
+    /// - Parameters:
+    ///   - host: A host to use to resolve the best node address.
+    ///   - nodeResolver: An instance of ``NodeResolver``
+    /// - Returns: A conferencing node address
+    func resolveNodeURL(
+        forHost host: String,
+        using nodeResolver: NodeResolver
+    ) async throws -> URL? {
+        // swiftlint: disable for_where
+        for url in try await nodeResolver.resolveNodes(for: host) {
+            if try await node(url: url).status() {
+                return url
+            }
+        }
+
+        return nil
+    }
+}
+
 // MARK: - Implementation
 
 struct DefaultInfinityService: InfinityService {

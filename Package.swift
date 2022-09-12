@@ -50,26 +50,22 @@ let package = Package(
 
         .target(
             name: "PexipInfinityClient",
-            dependencies: ["PexipCore"],
-            plugins: [.swiftlint]
+            dependencies: ["PexipCore"]
         ),
         .testTarget(
             name: "PexipInfinityClientTests",
-            dependencies: ["PexipInfinityClient", "TestHelpers"],
-            plugins: [.swiftlint]
+            dependencies: ["PexipInfinityClient", "TestHelpers"]
         ),
 
         // MARK: - PexipMedia
 
         .target(
             name: "PexipMedia",
-            dependencies: ["PexipCore", "PexipScreenCapture"],
-            plugins: [.swiftlint]
+            dependencies: ["PexipCore", "PexipScreenCapture"]
         ),
         .testTarget(
             name: "PexipMediaTests",
-            dependencies: ["PexipMedia", "TestHelpers"],
-            plugins: [.swiftlint]
+            dependencies: ["PexipMedia", "TestHelpers"]
         ),
 
         // MARK: - PexipRTC
@@ -80,33 +76,28 @@ let package = Package(
                 "PexipMedia",
                 "PexipCore",
                 .product(name: "WebRTC", package: "webrtc-ios-builds")
-            ],
-            plugins: [.swiftlint]
+            ]
         ),
         .testTarget(
             name: "PexipRTCTests",
-            dependencies: ["PexipRTC"],
-            plugins: [.swiftlint]
+            dependencies: ["PexipRTC"]
         ),
 
         // MARK: -  PexipCore
 
         .target(
-            name: "PexipCore",
-            plugins: [.swiftlint]
+            name: "PexipCore"
         ),
         .testTarget(
             name: "PexipCoreTests",
-            dependencies: ["PexipCore"],
-            plugins: [.swiftlint]
+            dependencies: ["PexipCore"]
         ),
 
         // MARK: - PexipVideoFilters
 
         .target(
             name: "PexipVideoFilters",
-            dependencies: ["PexipCore"],
-            plugins: [.swiftlint]
+            dependencies: ["PexipCore"]
         ),
         .testTarget(
             name: "PexipVideoFiltersTests",
@@ -119,20 +110,17 @@ let package = Package(
             resources: [
                 .copy("Resources/testVideo.mp4"),
                 .copy("Resources/testImage.jpg"),
-            ],
-            plugins: [.swiftlint]
+            ]
         ),
 
         // MARK: - PexipScreenCapture
 
         .target(
-            name: "PexipScreenCapture",
-            plugins: [.swiftlint]
+            name: "PexipScreenCapture"
         ),
         .testTarget(
             name: "PexipScreenCaptureTests",
-            dependencies: ["PexipScreenCapture", "TestHelpers"],
-            plugins: [.swiftlint]
+            dependencies: ["PexipScreenCapture", "TestHelpers"]
         ),
 
         // MARK: - TestHelpers
@@ -140,7 +128,7 @@ let package = Package(
         .target(
             name: "TestHelpers",
             path: "Tests/TestHelpers",
-            plugins: [.swiftlint]
+            plugins: ["SwiftLint"]
         ),
 
         // MARK: - Plugins
@@ -160,7 +148,3 @@ let package = Package(
         )
     ]
 )
-
-extension Target.PluginUsage {
-    static let swiftlint = Target.PluginUsage(stringLiteral: "SwiftLint")
-}
