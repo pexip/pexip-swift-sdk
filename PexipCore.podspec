@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-    s.name         = 'PexipUtils'
+    s.name         = 'PexipCore'
     s.version      = '0.4.0'
     s.summary      = 'Pexip Swift SDK extensions, utilities and shared components.'
     s.description  = <<-DESC
@@ -58,10 +58,10 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
     s.source = {
-      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/0.4.0/PexipUtils.xcframework.zip',
+      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/0.4.0/PexipCore.xcframework.zip',
       sha256: 'e672b276f94679d208e8b69e285991f4b6bed3c9a1ca7617ea2e3524fd6a7988',
       type: 'zip',
       headers: ['Accept: application/octet-stream']
     }
-    s.vendored_frameworks = 'PexipUtils.xcframework'
+    s.vendored_frameworks = 'PexipCore.xcframework'
 end

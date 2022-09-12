@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
-    s.name         = 'PexipConference'
+    s.name         = 'PexipVideoFilters'
     s.version      = '0.4.0'
-    s.summary      = 'Core components for working with conferences hosted on the Pexip Infinity platform'
+    s.summary      = 'A set of built-in video filters ready to use in your video conferencing app.'
     s.description  = <<-DESC
                      Pexip Swift SDK is designed for use by iOS/macOS voice/video applications 
                      that want to initiate or connect to conferences hosted on the Pexip Infinity platform.
@@ -58,12 +58,11 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
     s.source = {
-      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/0.4.0/PexipConference.xcframework.zip',
-      sha256: '3f99e739c782fb507d4a2402e715c82719b106c11ea20a8e380e1da31c737eab',
+      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/0.4.0/PexipVideoFilters.xcframework.zip',
+      sha256: '23bca19db5ef0cd67df376966600b76f0fe5cd9ab6e0d70cb44bc102f2e0eb09',
       type: 'zip',
       headers: ['Accept: application/octet-stream']
     }
-    s.vendored_frameworks = 'PexipConference.xcframework'
-    s.dependency 'PexipInfinityClient', "#{s.version}"
-    s.dependency 'PexipMedia', "#{s.version}"
+    s.vendored_frameworks = 'PexipVideoFilters.xcframework'
+    s.dependency 'PexipCore', "#{s.version}"
 end

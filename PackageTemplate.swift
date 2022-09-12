@@ -9,10 +9,6 @@ let package = Package(
     ],
     products: [
         .library(
-            name: "PexipConference",
-            targets: ["PexipConferenceTargets"]
-        ),
-        .library(
             name: "PexipInfinityClient",
             targets: ["PexipInfinityClientTargets"]
         ),
@@ -22,11 +18,19 @@ let package = Package(
         ),
         .library(
             name: "PexipMedia",
-            targets: ["PexipMedia"]
+            targets: ["PexipMediaTargets"]
         ),
         .library(
-            name: "PexipUtils",
-            targets: ["PexipUtils"]
+            name: "PexipVideoFilters",
+            targets: ["PexipVideoFiltersTargets"]
+        ),
+        .library(
+            name: "PexipScreenCapture",
+            targets: ["PexipScreenCapture"]
+        ),
+        .library(
+            name: "PexipCore",
+            targets: ["PexipCore"]
         ),
         .library(
             name: "WebRTC",
@@ -34,26 +38,11 @@ let package = Package(
         )
     ],
     targets: [
-        // PexipConference
-        .target(name: "PexipConferenceTargets",
-            dependencies: [
-                .target(name: "PexipConference"),
-                .target(name: "PexipInfinityClient"),
-                .target(name: "PexipMedia"),
-                .target(name: "PexipUtils")
-            ],
-            path: "Sources/PexipConference"
-        ),
-        .binaryTarget(
-            name: "PexipConference",
-            url: "PexipConference_url",
-            checksum: "PexipConference_checksum"
-        ),
         // PexipInfinityClient
         .target(name: "PexipInfinityClientTargets",
             dependencies: [
                 .target(name: "PexipInfinityClient"),
-                .target(name: "PexipUtils")
+                .target(name: "PexipCore")
             ],
             path: "Sources/PexipInfinityClient"
         ),
@@ -62,12 +51,14 @@ let package = Package(
             url: "PexipInfinityClient_url",
             checksum: "PexipInfinityClient_checksum"
         ),
+
         // PexipRTC
         .target(name: "PexipRTCTargets",
             dependencies: [
                 .target(name: "PexipRTC"),
-                .target(name: "PexipUtils"),
                 .target(name: "PexipMedia"),
+                .target(name: "PexipCore"),
+                .target(name: "PexipScreenCapture"),
                 .target(name: "WebRTC")
             ],
             path: "Sources/PexipRTC"
@@ -77,18 +68,50 @@ let package = Package(
             url: "PexipRTC_url",
             checksum: "PexipRTC_checksum"
         ),
+
         // PexipMedia
+        .target(name: "PexipMediaTargets",
+            dependencies: [
+                .target(name: "PexipMedia"),
+                .target(name: "PexipCore"),
+                .target(name: "PexipScreenCapture")
+            ],
+            path: "Sources/PexipMedia"
+        ),
         .binaryTarget(
             name: "PexipMedia",
             url: "PexipMedia_url",
             checksum: "PexipMedia_checksum"
         ),
-        // PexipUtils
-        .binaryTarget(
-            name: "PexipUtils",
-            url: "PexipUtils_url",
-            checksum: "PexipUtils_checksum"
+
+        // PexipVideoFilters
+        .target(name: "PexipVideoFiltersTargets",
+            dependencies: [
+                .target(name: "PexipVideoFilters"),
+                .target(name: "PexipCore")
+            ],
+            path: "Sources/PexipVideoFilters"
         ),
+        .binaryTarget(
+            name: "PexipVideoFilters",
+            url: "PexipVideoFilters_url",
+            checksum: "PexipVideoFilters_checksum"
+        ),
+
+        // PexipScreenCapture
+        .binaryTarget(
+            name: "PexipScreenCapture",
+            url: "PexipScreenCapture_url",
+            checksum: "PexipScreenCapture_checksum"
+        ),
+
+        // PexipCore
+        .binaryTarget(
+            name: "PexipCore",
+            url: "PexipCore_url",
+            checksum: "PexipCore_checksum"
+        ),
+
         // WebRTC
         .binaryTarget(
             name: "WebRTC",
