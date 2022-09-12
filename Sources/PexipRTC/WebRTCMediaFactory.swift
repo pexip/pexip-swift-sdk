@@ -3,7 +3,10 @@ import PexipCore
 import PexipMedia
 import PexipScreenCapture
 
-public final class WebRTCMediaConnectionFactory: MediaConnectionFactory {
+public final class WebRTCMediaFactory: MediaConnectionFactory,
+                                       CameraVideoTrackFactory,
+                                       LocalAudioTrackFactory,
+                                       ScreenMediaTrackFactory {
     private let factory: RTCPeerConnectionFactory
     private let logger: Logger?
 
