@@ -3,7 +3,7 @@
 
 import PackageDescription
 
-let isDevelopment = true
+let isDevelopment = false
 let sdkName = isDevelopment ? "pexip-swift-sdk-sources" : "pexip-swift-sdk"
 let sdkPackage: Package.Dependency = isDevelopment
     ? .package(path: "../../../../\(sdkName)")
