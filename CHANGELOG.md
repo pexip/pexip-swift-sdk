@@ -7,6 +7,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.0] - 2022-09-13
+
+### Added
+
+- Make it possible to receive incoming calls with [Registration API](https://pexip.github.io/pexip-swift-sdk/sdk/documentation/pexipswiftsdk/registration)
+
+### Changed
+- Update WebRTC to M105
+- Remove `PixipConference` framework, use [PexipInfinityClient](https://pexip.github.io/pexip-swift-sdk/frameworks/ios/PexipInfinityClient/documentation/pexipinfinityclient/) instead
+- Rename `PexipUtils` framework to [PexipCore](https://pexip.github.io/pexip-swift-sdk/frameworks/ios/PexipCore/documentation/pexipcore/)
+- Screen sharing: move functionality to a separate [PexipScreenCapture](https://pexip.github.io/pexip-swift-sdk/frameworks/ios/PexipScreenCapture/documentation/pexipscreencapture/) framework
+- Video filters: move functionality to a separate [PexipVideoFilters](https://pexip.github.io/pexip-swift-sdk/frameworks/ios/PexipVideoFilters/documentation/pexipvideofilters/)
+- DTMF APIs were moved to [MediaConnection](https://pexip.github.io/pexip-swift-sdk/frameworks/ios/PexipMedia/documentation/pexipmedia/mediaconnection/dtmf(signals:)) and [CallService](https://pexip.github.io/pexip-swift-sdk/frameworks/ios/PexipInfinityClient/documentation/pexipinfinityclient/callservice/dtmf(signals:token:))
+- Various breaking changes in the public APIs, see the [Example project](https://github.com/pexip/pexip-swift-sdk/tree/main/Examples/Conference) for more info. 
+
 ## [0.4.0] - 2022-08-02
 
 ### Added
@@ -46,7 +61,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Initial release
 
-[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.5.0
 [0.4.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.4.0
 [0.3.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.3.0
 [0.2.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.2.0
