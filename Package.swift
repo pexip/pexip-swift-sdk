@@ -1,4 +1,4 @@
-// swift-tools-version:5.6
+// swift-tools-version:5.7
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -38,7 +38,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/pexip/webrtc-ios-builds",
-            exact: .init(96, 0, 4664)
+            exact: "105.0.0"
         ),
         .package(
             url: "https://github.com/pointfreeco/swift-snapshot-testing.git",
@@ -64,6 +64,9 @@ let package = Package(
             dependencies: [
                 "PexipMedia",
                 .product(name: "WebRTC", package: "webrtc-ios-builds")
+            ],
+            cSettings: [
+               .unsafeFlags(["-w"])
             ]
         ),
         .testTarget(

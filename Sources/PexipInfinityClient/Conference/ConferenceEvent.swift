@@ -302,23 +302,19 @@ public struct LiveCaptions: Codable, Hashable {
         case data
         case isFinal = "is_final"
         case sentAt = "sent_time"
-        case receivedAt = "received_time"
     }
 
     public let data: String
     public let isFinal: Bool
-    public let sentAt: TimeInterval
-    public let receivedAt: TimeInterval
+    public let sentAt: TimeInterval?
 
     public init(
         data: String,
         isFinal: Bool,
-        sentAt: TimeInterval,
-        receivedAt: TimeInterval
+        sentAt: TimeInterval?
     ) {
         self.data = data
         self.isFinal = isFinal
         self.sentAt = sentAt
-        self.receivedAt = receivedAt
     }
 }

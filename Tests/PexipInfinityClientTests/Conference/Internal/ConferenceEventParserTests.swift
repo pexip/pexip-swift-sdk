@@ -184,8 +184,7 @@ final class ConferenceEventParserTests: XCTestCase {
         let expectedLiveCaptions = LiveCaptions(
             data: "Test",
             isFinal: true,
-            sentAt: Date().timeIntervalSinceReferenceDate,
-            receivedAt: Date().timeIntervalSinceReferenceDate
+            sentAt: Date().timeIntervalSinceReferenceDate
         )
         let httpEvent = try HTTPEvent.stub(for: expectedLiveCaptions, name: "live_captions")
 
