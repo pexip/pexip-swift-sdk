@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipVideoFilters'
-    s.version      = '0.4.0'
+    s.version      = '0.5.0'
     s.summary      = 'A set of built-in video filters ready to use in your video conferencing app.'
     s.description  = <<-DESC
                      Pexip Swift SDK is designed for use by iOS/macOS voice/video applications 
@@ -58,8 +58,8 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
     s.source = {
-      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/0.4.0/PexipVideoFilters.xcframework.zip',
-      sha256: '23bca19db5ef0cd67df376966600b76f0fe5cd9ab6e0d70cb44bc102f2e0eb09',
+      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/0.5.0/PexipVideoFilters.xcframework.zip',
+      sha256: '2a1b53879ef0fe25d4ccba764dddc28b2c4411d9a53cffed6c403c8eb341132e',
       type: 'zip',
       headers: ['Accept: application/octet-stream']
     }

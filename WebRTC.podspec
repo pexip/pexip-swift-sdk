@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'WebRTC'
-    s.version      = '96.0.4664'
+    s.version      = '105.0.0'
     s.summary      = 'WebRTC binaries for Apple platforms'
     s.description  = <<-DESC
                      WebRTC is a free and open-source project providing web browsers and 
@@ -44,8 +44,8 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
     s.source = {
-      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/0.4.0/WebRTC.xcframework.zip',
-      sha256: '1ddefa62bfe01fbb2fbebea94c7c7992a26e09d3f0ee6c18ee008f62f498ce6f',
+      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/0.5.0/WebRTC.xcframework.zip',
+      sha256: '921c2bc805f04fdb22b2cc97f67e4bf33c538845d0097e620e635194dd68d9c3',
       type: 'zip',
       headers: ['Accept: application/octet-stream']
     }

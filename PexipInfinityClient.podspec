@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipInfinityClient'
-    s.version      = '0.4.0'
+    s.version      = '0.5.0'
     s.summary      = 'A fluent client for Pexip Infinity REST API v2, conference controls, events, media signaling and token refreshing.'
     s.description  = <<-DESC
                      Pexip Swift SDK is designed for use by iOS/macOS voice/video applications 
@@ -58,8 +58,8 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
     s.source = {
-      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/0.4.0/PexipInfinityClient.xcframework.zip',
-      sha256: 'c7c0f61949b80b597d44abe282d7e4e942139c83d4d2f1d08f9738f033107efa',
+      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/0.5.0/PexipInfinityClient.xcframework.zip',
+      sha256: 'd1e0c3432def50f07133964d4cd79e3c3872a12fc7262ec526b4593221b3b56e',
       type: 'zip',
       headers: ['Accept: application/octet-stream']
     }
