@@ -2,6 +2,7 @@ import Foundation
 import PexipCore
 
 public struct ConferenceToken: InfinityToken, Codable, Hashable {
+    @frozen
     public enum Role: String, Codable, Hashable {
         case host = "HOST"
         case guest = "GUEST"

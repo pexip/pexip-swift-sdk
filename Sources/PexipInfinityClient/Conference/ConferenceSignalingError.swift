@@ -1,5 +1,6 @@
 import Foundation
 
+@frozen
 public enum ConferenceSignalingError: LocalizedError, CustomStringConvertible, Hashable {
     case pwdsMissing
     case ufragMissing

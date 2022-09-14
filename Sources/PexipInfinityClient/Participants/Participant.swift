@@ -65,6 +65,7 @@ public struct Participant: Codable, Hashable, Identifiable {
     }
 
     /// Either "in" or "out" as to whether this is an inbound or outbound call.
+    @frozen
     public enum CallDirection: String, Codable, Hashable {
         /// Inbound call
         case inbound = "in"
@@ -73,6 +74,7 @@ public struct Participant: Codable, Hashable, Identifiable {
     }
 
     /// The level of privileges the participant has in the conference.
+    @frozen
     public enum Role: String, Codable, Hashable {
         /// The participant has Guest privileges
         case guest
@@ -80,6 +82,7 @@ public struct Participant: Codable, Hashable, Identifiable {
         case chair
     }
 
+    @frozen
     public enum ServiceType: String, Codable, Hashable {
         /// For a dial-out participant that has not been answered
         case connecting = "connecting"

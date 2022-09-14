@@ -1,5 +1,6 @@
 import Foundation
 
+@frozen
 public enum ValidationError: LocalizedError, CustomStringConvertible, Hashable {
     case invalidArgument
 

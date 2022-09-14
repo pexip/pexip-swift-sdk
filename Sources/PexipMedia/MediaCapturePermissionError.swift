@@ -1,5 +1,6 @@
 import AVFoundation
 
+@frozen
 public enum MediaCapturePermissionError: LocalizedError,
                                          CustomStringConvertible,
                                          CaseIterable {

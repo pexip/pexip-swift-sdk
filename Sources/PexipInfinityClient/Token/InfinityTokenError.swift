@@ -1,5 +1,6 @@
 import Foundation
 
+@frozen
 public enum InfinityTokenError: LocalizedError, CustomStringConvertible, Hashable {
     case tokenExpired
 

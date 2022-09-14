@@ -1,5 +1,6 @@
 import Foundation
 
+@frozen
 public enum HTTPError: LocalizedError, CustomStringConvertible, Hashable {
     case invalidHTTPResponse
     case noDataInResponse

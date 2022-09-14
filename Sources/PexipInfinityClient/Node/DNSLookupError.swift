@@ -1,5 +1,6 @@
 import Foundation
 
+@frozen
 public enum DNSLookupError: LocalizedError, CustomStringConvertible, Hashable {
     case timeout
     case lookupFailed(code: Int32)

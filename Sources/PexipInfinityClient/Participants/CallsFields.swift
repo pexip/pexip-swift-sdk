@@ -1,6 +1,7 @@
 import Foundation
 
 public struct CallsFields: Encodable, Hashable {
+    @frozen
     public enum Present: String, Encodable {
         case main
         case send

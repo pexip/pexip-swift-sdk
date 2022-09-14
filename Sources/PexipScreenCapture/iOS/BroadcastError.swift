@@ -3,6 +3,7 @@
 import Foundation
 
 /// An object that represents the error occured during IPC.
+@frozen
 public enum BroadcastError: LocalizedError, CustomStringConvertible, CustomNSError {
     public static let errorDomain = "com.pexip.PexipMedia.BroadcastError"
 

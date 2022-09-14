@@ -1,5 +1,6 @@
 import Foundation
 
+@frozen
 public enum ConferenceTokenError: LocalizedError, Hashable {
     /// The supplied `pin` is invalid
     case invalidPin

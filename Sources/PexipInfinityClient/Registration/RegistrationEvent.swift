@@ -1,6 +1,7 @@
 import Foundation
 
 /// Registration-related events.
+@frozen
 public enum RegistrationEvent: Hashable {
     /// An event to be sent when there is a new icoming call.
     case incoming(IncomingCallEvent)

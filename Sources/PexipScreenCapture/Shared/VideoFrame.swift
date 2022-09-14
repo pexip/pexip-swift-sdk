@@ -4,6 +4,7 @@ import CoreMedia
 import CoreImage
 
 /// An object that represents a video frame.
+@frozen
 public struct VideoFrame {
     /// The capture status
     public enum Status {

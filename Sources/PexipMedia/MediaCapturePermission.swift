@@ -27,11 +27,13 @@ extension NSWorkspace: URLOpener {}
 
 public struct MediaCapturePermission {
     /// The media type, either video or audio
+    @frozen
     public enum MediaType {
         case audio
         case video
     }
 
+    @frozen
     public enum Status {
         case granted
         case requested

@@ -1,3 +1,4 @@
+@frozen
 public enum MediaConnectionState: String, CustomStringConvertible, CaseIterable {
     case new
     case connecting

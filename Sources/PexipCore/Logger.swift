@@ -2,6 +2,7 @@ import os.log
 
 // MARK: - Types
 
+@frozen
 public enum LogLevel: String, CaseIterable {
     case debug = "🟣"
     case info = "🟢"

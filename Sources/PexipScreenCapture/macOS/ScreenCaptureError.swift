@@ -4,6 +4,7 @@ import Foundation
 import CoreGraphics
 
 /// An object that represents the error occured during screen capture.
+@frozen
 public enum ScreenCaptureError: LocalizedError, CustomStringConvertible, Hashable {
     case cgError(CGError)
     case noScreenMediaSourceAvailable

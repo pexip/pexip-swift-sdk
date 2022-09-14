@@ -4,6 +4,7 @@ import Foundation
 // MARK: - Delegate
 
 /// Participant events
+@frozen
 public enum ParticipantEvent: Hashable {
     case added(Participant)
     case updated(Participant)

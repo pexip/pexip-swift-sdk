@@ -5,6 +5,7 @@ import CoreMedia
 import ScreenCaptureKit
 
 /// A source of the screen content for media capture.
+@frozen
 public enum ScreenMediaSource: Equatable {
     public static func == (lhs: ScreenMediaSource, rhs: ScreenMediaSource) -> Bool {
         switch (lhs, rhs) {

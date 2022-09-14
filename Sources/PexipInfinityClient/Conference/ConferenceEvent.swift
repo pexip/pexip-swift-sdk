@@ -1,6 +1,7 @@
 import Foundation
 
 /// Conference-related events.
+@frozen
 public enum ConferenceEvent: Hashable {
     /// Conference properties have been updated.
     case conferenceUpdate(ConferenceStatus)
