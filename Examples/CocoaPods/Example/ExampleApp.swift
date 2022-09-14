@@ -1,9 +1,10 @@
 import SwiftUI
-import PexipConference
 import PexipInfinityClient
 import PexipMedia
 import PexipRTC
-import PexipUtils
+import PexipCore
+import PexipScreenCapture
+import PexipVideoFilters
 import WebRTC
 
 // Check SPM demo app to learn how to use the Pexip SDK

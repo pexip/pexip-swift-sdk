@@ -4,6 +4,7 @@ inhibit_all_warnings!
 
 target 'Example' do
   use_frameworks!
-  pod 'PexipConference'
+  pod 'PexipInfinityClient'
   pod 'PexipRTC'
+  pod 'PexipVideoFilters'
 end
