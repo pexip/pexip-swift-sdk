@@ -9,7 +9,7 @@ extension RTCRtpTransceiver {
         var error: NSError?
         setDirection(direction, error: &error)
 
-        if let error = error {
+        if let error {
             throw error
         }
     }

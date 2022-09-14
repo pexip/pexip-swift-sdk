@@ -37,7 +37,7 @@ final class WebRTCVideoProcessor: NSObject, RTCVideoCapturerDelegate {
             videoSource.capturer(capturer, didCapture: rtcVideoFrame)
         }
 
-        guard let videoFilter = videoFilter else {
+        guard let videoFilter else {
             return
         }
 

@@ -27,7 +27,7 @@ public enum BroadcastError: LocalizedError, CustomStringConvertible, CustomNSErr
         var info: [String: Any] = [NSLocalizedDescriptionKey: description]
 
         if case .broadcastFinished(let error) = self {
-            if let error = error {
+            if let error {
                 info[NSUnderlyingErrorKey] = error
             }
         }

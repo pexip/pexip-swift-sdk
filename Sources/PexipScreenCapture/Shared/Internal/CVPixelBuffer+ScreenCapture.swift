@@ -63,7 +63,7 @@ extension CVPixelBuffer {
                 &pixelBuffer
             )
 
-            guard let pixelBuffer = pixelBuffer, result == kCVReturnSuccess else {
+            guard let pixelBuffer, result == kCVReturnSuccess else {
                 return nil
             }
 

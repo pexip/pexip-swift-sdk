@@ -313,7 +313,7 @@ extension WebRTCMediaConnection: PeerConnectionDelegate {
         _ peerConnection: RTCPeerConnection,
         didGenerate candidate: RTCIceCandidate
     ) {
-        guard let sendOfferTask = sendOfferTask else {
+        guard let sendOfferTask else {
             return
         }
 

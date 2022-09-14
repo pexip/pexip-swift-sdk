@@ -63,7 +63,7 @@ final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate 
         let cropDimensions = videoFrame.contentDimensions
         var adaptedDimensions = cropDimensions
 
-        if let videoProfile = videoProfile {
+        if let videoProfile {
             adaptedDimensions = videoFrame.adaptedContentDimensions(
                 to: videoProfile.dimensions
             )

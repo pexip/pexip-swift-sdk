@@ -20,7 +20,7 @@ actor TokenStore<Token: InfinityToken> {
     func token() async throws -> Token {
         let token: Token
 
-        if let updateTask = updateTask {
+        if let updateTask {
             token = try await updateTask.value
         } else {
             token = self.token

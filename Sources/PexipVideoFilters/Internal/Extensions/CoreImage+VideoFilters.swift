@@ -38,7 +38,7 @@ extension CIImage {
             &pixelBuffer
         )
 
-        guard let pixelBuffer = pixelBuffer else {
+        guard let pixelBuffer else {
             return nil
         }
 

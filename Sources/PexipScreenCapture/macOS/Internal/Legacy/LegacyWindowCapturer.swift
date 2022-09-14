@@ -80,7 +80,7 @@ final class LegacyWindowCapturer: ScreenMediaCapturer {
             &pixelBuffer
         )
 
-        guard let pixelBuffer = pixelBuffer else {
+        guard let pixelBuffer else {
             return
         }
 

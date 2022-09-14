@@ -49,7 +49,7 @@ extension ScreenCaptureStreamFactory {
                 })
         }
 
-        if let filter = filter {
+        if let filter {
             return filter
         } else {
             throw ScreenCaptureError.noScreenMediaSourceAvailable

@@ -55,7 +55,7 @@ public struct VideoComponent: View {
     }
 
     public var body: some View {
-        if let aspectRatio = aspectRatio {
+        if let aspectRatio {
             videoView
                 .aspectRatio(
                     aspectRatio,

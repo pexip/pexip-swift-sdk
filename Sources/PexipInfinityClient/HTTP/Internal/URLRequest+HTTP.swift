@@ -15,7 +15,7 @@ extension URLRequest {
     }
 
     mutating func setQueryItems(_ queryItems: [URLQueryItem]) {
-        if let url = url, !queryItems.isEmpty {
+        if let url, !queryItems.isEmpty {
             var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
             components?.queryItems = queryItems
             self.url = components?.url

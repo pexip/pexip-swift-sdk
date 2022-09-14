@@ -20,7 +20,7 @@ extension HTTPURLResponse {
     }
 
     func validateContentType(_ acceptableContentTypes: Set<String>) throws {
-        guard let mimeType = mimeType, acceptableContentTypes.contains(mimeType) else {
+        guard let mimeType, acceptableContentTypes.contains(mimeType) else {
             throw HTTPError.unacceptableContentType(mimeType)
         }
     }

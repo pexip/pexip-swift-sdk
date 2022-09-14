@@ -31,7 +31,7 @@ public final class CoreMLPersonSegmenter: PersonSegmenter {
     // MARK: - Perform Requests
 
     public func personMaskPixelBuffer(from pixelBuffer: CVPixelBuffer) -> CVPixelBuffer? {
-        guard let request = request else {
+        guard let request else {
             return nil
         }
 

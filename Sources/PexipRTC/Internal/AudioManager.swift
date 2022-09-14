@@ -46,7 +46,7 @@ final class AudioManager {
 
     private func overrideOutputAudioPort(_ portOverride: AVAudioSession.PortOverride) {
         audioQueue.async { [weak self] in
-            guard let self = self else {
+            guard let self else {
                 return
             }
 

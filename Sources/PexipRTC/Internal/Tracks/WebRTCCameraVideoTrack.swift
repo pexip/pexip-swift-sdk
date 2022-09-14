@@ -96,7 +96,7 @@ final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
         currentDevice = newDevice
         stopCapture()
 
-        if let videoProfile = videoProfile {
+        if let videoProfile {
             try await startCapture(withVideoProfile: videoProfile)
         } else {
             try await startCapture()

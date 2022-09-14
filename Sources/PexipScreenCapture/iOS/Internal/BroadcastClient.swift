@@ -105,11 +105,11 @@ final class BroadcastClient: Publisher {
         }
 
         connection.receive { [weak self] data, _, isComplete, error in
-            guard let self = self else {
+            guard let self else {
                 return
             }
 
-            if let error = error {
+            if let error {
                 self.stop(error: error)
             } else if isComplete {
                 self.stop(error: nil)
@@ -148,7 +148,7 @@ private actor DataSender {
     }
 
     func send(data: Data) async throws {
-        if let task = task {
+        if let task {
             try? await task.value
         }
 
@@ -157,7 +157,7 @@ private actor DataSender {
                 connection.send(
                     content: data,
                     completion: .contentProcessed { error in
-                        if let error = error {
+                        if let error {
                             continuation.resume(throwing: error)
                         } else {
                             continuation.resume()

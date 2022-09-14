@@ -56,7 +56,7 @@ final class BroadcastServer: Publisher {
             try removeSocketFile()
 
             listener.stateUpdateHandler = { [weak self] state in
-                guard let self = self else {
+                guard let self else {
                     return
                 }
 
@@ -138,7 +138,7 @@ final class BroadcastServer: Publisher {
 
     private func readHandshake() {
         connection?.receive { [weak self] data, _, isComplete, error in
-            guard let self = self, data != nil else {
+            guard let self, data != nil else {
                 return
             }
 
@@ -166,7 +166,7 @@ final class BroadcastServer: Publisher {
             minimumIncompleteLength: headerLength,
             maximumLength: headerLength,
             completion: { [weak self] data, _, isComplete, error in
-                guard let self = self else {
+                guard let self else {
                     return
                 }
 
@@ -199,11 +199,11 @@ final class BroadcastServer: Publisher {
             minimumIncompleteLength: bodyLength,
             maximumLength: bodyLength,
             completion: { [weak self] data, _, isComplete, error in
-                guard let self = self else {
+                guard let self else {
                     return
                 }
 
-                if let data = data, data.count == bodyLength {
+                if let data, data.count == bodyLength {
                     let message = BroadcastMessage(header: header, body: data)
                     self.subject.send(.message(message))
                 }

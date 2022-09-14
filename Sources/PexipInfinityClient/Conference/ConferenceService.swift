@@ -132,11 +132,11 @@ struct DefaultConferenceService: ConferenceService {
         try request.setJSONBody(fields)
         let pin = (pin?.isEmpty == true ? "none" : pin)
 
-        if let pin = pin {
+        if let pin {
             request.setHTTPHeader(.init(name: "pin", value: pin))
         }
 
-        if let incomingToken = incomingToken {
+        if let incomingToken {
             request.setHTTPHeader(.token(incomingToken))
         }
 

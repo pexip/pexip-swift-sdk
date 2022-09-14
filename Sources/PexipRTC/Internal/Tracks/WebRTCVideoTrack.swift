@@ -60,7 +60,7 @@ class WebRTCVideoTrack: VideoTrack {
     // MARK: - Private
 
     private func removeCurrentRenderer() {
-        if let renderer = renderer {
+        if let renderer {
             renderEmptyFrame()
             rtcTrack.remove(renderer)
             self.renderer = nil

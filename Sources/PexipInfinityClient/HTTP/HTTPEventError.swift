@@ -17,7 +17,7 @@ public struct HTTPEventError: LocalizedError, CustomStringConvertible {
     // MARK: - LocalizedError
 
     public var description: String {
-        if let dataStreamError = dataStreamError {
+        if let dataStreamError {
             let errorDescription = dataStreamError.localizedDescription
             return "Event source disconnected with error: \(errorDescription)"
         } else if let statusCode = response?.statusCode {

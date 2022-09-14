@@ -103,7 +103,7 @@ final class LegacyDisplayCapturer: ScreenMediaCapturer {
                 delegate?.screenMediaCapturer(self, didStopWithError: nil)
             }
         case .frameComplete:
-            guard let ioSurface = ioSurface else {
+            guard let ioSurface else {
                 break
             }
 
@@ -118,7 +118,7 @@ final class LegacyDisplayCapturer: ScreenMediaCapturer {
                 &pixelBufferRef
             )
 
-            if let pixelBufferRef = pixelBufferRef, result == kCVReturnSuccess {
+            if let pixelBufferRef, result == kCVReturnSuccess {
                 let pixelBuffer = pixelBufferRef.takeRetainedValue()
                 let videoFrame = VideoFrame(
                     pixelBuffer: pixelBuffer,

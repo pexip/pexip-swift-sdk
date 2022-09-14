@@ -91,7 +91,7 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
 
     private func addNotificationObservers() {
         notificationCenter.addObserver(self, for: .broadcastStarted) { [weak self] in
-            guard let self = self else {
+            guard let self else {
                 return
             }
 
@@ -112,7 +112,7 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
         }
 
         notificationCenter.addObserver(self, for: .broadcastFinished) { [weak self] in
-            guard let self = self, self.isCapturing.value else {
+            guard let self, self.isCapturing.value else {
                 return
             }
 
@@ -134,7 +134,7 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
 
     private func subscribeToEvents(from server: BroadcastServer) {
         server.sink { [weak self] httpEvent in
-            guard let self = self else { return }
+            guard let self else { return }
 
             switch httpEvent {
             case .start:

@@ -123,7 +123,7 @@ final class DefaultConference: Conference {
 
     @discardableResult
     func toggleLiveCaptions(_ enabled: Bool) async throws -> Bool {
-        guard let status = status, status.liveCaptionsAvailable else {
+        guard let status, status.liveCaptionsAvailable else {
             return false
         }
 

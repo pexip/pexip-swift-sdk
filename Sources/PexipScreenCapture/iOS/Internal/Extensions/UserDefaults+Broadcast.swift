@@ -13,7 +13,7 @@ extension UserDefaults {
             return value > 0 ? value : nil
         }
         set {
-            if let newValue = newValue {
+            if let newValue {
                 setValue(Int(newValue), forKey: Key.broadcastFps)
             } else {
                 removeObject(forKey: Key.broadcastFps)

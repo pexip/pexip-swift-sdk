@@ -34,7 +34,7 @@ extension URLSession {
         request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
         request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
 
-        if let lastEventId = lastEventId {
+        if let lastEventId {
             request.setValue(lastEventId, forHTTPHeaderField: "Last-Event-Id")
         }
 

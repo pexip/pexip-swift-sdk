@@ -103,7 +103,7 @@ final class DNSLookupClient: DNSLookupClientProtocol {
 
         context.flags = flags
 
-        if let bytes = bytes, length > 0 {
+        if let bytes, length > 0 {
             context.records.append(Data(bytes: bytes, count: Int(length)))
         }
     }

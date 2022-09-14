@@ -67,7 +67,7 @@ final class BroadcastNotificationCenter {
         func shouldRemove(_ observation: Observation) -> Bool {
             var result = observation.observer === observer
 
-            if let notification = notification {
+            if let notification {
                 result = result && observation.notification == notification
             }
 

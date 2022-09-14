@@ -113,7 +113,7 @@ public struct MediaCapturePermission {
         )
         #endif
 
-        if let url = url {
+        if let url {
             _ = urlOpener.open(url)
         }
     }

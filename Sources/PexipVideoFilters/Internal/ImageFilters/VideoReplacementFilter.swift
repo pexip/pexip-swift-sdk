@@ -95,7 +95,7 @@ final class VideoReplacementFilter: ImageFilter {
         lastFrameImage = nil
         isPlaying = false
 
-        if let playerPlayToEndObserver = playerPlayToEndObserver {
+        if let playerPlayToEndObserver {
             notificationCenter.removeObserver(playerPlayToEndObserver)
         }
 
@@ -106,7 +106,7 @@ final class VideoReplacementFilter: ImageFilter {
         forSize size: CGSize,
         orientation: CGImagePropertyOrientation
     ) -> CIImage? {
-        guard let playerItemOutput = playerItemOutput else {
+        guard let playerItemOutput else {
             return nil
         }
 

@@ -78,11 +78,11 @@ final class BroadcastMessageLoop {
     }
 
     private func prepareMessage() {
-        guard let displayLink = displayLink else {
+        guard let displayLink else {
             return
         }
 
-        guard let lastSampleBuffer = lastSampleBuffer else {
+        guard let lastSampleBuffer else {
             return
         }
 
