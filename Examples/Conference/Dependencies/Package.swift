@@ -7,7 +7,7 @@ let isDevelopment = false
 let sdkName = isDevelopment ? "pexip-swift-sdk-sources" : "pexip-swift-sdk"
 let sdkPackage: Package.Dependency = isDevelopment
     ? .package(path: "../../../../\(sdkName)")
-    : .package(url: "https://github.com/pexip/\(sdkName)", exact: .init(0, 4, 0))
+    : .package(path: "../../..")
 
 let package = Package(
     name: "Dependencies",
