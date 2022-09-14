@@ -61,10 +61,7 @@ let package = Package(
                 .target(name: "PexipScreenCapture"),
                 .target(name: "WebRTC")
             ],
-            path: "Sources/PexipRTC",
-            cSettings: [
-                .unsafeFlags(["-w"])
-            ]
+            path: "Sources/PexipRTC"
         ),
         .binaryTarget(
             name: "PexipRTC",
