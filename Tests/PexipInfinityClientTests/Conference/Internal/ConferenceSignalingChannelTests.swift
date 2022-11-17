@@ -9,10 +9,13 @@ final class ConferenceSignalingChannelTests: XCTestCase {
     private var tokenStore: TokenStore<ConferenceToken>!
     private var token: ConferenceToken!
     private var roster: Roster!
-    private let iceServer = IceServer(urls: [
-        "stun:stun.l.google.com:19302",
-        "stun:stun1.l.google.com:19302"
-    ])
+    private let iceServer = IceServer(
+        kind: .stun,
+        urls: [
+            "stun:stun.l.google.com:19302",
+            "stun:stun1.l.google.com:19302"
+        ]
+    )
     private let sdpOffer = """
         a=ice-ufrag:ToQx\r
         a=ice-pwd:jSThfoPwGg6gKmxeTmTqz8ea\r
@@ -48,15 +51,19 @@ final class ConferenceSignalingChannelTests: XCTestCase {
     }
 
     func testSendOfferOnFirstCall() async throws {
+        let expectedCallId = UUID()
         let expectedSdpAnswer = UUID().uuidString
         let sdpAnswer = try await sendOffer(
             offer: sdpOffer,
             answer: expectedSdpAnswer,
-            presentationInMain: false
+            presentationInMain: false,
+            callId: expectedCallId
         )
         let pwds = await channel.pwds
+        let callId = await channel.callId
 
         XCTAssertEqual(sdpAnswer, expectedSdpAnswer)
+        XCTAssertEqual(callId, expectedCallId)
         XCTAssertEqual(pwds, ["ToQx": "jSThfoPwGg6gKmxeTmTqz8ea"])
         XCTAssertEqual(
             participantService.callFields,
@@ -371,10 +378,11 @@ final class ConferenceSignalingChannelTests: XCTestCase {
     private func sendOffer(
         offer: String? = nil,
         answer: String = UUID().uuidString,
-        presentationInMain: Bool = false
+        presentationInMain: Bool = false,
+        callId: UUID = UUID()
     ) async throws -> String {
         participantService.results = [
-            .calls: .success(CallDetails(id: UUID(), sdp: answer))
+            .calls: .success(CallDetails(id: callId, sdp: answer))
         ]
         participantService.callService.results = [
             .ack: .success(true)

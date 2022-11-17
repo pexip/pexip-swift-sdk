@@ -84,12 +84,11 @@ final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
     }
 
     #if os(iOS)
-    @discardableResult
-    func toggleCamera() async throws -> AVCaptureDevice.Position {
-        guard let newDevice = AVCaptureDevice.videoCaptureDevice(
+    func toggleCamera() async throws {
+        guard let newDevice = AVCaptureDevice.videoCaptureDevices(
             withPosition: currentDevice.position == .front ? .back : .front
-        ) else {
-            return currentDevice.position
+        ).first else {
+            return
         }
 
         // Restart the video capturing using another camera
@@ -101,8 +100,6 @@ final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
         } else {
             try await startCapture()
         }
-
-        return currentDevice.position
     }
     #endif
 

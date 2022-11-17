@@ -1,6 +1,7 @@
 import XCTest
 @testable import PexipInfinityClient
 
+// swiftlint:disable type_body_length
 final class ConferenceTokenTests: XCTestCase {
     private var calendar: Calendar!
 
@@ -216,9 +217,10 @@ final class ConferenceTokenTests: XCTestCase {
         XCTAssertEqual(
             token.iceServers,
             [
-                IceServer(url: "url1"),
-                IceServer(url: "url2"),
+                IceServer(kind: .stun, url: "url1"),
+                IceServer(kind: .stun, url: "url2"),
                 IceServer(
+                    kind: .turn,
                     urls: ["url1", "url2"],
                     username: "username",
                     password: "password"
@@ -239,7 +241,7 @@ final class ConferenceTokenTests: XCTestCase {
         )
         XCTAssertEqual(
             token.iceServers,
-            [IceServer(url: "url1"), IceServer(url: "url2")]
+            [IceServer(kind: .stun, url: "url1"), IceServer(kind: .stun, url: "url2")]
         )
     }
 
@@ -263,11 +265,13 @@ final class ConferenceTokenTests: XCTestCase {
             token.iceServers,
             [
                 IceServer(
+                    kind: .turn,
                     urls: ["url1", "url2"],
                     username: "username",
                     password: "password"
                 ),
                 IceServer(
+                    kind: .turn,
                     urls: ["url3", "url4"],
                     username: "username2",
                     password: "password2"

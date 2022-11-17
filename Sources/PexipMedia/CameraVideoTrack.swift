@@ -17,7 +17,6 @@ public protocol CameraVideoTrack: LocalMediaTrack, VideoTrack {
     #if os(iOS)
     /// Toggles between local camera devices,
     /// from front-facing to back-facing camera.
-    @discardableResult
-    func toggleCamera() async throws -> AVCaptureDevice.Position
+    func toggleCamera() async throws
     #endif
 }

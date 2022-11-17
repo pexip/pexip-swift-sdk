@@ -1,3 +1,4 @@
+import Foundation
 import PexipCore
 
 actor ConferenceSignalingChannel: SignalingChannel {
@@ -5,6 +6,12 @@ actor ConferenceSignalingChannel: SignalingChannel {
 
     let iceServers: [IceServer]
     private(set) var pwds = [String: String]()
+
+    var callId: UUID? {
+        get async {
+            try? await callsRequestTask?.value.id
+        }
+    }
 
     private let participantService: ParticipantService
     private let tokenStore: TokenStore<ConferenceToken>

@@ -18,7 +18,22 @@ public final class WebRTCMediaFactory: MediaFactory {
         self.logger = logger
     }
 
-    // MARK: - MediaConnectionFactory
+    // MARK: - MediaFactory
+
+    public func videoInputDevices() throws -> [MediaDevice] {
+        AVCaptureDevice.videoCaptureDevices(withPosition: .unspecified)
+            .sorted(by: { device1, _ in
+                device1.position == .front
+            })
+            .map({
+                MediaDevice(
+                    id: $0.uniqueID,
+                    name: $0.localizedName,
+                    mediaType: .video,
+                    direction: .input
+                )
+            })
+    }
 
     public func createLocalAudioTrack() -> LocalAudioTrack {
         let audioSource = factory.audioSource(with: nil)
@@ -33,27 +48,31 @@ public final class WebRTCMediaFactory: MediaFactory {
     }
 
     public func createCameraVideoTrack() -> CameraVideoTrack? {
-        func device(position: AVCaptureDevice.Position) -> AVCaptureDevice? {
-            AVCaptureDevice.videoCaptureDevice(withPosition: position)
+        do {
+            if let device = try videoInputDevices().first {
+                return createCameraVideoTrack(device: device)
+            }
+        } catch {
+            logger?.error("Failed to load video input devices: \(error)")
         }
 
-        guard let device = device(position: .front)
-            ?? device(position: .back)
-            ?? AVCaptureDevice.default(for: .video)
-        else {
-            return nil
-        }
-
-        return createCameraVideoTrack(device: device)
+        return nil
     }
 
-    public func createCameraVideoTrack(
-        device: AVCaptureDevice
-    ) -> CameraVideoTrack {
+    public func createCameraVideoTrack(device: MediaDevice) -> CameraVideoTrack {
         precondition(
-            device.hasMediaType(.video),
+            device.mediaType == .video,
             "Invalid capture device, must support video"
         )
+
+        precondition(
+            device.direction == .input,
+            "Invalid capture device, must be input device"
+        )
+
+        guard let device = AVCaptureDevice(uniqueID: device.id) else {
+            preconditionFailure("Cannot create AVCaptureDevice with given id: \(device.id)")
+        }
 
         let videoSource = factory.videoSource()
         let videoProcessor = WebRTCVideoProcessor(videoSource: videoSource)

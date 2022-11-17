@@ -1,7 +1,12 @@
+import Foundation
+
 /// The object responsible for setting up and controlling a communication session.
 public protocol SignalingChannel {
     /// The list of ice servers.
     var iceServers: [IceServer] { get }
+
+    // The call ID (if present)
+    var callId: UUID? { get async }
 
     /**
      Sends a new local SDP.

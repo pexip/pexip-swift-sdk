@@ -136,10 +136,15 @@ public extension ConferenceToken {
     /// The list of ice servers.
     var iceServers: [IceServer] {
         let stunIceServers = (stun ?? []).map {
-            IceServer(url: $0.url)
+            IceServer(kind: .stun, url: $0.url)
         }
         let turnIceServers = (turn ?? []).map {
-            IceServer(urls: $0.urls, username: $0.username, password: $0.credential)
+            IceServer(
+                kind: .turn,
+                urls: $0.urls,
+                username: $0.username,
+                password: $0.credential
+            )
         }
         return stunIceServers + turnIceServers
     }

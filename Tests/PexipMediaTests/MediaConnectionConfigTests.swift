@@ -5,10 +5,13 @@ import PexipCore
 final class MediaConnectionConfigTests: XCTestCase {
     func testInit() {
         let signaling = Signaling()
-        let iceServer = IceServer(urls: [
-            "stun:stun.l.google.com:19302",
-            "stun:stun1.l.google.com:19302"
-        ])
+        let iceServer = IceServer(
+            kind: .stun,
+            urls: [
+                "stun:stun.l.google.com:19302",
+                "stun:stun1.l.google.com:19302"
+            ]
+        )
         let config = MediaConnectionConfig(
             signaling: signaling,
             iceServers: [iceServer],
@@ -31,11 +34,26 @@ final class MediaConnectionConfigTests: XCTestCase {
         XCTAssertFalse(config.dscp)
         XCTAssertFalse(config.presentationInMain)
     }
+
+    func testInitWithNoStunServers() {
+        let signaling = Signaling()
+        let iceServer = IceServer(
+            kind: .turn,
+            urls: ["url1", "url2"]
+        )
+        let config = MediaConnectionConfig(signaling: signaling, iceServers: [iceServer])
+
+        XCTAssertEqual(config.signaling as? Signaling, signaling)
+        XCTAssertEqual(config.iceServers, [iceServer] + [MediaConnectionConfig.googleIceServer])
+        XCTAssertFalse(config.dscp)
+        XCTAssertFalse(config.presentationInMain)
+    }
 }
 
 // MARK: - Mocks
 
 private struct Signaling: SignalingChannel, Hashable {
+    var callId: UUID?
     var iceServers = [IceServer]()
 
     func sendOffer(

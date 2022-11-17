@@ -1,13 +1,13 @@
 import AVFoundation
 
 public extension AVCaptureDevice {
-    static func videoCaptureDevice(
+    static func videoCaptureDevices(
         withPosition position: AVCaptureDevice.Position
-    ) -> AVCaptureDevice? {
+    ) -> [AVCaptureDevice] {
         AVCaptureDevice.DiscoverySession(
             deviceTypes: [.builtInWideAngleCamera],
             mediaType: .video,
             position: position
-        ).devices.first
+        ).devices
     }
 }

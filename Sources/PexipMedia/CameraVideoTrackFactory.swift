@@ -18,5 +18,5 @@ public protocol CameraVideoTrackFactory {
         - device: A physical device that provides realtime input video data.
      - Returns: A new camera track
      */
-    func createCameraVideoTrack(device: AVCaptureDevice) -> CameraVideoTrack
+    func createCameraVideoTrack(device: MediaDevice) -> CameraVideoTrack
 }

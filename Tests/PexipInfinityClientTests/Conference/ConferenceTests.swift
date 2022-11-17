@@ -560,6 +560,7 @@ private final class LiveCaptionsServiceMock: LiveCaptionsService {
 }
 
 private final class SignalingChannelMock: SignalingChannel {
+    var callId: UUID?
     let iceServers = [IceServer]()
 
     func sendOffer(

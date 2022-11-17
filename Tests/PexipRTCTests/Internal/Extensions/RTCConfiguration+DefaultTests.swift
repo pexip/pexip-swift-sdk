@@ -4,10 +4,13 @@ import PexipCore
 @testable import PexipRTC
 
 final class RTCConfigurationDefaultTests: XCTestCase {
-    private let iceServer = IceServer(urls: [
-        "stun:stun.l.google.com:19302",
-        "stun:stun1.l.google.com:19302"
-    ])
+    private let iceServer = IceServer(
+        kind: .stun,
+        urls: [
+            "stun:stun.l.google.com:19302",
+            "stun:stun1.l.google.com:19302"
+        ]
+    )
 
     func testDefaultConfiguration() {
         let configuration = RTCConfiguration.defaultConfiguration(

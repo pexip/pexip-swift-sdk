@@ -66,9 +66,9 @@ final class SegmentationVideoFilter: VideoFilter {
 
         // 5. Blend the original, background, and mask images.
         let blendFilter = CIFilter.blendWithMask()
-        blendFilter.inputImage = originalImage
-        blendFilter.backgroundImage = backgroundImage
-        blendFilter.maskImage = maskImage
+        blendFilter.setValue(originalImage, forKey: kCIInputImageKey)
+        blendFilter.setValue(maskImage, forKey: kCIInputMaskImageKey)
+        blendFilter.setValue(backgroundImage, forKey: kCIInputBackgroundImageKey)
 
         return blendFilter.outputImage?.pixelBuffer(
             withTemplate: pixelBuffer,

@@ -11,7 +11,7 @@ public struct MediaConnectionConfig {
         "stun:stun4.l.google.com:19302"
     ]
     /// The Google Ice server.
-    public static let googleIceServer = IceServer(urls: googleStunUrls)
+    public static let googleIceServer = IceServer(kind: .stun, urls: googleStunUrls)
 
     /// The object responsible for setting up and controlling a communication session.
     public let signaling: SignalingChannel
@@ -52,13 +52,15 @@ public struct MediaConnectionConfig {
     ) {
         self.signaling = signaling
 
-        let iceServers = (signaling.iceServers + iceServers).filter {
+        var iceServers = (signaling.iceServers + iceServers).filter {
             !$0.urls.isEmpty
         }
-        self.iceServers = iceServers.isEmpty
-            ? [Self.googleIceServer]
-            : iceServers
 
+        if !iceServers.contains(where: { $0.kind == .stun }) {
+            iceServers.append(Self.googleIceServer)
+        }
+
+        self.iceServers = iceServers
         self.bandwidth = bandwidth
         self.dscp = dscp
         self.presentationInMain = presentationInMain
