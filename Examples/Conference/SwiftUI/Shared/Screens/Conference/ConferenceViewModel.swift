@@ -277,6 +277,7 @@ private extension ConferenceViewModel {
             .assign(to: &$microphoneEnabled)
     }
 
+    // swiftlint:disable cyclomatic_complexity
     func sinkConferenceEvents() {
         conference.eventPublisher
             .receive(on: DispatchQueue.main)
@@ -299,8 +300,25 @@ private extension ConferenceViewModel {
                         try self.mediaConnection.receivePresentation(false)
                     case .clientDisconnected:
                         self.leave()
-                    default:
-                        // Ignore the rest
+                    case .newOffer(let message):
+                        Task {
+                            try await self.mediaConnection.acceptOffer(message.sdp)
+                        }
+                    case .updateSdp(let message):
+                        fatalError("Not implemented")
+                    case .newCandidate(let message):
+                        Task {
+                            try await self.mediaConnection.addCandidate(
+                                sdp: message.candidate,
+                                mid: message.mid
+                            )
+                        }
+                    case .failure(let message):
+                        debugPrint("Received conference error event: \(message.error)")
+                    // Ignore the rest
+                    case .messageReceived, .participantSyncBegin, .participantSyncEnd,
+                         .participantCreate, .participantUpdate, .participantDelete,
+                         .peerDisconnected, .callDisconnected:
                         break
                     }
                 } catch {
