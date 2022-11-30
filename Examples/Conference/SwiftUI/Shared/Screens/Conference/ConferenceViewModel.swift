@@ -112,8 +112,8 @@ extension ConferenceViewModel {
                 state = .connecting
                 mediaConnection.setMainAudioTrack(mainLocalAudioTrack)
                 mediaConnection.setMainVideoTrack(cameraVideoTrack)
-                try await mediaConnection.start()
                 conference.receiveEvents()
+                try await mediaConnection.start()
             } catch {
                 state = .preflight
                 debugPrint(error)
@@ -305,7 +305,9 @@ private extension ConferenceViewModel {
                             try await self.mediaConnection.acceptOffer(message.sdp)
                         }
                     case .updateSdp(let message):
-                        fatalError("Not implemented")
+                        Task {
+                            try await self.mediaConnection.updateOffer(message.sdp)
+                        }
                     case .newCandidate(let message):
                         Task {
                             try await self.mediaConnection.addCandidate(
