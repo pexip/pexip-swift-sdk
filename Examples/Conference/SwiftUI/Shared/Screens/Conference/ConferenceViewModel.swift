@@ -302,11 +302,11 @@ private extension ConferenceViewModel {
                         self.leave()
                     case .newOffer(let message):
                         Task {
-                            try await self.mediaConnection.acceptOffer(message.sdp)
+                            try await self.mediaConnection.receiveNewOffer(message.sdp)
                         }
                     case .updateSdp(let message):
                         Task {
-                            try await self.mediaConnection.updateOffer(message.sdp)
+                            try await self.mediaConnection.receiveUpdatedOffer(message.sdp)
                         }
                     case .newCandidate(let message):
                         Task {
