@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pexip/webrtc-ios-builds",
       "state" : {
-        "revision" : "4db0d9fd22698046fe8a7d2c50c858540d258484",
-        "version" : "108.0.5359"
+        "revision" : "8a7c849ba966981941a04082cf97ec5b8cc0521a",
+        "version" : "105.0.0"
       }
     }
   ],

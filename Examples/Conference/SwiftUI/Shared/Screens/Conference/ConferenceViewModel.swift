@@ -300,13 +300,9 @@ private extension ConferenceViewModel {
                         try self.mediaConnection.receivePresentation(false)
                     case .clientDisconnected:
                         self.leave()
-                    case .newOffer(let message):
+                    case .newOffer(let message), .updateSdp(let message):
                         Task {
                             try await self.mediaConnection.receiveNewOffer(message.sdp)
-                        }
-                    case .updateSdp(let message):
-                        Task {
-                            try await self.mediaConnection.receiveUpdatedOffer(message.sdp)
                         }
                     case .newCandidate(let message):
                         Task {
