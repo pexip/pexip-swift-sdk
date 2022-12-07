@@ -18,6 +18,7 @@ extension RTCConfiguration {
         configuration.sdpSemantics = .unifiedPlan
         configuration.enableDscp = dscp
         configuration.continualGatheringPolicy = .gatherContinually
+        configuration.enableImplicitRollback = true
         return configuration
     }
 }

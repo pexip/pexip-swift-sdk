@@ -23,7 +23,15 @@ public protocol SignalingChannel {
         callType: String,
         description: String,
         presentationInMain: Bool
-    ) async throws -> String
+    ) async throws -> String?
+
+    /**
+     Sends a new SDP answer.
+
+     - Parameters:
+        - description: The new SDP answer
+     */
+    func sendAnswer(_ description: String) async throws
 
     /**
      Sends a new ICE candidate if doing trickle ICE.

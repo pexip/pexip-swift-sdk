@@ -41,29 +41,47 @@ actor ConferenceSignalingChannel: SignalingChannel {
         callType: String,
         description: String,
         presentationInMain: Bool
-    ) async throws -> String {
+    ) async throws -> String? {
         let token = try await tokenStore.token()
-
-        if let callService = try await callService {
-            return try await callService.update(
-                sdp: description,
-                token: token
-            )
-        }
+        let callService = try await callService
+        let callId = await self.callId
+        let isUpdate = callService != nil && callId != nil
 
         pwds = sdpPwds(from: description)
         callsRequestTask = CallDetailsTask {
-            try await participantService.calls(
-                fields: CallsFields(
-                    callType: callType,
+            if let callService, let callId {
+                let sdp = try await callService.update(
                     sdp: description,
-                    present: presentationInMain ? .main : nil
-                ),
-                token: token
-            )
+                    token: token
+                )
+                return CallDetails(id: callId, sdp: sdp)
+            } else {
+                return try await participantService.calls(
+                    fields: CallsFields(
+                        callType: callType,
+                        sdp: description,
+                        present: presentationInMain ? .main : nil
+                    ),
+                    token: token
+                )
+            }
         }
-        _ = try await callService?.ack(token: await tokenStore.token())
-        return try await callsRequestTask!.value.sdp
+
+        var remoteDescription = try await callsRequestTask!.value.sdp
+        remoteDescription = remoteDescription?.isEmpty == true
+            ? nil
+            : remoteDescription
+
+        if remoteDescription != nil, !isUpdate {
+            try await ack(sdp: nil)
+        }
+
+        return remoteDescription
+    }
+
+    func sendAnswer(_ description: String) async throws {
+        pwds = sdpPwds(from: description)
+        try await ack(sdp: description)
     }
 
     func addCandidate(_ candidate: String, mid: String?) async throws {
@@ -160,6 +178,18 @@ actor ConferenceSignalingChannel: SignalingChannel {
             }
             return try await participantService.call(id: callDetailsTask.value.id)
         }
+    }
+
+    private func ack(sdp: String?) async throws {
+        guard let callService = try await callService else {
+            logger?.warn("Tried to ack before starting a call")
+            return
+        }
+
+        _ = try await callService.ack(
+            sdp: sdp,
+            token: await tokenStore.token()
+        )
     }
 
     private func candidateUfrag(from candidate: String) -> String? {

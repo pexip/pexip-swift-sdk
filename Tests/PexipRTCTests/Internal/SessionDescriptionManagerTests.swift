@@ -2,7 +2,7 @@ import XCTest
 import PexipMedia
 @testable import PexipRTC
 
-final class SDPManglerTests: XCTestCase {
+final class SessionDescriptionManagerTests: XCTestCase {
     private func mangle(
         _ sdp: SDP,
         bandwidth: Bandwidth = .high,
@@ -11,8 +11,8 @@ final class SDPManglerTests: XCTestCase {
         mainVideoMid: String? = nil,
         presentationVideoMid: String? = nil
     ) -> SDP {
-        let mangler = SessionDescriptionMangler(sdp: sdp.string)
-        let outSDPString = mangler.mangle(
+        let manager = SessionDescriptionManager(sdp: sdp.string)
+        let outSDPString = manager.mangle(
             bandwidth: bandwidth,
             mainQualityProfile: profile,
             mainAudioMid: mainAudioMid,
@@ -190,6 +190,27 @@ final class SDPManglerTests: XCTestCase {
         let expectedSDP = inSDP
         let outSDP = mangle(inSDP, profile: profile)
         XCTAssertEqual(outSDP, expectedSDP)
+    }
+
+    func testExtractFingerprints() {
+        let sdp = SDP([
+            "line1",
+            "a=fingerprint:sha-256 hash1",
+            "line3",
+            "line4",
+            "a=fingerprint:sha-256 hash2"
+        ])
+
+        let manager = SessionDescriptionManager(sdp: sdp.string)
+        let fingerprints = manager.extractFingerprints()
+
+        XCTAssertEqual(
+            fingerprints,
+            [
+                Fingerprint(type: "sha-256", hash: "hash1"),
+                Fingerprint(type: "sha-256", hash: "hash2")
+            ]
+        )
     }
 }
 

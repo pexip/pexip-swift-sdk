@@ -4,6 +4,7 @@ public struct ConferenceTokenRequestFields: Encodable, Hashable {
         case conferenceExtension = "conference_extension"
         case chosenIdpId = "chosen_idp"
         case ssoToken = "sso_token"
+        case directMedia = "direct_media"
     }
 
     /// The name by which this participant should be known
@@ -18,6 +19,9 @@ public struct ConferenceTokenRequestFields: Encodable, Hashable {
     /// The ssoToken received from the SSO flow
     public var ssoToken: String?
 
+    /// Indicates whether direct media is supported by the client.
+    public var directMedia: Bool
+
     // MARK: - Init
 
     /**
@@ -26,16 +30,19 @@ public struct ConferenceTokenRequestFields: Encodable, Hashable {
         - conferenceExtension: Conference to connect to (when being used with a Virtual Reception)
         - idp: The identity provider used to proceed with SSO flow
         - ssoToken: The ssoToken received from the SSO flow
+        - directMedia: Indicates whether direct media is supported by the client.
      */
     public init(
         displayName: String,
         conferenceExtension: String? = nil,
         idp: IdentityProvider? = nil,
-        ssoToken: String? = nil
+        ssoToken: String? = nil,
+        directMedia: Bool = true
     ) {
         self.displayName = displayName
         self.conferenceExtension = conferenceExtension
         self.chosenIdpId = idp?.id
         self.ssoToken = ssoToken
+        self.directMedia = directMedia
     }
 }

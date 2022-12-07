@@ -7,9 +7,9 @@ public typealias DTMFSignals = PexipCore.DTMFSignals
 /// Observable object that holds references to main and presentation remote video tracks.
 public final class RemoteVideoTracks: ObservableObject {
     /// The main remote video track.
-    @Published public var mainTrack: VideoTrack?
+    @Published public private(set) var mainTrack: VideoTrack?
     /// The presentation remote video track.
-    @Published public var presentationTrack: VideoTrack?
+    @Published public private(set) var presentationTrack: VideoTrack?
 
     /**
      Creates a new instance of ``RemoteVideoTracks`` object.
@@ -21,6 +21,18 @@ public final class RemoteVideoTracks: ObservableObject {
         self.mainTrack = mainTrack
         self.presentationTrack = presentationTrack
     }
+
+    public func setMainTrack(_ track: VideoTrack?) {
+        Task { @MainActor in
+            mainTrack = track
+        }
+    }
+
+    public func setPresentationTrack(_ track: VideoTrack?) {
+        Task { @MainActor in
+            presentationTrack = track
+        }
+    }
 }
 
 /// Media connection between the local computer and a remote peer.
@@ -31,11 +43,9 @@ public protocol MediaConnection {
     /// Observable object that holds references to main and presentation remote video tracks.
     var remoteVideoTracks: RemoteVideoTracks { get }
 
-    /// Creates a media session
-    func start() async throws
-
-    /// Terminates all media and deallocates resources
-    func stop()
+    /// Observable object that holds secure check code.
+    /// Check algorithm is triggered on each send / receive of an SDP offer / answer.
+    var secureCheckCode: SecureCheckCode { get }
 
     /**
      Sets the given local audio track as the main audio track
@@ -65,6 +75,27 @@ public protocol MediaConnection {
         - screenMediaTrack: Local screen media track
      */
     func setScreenMediaTrack(_ screenMediaTrack: ScreenMediaTrack?)
+
+    /// Creates a media session
+    func start() async throws
+
+    /// Terminates all media and deallocates resources
+    func stop()
+
+    /**
+     Handles the incoming offer.
+     - Parameters:
+        - offer: A remote SDP offer.
+     */
+    func receiveNewOffer(_ offer: String) async throws
+
+    /**
+     Adds new incoming ICE candidate.
+     - Parameters:
+        - sdp: The SDP string for this candidate
+        - mid: The SDP mid for this candidate
+     */
+    func addCandidate(sdp: String, mid: String?) async throws
 
     /**
      Adds or removes remote presentation track from the current media connection.

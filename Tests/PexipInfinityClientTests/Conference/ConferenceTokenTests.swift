@@ -34,6 +34,8 @@ final class ConferenceTokenTests: XCTestCase {
                 "conference_name": "Conference",
                 "stun": [{"url": "stun:stun.l.google.com:19302"}],
                 "analytics_enabled": true,
+                "pex_datachannel_id": 1,
+                "direct_media": true,
                 "version": {"pseudo_version": "25010.0.0", "version_id": "10"},
                 "service_type": "conference",
                 "chat_enabled": true,
@@ -61,6 +63,8 @@ final class ConferenceTokenTests: XCTestCase {
         XCTAssertEqual(token.expires, 120)
         XCTAssertEqual(token.role, .host)
         XCTAssertFalse(token.isExpired())
+        XCTAssertTrue(token.directMedia)
+        XCTAssertTrue(token.analyticsEnabled)
 
         token = token.updating(value: tokenValue, expires: "120", updatedAt: date)
 
@@ -83,7 +87,9 @@ final class ConferenceTokenTests: XCTestCase {
                     credential: "password"
                 )],
                 chatEnabled: true,
+                dataChannelId: 1,
                 analyticsEnabled: true,
+                directMedia: true,
                 expiresString: "120",
                 version: Version(versionId: "10", pseudoVersion: "25010.0.0")
             )

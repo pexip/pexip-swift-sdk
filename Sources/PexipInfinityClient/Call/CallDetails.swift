@@ -7,9 +7,9 @@ public struct CallDetails: Decodable, Hashable {
     }
 
     public let id: UUID
-    public let sdp: String
+    public let sdp: String?
 
-    public init(id: UUID, sdp: String) {
+    public init(id: UUID, sdp: String?) {
         self.id = id
         self.sdp = sdp
     }

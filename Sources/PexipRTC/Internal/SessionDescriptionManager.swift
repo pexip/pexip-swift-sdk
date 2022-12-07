@@ -3,7 +3,7 @@ import PexipMedia
 import PexipCore
 
 /// Responsible for mangling the SDP to set bandwidths and resolutions
-struct SessionDescriptionMangler {
+struct SessionDescriptionManager {
     private static let delimeter = "\r\n"
     let sdp: String
 
@@ -16,15 +16,12 @@ struct SessionDescriptionMangler {
     ) -> String {
         var modifiedLines = [String]()
         var section = "global"
-        let lines = sdp
-            .components(separatedBy: Self.delimeter)
-            .filter({ !$0.isEmpty })
         let mainAudioMidLine = mainAudioMid?.toMidLine()
         let mainVideoMidLine = mainVideoMid?.toMidLine()
         let presentationVideoMidLine = presentationVideoMid?.toMidLine()
         var addBandwidth = true
 
-        for line in lines {
+        for line in splitToLines() {
             section = self.section(for: line) ?? section
             modifiedLines.append(line)
 
@@ -47,6 +44,29 @@ struct SessionDescriptionMangler {
         return modifiedLines
             .joined(separator: Self.delimeter)
             .appending(Self.delimeter)
+    }
+
+    func extractFingerprints() -> [Fingerprint] {
+        let key = "a=fingerprint:"
+        return splitToLines()
+            .filter({ $0.starts(with: key) })
+            .compactMap({ line in
+                let parts = line
+                    .replacingOccurrences(of: key, with: "")
+                    .split(separator: " ", maxSplits: 1)
+                if parts.count == 2 {
+                    return Fingerprint(
+                        type: String(parts[0]),
+                        hash: String(parts[1].replacingOccurrences(of: " ", with: ""))
+                    )
+                } else {
+                    return nil
+                }
+            })
+    }
+
+    private func splitToLines() -> [String] {
+        sdp.components(separatedBy: Self.delimeter).filter({ !$0.isEmpty })
     }
 
     private func section(for line: String) -> String? {

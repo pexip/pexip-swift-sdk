@@ -14,6 +14,19 @@ protocol PeerConnectionDelegate: AnyObject {
         _ peerConnection: RTCPeerConnection,
         didGenerate candidate: RTCIceCandidate
     )
+    func peerConnection(
+        _ peerConnection: RTCPeerConnection,
+        didChange newState: RTCIceConnectionState
+    )
+    func peerConnection(
+        _ peerConnection: RTCPeerConnection,
+        didStartReceivingOn transceiver: RTCRtpTransceiver
+    )
+    func peerConnection(
+        _ peerConnection: RTCPeerConnection,
+        didAdd rtpReceiver: RTCRtpReceiver,
+        streams mediaStreams: [RTCMediaStream]
+    )
 }
 
 // MARK: - Proxy
@@ -44,7 +57,7 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
         _ peerConnection: RTCPeerConnection,
         didGenerate candidate: RTCIceCandidate
     ) {
-        logger?.debug("Peer connection - did generate local candidate")
+        logger?.debug("Peer connection - did generate local ICE candidate")
         delegate?.peerConnection(peerConnection, didGenerate: candidate)
     }
 
@@ -60,7 +73,7 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
         _ peerConnection: RTCPeerConnection,
         didAdd stream: RTCMediaStream
     ) {
-        logger?.debug("Peer connection - did add stream")
+        logger?.debug("Peer connection - did add stream, id:\(stream.streamId)")
     }
 
     func peerConnection(
@@ -75,7 +88,8 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
         didChange newState: RTCIceConnectionState
     ) {
         let state = IceConnectionState(newState)
-        logger?.debug("Peer connection - new ice connection state: \(state)")
+        logger?.debug("Peer connection - new ICE connection state: \(state)")
+        delegate?.peerConnection(peerConnection, didChange: newState)
     }
 
     func peerConnection(
@@ -83,7 +97,7 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
         didChange newState: RTCIceGatheringState
     ) {
         let state = IceGatheringState(newState)
-        logger?.debug("Peer connection - new gathering state: \(state)")
+        logger?.debug("Peer connection - new ICE gathering state: \(state)")
     }
 
     func peerConnection(
@@ -91,7 +105,7 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
         didRemove candidates: [RTCIceCandidate]
     ) {
         let count = candidates.count
-        logger?.debug("Peer connection - did remove \(count) candidate(s)")
+        logger?.debug("Peer connection - did remove \(count) ICE candidate(s)")
     }
 
     func peerConnection(
@@ -99,5 +113,22 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
         didOpen dataChannel: RTCDataChannel
     ) {
         logger?.debug("Peer connection - did open data channel")
+    }
+
+    func peerConnection(
+        _ peerConnection: RTCPeerConnection,
+        didAdd rtpReceiver: RTCRtpReceiver,
+        streams mediaStreams: [RTCMediaStream]
+    ) {
+        logger?.debug("Peer connection - did add rtpReceiver")
+        delegate?.peerConnection(peerConnection, didAdd: rtpReceiver, streams: mediaStreams)
+    }
+
+    func peerConnection(
+        _ peerConnection: RTCPeerConnection,
+        didStartReceivingOn transceiver: RTCRtpTransceiver
+    ) {
+        logger?.debug("Peer connection - did start receiving on transceiver")
+        delegate?.peerConnection(peerConnection, didStartReceivingOn: transceiver)
     }
 }

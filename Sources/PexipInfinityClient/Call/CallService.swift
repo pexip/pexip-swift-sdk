@@ -19,11 +19,12 @@ public protocol CallService {
     /**
      Starts media for the specified call (WebRTC calls only).
      - Parameters:
+        - sdp: The new local SDP (optional)
         - token: Current valid API token
      - Returns: The result is true if successful, false otherwise.
      - Throws: `HTTPError` if a network error was encountered during operation
      */
-    func ack(token: ConferenceToken) async throws -> Bool
+    func ack(sdp: String?, token: ConferenceToken) async throws -> Bool
 
     /**
      Sends a new local SDP.
@@ -33,7 +34,7 @@ public protocol CallService {
      - Returns: A new remote SDP
      - Throws: `HTTPError` if a network error was encountered during operation
      */
-    func update(sdp: String, token: ConferenceToken) async throws -> String
+    func update(sdp: String, token: ConferenceToken) async throws -> String?
 
     /**
      Sends DTMF digits to the participant (gateway call only).
@@ -63,6 +64,7 @@ public protocol CallService {
 struct DefaultCallService: CallService {
     let baseURL: URL
     let client: HTTPClient
+    var decoder = JSONDecoder()
 
     func newCandidate(iceCandidate: IceCandidate, token: ConferenceToken) async throws {
         var request = URLRequest(
@@ -74,16 +76,23 @@ struct DefaultCallService: CallService {
         _ = try await client.data(for: request)
     }
 
-    func ack(token: ConferenceToken) async throws -> Bool {
+    func ack(sdp: String?, token: ConferenceToken) async throws -> Bool {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("ack"),
             httpMethod: .POST
         )
         request.setHTTPHeader(.token(token.value))
+
+        if let sdp = sdp {
+            try request.setJSONBody([
+                "sdp": sdp
+            ])
+        }
+
         return try await client.json(for: request)
     }
 
-    func update(sdp: String, token: ConferenceToken) async throws -> String {
+    func update(sdp: String, token: ConferenceToken) async throws -> String? {
         var request = URLRequest(
             url: baseURL.appendingPathComponent("update"),
             httpMethod: .POST
@@ -92,7 +101,20 @@ struct DefaultCallService: CallService {
         try request.setJSONBody([
             "sdp": sdp
         ])
-        return try await client.json(for: request)
+
+        let (data, _) = try await client.data(for: request)
+
+        do {
+            return try decoder.decode(
+                ResponseContainer<String>.self,
+                from: data
+            ).result
+        } catch {
+            return try decoder.decode(
+                ResponseContainer<CallDetails>.self,
+                from: data
+            ).result.sdp
+        }
     }
 
     @discardableResult

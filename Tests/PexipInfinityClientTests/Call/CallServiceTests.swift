@@ -50,12 +50,34 @@ final class CallServiceTests: APITestCase {
             body: nil,
             responseJSON: responseJSON,
             execute: {
-                let result = try await service.ack(token: token)
+                let result = try await service.ack(sdp: nil, token: token)
                 XCTAssertTrue(result)
             })
     }
 
-    func testUpdate() async throws {
+    func testAckWithSdp() async throws {
+        let token = ConferenceToken.randomToken()
+        let sdp = UUID().uuidString
+        let responseJSON = """
+        {
+            "status": "success",
+            "result": true
+        }
+        """
+
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("ack"),
+            token: token,
+            body: try JSONEncoder().encode(["sdp": sdp]),
+            responseJSON: responseJSON,
+            execute: {
+                let result = try await service.ack(sdp: sdp, token: token)
+                XCTAssertTrue(result)
+            })
+    }
+
+    func testUpdateWithStringResponse() async throws {
         let token = ConferenceToken.randomToken()
         let sdp = "SDP"
         let responseJSON = """
@@ -74,6 +96,33 @@ final class CallServiceTests: APITestCase {
             execute: {
                 let newSdp = try await service.update(sdp: sdp, token: token)
                 XCTAssertEqual(newSdp, "New SDP")
+            })
+    }
+
+    func testUpdateWithDictionaryResponse() async throws {
+        let token = ConferenceToken.randomToken()
+        let inputSDP = "SDP"
+        let callId = UUID()
+        let outputSDP = UUID().uuidString
+        let responseJSON = """
+        {
+            "status": "success",
+            "result": {
+                "sdp": "\(outputSDP)",
+                "call_uuid": "\(callId.uuidString.lowercased())"
+            }
+        }
+        """
+
+        try await testJSONRequest(
+            withMethod: .POST,
+            url: baseURL.appendingPathComponent("update"),
+            token: token,
+            body: try JSONEncoder().encode(["sdp": inputSDP]),
+            responseJSON: responseJSON,
+            execute: {
+                let newSdp = try await service.update(sdp: inputSDP, token: token)
+                XCTAssertEqual(newSdp, outputSDP)
             })
     }
 

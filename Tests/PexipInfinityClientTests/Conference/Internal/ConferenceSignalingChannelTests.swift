@@ -96,6 +96,29 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         XCTAssertEqual(callService.token, token)
     }
 
+    func testSendOfferOnFirstCallWithoutSdpInResponse() async throws {
+        let expectedCallId = UUID()
+        let sdpAnswer = try await sendOffer(
+            offer: sdpOffer,
+            answer: nil,
+            presentationInMain: false,
+            callId: expectedCallId
+        )
+        let pwds = await channel.pwds
+        let callId = await channel.callId
+
+        XCTAssertNil(sdpAnswer)
+        XCTAssertEqual(callId, expectedCallId)
+        XCTAssertEqual(pwds, ["ToQx": "jSThfoPwGg6gKmxeTmTqz8ea"])
+        XCTAssertEqual(
+            participantService.callFields,
+            CallsFields(callType: "WEBRTC", sdp: sdpOffer, present: nil)
+        )
+        XCTAssertEqual(participantService.actions, [.calls])
+        XCTAssertEqual(callService.actions, [])
+        XCTAssertEqual(participantService.token, token)
+    }
+
     func testSendOfferOnFirstCallWithoutPwds() async throws {
         let sdpOffer = """
             a=ice-ufrag:ToQx\r
@@ -150,6 +173,42 @@ final class ConferenceSignalingChannelTests: XCTestCase {
 
         let pwds = await channel.pwds
         XCTAssertEqual(pwds, ["ToQx": "jSThfoPwGg6gKmxeTmTqz8ea"])
+    }
+
+    func testSendOfferOnSubsequentCallsWithoutSdpInResponse() async throws {
+        try await sendOffer(answer: UUID().uuidString)
+
+        callService.results[.update] = .success(nil)
+
+        let sdpAnswer = try await channel.sendOffer(
+            callType: "WEBRTC",
+            description: sdpOffer,
+            presentationInMain: false
+        )
+
+        XCTAssertNil(sdpAnswer)
+        XCTAssertEqual(participantService.actions, [.calls])
+        XCTAssertEqual(callService.actions, [.ack, .update])
+        XCTAssertEqual(participantService.token, token)
+        XCTAssertEqual(callService.token, token)
+
+        let pwds = await channel.pwds
+        XCTAssertEqual(pwds, ["ToQx": "jSThfoPwGg6gKmxeTmTqz8ea"])
+    }
+
+    func testSendAnswer() async throws {
+        let answer = """
+        a=ice-ufrag:ToQy\r
+        a=ice-pwd:jSThfoPwGg6gKmxeYnTqz8ea\r
+        a=ice-options:trickle renomination\r
+        """
+
+        try await sendOffer(answer: UUID().uuidString)
+        try await channel.sendAnswer(answer)
+
+        let pwds = await channel.pwds
+        XCTAssertEqual(pwds, ["ToQy": "jSThfoPwGg6gKmxeYnTqz8ea"])
+        XCTAssertEqual(callService.actions, [.ack, .ack])
     }
 
     func testAddCandidate() async throws {
@@ -377,10 +436,10 @@ final class ConferenceSignalingChannelTests: XCTestCase {
     @discardableResult
     private func sendOffer(
         offer: String? = nil,
-        answer: String = UUID().uuidString,
+        answer: String? = UUID().uuidString,
         presentationInMain: Bool = false,
         callId: UUID = UUID()
-    ) async throws -> String {
+    ) async throws -> String? {
         participantService.results = [
             .calls: .success(CallDetails(id: callId, sdp: answer))
         ]
@@ -472,7 +531,7 @@ private final class CallServiceMock: CallService {
         case dtmf
     }
 
-    var results = [Action: Result<Any, Error>]()
+    var results = [Action: Result<Any?, Error>]()
     private(set) var actions = [Action]()
     private(set) var iceCandidate: IceCandidate?
     private(set) var token: ConferenceToken?
@@ -482,11 +541,11 @@ private final class CallServiceMock: CallService {
         let _: Void = try performAction(.newCandidate, token: token)
     }
 
-    func ack(token: ConferenceToken) async throws -> Bool {
+    func ack(sdp: String?, token: ConferenceToken) async throws -> Bool {
         try performAction(.ack, token: token)
     }
 
-    func update(sdp: String, token: ConferenceToken) async throws -> String {
+    func update(sdp: String, token: ConferenceToken) async throws -> String? {
         try performAction(.update, token: token)
     }
 

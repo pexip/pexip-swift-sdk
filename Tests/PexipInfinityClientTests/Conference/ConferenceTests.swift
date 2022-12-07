@@ -567,10 +567,11 @@ private final class SignalingChannelMock: SignalingChannel {
         callType: String,
         description: String,
         presentationInMain: Bool
-    ) async throws -> String {
+    ) async throws -> String? {
         return ""
     }
 
+    func sendAnswer(_ description: String) async throws {}
     func addCandidate(_ candidate: String, mid: String?) async throws {}
 
     func dtmf(signals: DTMFSignals) async throws -> Bool {

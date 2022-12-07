@@ -1,4 +1,4 @@
-public struct IceCandidate: Hashable, Encodable {
+public struct IceCandidate: Hashable, Codable {
     /// Representation of address in candidate-attribute format as per RFC5245.
     public let candidate: String
     /// The media stream identifier tag.

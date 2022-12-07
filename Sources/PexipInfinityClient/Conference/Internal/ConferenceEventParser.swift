@@ -39,8 +39,17 @@ struct ConferenceEventParser: InfinityEventParser {
         case .conferenceUpdate:
             let status = try decoder.decode(ConferenceStatus.self, from: data)
             return .conferenceUpdate(status)
+        case .liveCaptions:
+            let details = try decoder.decode(LiveCaptions.self, from: data)
+            return .liveCaptions(details)
         case .messageReceived:
             return .messageReceived(try decoder.decode(ChatMessage.self, from: data))
+        case .newOffer:
+            return .newOffer(try decoder.decode(NewOfferMessage.self, from: data))
+        case .updateSdp:
+            return .updateSdp(try decoder.decode(UpdateSdpMessage.self, from: data))
+        case .newCandidate:
+            return .newCandidate(try decoder.decode(IceCandidate.self, from: data))
         case .presentationStart:
             let event = try decoder.decode(PresentationStartEvent.self, from: data)
             return .presentationStart(event)
@@ -57,15 +66,14 @@ struct ConferenceEventParser: InfinityEventParser {
         case .participantDelete:
             let event = try decoder.decode(ParticipantDeleteEvent.self, from: data)
             return .participantDelete(event)
+        case .peerDisconnected:
+            return .peerDisconnected
         case .callDisconnected:
             let event = try decoder.decode(CallDisconnectEvent.self, from: data)
             return .callDisconnected(event)
         case .clientDisconnected:
             let event = try decoder.decode(ClientDisconnectEvent.self, from: data)
             return .clientDisconnected(event)
-        case .liveCaptions:
-            let details = try decoder.decode(LiveCaptions.self, from: data)
-            return .liveCaptions(details)
         }
     }
 }

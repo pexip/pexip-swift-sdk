@@ -18,6 +18,7 @@ public struct ConferenceToken: InfinityToken, Codable, Hashable {
         public let credential: String
     }
 
+    // swiftlint:disable identifier_name
     private enum CodingKeys: String, CodingKey {
         case value = "token"
         case expiresString = "expires"
@@ -29,8 +30,10 @@ public struct ConferenceToken: InfinityToken, Codable, Hashable {
         case stun
         case turn
         case chatEnabled = "chat_enabled"
-        case analyticsEnabled = "analytics_enabled"
+        case dataChannelId = "pex_datachannel_id"
         case version
+        case _analyticsEnabled = "analytics_enabled"
+        case _directMedia = "direct_media"
     }
 
     /// A textual representation of this type, suitable for debugging.
@@ -53,7 +56,7 @@ public struct ConferenceToken: InfinityToken, Codable, Hashable {
     public let displayName: String
 
     /// VMR, gateway or Test Call Service
-    public let serviceType: String
+    public let serviceType: String?
 
     /// The name of the conference
     public let conferenceName: String
@@ -67,9 +70,19 @@ public struct ConferenceToken: InfinityToken, Codable, Hashable {
     /// true = chat is enabled; false = chat is not enabled
     public let chatEnabled: Bool
 
+    /// The id of the data channel for direct media connections
+    public let dataChannelId: Int32?
+
     /// Whether the Automatically send deployment and usage statistics
     /// to Pexip global setting has been enabled on the Pexip installation.
-    public let analyticsEnabled: Bool
+    public var analyticsEnabled: Bool {
+        _analyticsEnabled ?? false
+    }
+
+    /// true = direct media is enabled; false = direct media is not enabled
+    public var directMedia: Bool {
+        _directMedia ?? false
+    }
 
     /// The version of the Pexip server being communicated with.
     public let version: Version
@@ -80,6 +93,8 @@ public struct ConferenceToken: InfinityToken, Codable, Hashable {
     }
 
     private(set) var expiresString: String
+    private let _analyticsEnabled: Bool?
+    private let _directMedia: Bool?
 
     // MARK: - Init
 
@@ -94,7 +109,9 @@ public struct ConferenceToken: InfinityToken, Codable, Hashable {
         stun: [ConferenceToken.Stun]?,
         turn: [ConferenceToken.Turn]?,
         chatEnabled: Bool,
-        analyticsEnabled: Bool,
+        dataChannelId: Int32? = nil,
+        analyticsEnabled: Bool? = nil,
+        directMedia: Bool? = nil,
         expiresString: String,
         version: Version
     ) {
@@ -108,8 +125,10 @@ public struct ConferenceToken: InfinityToken, Codable, Hashable {
         self.stun = stun
         self.turn = turn
         self.chatEnabled = chatEnabled
-        self.analyticsEnabled = analyticsEnabled
         self.expiresString = expiresString
+        self.dataChannelId = dataChannelId
+        self._analyticsEnabled = analyticsEnabled
+        self._directMedia = directMedia
         self.version = version
     }
 

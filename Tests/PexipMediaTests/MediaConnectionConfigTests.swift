@@ -60,10 +60,11 @@ private struct Signaling: SignalingChannel, Hashable {
         callType: String,
         description: String,
         presentationInMain: Bool
-    ) async throws -> String {
+    ) async throws -> String? {
         return ""
     }
 
+    func sendAnswer(_ description: String) async throws {}
     func addCandidate(_ candidate: String, mid: String?) async throws {}
     func muteVideo(_ muted: Bool) async throws -> Bool { true }
     func muteAudio(_ muted: Bool) async throws -> Bool { true }

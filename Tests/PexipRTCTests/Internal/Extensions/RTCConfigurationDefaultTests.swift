@@ -26,5 +26,6 @@ final class RTCConfigurationDefaultTests: XCTestCase {
         XCTAssertEqual(configuration.rtcpMuxPolicy, .require)
         XCTAssertEqual(configuration.tcpCandidatePolicy, .enabled)
         XCTAssertTrue(configuration.enableDscp)
+        XCTAssertTrue(configuration.enableImplicitRollback)
     }
 }

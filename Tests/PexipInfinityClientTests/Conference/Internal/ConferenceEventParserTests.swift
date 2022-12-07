@@ -95,6 +95,47 @@ final class ConferenceEventParserTests: XCTestCase {
         }
     }
 
+    func testNewOffer() throws {
+        let expectedEvent = NewOfferMessage(sdp: UUID().uuidString)
+        let httpEvent = try HTTPEvent.stub(for: expectedEvent, name: "new_offer")
+
+        switch parser.parseEventData(from: httpEvent) {
+        case .newOffer(let event):
+            XCTAssertEqual(event.sdp, expectedEvent.sdp)
+        default:
+            XCTFail("Invalid event type")
+        }
+    }
+
+    func testUpdateSdp() throws {
+        let expectedEvent = UpdateSdpMessage(sdp: UUID().uuidString)
+        let httpEvent = try HTTPEvent.stub(for: expectedEvent, name: "update_sdp")
+
+        switch parser.parseEventData(from: httpEvent) {
+        case .updateSdp(let event):
+            XCTAssertEqual(event.sdp, expectedEvent.sdp)
+        default:
+            XCTFail("Invalid event type")
+        }
+    }
+
+    func testNewCandidate() throws {
+        let expectedEvent = IceCandidate(
+            candidate: UUID().uuidString,
+            mid: "0",
+            ufrag: "ufrag",
+            pwd: nil
+        )
+        let httpEvent = try HTTPEvent.stub(for: expectedEvent, name: "new_candidate")
+
+        switch parser.parseEventData(from: httpEvent) {
+        case .newCandidate(let event):
+            XCTAssertEqual(event, expectedEvent)
+        default:
+            XCTFail("Invalid event type")
+        }
+    }
+
     func testPresentationStart() throws {
         let expectedEvent = PresentationStartEvent(
             presenterName: "Name",
@@ -153,6 +194,12 @@ final class ConferenceEventParserTests: XCTestCase {
         default:
             XCTFail("Invalid event type")
         }
+    }
+
+    func testPeerDisconnected() throws {
+        let httpEvent = HTTPEvent(id: "11", name: "peer_disconnect")
+        let event = parser.parseEventData(from: httpEvent)
+        XCTAssertEqual(event, .peerDisconnected)
     }
 
     func testCallDisconnected() throws {

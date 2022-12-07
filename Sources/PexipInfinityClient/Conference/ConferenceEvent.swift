@@ -12,6 +12,15 @@ public enum ConferenceEvent: Hashable {
     /// A chat message has been broadcast to the conference.
     case messageReceived(ChatMessage)
 
+    /// New SDP offer received
+    case newOffer(NewOfferMessage)
+
+    /// Remote SDP updated
+    case updateSdp(UpdateSdpMessage)
+
+    /// New ICE candidate received
+    case newCandidate(IceCandidate)
+
     /// Marks the start of a presentation,
     /// and includes the information on which participant is presenting.
     case presentationStart(PresentationStartEvent)
@@ -34,6 +43,8 @@ public enum ConferenceEvent: Hashable {
     /// A participant has left the conference.
     case participantDelete(ParticipantDeleteEvent)
 
+    case peerDisconnected
+
     /// Sent when a child call has been disconnected.
     case callDisconnected(CallDisconnectEvent)
 
@@ -45,7 +56,11 @@ public enum ConferenceEvent: Hashable {
 
     enum Name: String {
         case conferenceUpdate = "conference_update"
+        case liveCaptions = "live_captions"
         case messageReceived = "message_received"
+        case newOffer = "new_offer"
+        case updateSdp = "update_sdp"
+        case newCandidate = "new_candidate"
         case presentationStart = "presentation_start"
         case presentationStop = "presentation_stop"
         case participantSyncBegin = "participant_sync_begin"
@@ -53,9 +68,9 @@ public enum ConferenceEvent: Hashable {
         case participantCreate = "participant_create"
         case participantUpdate = "participant_update"
         case participantDelete = "participant_delete"
+        case peerDisconnected = "peer_disconnect"
         case callDisconnected = "call_disconnected"
         case clientDisconnected = "disconnect"
-        case liveCaptions = "live_captions"
     }
 }
 
@@ -296,6 +311,29 @@ public struct ChatMessage: Codable, Hashable {
         self.receivedAt = receivedAt
     }
 }
+
+public struct NewOfferMessage: Codable, Hashable {
+    private enum CodingKeys: String, CodingKey {
+        case sdp
+    }
+
+    /// The remote offer sdp.
+    public let sdp: String
+    /// A date when the event was received.
+    public private(set) var receivedAt = Date()
+
+    /// Creates a new instance of ``NewOfferMessage``
+    ///
+    /// - Parameters:
+    ///   - sdp: The remote offer sdp
+    ///   - receivedAt: A date when the event was received
+    public init(sdp: String, receivedAt: Date = Date()) {
+        self.sdp = sdp
+        self.receivedAt = receivedAt
+    }
+}
+
+public typealias UpdateSdpMessage = NewOfferMessage
 
 /// Live caption event details.
 public struct LiveCaptions: Codable, Hashable {

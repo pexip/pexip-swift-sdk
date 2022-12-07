@@ -9,13 +9,15 @@ final class ConferenceTokenRequestFieldsTests: XCTestCase {
             displayName: "Name",
             conferenceExtension: "ext",
             idp: identityProvider,
-            ssoToken: ssoToken
+            ssoToken: ssoToken,
+            directMedia: false
         )
 
         XCTAssertEqual(fields.displayName, "Name")
         XCTAssertEqual(fields.conferenceExtension, "ext")
         XCTAssertEqual(fields.chosenIdpId, identityProvider.id)
         XCTAssertEqual(fields.ssoToken, ssoToken)
+        XCTAssertFalse(fields.directMedia)
     }
 
     func testInitWithDefaults() {
@@ -25,5 +27,6 @@ final class ConferenceTokenRequestFieldsTests: XCTestCase {
         XCTAssertNil(fields.conferenceExtension)
         XCTAssertNil(fields.chosenIdpId)
         XCTAssertNil(fields.ssoToken)
+        XCTAssertTrue(fields.directMedia)
     }
 }
