@@ -1,3 +1,5 @@
+import PexipInfinityClient
+
 enum ConferenceState {
     case preflight
     case connecting

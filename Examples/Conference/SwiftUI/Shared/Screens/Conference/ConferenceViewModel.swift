@@ -8,6 +8,7 @@ import PexipScreenCapture
 
 final class ConferenceViewModel: ObservableObject {
     @Published private(set) var state: ConferenceState
+    @Published private(set) var splashScreen: SplashScreen?
     @Published private(set) var cameraEnabled = false
     @Published private(set) var microphoneEnabled = false
     @Published private(set) var isPresenting = false
@@ -95,6 +96,8 @@ final class ConferenceViewModel: ObservableObject {
         sinkMediaConnectionEvents()
         sinkConferenceEvents()
         sinkCameraFilterSettings()
+
+        conference.receiveEvents()
     }
 
     deinit {
@@ -112,7 +115,6 @@ extension ConferenceViewModel {
                 state = .connecting
                 mediaConnection.setMainAudioTrack(mainLocalAudioTrack)
                 mediaConnection.setMainVideoTrack(cameraVideoTrack)
-                conference.receiveEvents()
                 try await mediaConnection.start()
             } catch {
                 state = .preflight
@@ -311,6 +313,8 @@ private extension ConferenceViewModel {
                                 mid: message.mid
                             )
                         }
+                    case .splashScreen(let event):
+                        self.splashScreen = event?.splashScreen
                     case .failure(let message):
                         debugPrint("Received conference error event: \(message.error)")
                     // Ignore the rest

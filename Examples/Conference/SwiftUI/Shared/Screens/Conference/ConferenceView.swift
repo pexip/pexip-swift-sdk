@@ -75,13 +75,17 @@ struct ConferenceView: View {
             case .preflight:
                 preflightView
             case .connecting:
-                ZStack {
-                    preflightView
-                    Color.black
-                        .opacity(0.7)
-                        .edgesIgnoringSafeArea(.all)
-                    Text("Joining the conference...")
-                        .foregroundColor(.white)
+                if viewModel.splashScreen == nil {
+                    ZStack {
+                        preflightView
+                        Color.black
+                            .opacity(0.7)
+                            .edgesIgnoringSafeArea(.all)
+                        Text("Joining the conference...")
+                            .foregroundColor(.white)
+                    }
+                } else {
+                    connectedView
                 }
             case .connected:
                 connectedView
@@ -134,6 +138,7 @@ struct ConferenceView: View {
             mainRemoteVideo: viewModel.mainRemoteVideo,
             presentationLocalVideo: viewModel.presentationLocalVideo,
             presentationRemoteVideo: viewModel.presentationRemoteVideo,
+            splashScreen: viewModel.splashScreen,
             presenterName: viewModel.presenterName,
             captions: viewModel.captions,
             showingChat: showingChat,

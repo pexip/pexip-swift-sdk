@@ -19,6 +19,8 @@
 		DA11B0DE27EA036500501E50 /* FormContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0D927EA007400501E50 /* FormContainerView.swift */; };
 		DA11B0E127EA0C3100501E50 /* UIViewController+Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0DF27EA0BFF00501E50 /* UIViewController+Keyboard.swift */; };
 		DA11B0E527EA104200501E50 /* UserDefaultsBacked.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0E327EA103F00501E50 /* UserDefaultsBacked.swift */; };
+		DA11E1EA2940EBF50075AE63 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11E1E92940EBF50075AE63 /* SplashView.swift */; };
+		DA11E1EB2940EBF50075AE63 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11E1E92940EBF50075AE63 /* SplashView.swift */; };
 		DA1329E627A98EC500C2EA89 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA1329D427A98EC500C2EA89 /* Assets.xcassets */; };
 		DA217DDB28995C27006E5169 /* BroadcastExtension in Frameworks */ = {isa = PBXBuildFile; productRef = DA217DDA28995C27006E5169 /* BroadcastExtension */; };
 		DA217DDD28995D2D006E5169 /* App in Frameworks */ = {isa = PBXBuildFile; productRef = DA217DDC28995D2D006E5169 /* App */; };
@@ -152,6 +154,7 @@
 		DA11B0DB27EA024800501E50 /* UIView+AutoLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+AutoLayout.swift"; sourceTree = "<group>"; };
 		DA11B0DF27EA0BFF00501E50 /* UIViewController+Keyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Keyboard.swift"; sourceTree = "<group>"; };
 		DA11B0E327EA103F00501E50 /* UserDefaultsBacked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsBacked.swift; sourceTree = "<group>"; };
+		DA11E1E92940EBF50075AE63 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		DA1329D427A98EC500C2EA89 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DA1329D927A98EC500C2EA89 /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA217DD9289959B6006E5169 /* Dependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Dependencies; sourceTree = "<group>"; };
@@ -548,6 +551,7 @@
 				DA2FE596287110CB00D8FCAB /* ConferenceState.swift */,
 				DA2FE599287110DD00D8FCAB /* ConferenceModal.swift */,
 				DAEBE68228A3D8AD00951E3C /* CameraVideoFilter.swift */,
+				DA11E1E92940EBF50075AE63 /* SplashView.swift */,
 			);
 			path = Conference;
 			sourceTree = "<group>";
@@ -833,6 +837,7 @@
 				DAFADCC927F50C1400A9AC3D /* MainVStack.swift in Sources */,
 				DA2FE59A287110DD00D8FCAB /* ConferenceModal.swift in Sources */,
 				DA93EE6D284A35200063386F /* Constants.swift in Sources */,
+				DA11E1EA2940EBF50075AE63 /* SplashView.swift in Sources */,
 				DAFADCC727F50C1400A9AC3D /* GeometryProxy+Extensions.swift in Sources */,
 				DAFADCDD27F50C1400A9AC3D /* AliasViewModel.swift in Sources */,
 				DAFADCE727F50C1400A9AC3D /* ConferenceView.swift in Sources */,
@@ -911,6 +916,7 @@
 				DAFADD0E27F50E8800A9AC3D /* PinChallengeViewModel.swift in Sources */,
 				DAFADD1F27F5D02E00A9AC3D /* NSColor+Extensions.swift in Sources */,
 				DAFADD0827F50E5D00A9AC3D /* DisplayNameViewModel.swift in Sources */,
+				DA11E1EB2940EBF50075AE63 /* SplashView.swift in Sources */,
 				DAFADCE827F50C1400A9AC3D /* ConferenceView.swift in Sources */,
 				DA934F0C28C7F41E002434DC /* Environment.swift in Sources */,
 				DA2FE598287110CB00D8FCAB /* ConferenceState.swift in Sources */,
