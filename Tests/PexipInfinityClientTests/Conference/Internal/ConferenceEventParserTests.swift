@@ -43,6 +43,35 @@ final class ConferenceEventParserTests: XCTestCase {
         XCTAssertNil(parser.parseEventData(from: event))
     }
 
+    func testSplashScreen() throws {
+        let expectedEvent = SplashScreenEvent(key: "direct_media")
+        let httpEvent = try HTTPEvent.stub(for: expectedEvent, name: "splash_screen")
+
+        switch parser.parseEventData(from: httpEvent) {
+        case .splashScreen(let event):
+            XCTAssertEqual(event?.key, expectedEvent.key)
+            XCTAssertNil(event?.splashScreen)
+        default:
+            XCTFail("Invalid event type")
+        }
+    }
+
+    func testSplashScreenWithNull() throws {
+        let httpEvent = HTTPEvent(
+            id: "1",
+            name: "splash_screen",
+            data: "null",
+            retry: nil
+        )
+
+        switch parser.parseEventData(from: httpEvent) {
+        case .splashScreen(let event):
+            XCTAssertNil(event)
+        default:
+            XCTFail("Invalid event type")
+        }
+    }
+
     func testConferenceUpdate() throws {
         let expectedStatus = ConferenceStatus(
             started: true,

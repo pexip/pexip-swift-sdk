@@ -1,7 +1,5 @@
 import Foundation
 
-// MARK: - Protocol
-
 /// Conference chat message service.
 public protocol ChatService {
     /**

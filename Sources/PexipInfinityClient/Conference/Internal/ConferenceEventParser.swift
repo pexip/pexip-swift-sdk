@@ -31,11 +31,18 @@ struct ConferenceEventParser: InfinityEventParser {
     }
 
     // swiftlint:disable cyclomatic_complexity
+    // swiftlint:disable function_body_length
     private func conferenceEvent(
         withName name: ConferenceEvent.Name,
         data: Data?
     ) throws -> ConferenceEvent {
         switch name {
+        case .splashScreen:
+            if let data, String(data: data, encoding: .utf8) == "null" {
+                return .splashScreen(nil)
+            } else {
+                return .splashScreen(try decoder.decode(SplashScreenEvent.self, from: data))
+            }
         case .conferenceUpdate:
             let status = try decoder.decode(ConferenceStatus.self, from: data)
             return .conferenceUpdate(status)

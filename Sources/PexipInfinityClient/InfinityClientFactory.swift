@@ -135,6 +135,7 @@ public struct InfinityClientFactory {
                 logger: logger
             ),
             roster: roster,
+            splashScreenService: conferenceService,
             liveCaptionsService: participantService,
             chat: chat(
                 token: token,

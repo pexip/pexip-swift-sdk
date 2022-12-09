@@ -6,7 +6,7 @@ import PexipCore
 // swiftlint:disable line_length
 
 /// Represents the [Conference control functions](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#conference) section.
-public protocol ConferenceService: TokenService, ChatService {
+public protocol ConferenceService: TokenService, ChatService, SplashScreenService {
     /**
      Requests a new token from the Pexip Conferencing Node.
      See [documentation](https://docs.pexip.com/api_client/api_rest.htm?Highlight=api#request_token)
@@ -116,6 +116,39 @@ struct DefaultConferenceService: ConferenceService {
             .appendingPathComponent("participants")
             .appendingPathComponent(id.uuidString.lowercased())
         return DefaultParticipantService(baseURL: url, client: client)
+    }
+
+    func splashScreens(token: ConferenceToken) async throws -> [String: SplashScreen] {
+        var request = URLRequest(
+            url: baseURL.appendingPathComponent("theme/"),
+            httpMethod: .GET
+        )
+        request.setHTTPHeader(.token(token.value))
+        var splashScreens: [String: SplashScreen] = try await client.json(for: request)
+
+        for key in splashScreens.keys {
+            if let background = splashScreens[key]?.background {
+                splashScreens[key]?.background.url = backgroundURL(for: background, token: token)
+            }
+        }
+
+        return splashScreens
+    }
+
+    func backgroundURL(
+        for background: SplashScreen.Background,
+        token: ConferenceToken
+    ) -> URL? {
+        var components = URLComponents(
+            url: baseURL
+                .appendingPathComponent("theme")
+                .appendingPathComponent(background.path),
+            resolvingAgainstBaseURL: false
+        )
+        components?.queryItems = [
+            URLQueryItem(name: "token", value: token.value)
+        ]
+        return components?.url
     }
 
     // MARK: - Private methods

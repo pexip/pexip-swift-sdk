@@ -22,6 +22,9 @@ public protocol Conference: AnyObject {
     /// The object responsible for sending and receiving text messages in the conference
     var chat: Chat? { get }
 
+    /// All available conference splash screens
+    var splashScreens: [String: SplashScreen] { get }
+
     /// Receives conference events as they occur
     /// - Returns: False if has already subscribed to the event source
     ///            or client was disconnected, True otherwise
@@ -47,6 +50,7 @@ final class DefaultConference: Conference {
     let signalingChannel: SignalingChannel
     let roster: Roster
     let chat: Chat?
+    var splashScreens = [String: SplashScreen]()
     var isClientDisconnected: Bool { _isClientDisconnected.value }
     var status: ConferenceStatus? { _status.value }
 
@@ -54,12 +58,14 @@ final class DefaultConference: Conference {
 
     private let tokenStore: TokenStore<ConferenceToken>
     private let connection: InfinityConnection<ConferenceEvent>
+    private let splashScreenService: SplashScreenService
     private let liveCaptionsService: LiveCaptionsService
     private let logger: Logger?
     private var eventSubject = PassthroughSubject<ConferenceEvent, Never>()
     private var eventTask: Task<Void, Never>?
     // Skip initial `presentation_stop` event
     private let skipPresentationStop = Synchronized(true)
+    private let hasRequestedSplashScreens = Synchronized(false)
     private let _status = Synchronized<ConferenceStatus?>(nil)
     private let _isClientDisconnected = Synchronized(false)
 
@@ -70,6 +76,7 @@ final class DefaultConference: Conference {
         tokenStore: TokenStore<ConferenceToken>,
         signalingChannel: SignalingChannel,
         roster: Roster,
+        splashScreenService: SplashScreenService,
         liveCaptionsService: LiveCaptionsService,
         chat: Chat?,
         logger: Logger?
@@ -78,6 +85,7 @@ final class DefaultConference: Conference {
         self.tokenStore = tokenStore
         self.signalingChannel = signalingChannel
         self.roster = roster
+        self.splashScreenService = splashScreenService
         self.liveCaptionsService = liveCaptionsService
         self.chat = chat
         self.logger = logger
@@ -146,6 +154,21 @@ final class DefaultConference: Conference {
         connection.cancel(withTokenRelease: !isClientDisconnected)
     }
 
+    private func loadSplashScreensIfNeeded() async {
+        guard !hasRequestedSplashScreens.value else {
+            return
+        }
+
+        do {
+            let token = try await tokenStore.token()
+            splashScreens = try await splashScreenService.splashScreens(token: token)
+        } catch {
+            logger?.error("Failed to load conference splash screens: \(error)")
+        }
+
+        hasRequestedSplashScreens.setValue(true)
+    }
+
     // swiftlint:disable cyclomatic_complexity
     @MainActor
     private func handleEvent(_ event: ConferenceEvent) async {
@@ -154,7 +177,15 @@ final class DefaultConference: Conference {
             return
         }
 
+        var event = event
+
         switch event {
+        case .splashScreen(var splashScreen):
+            if let key = splashScreen?.key {
+                await loadSplashScreensIfNeeded()
+                splashScreen?.splashScreen = splashScreens[key]
+            }
+            event = .splashScreen(splashScreen)
         case .conferenceUpdate(let value):
             _status.setValue(value)
         case .messageReceived(let message):

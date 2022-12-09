@@ -212,6 +212,17 @@ private final class ConferenceServiceMock: ConferenceService {
     func message(_ message: String, token: ConferenceToken) async throws -> Bool {
         fatalError("Not implemented")
     }
+
+    func splashScreens(token: ConferenceToken) async throws -> [String: SplashScreen] {
+        fatalError("Not implemented")
+    }
+
+    func backgroundURL(
+        for background: SplashScreen.Background,
+        token: ConferenceToken
+    ) -> URL? {
+        return nil
+    }
 }
 
 // swiftlint:disable unavailable_function

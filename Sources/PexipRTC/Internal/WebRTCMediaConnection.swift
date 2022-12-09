@@ -284,7 +284,7 @@ private extension WebRTCMediaConnection {
             }
 
             try await addOutgoingIceCandidatesIfNeeded()
-            logger?.debug("Outgoing offer - received answer, isPolitePeer=\(isPolitePeer)")
+            logger?.debug("Outgoing offer - received answer, isPolitePeer=\(isPolitePeer.value)")
         } catch {
             logger?.error("Outgoing offer - failed to send new offer: \(error)")
             outgoingIceCandidates.removeAll()

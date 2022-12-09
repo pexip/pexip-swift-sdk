@@ -11,6 +11,7 @@ final class ConferenceTests: XCTestCase {
     private var tokenRefreshTask: TokenRefreshTaskMock!
     private var eventSource: InfinityEventSource<ConferenceEvent>!
     private var liveCaptionsService: LiveCaptionsServiceMock!
+    private var splashScreenService: SplashScreenServiceMock!
     private var roster: Roster!
     private var chat: Chat!
     private var delegateMock: ConferenceDelegateMock!
@@ -28,6 +29,7 @@ final class ConferenceTests: XCTestCase {
         tokenStore = TokenStore<ConferenceToken>(token: token)
         tokenRefreshTask = TokenRefreshTaskMock()
         liveCaptionsService = LiveCaptionsServiceMock()
+        splashScreenService = SplashScreenServiceMock()
         delegateMock = ConferenceDelegateMock()
         eventSender = TestResultSender()
 
@@ -65,6 +67,7 @@ final class ConferenceTests: XCTestCase {
             tokenStore: tokenStore,
             signalingChannel: SignalingChannelMock(),
             roster: roster,
+            splashScreenService: splashScreenService,
             liveCaptionsService: liveCaptionsService,
             chat: chat,
             logger: nil
@@ -213,6 +216,46 @@ final class ConferenceTests: XCTestCase {
         // 4. Assert
         XCTAssertEqual(delegateMock.events, receivedEvents)
         XCTAssertEqual(receivedEvents, [.participantSyncBegin, .presentationStop])
+    }
+
+    func testHandleSplashScreenEvent() {
+        // 1. Subscribe to events
+        conference.receiveEvents()
+
+        // 2. Prepare
+        let key = "direct_media_welcome"
+        let splashScreen = SplashScreen(
+            layoutType: "direct_media",
+            background: .init(path: "background.jpg"),
+            elements: []
+        )
+        splashScreenService.splashScreens = [key: splashScreen]
+
+        // 3. Send event and assert
+        wait(
+            for: { expectation in
+                conference.eventPublisher.sink { event in
+                    Task { @MainActor [weak self] in
+                        switch event {
+                        case .splashScreen(let event):
+                            XCTAssertEqual(event?.key, key)
+                            XCTAssertEqual(event?.splashScreen, splashScreen)
+                            XCTAssertNotNil(self?.conference.splashScreens)
+                            XCTAssertEqual(
+                                self?.conference.splashScreens,
+                                self?.splashScreenService.splashScreens
+                            )
+                            expectation.fulfill()
+                        default:
+                            XCTFail("Unexpected event")
+                        }
+                    }
+                }.store(in: &cancellables)
+            },
+            after: {
+                eventSender.send(.success(.splashScreen(.init(key: key))))
+            }
+        )
     }
 
     func testHandleConferenceUpdateEvent() {
@@ -592,6 +635,21 @@ private final class SignalingChannelMock: SignalingChannel {
 
     func releaseFloor() async throws -> Bool {
         return false
+    }
+}
+
+private final class SplashScreenServiceMock: SplashScreenService {
+    var splashScreens = [String: SplashScreen]()
+
+    func splashScreens(token: ConferenceToken) async throws -> [String: SplashScreen] {
+        return splashScreens
+    }
+
+    func backgroundURL(
+        for background: SplashScreen.Background,
+        token: ConferenceToken
+    ) -> URL? {
+        return nil
     }
 }
 

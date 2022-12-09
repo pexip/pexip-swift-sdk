@@ -3,6 +3,9 @@ import Foundation
 /// Conference-related events.
 @frozen
 public enum ConferenceEvent: Hashable {
+    /// New conference splash screen event received.
+    case splashScreen(SplashScreenEvent?)
+
     /// Conference properties have been updated.
     case conferenceUpdate(ConferenceStatus)
 
@@ -55,6 +58,7 @@ public enum ConferenceEvent: Hashable {
     case failure(FailureEvent)
 
     enum Name: String {
+        case splashScreen = "splash_screen"
         case conferenceUpdate = "conference_update"
         case liveCaptions = "live_captions"
         case messageReceived = "message_received"
@@ -75,6 +79,22 @@ public enum ConferenceEvent: Hashable {
 }
 
 // MARK: - Events
+
+/// An event that includes information to be displayed to the user.
+public struct SplashScreenEvent: Codable, Hashable {
+    private enum CodingKeys: String, CodingKey {
+        case key = "screen_key"
+    }
+
+    /// The key to find the corresponding splash screen theme.
+    public let key: String
+
+    /// Optional splash screen object.
+    public internal(set) var splashScreen: SplashScreen?
+
+    /// A date when the event was received.
+    public private(set) var receivedAt = Date()
+}
 
 /// The status of the conference.
 public struct ConferenceStatus: Codable, Hashable {

@@ -1,6 +1,7 @@
 import XCTest
 @testable import PexipInfinityClient
 
+// swiftlint:disable type_body_length
 final class ConferenceServiceTests: APITestCase {
     private let baseURL = URL(string: "https://example.com/api/conference/name")!
     private var service: ConferenceService!
@@ -294,6 +295,59 @@ final class ConferenceServiceTests: APITestCase {
                 let result = try await service.message(message, token: token)
                 XCTAssertTrue(result)
             }
+        )
+    }
+
+    func testSplashScreens() async throws {
+        let token = ConferenceToken.randomToken()
+        var expectedBackground = SplashScreen.Background(path: "background.jpg")
+        expectedBackground.url = URL(
+            string: baseURL.absoluteString + "/theme/background.jpg?token=\(token.value)"
+        )
+        let responseJSON = """
+        {
+            "status": "success",
+            "result": {
+                "direct_media_welcome": {
+                    "layout_type": "direct_media",
+                    "background": {
+                        "path": "background.jpg"
+                    },
+                    "elements": [{
+                        "type": "text",
+                        "color": 4294967295,
+                        "text": "Welcome"
+                    }]
+                }
+            }
+        }
+        """
+        try await testJSONRequest(
+            withMethod: .GET,
+            url: baseURL.appendingPathComponent("theme/"),
+            token: token,
+            body: nil,
+            responseJSON: responseJSON,
+            execute: {
+                let result = try await service.splashScreens(token: token)
+                let splashScreen = SplashScreen(
+                    layoutType: "direct_media",
+                    background: expectedBackground,
+                    elements: [.init(type: "text", color: 4_294_967_295, text: "Welcome")]
+                )
+                XCTAssertEqual(result, ["direct_media_welcome": splashScreen])
+            }
+        )
+    }
+
+    func testBackgroundURL() {
+        let background = SplashScreen.Background(path: "background.jpg")
+        let token = ConferenceToken.randomToken()
+        let url = service.backgroundURL(for: background, token: token)
+
+        XCTAssertEqual(
+            url?.absoluteString,
+            baseURL.absoluteString + "/theme/background.jpg?token=\(token.value)"
         )
     }
 }
