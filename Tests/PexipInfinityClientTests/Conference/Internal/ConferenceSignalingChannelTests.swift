@@ -29,7 +29,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         super.setUp()
         participantService = ParticipantServiceMock()
         roster = Roster(
-            currentParticipantId: UUID(),
+            currentParticipantId: UUID().uuidString,
             currentParticipantName: "Test",
             avatarURL: { _ in nil }
         )
@@ -45,13 +45,13 @@ final class ConferenceSignalingChannelTests: XCTestCase {
 
     // MARK: - Tests
 
-    func testInit() async {
-        let iceServers = await channel.iceServers
+    func testInit() {
+        let iceServers = channel.iceServers
         XCTAssertEqual(iceServers, [iceServer])
     }
 
     func testSendOfferOnFirstCall() async throws {
-        let expectedCallId = UUID()
+        let expectedCallId = UUID().uuidString
         let expectedSdpAnswer = UUID().uuidString
         let sdpAnswer = try await sendOffer(
             offer: sdpOffer,
@@ -59,7 +59,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
             presentationInMain: false,
             callId: expectedCallId
         )
-        let pwds = await channel.pwds
+        let pwds = channel.pwds.value
         let callId = await channel.callId
 
         XCTAssertEqual(sdpAnswer, expectedSdpAnswer)
@@ -82,7 +82,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
             answer: expectedSdpAnswer,
             presentationInMain: true
         )
-        let pwds = await channel.pwds
+        let pwds = channel.pwds.value
 
         XCTAssertEqual(sdpAnswer, expectedSdpAnswer)
         XCTAssertEqual(pwds, ["ToQx": "jSThfoPwGg6gKmxeTmTqz8ea"])
@@ -97,14 +97,14 @@ final class ConferenceSignalingChannelTests: XCTestCase {
     }
 
     func testSendOfferOnFirstCallWithoutSdpInResponse() async throws {
-        let expectedCallId = UUID()
+        let expectedCallId = UUID().uuidString
         let sdpAnswer = try await sendOffer(
             offer: sdpOffer,
             answer: nil,
             presentationInMain: false,
             callId: expectedCallId
         )
-        let pwds = await channel.pwds
+        let pwds = channel.pwds.value
         let callId = await channel.callId
 
         XCTAssertNil(sdpAnswer)
@@ -125,7 +125,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
             """
         let expectedSdpAnswer = UUID().uuidString
         let sdpAnswer = try await sendOffer(offer: sdpOffer, answer: expectedSdpAnswer)
-        let pwds = await channel.pwds
+        let pwds = channel.pwds.value
 
         XCTAssertEqual(sdpAnswer, expectedSdpAnswer)
         XCTAssertTrue(pwds.isEmpty)
@@ -142,7 +142,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
             """
         let expectedSdpAnswer = UUID().uuidString
         let sdpAnswer = try await sendOffer(offer: sdpOffer, answer: expectedSdpAnswer)
-        let pwds = await channel.pwds
+        let pwds = channel.pwds.value
 
         XCTAssertEqual(sdpAnswer, expectedSdpAnswer)
         XCTAssertTrue(pwds.isEmpty)
@@ -171,7 +171,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         XCTAssertEqual(participantService.token, token)
         XCTAssertEqual(callService.token, token)
 
-        let pwds = await channel.pwds
+        let pwds = channel.pwds.value
         XCTAssertEqual(pwds, ["ToQx": "jSThfoPwGg6gKmxeTmTqz8ea"])
     }
 
@@ -192,7 +192,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         XCTAssertEqual(participantService.token, token)
         XCTAssertEqual(callService.token, token)
 
-        let pwds = await channel.pwds
+        let pwds = channel.pwds.value
         XCTAssertEqual(pwds, ["ToQx": "jSThfoPwGg6gKmxeTmTqz8ea"])
     }
 
@@ -206,7 +206,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         try await sendOffer(answer: UUID().uuidString)
         try await channel.sendAnswer(answer)
 
-        let pwds = await channel.pwds
+        let pwds = channel.pwds.value
         XCTAssertEqual(pwds, ["ToQy": "jSThfoPwGg6gKmxeYnTqz8ea"])
         XCTAssertEqual(callService.actions, [.ack, .ack])
     }
@@ -438,7 +438,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         offer: String? = nil,
         answer: String? = UUID().uuidString,
         presentationInMain: Bool = false,
-        callId: UUID = UUID()
+        callId: String = UUID().uuidString
     ) async throws -> String? {
         participantService.results = [
             .calls: .success(CallDetails(id: callId, sdp: answer))
@@ -510,7 +510,7 @@ private final class ParticipantServiceMock: ParticipantService {
         fatalError()
     }
 
-    func call(id: UUID) -> CallService { callService }
+    func call(id: String) -> CallService { callService }
     func showLiveCaptions(token: ConferenceToken) async throws { fatalError() }
     func hideLiveCaptions(token: ConferenceToken) async throws { fatalError() }
     func avatarURL() -> URL { fatalError() }

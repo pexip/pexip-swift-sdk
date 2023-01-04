@@ -12,7 +12,6 @@ final class RegistrationEventServiceTests: APITestCase {
         service = DefaultRegistrationEventService(baseURL: baseURL, client: client)
     }
 
-    // swiftlint:disable function_body_length
     func testEventStream() async throws {
         // 1. Prepare
         var receivedEvents = [RegistrationEvent]()
@@ -63,15 +62,7 @@ final class RegistrationEventServiceTests: APITestCase {
 
         switch receivedEvents.first {
         case .incoming(let incomingEvent):
-            XCTAssertEqual(
-                incomingEvent.conferenceAlias,
-                expectedEvent.conferenceAlias
-            )
-            XCTAssertEqual(
-                incomingEvent.remoteDisplayName,
-                expectedEvent.remoteDisplayName
-            )
-            XCTAssertEqual(incomingEvent.token, expectedEvent.token)
+            XCTAssertEqual(incomingEvent, expectedEvent)
         default:
             XCTFail("Unexpected event type")
         }

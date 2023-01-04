@@ -4,7 +4,7 @@ import PexipCore
 import PexipMedia
 
 // swiftlint:disable file_length
-final class WebRTCMediaConnection: MediaConnection {
+final class WebRTCMediaConnection: NSObject, MediaConnection {
     var remoteVideoTracks = RemoteVideoTracks(
         mainTrack: nil,
         presentationTrack: nil
@@ -78,10 +78,10 @@ final class WebRTCMediaConnection: MediaConnection {
         self.factory = factory
         self.connection = connection
         self.logger = logger
+        super.init()
+
         self.connectionDelegateProxy.delegate = self
-        secureCheckCode.$value.sink { value in
-            logger?.debug("Secure Check Code: \(value)")
-        }.store(in: &cancellables)
+        subscribeToEvents()
     }
 
     deinit {
@@ -157,62 +157,12 @@ final class WebRTCMediaConnection: MediaConnection {
         shouldRenegotiate.setValue(false)
         isPolitePeer.setValue(false)
 
+        signalingChannel.data?.sender = nil
+        localDataChannel?.close()
+        localDataChannel = nil
+
         incomingIceCandidates.removeAll()
         outgoingIceCandidates.removeAll()
-    }
-
-    func receiveNewOffer(_ offer: String) async throws {
-        isReceivingOffer.setValue(true)
-        defer {
-            isReceivingOffer.setValue(false)
-        }
-
-        logger?.debug("Incoming offer - received")
-        guard canReceiveOffer else {
-            logger?.debug("Incoming offer - ignored")
-            return
-        }
-
-        do {
-            let remoteDescription = RTCSessionDescription(type: .offer, sdp: offer)
-            try await connection.setRemoteDescription(remoteDescription)
-            fingerprintStore.setRemoteFingerprints(fingerprints(from: remoteDescription))
-
-            try await connection.setLocalDescription()
-            if let localDescription = connection.localDescription {
-                fingerprintStore.setLocalFingerprints(fingerprints(from: localDescription))
-                try await config.signaling.sendAnswer(mangle(description: localDescription))
-            }
-
-            try await addIncomingIceCandidatesIfNeeded()
-            logger?.debug("Incoming offer - sent answer")
-        } catch {
-            incomingIceCandidates.removeAll()
-            logger?.error("Incoming offer - failed to accept: \(error)")
-            throw error
-        }
-    }
-
-    func addCandidate(sdp: String, mid: String?) async throws {
-        guard !sdp.isEmpty else {
-            return
-        }
-        let sdpMLineIndex = mid.flatMap({ Int32($0) }) ?? 0
-        let candidate = RTCIceCandidate(sdp: sdp, sdpMLineIndex: sdpMLineIndex, sdpMid: mid)
-
-        do {
-            if isReceivingOffer.value {
-                incomingIceCandidates.append(candidate)
-            } else {
-                try await connection.add(candidate)
-                logger?.debug("New incoming ICE candidate added")
-            }
-        } catch {
-            if canReceiveOffer {
-                logger?.error("Failed to add new incoming ICE candidate")
-                throw error
-            }
-        }
     }
 
     func receivePresentation(_ receive: Bool) throws {
@@ -292,6 +242,63 @@ private extension WebRTCMediaConnection {
         }
     }
 
+    func receiveNewOffer(_ offer: String) async throws {
+        isReceivingOffer.setValue(true)
+        defer {
+            isReceivingOffer.setValue(false)
+        }
+
+        logger?.debug("Incoming offer - received")
+        guard canReceiveOffer else {
+            logger?.debug("Incoming offer - ignored")
+            return
+        }
+
+        do {
+            let remoteDescription = RTCSessionDescription(type: .offer, sdp: offer)
+            try await connection.setRemoteDescription(remoteDescription)
+            fingerprintStore.setRemoteFingerprints(fingerprints(from: remoteDescription))
+
+            try await connection.setLocalDescription()
+            if let localDescription = connection.localDescription {
+                fingerprintStore.setLocalFingerprints(fingerprints(from: localDescription))
+                try await config.signaling.sendAnswer(mangle(description: localDescription))
+            }
+
+            try await addIncomingIceCandidatesIfNeeded()
+            logger?.debug("Incoming offer - sent answer")
+        } catch {
+            incomingIceCandidates.removeAll()
+            logger?.error("Incoming offer - failed to accept: \(error)")
+            throw error
+        }
+    }
+
+    func receiveCandidate(_ candidate: String, mid: String?) async throws {
+        guard !candidate.isEmpty else {
+            return
+        }
+        let candidate = RTCIceCandidate(
+            sdp: candidate,
+            sdpMLineIndex: mid.flatMap({ Int32($0) }) ?? 0,
+            sdpMid: mid
+        )
+
+        do {
+            if isReceivingOffer.value {
+                incomingIceCandidates.append(candidate)
+            } else {
+                try await connection.add(candidate)
+                logger?.debug("New incoming ICE candidate added")
+            }
+        } catch {
+            if canReceiveOffer {
+                logger?.error("Failed to add new incoming ICE candidate")
+                throw error
+            }
+        }
+    }
+
     func toggleLocalPresentation(_ isPresenting: Bool) {
         guard let transceiver = presentationVideoTransceiver else {
             return
@@ -326,7 +333,7 @@ private extension WebRTCMediaConnection {
     }
 
     func createDataChannelIfNeeded() {
-        if let dataChannelId = config.dataChannelId, localDataChannel == nil {
+        if let dataChannelId = signalingChannel.data?.id, localDataChannel == nil {
             let config = RTCDataChannelConfiguration()
             config.isNegotiated = true
             config.channelId = dataChannelId
@@ -334,6 +341,9 @@ private extension WebRTCMediaConnection {
                 forLabel: "pexChannel",
                 configuration: config
             )
+            localDataChannel?.delegate = self
+            signalingChannel.data?.sender = self
+            logger?.debug("Data channel - new data channel created.")
         }
     }
 
@@ -388,6 +398,23 @@ private extension WebRTCMediaConnection {
 
     func fingerprints(from description: RTCSessionDescription) -> [Fingerprint] {
         SessionDescriptionManager(sdp: description.sdp).extractFingerprints()
+    }
+
+    func subscribeToEvents() {
+        secureCheckCode.$value.sink { [weak self] value in
+            self?.logger?.debug("Secure Check Code: \(value)")
+        }.store(in: &cancellables)
+
+        config.signaling.eventPublisher.sink { event in
+            Task { [weak self] in
+                switch event {
+                case .newOffer(let sdp):
+                    try await self?.receiveNewOffer(sdp)
+                case let .newCandidate(candidate, mid):
+                    try await self?.receiveCandidate(candidate, mid: mid)
+                }
+            }
+        }.store(in: &cancellables)
     }
 }
 
@@ -510,6 +537,45 @@ extension WebRTCMediaConnection: PeerConnectionDelegate {
             remoteVideoTracks.setMainTrack(track.map { WebRTCVideoTrack(rtcTrack: $0) })
         } else if rtpReceiver.receiverId == presentationVideoTransceiver?.receiver.receiverId {
             presentationVideoTransceiver?.setSenderStreams(mediaStreams)
+        }
+    }
+}
+
+// MARK: - DataSender
+
+extension WebRTCMediaConnection: DataSender {
+    func send(_ data: Data) async throws -> Bool {
+        guard let localDataChannel else {
+            logger?.warn("Data channel - no local data channel created.")
+            return false
+        }
+
+        let buffer = RTCDataBuffer(data: data, isBinary: false)
+        let result = localDataChannel.sendData(buffer)
+        logger?.debug("Data channel - did send data, success=\(result).")
+        return result
+    }
+}
+
+// MARK: - RTCDataChannelDelegate
+
+extension WebRTCMediaConnection: RTCDataChannelDelegate {
+    func dataChannelDidChangeState(_ dataChannel: RTCDataChannel) {
+        let state = DataChannelState(dataChannel.readyState)
+        logger?.debug("Data channel - did change state: \(state)")
+    }
+
+    func dataChannel(
+        _ dataChannel: RTCDataChannel,
+        didReceiveMessageWith buffer: RTCDataBuffer
+    ) {
+        Task {
+            do {
+                let result = try await signalingChannel.data?.receiver?.receive(buffer.data)
+                logger?.debug("Data channel - did receive data, success=\(result == true).")
+            } catch {
+                logger?.error("Data channel - failed to process incoming data: \(error)")
+            }
         }
     }
 }

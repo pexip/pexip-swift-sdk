@@ -49,7 +49,7 @@ public protocol ConferenceService: TokenService, ChatService, SplashScreenServic
         - id: The ID of the participant
      - Returns: A new instance of ``ParticipantService``
      */
-    func participant(id: UUID) -> ParticipantService
+    func participant(id: String) -> ParticipantService
 }
 
 // MARK: - Implementation
@@ -111,10 +111,10 @@ struct DefaultConferenceService: ConferenceService {
         )
     }
 
-    func participant(id: UUID) -> ParticipantService {
+    func participant(id: String) -> ParticipantService {
         let url = baseURL
             .appendingPathComponent("participants")
-            .appendingPathComponent(id.uuidString.lowercased())
+            .appendingPathComponent(id)
         return DefaultParticipantService(baseURL: url, client: client)
     }
 

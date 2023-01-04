@@ -2,12 +2,12 @@ import Foundation
 @testable import PexipInfinityClient
 
 extension Participant {
-    static func avatarURL(id: UUID) -> URL? {
+    static func avatarURL(id: String) -> URL? {
         URL(string: "https://vc.example.com/api/participant/\(id)/avatar.jpg")
     }
 
     static func stub(
-        withId id: UUID,
+        withId id: String = UUID().uuidString,
         displayName: String,
         isPresenting: Bool = false
     ) -> Participant {

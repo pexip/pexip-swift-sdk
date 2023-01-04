@@ -1,5 +1,6 @@
 import XCTest
 import Combine
+import PexipCore
 import TestHelpers
 @testable import PexipInfinityClient
 
@@ -11,6 +12,7 @@ final class ConferenceTests: XCTestCase {
     private var tokenRefreshTask: TokenRefreshTaskMock!
     private var eventSource: InfinityEventSource<ConferenceEvent>!
     private var liveCaptionsService: LiveCaptionsServiceMock!
+    private var signalingChannel: SignalingChannelMock!
     private var splashScreenService: SplashScreenServiceMock!
     private var roster: Roster!
     private var chat: Chat!
@@ -22,6 +24,7 @@ final class ConferenceTests: XCTestCase {
 
     // MARK: - Setup
 
+    // swiftlint:disable function_body_length
     override func setUp() async throws {
         try await super.setUp()
 
@@ -32,6 +35,7 @@ final class ConferenceTests: XCTestCase {
         splashScreenService = SplashScreenServiceMock()
         delegateMock = ConferenceDelegateMock()
         eventSender = TestResultSender()
+        signalingChannel = SignalingChannelMock()
 
         let stream = AsyncThrowingStream<ConferenceEvent, Error> { [weak self] continuation in
             continuation.onTermination = { @Sendable [weak self] _ in
@@ -57,7 +61,11 @@ final class ConferenceTests: XCTestCase {
             avatarURL: { _ in nil }
         )
 
-        chat = Chat(senderName: "Test", senderId: UUID(), sendMessage: { _ in true })
+        chat = Chat(
+            senderName: "Test",
+            senderId: UUID().uuidString,
+            sendMessage: { _ in true }
+        )
 
         conference = DefaultConference(
             connection: InfinityConnection(
@@ -65,7 +73,7 @@ final class ConferenceTests: XCTestCase {
                 eventSource: eventSource
             ),
             tokenStore: tokenStore,
-            signalingChannel: SignalingChannelMock(),
+            signalingChannel: signalingChannel,
             roster: roster,
             splashScreenService: splashScreenService,
             liveCaptionsService: liveCaptionsService,
@@ -85,9 +93,14 @@ final class ConferenceTests: XCTestCase {
 
     // MARK: - Tests
 
+    func testSetDataReceiverOnInit() {
+        XCTAssertNotNil(conference.signalingChannel.data?.receiver)
+        XCTAssertTrue(conference.signalingChannel.data?.receiver === conference)
+    }
+
     func testFailureEventOnTokenRefreshError() {
         let error = URLError(.unknown)
-        var receivedEvents = [ConferenceEvent]()
+        var receivedEvents = [ConferenceClientEvent]()
 
         // 1. Wait for events
         wait(
@@ -121,18 +134,35 @@ final class ConferenceTests: XCTestCase {
         XCTAssertTrue(conference.receiveEvents())
 
         // 2. Prepare
+        let conferenceStatus = ConferenceStatus.stub()
+        let liveCaptions = LiveCaptions(data: "Test", isFinal: true, sentAt: nil)
+        let presentationStart = PresentationStartEvent(
+            presenterName: "Test",
+            presenterUri: ""
+        )
+        let callDisconnect = CallDisconnectEvent(callId: "id", reason: "Test")
+        let clientDisconnect = ClientDisconnectEvent(reason: "Test")
+        let refer = ReferEvent(token: UUID().uuidString, alias: "test@example.com")
         let events: [ConferenceEvent] = [
-            .participantSyncBegin,
-            .participantSyncEnd
+            .splashScreen(nil),
+            .conferenceUpdate(conferenceStatus),
+            .liveCaptions(liveCaptions),
+            .presentationStart(presentationStart),
+            .presentationStop, // First presentationStop event should be skipped.
+            .presentationStop,
+            .callDisconnected(callDisconnect),
+            .clientDisconnected(clientDisconnect),
+            .peerDisconnected,
+            .refer(refer)
         ]
-        var receivedEvents = [ConferenceEvent]()
+        var receivedEvents = [ConferenceClientEvent]()
 
         // 3. Send events
         wait(
             for: { expectation in
                 conference.eventPublisher.sink { event in
                     receivedEvents.append(event)
-                    if receivedEvents.count == 3 {
+                    if receivedEvents.count == 9 {
                         expectation.fulfill()
                     }
                 }.store(in: &cancellables)
@@ -147,16 +177,20 @@ final class ConferenceTests: XCTestCase {
 
         // 4. Assert
         XCTAssertEqual(delegateMock.events, receivedEvents)
-        XCTAssertEqual(receivedEvents.count, 3)
-        XCTAssertEqual(receivedEvents[0], events[0])
-        XCTAssertEqual(receivedEvents[1], events[1])
-
-        switch receivedEvents[2] {
-        case .failure(let event):
-            XCTAssertEqual(event.error as? InfinityTokenError, .tokenExpired)
-        default:
-            XCTFail("Invalid event type")
-        }
+        XCTAssertEqual(
+            receivedEvents,
+            [
+                .splashScreen(nil),
+                .conferenceUpdate(conferenceStatus),
+                .liveCaptions(liveCaptions),
+                .presentationStart(presentationStart),
+                .presentationStop,
+                .callDisconnected(callDisconnect),
+                .clientDisconnected(clientDisconnect),
+                .peerDisconnected,
+                .refer(refer)
+            ]
+        )
     }
 
     func testReceiveEventsWhenAlreadySubscribed() {
@@ -191,10 +225,10 @@ final class ConferenceTests: XCTestCase {
         // 2. Prepare
         let events: [ConferenceEvent] = [
             .presentationStop,
-            .participantSyncBegin,
+            .splashScreen(nil),
             .presentationStop
         ]
-        var receivedEvents = [ConferenceEvent]()
+        var receivedEvents = [ConferenceClientEvent]()
 
         // 3. Send events
         wait(
@@ -215,7 +249,7 @@ final class ConferenceTests: XCTestCase {
 
         // 4. Assert
         XCTAssertEqual(delegateMock.events, receivedEvents)
-        XCTAssertEqual(receivedEvents, [.participantSyncBegin, .presentationStop])
+        XCTAssertEqual(receivedEvents, [.splashScreen(nil), .presentationStop])
     }
 
     func testHandleSplashScreenEvent() {
@@ -238,8 +272,7 @@ final class ConferenceTests: XCTestCase {
                     Task { @MainActor [weak self] in
                         switch event {
                         case .splashScreen(let event):
-                            XCTAssertEqual(event?.key, key)
-                            XCTAssertEqual(event?.splashScreen, splashScreen)
+                            XCTAssertEqual(event, splashScreen)
                             XCTAssertNotNil(self?.conference.splashScreens)
                             XCTAssertEqual(
                                 self?.conference.splashScreens,
@@ -254,6 +287,96 @@ final class ConferenceTests: XCTestCase {
             },
             after: {
                 eventSender.send(.success(.splashScreen(.init(key: key))))
+            }
+        )
+    }
+
+    func testHandleNewOfferEvent() {
+        // 1. Subscribe to events
+        conference.receiveEvents()
+
+        // 2. Prepare
+        let expectedOffer = UUID().uuidString
+
+        // 3. Send event and assert
+        wait(
+            for: { expectation in
+                signalingChannel.eventPublisher.sink { event in
+                    Task { @MainActor in
+                        switch event {
+                        case .newOffer(let offer):
+                            XCTAssertEqual(offer, expectedOffer)
+                            expectation.fulfill()
+                        default:
+                            XCTFail("Unexpected event")
+                        }
+                    }
+                }.store(in: &cancellables)
+            },
+            after: {
+                eventSender.send(.success(.newOffer(NewOfferMessage(sdp: expectedOffer))))
+            }
+        )
+    }
+
+    func testHandleUpdateSdpEvent() {
+        // 1. Subscribe to events
+        conference.receiveEvents()
+
+        // 2. Prepare
+        let expectedOffer = UUID().uuidString
+
+        // 3. Send event and assert
+        wait(
+            for: { expectation in
+                signalingChannel.eventPublisher.sink { event in
+                    Task { @MainActor in
+                        switch event {
+                        case .newOffer(let offer):
+                            XCTAssertEqual(offer, expectedOffer)
+                            expectation.fulfill()
+                        default:
+                            XCTFail("Unexpected event")
+                        }
+                    }
+                }.store(in: &cancellables)
+            },
+            after: {
+                eventSender.send(.success(.updateSdp(UpdateSdpMessage(sdp: expectedOffer))))
+            }
+        )
+    }
+
+    func testHandleNewCandidateEvent() {
+        // 1. Subscribe to events
+        conference.receiveEvents()
+
+        // 2. Prepare
+        let expectedCandidate = IceCandidate(
+            candidate: UUID().uuidString,
+            mid: "1",
+            ufrag: nil,
+            pwd: nil
+        )
+
+        // 3. Send event and assert
+        wait(
+            for: { expectation in
+                signalingChannel.eventPublisher.sink { event in
+                    Task { @MainActor in
+                        switch event {
+                        case let .newCandidate(candidate, mid):
+                            XCTAssertEqual(candidate, expectedCandidate.candidate)
+                            XCTAssertEqual(mid, expectedCandidate.mid)
+                            expectation.fulfill()
+                        default:
+                            XCTFail("Unexpected event")
+                        }
+                    }
+                }.store(in: &cancellables)
+            },
+            after: {
+                eventSender.send(.success(.newCandidate(expectedCandidate)))
             }
         )
     }
@@ -286,7 +409,11 @@ final class ConferenceTests: XCTestCase {
         conference.receiveEvents()
 
         // 2. Prepare
-        let message = ChatMessage(senderName: "Name", senderId: UUID(), payload: "Test")
+        let message = ChatMessage(
+            senderName: "Name",
+            senderId: UUID().uuidString,
+            payload: "Test"
+        )
         let event = ConferenceEvent.messageReceived(message)
 
         // 3. Send event and assert
@@ -308,8 +435,8 @@ final class ConferenceTests: XCTestCase {
         conference.receiveEvents()
 
         // 2. Prepare
-        let idA = UUID()
-        let idB = UUID()
+        let idA = UUID().uuidString
+        let idB = UUID().uuidString
         let participantA = Participant.stub(withId: idA, displayName: "A")
         let participantB = Participant.stub(withId: idB, displayName: "B")
         let participantC = Participant.stub(withId: idA, displayName: "C")
@@ -317,21 +444,14 @@ final class ConferenceTests: XCTestCase {
         // 3. Send events and assert
         wait(
             for: { expectation in
-                conference.eventPublisher.sink { event in
+                conference.roster.eventPublisher.sink { event in
                     Task { @MainActor in
                         switch event {
-                        case .participantSyncBegin:
-                            let isSyncing = await self.roster.isSyncing
-                            XCTAssertTrue(isSyncing)
-                        case .participantSyncEnd:
-                            let isSyncing = await self.roster.isSyncing
-                            XCTAssertFalse(isSyncing)
-                            XCTAssertEqual(self.roster.participants, [participantC])
+                        case .reloaded(let participants):
+                            XCTAssertEqual(participants, [participantC])
                             expectation.fulfill()
-                        case .participantCreate, .participantUpdate, .participantDelete:
-                            break
                         default:
-                            XCTFail("Unexpected event")
+                            XCTFail("Invalid event")
                         }
                     }
                 }.store(in: &cancellables)
@@ -362,7 +482,10 @@ final class ConferenceTests: XCTestCase {
             },
             after: {
                 eventSender.send(
-                    .success(.callDisconnected(.init(callId: UUID(), reason: "Unknown")))
+                    .success(.callDisconnected(.init(
+                        callId: UUID().uuidString,
+                        reason: "Unknown")
+                    ))
                 )
                 eventSender.send(
                     .success(.clientDisconnected(.init(reason: "Unknown")))
@@ -445,7 +568,10 @@ final class ConferenceTests: XCTestCase {
 
         // 2. Leave
         Task {
-            await roster.addParticipant(.stub(withId: UUID(), displayName: "Test"))
+            await roster.addParticipant(.stub(
+                withId: UUID().uuidString,
+                displayName: "Test"
+            ))
             await conference.leave()
         }
 
@@ -487,7 +613,10 @@ final class ConferenceTests: XCTestCase {
 
         // 3. Leave
         Task {
-            await roster.addParticipant(.stub(withId: UUID(), displayName: "Test"))
+            await roster.addParticipant(.stub(
+                withId: UUID().uuidString,
+                displayName: "Test"
+            ))
             await conference.leave()
         }
 
@@ -505,6 +634,53 @@ final class ConferenceTests: XCTestCase {
         }
 
         wait(for: [assertExpectation], timeout: 0.1)
+    }
+
+    func testReceiveDataWithoutDirectMedia() async throws {
+        let result = try await conference.receive(Data())
+        XCTAssertFalse(result)
+    }
+
+    func testReceiveDataWithDirectMedia() throws {
+        let status = ConferenceStatus.stub(directMedia: true)
+        let message = ChatMessage(
+            senderName: "Name",
+            senderId: UUID().uuidString,
+            payload: "Test"
+        )
+        let dataMessage = DataMessage.text(message)
+        let data = try JSONEncoder().encode(dataMessage)
+
+        // 1. Subscribe to events
+        conference.receiveEvents()
+
+        // 2. Send event and assert
+        wait(
+            for: { expectation in
+                conference.eventPublisher.sink { event in
+                    switch event {
+                    case .conferenceUpdate:
+                        Task { [weak self] in
+                            let result = try await self?.conference.receive(data)
+                            XCTAssertTrue(result == true)
+                        }
+                    default:
+                        break
+                    }
+                }.store(in: &cancellables)
+
+                chat.publisher.sink { (newMessage: ChatMessage) in
+                    XCTAssertEqual(newMessage.senderName, message.senderName)
+                    XCTAssertEqual(newMessage.senderId, message.senderId)
+                    XCTAssertEqual(newMessage.type, message.type)
+                    XCTAssertEqual(newMessage.payload, message.payload)
+                    expectation.fulfill()
+                }.store(in: &cancellables)
+            },
+            after: {
+                eventSender.send(.success(.conferenceUpdate(status)))
+            }
+        )
     }
 
     func testDeinit() {
@@ -576,35 +752,14 @@ final class ConferenceTests: XCTestCase {
 
 // MARK: - Mocks
 
-private final class ConferenceDelegateMock: ConferenceDelegate {
-    private(set) var events = [ConferenceEvent]()
-
-    func conference(
-        _ conference: Conference,
-        didReceiveEvent event: ConferenceEvent
-    ) {
-        events.append(event)
+final class SignalingChannelMock: SignalingChannel, SignalingEventSender {
+    var callId: String?
+    let iceServers = [PexipCore.IceServer]()
+    var data: DataChannel? = DataChannel(id: 11)
+    var eventPublisher: AnyPublisher<SignalingEvent, Never> {
+        eventSubject.eraseToAnyPublisher()
     }
-}
-
-private final class LiveCaptionsServiceMock: LiveCaptionsService {
-    private(set) var token: ConferenceToken?
-    private(set) var flag: Bool?
-
-    func showLiveCaptions(token: PexipInfinityClient.ConferenceToken) async throws {
-        self.token = token
-        flag = true
-    }
-
-    func hideLiveCaptions(token: PexipInfinityClient.ConferenceToken) async throws {
-        self.token = token
-        flag = false
-    }
-}
-
-private final class SignalingChannelMock: SignalingChannel {
-    var callId: UUID?
-    let iceServers = [IceServer]()
+    private let eventSubject = PassthroughSubject<SignalingEvent, Never>()
 
     func sendOffer(
         callType: String,
@@ -636,6 +791,36 @@ private final class SignalingChannelMock: SignalingChannel {
     func releaseFloor() async throws -> Bool {
         return false
     }
+
+    func sendEvent(_ event: SignalingEvent) {
+        eventSubject.send(event)
+    }
+}
+
+private final class ConferenceDelegateMock: ConferenceDelegate {
+    private(set) var events = [ConferenceClientEvent]()
+
+    func conference(
+        _ conference: Conference,
+        didReceiveEvent event: ConferenceClientEvent
+    ) {
+        events.append(event)
+    }
+}
+
+private final class LiveCaptionsServiceMock: LiveCaptionsService {
+    private(set) var token: ConferenceToken?
+    private(set) var flag: Bool?
+
+    func showLiveCaptions(token: PexipInfinityClient.ConferenceToken) async throws {
+        self.token = token
+        flag = true
+    }
+
+    func hideLiveCaptions(token: PexipInfinityClient.ConferenceToken) async throws {
+        self.token = token
+        flag = false
+    }
 }
 
 private final class SplashScreenServiceMock: SplashScreenService {
@@ -654,14 +839,17 @@ private final class SplashScreenServiceMock: SplashScreenService {
 }
 
 private extension ConferenceStatus {
-    static func stub(liveCaptionsAvailable: Bool = true) -> ConferenceStatus {
+    static func stub(
+        liveCaptionsAvailable: Bool = true,
+        directMedia: Bool = false
+    ) -> ConferenceStatus {
         ConferenceStatus(
             started: true,
             locked: false,
             allMuted: false,
             guestsMuted: false,
             presentationAllowed: true,
-            directMedia: false,
+            directMedia: directMedia,
             liveCaptionsAvailable: liveCaptionsAvailable
         )
     }

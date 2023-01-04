@@ -37,26 +37,20 @@ public struct IncomingCallEvent: Codable, Hashable {
     /// The incoming registration token.
     public let token: String
 
-    /// A date when the event was received.
-    public private(set) var receivedAt = Date()
-
     /// Creates a new instance of ``IncomingCallEvent``
     ///
     /// - Parameters:
     ///   - conferenceAlias: An alias of the conference
     ///   - remoteDisplayName: The display name of the caller
     ///   - token: The incoming registration token
-    ///   - receivedAt: A date when the event was received
     public init(
         conferenceAlias: String,
         remoteDisplayName: String,
-        token: String,
-        receivedAt: Date = .init()
+        token: String
     ) {
         self.conferenceAlias = conferenceAlias
         self.remoteDisplayName = remoteDisplayName
         self.token = token
-        self.receivedAt = receivedAt
     }
 }
 
@@ -69,16 +63,11 @@ public struct IncomingCallCancelledEvent: Codable, Hashable {
     /// The incoming registration token.
     public let token: String
 
-    /// A date when the event was received.
-    public private(set) var receivedAt = Date()
-
     /// Creates a new instance of ``IncomingCallCancelledEvent``
     ///
     /// - Parameters:
     ///   - token: The incoming registration token
-    ///   - receivedAt: A date when the event was received
-    public init(token: String, receivedAt: Date = .init()) {
+    public init(token: String) {
         self.token = token
-        self.receivedAt = receivedAt
     }
 }

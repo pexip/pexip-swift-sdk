@@ -1,12 +1,19 @@
 import Foundation
+import Combine
 
 /// The object responsible for setting up and controlling a communication session.
-public protocol SignalingChannel {
+public protocol SignalingChannel: AnyObject {
+    /// The publisher that publishes incoming signaling events.
+    var eventPublisher: AnyPublisher<SignalingEvent, Never> { get }
+
     /// The list of ice servers.
     var iceServers: [IceServer] { get }
 
     // The call ID (if present)
-    var callId: UUID? { get async }
+    var callId: String? { get async }
+
+    /// The object responsible for sending and receiving arbitrary data messages.
+    var data: DataChannel? { get }
 
     /**
      Sends a new local SDP.

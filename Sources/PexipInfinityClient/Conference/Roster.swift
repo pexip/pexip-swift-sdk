@@ -36,7 +36,7 @@ public final class Roster: ObservableObject {
     }
 
     /// The UUID of the current participant.
-    public let currentParticipantId: UUID
+    public let currentParticipantId: String
 
     /// The object that acts as the delegate of the roster list.
     public weak var delegate: RosterDelegate?
@@ -49,15 +49,15 @@ public final class Roster: ObservableObject {
 
     private let eventSubject = PassthroughSubject<ParticipantEvent, Never>()
     private let storage: Storage
-    private let _avatarURL: (UUID) -> URL?
+    private let _avatarURL: (String) -> URL?
 
     // MARK: - Init
 
     public init(
-        currentParticipantId: UUID,
+        currentParticipantId: String,
         currentParticipantName: String,
         participants: [Participant] = [],
-        avatarURL: @escaping (UUID) -> URL?
+        avatarURL: @escaping (String) -> URL?
     ) {
         self.currentParticipantId = currentParticipantId
         self.currentParticipantName = currentParticipantName
@@ -134,7 +134,7 @@ public final class Roster: ObservableObject {
         }
     }
 
-    func removeParticipant(withId id: UUID) async {
+    func removeParticipant(withId id: String) async {
         guard let participant = await storage.removeParticipant(withId: id) else {
             return
         }
@@ -199,7 +199,7 @@ private extension Roster {
             return true
         }
 
-        func removeParticipant(withId id: UUID) async -> Participant? {
+        func removeParticipant(withId id: String) async -> Participant? {
             guard let index = indexOfParticipant(withId: id) else {
                 return nil
             }
@@ -211,7 +211,7 @@ private extension Roster {
             participants.removeAll()
         }
 
-        private func indexOfParticipant(withId id: UUID) -> Int? {
+        private func indexOfParticipant(withId id: String) -> Int? {
             participants.firstIndex(where: { $0.id == id })
         }
     }

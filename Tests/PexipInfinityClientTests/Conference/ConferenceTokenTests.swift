@@ -22,6 +22,7 @@ final class ConferenceTokenTests: XCTestCase {
     // swiftlint:disable function_body_length
     func testDecoding() throws {
         let tokenValue = "SE9TVAltZ...etc...zNiZjlmNjFhMTlmMTJiYTE%3D"
+        let participantId = "2c34f35f-1060-438c-9e87-6c2dffbc9980"
         let json = """
         {
             "status": "success",
@@ -29,7 +30,7 @@ final class ConferenceTokenTests: XCTestCase {
                 "token": "\(tokenValue)",
                 "expires": "120",
                 "role": "HOST",
-                "participant_uuid": "2c34f35f-1060-438c-9e87-6c2dffbc9980",
+                "participant_uuid": "\(participantId)",
                 "display_name": "Alice",
                 "conference_name": "Conference",
                 "stun": [{"url": "stun:stun.l.google.com:19302"}],
@@ -73,9 +74,7 @@ final class ConferenceTokenTests: XCTestCase {
             ConferenceToken(
                 value: tokenValue,
                 updatedAt: date,
-                participantId: try XCTUnwrap(
-                    UUID(uuidString: "2c34f35f-1060-438c-9e87-6c2dffbc9980")
-                ),
+                participantId: participantId,
                 role: .host,
                 displayName: "Alice",
                 serviceType: "conference",
@@ -101,9 +100,7 @@ final class ConferenceTokenTests: XCTestCase {
         let token = ConferenceToken(
             value: "token_value",
             updatedAt: date,
-            participantId: try XCTUnwrap(
-                UUID(uuidString: "2c34f35f-1060-438c-9e87-6c2dffbc9980")
-            ),
+            participantId: "2c34f35f-1060-438c-9e87-6c2dffbc9980",
             role: .host,
             displayName: "Alice",
             serviceType: "conference",
@@ -151,9 +148,7 @@ final class ConferenceTokenTests: XCTestCase {
         let token = ConferenceToken(
             value: "token_value",
             updatedAt: updatedAt,
-            participantId: try XCTUnwrap(
-                UUID(uuidString: "2c34f35f-1060-438c-9e87-6c2dffbc9980")
-            ),
+            participantId: "2c34f35f-1060-438c-9e87-6c2dffbc9980",
             role: .host,
             displayName: "Alice",
             serviceType: "conference",
@@ -196,7 +191,7 @@ final class ConferenceTokenTests: XCTestCase {
     func testTokenWrongExpiresString() {
         let token = ConferenceToken(
             value: UUID().uuidString,
-            participantId: UUID(),
+            participantId: UUID().uuidString,
             role: .guest,
             displayName: "Name",
             serviceType: "test",

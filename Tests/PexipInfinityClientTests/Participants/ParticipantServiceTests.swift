@@ -22,7 +22,7 @@ final class ParticipantServiceTests: APITestCase {
 
     func testCalls() async throws {
         let token = ConferenceToken.randomToken()
-        let callId = UUID()
+        let callId = UUID().uuidString.lowercased()
         let inputSDP = UUID().uuidString
         let outputSDP = UUID().uuidString
         let fields = CallsFields(callType: "WEBRTC", sdp: inputSDP, present: nil)
@@ -31,7 +31,7 @@ final class ParticipantServiceTests: APITestCase {
             "status": "success",
             "result": {
                 "sdp": "\(outputSDP)",
-                "call_uuid": "\(callId.uuidString.lowercased())"
+                "call_uuid": "\(callId)"
             }
         }
         """
@@ -217,14 +217,14 @@ final class ParticipantServiceTests: APITestCase {
     }
 
     func testCall() throws {
-        let id = UUID()
+        let id = UUID().uuidString.lowercased()
         let service = service.call(id: id) as? DefaultCallService
 
         XCTAssertEqual(
             service?.baseURL,
             baseURL
                 .appendingPathComponent("calls")
-                .appendingPathComponent(id.uuidString.lowercased())
+                .appendingPathComponent(id)
         )
     }
 }

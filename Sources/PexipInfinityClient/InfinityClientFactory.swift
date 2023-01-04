@@ -6,6 +6,7 @@ public typealias SignalingChannel = PexipCore.SignalingChannel
 public struct InfinityClientFactory {
     private let session: URLSession
     private let logger: Logger?
+    private let encoder = JSONEncoder()
 
     /**
      Creates a new instance of ``InfinityClientFactory``
@@ -113,6 +114,14 @@ public struct InfinityClientFactory {
         let roster = roster(token: token, service: conferenceService)
         let eventService = conferenceService.eventSource()
         let participantService = conferenceService.participant(id: token.participantId)
+        let signalingChannel = ConferenceSignalingChannel(
+            participantService: participantService,
+            tokenStore: tokenStore,
+            roster: roster,
+            iceServers: token.iceServers,
+            data: dataChannel(token: token),
+            logger: logger
+        )
 
         return DefaultConference(
             connection: InfinityConnection(
@@ -127,20 +136,15 @@ public struct InfinityClientFactory {
                 )
             ),
             tokenStore: tokenStore,
-            signalingChannel: ConferenceSignalingChannel(
-                participantService: participantService,
-                tokenStore: tokenStore,
-                roster: roster,
-                iceServers: token.iceServers,
-                logger: logger
-            ),
+            signalingChannel: signalingChannel,
             roster: roster,
             splashScreenService: conferenceService,
             liveCaptionsService: participantService,
             chat: chat(
                 token: token,
                 tokenStore: tokenStore,
-                service: conferenceService
+                service: conferenceService,
+                signalingChannel: signalingChannel
             ),
             logger: logger
         )
@@ -177,7 +181,8 @@ public struct InfinityClientFactory {
     func chat(
         token: ConferenceToken,
         tokenStore: TokenStore<ConferenceToken>,
-        service: ChatService
+        service: ChatService,
+        signalingChannel: SignalingChannel
     ) -> Chat? {
         guard token.chatEnabled else {
             return nil
@@ -186,8 +191,15 @@ public struct InfinityClientFactory {
         return Chat(
             senderName: token.displayName,
             senderId: token.participantId,
-            sendMessage: { text in
-                try await service.message(text, token: tokenStore.token())
+            sendMessage: { [weak signalingChannel] message in
+                let token = try await tokenStore.token()
+
+                if let dataChannel = signalingChannel?.data, token.directMedia {
+                    let data = try encoder.encode(DataMessage.text(message))
+                    return try await dataChannel.sender?.send(data) == true
+                } else {
+                    return try await service.message(message.payload, token: token)
+                }
             }
         )
     }
@@ -203,5 +215,13 @@ public struct InfinityClientFactory {
                 service.participant(id: id).avatarURL()
             }
         )
+    }
+
+    func dataChannel(token: ConferenceToken) -> DataChannel? {
+        if let id = token.dataChannelId, token.chatEnabled, token.directMedia {
+            return DataChannel(id: id)
+        } else {
+            return nil
+        }
     }
 }

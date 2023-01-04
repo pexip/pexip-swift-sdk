@@ -4,6 +4,7 @@ import XCTest
 final class ParticipantTests: XCTestCase {
     // swiftlint:disable function_body_length
     func testDecoding() throws {
+        let id = "50b956c8-9a63-4711-8630-3810f8666b04"
         let json = """
         {
             "buzz_time": 0,
@@ -34,14 +35,14 @@ final class ParticipantTests: XCTestCase {
             "start_time": 1441720992,
             "transfer_supported": "YES",
             "uri": "Infinity_Connect_10.44.21.35",
-            "uuid": "50b956c8-9a63-4711-8630-3810f8666b04",
+            "uuid": "\(id)",
             "vendor": "Pexip Infinity Connect/2.0.0-25227.0.0 (Windows NT 6.1; WOW64) nwjs/0.12.2 Chrome/41.0.2272.76"
         }
         """
         let data = try XCTUnwrap(json.data(using: .utf8))
         let participant = try JSONDecoder().decode(Participant.self, from: data)
         let expectedParticipant = Participant(
-            id: try XCTUnwrap(UUID(uuidString: "50b956c8-9a63-4711-8630-3810f8666b04")),
+            id: id,
             displayName: "Alice",
             localAlias: "meet.alice",
             overlayText: "Alice",
@@ -76,7 +77,7 @@ final class ParticipantTests: XCTestCase {
     }
 
     func testInit1() {
-        let id = UUID()
+        let id = UUID().uuidString
         let participant = Participant(
             id: id,
             displayName: "Test",
@@ -131,7 +132,7 @@ final class ParticipantTests: XCTestCase {
     }
 
     func testInit2() {
-        let id = UUID()
+        let id = UUID().uuidString
         let participant = Participant(
             id: id,
             displayName: "Test",

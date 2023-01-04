@@ -10,24 +10,24 @@ public protocol Conference: AnyObject {
     /// The object that acts as the delegate of the conference.
     var delegate: ConferenceDelegate? { get set }
 
-    /// The publisher that publishes conference events
-    var eventPublisher: AnyPublisher<ConferenceEvent, Never> { get }
+    /// The publisher that publishes relevant conference events.
+    var eventPublisher: AnyPublisher<ConferenceClientEvent, Never> { get }
 
-    /// The object responsible for setting up and controlling a communication session
+    /// The object responsible for setting up and controlling a communication session.
     var signalingChannel: SignalingChannel { get }
 
-    /// The full participant list of the conference
+    /// The full participant list of the conference.
     var roster: Roster { get }
 
-    /// The object responsible for sending and receiving text messages in the conference
+    /// The object responsible for sending and receiving text messages in the conference.
     var chat: Chat? { get }
 
-    /// All available conference splash screens
+    /// All available conference splash screens.
     var splashScreens: [String: SplashScreen] { get }
 
     /// Receives conference events as they occur
     /// - Returns: False if has already subscribed to the event source
-    ///            or client was disconnected, True otherwise
+    ///            or client was disconnected, True otherwise.
     @discardableResult
     func receiveEvents() -> Bool
 
@@ -43,7 +43,7 @@ public protocol Conference: AnyObject {
 
 final class DefaultConference: Conference {
     weak var delegate: ConferenceDelegate?
-    var eventPublisher: AnyPublisher<ConferenceEvent, Never> {
+    var eventPublisher: AnyPublisher<ConferenceClientEvent, Never> {
         eventSubject.eraseToAnyPublisher()
     }
 
@@ -61,8 +61,10 @@ final class DefaultConference: Conference {
     private let splashScreenService: SplashScreenService
     private let liveCaptionsService: LiveCaptionsService
     private let logger: Logger?
-    private var eventSubject = PassthroughSubject<ConferenceEvent, Never>()
+    private let signalingEventSender: SignalingEventSender
+    private var eventSubject = PassthroughSubject<ConferenceClientEvent, Never>()
     private var eventTask: Task<Void, Never>?
+    private let decoder = JSONDecoder()
     // Skip initial `presentation_stop` event
     private let skipPresentationStop = Synchronized(true)
     private let hasRequestedSplashScreens = Synchronized(false)
@@ -74,7 +76,7 @@ final class DefaultConference: Conference {
     init(
         connection: InfinityConnection<ConferenceEvent>,
         tokenStore: TokenStore<ConferenceToken>,
-        signalingChannel: SignalingChannel,
+        signalingChannel: SignalingChannel & SignalingEventSender,
         roster: Roster,
         splashScreenService: SplashScreenService,
         liveCaptionsService: LiveCaptionsService,
@@ -89,6 +91,9 @@ final class DefaultConference: Conference {
         self.liveCaptionsService = liveCaptionsService
         self.chat = chat
         self.logger = logger
+        signalingEventSender = signalingChannel
+
+        signalingChannel.data?.receiver = self
 
         eventTask = Task { [weak self] in
             guard let events = self?.connection.events() else {
@@ -99,7 +104,7 @@ final class DefaultConference: Conference {
                 do {
                     await self?.handleEvent(try event.get())
                 } catch {
-                    await self?.handleEvent(
+                    await self?.notify(
                         .failure(FailureEvent(error: error))
                     )
                 }
@@ -170,6 +175,7 @@ final class DefaultConference: Conference {
     }
 
     // swiftlint:disable cyclomatic_complexity
+    // swiftlint:disable function_body_length
     @MainActor
     private func handleEvent(_ event: ConferenceEvent) async {
         if case .presentationStop = event, skipPresentationStop.value {
@@ -177,17 +183,31 @@ final class DefaultConference: Conference {
             return
         }
 
-        var event = event
+        var outputEvent: ConferenceClientEvent?
 
         switch event {
-        case .splashScreen(var splashScreen):
-            if let key = splashScreen?.key {
+        case .newOffer(let message), .updateSdp(let message):
+            signalingEventSender.sendEvent(.newOffer(message.sdp))
+        case .newCandidate(let candidate):
+            signalingEventSender.sendEvent(
+                .newCandidate(candidate.candidate, mid: candidate.mid)
+            )
+        case .splashScreen(let event):
+            if let key = event?.key {
                 await loadSplashScreensIfNeeded()
-                splashScreen?.splashScreen = splashScreens[key]
+                outputEvent = .splashScreen(splashScreens[key])
+            } else {
+                outputEvent = .splashScreen(nil)
             }
-            event = .splashScreen(splashScreen)
         case .conferenceUpdate(let value):
             _status.setValue(value)
+            outputEvent = .conferenceUpdate(value)
+        case .liveCaptions(let event):
+            outputEvent = .liveCaptions(event)
+        case .presentationStart(let event):
+            outputEvent = .presentationStart(event)
+        case .presentationStop:
+            outputEvent = .presentationStop
         case .messageReceived(let message):
             logger?.debug("Chat message received")
             await chat?.addMessage(message)
@@ -208,14 +228,44 @@ final class DefaultConference: Conference {
             await roster.removeParticipant(withId: details.id)
         case .callDisconnected(let details):
             logger?.debug("Call disconnected, reason: \(details.reason)")
+            outputEvent = .callDisconnected(details)
         case .clientDisconnected(let details):
             _isClientDisconnected.setValue(true)
+            outputEvent = .clientDisconnected(details)
             logger?.debug("Participant disconnected, reason: \(details.reason)")
-        default:
-            break
+        case .peerDisconnected:
+            outputEvent = .peerDisconnected
+        case .refer(let event):
+            outputEvent = .refer(event)
         }
 
+        if let outputEvent {
+            notify(outputEvent)
+        }
+    }
+
+    @MainActor
+    private func notify(_ event: ConferenceClientEvent) {
         delegate?.conference(self, didReceiveEvent: event)
         eventSubject.send(event)
+    }
+}
+
+// MARK: - DataReceiver
+
+extension DefaultConference: DataReceiver {
+    func receive(_ data: Data) async throws -> Bool {
+        guard status?.directMedia == true else {
+            return false
+        }
+
+        let dataMessage = try decoder.decode(DataMessage.self, from: data)
+
+        switch dataMessage {
+        case .text(let message):
+            await handleEvent(.messageReceived(message))
+        }
+
+        return true
     }
 }

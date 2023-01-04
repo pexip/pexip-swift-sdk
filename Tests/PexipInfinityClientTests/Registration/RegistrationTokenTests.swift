@@ -20,7 +20,7 @@ final class RegistrationTokenTests: XCTestCase {
 
     func testDecoding() throws {
         let tokenValue = "SE9TVAltZ...etc...zNiZjlmNjFhMTlmMTJiYTE%3D"
-        let registrationId = UUID()
+        let registrationId = UUID().uuidString
         let directoryEnabled = Bool.random()
         let routeViaRegistrar = Bool.random()
         let json = """
@@ -67,7 +67,7 @@ final class RegistrationTokenTests: XCTestCase {
 
     func testUpdating() throws {
         let date = Date()
-        let registrationId = UUID()
+        let registrationId = UUID().uuidString
         let token = RegistrationToken(
             value: "token_value",
             updatedAt: date,
@@ -109,7 +109,7 @@ final class RegistrationTokenTests: XCTestCase {
         let token = RegistrationToken(
             value: "token_value",
             updatedAt: updatedAt,
-            registrationId: UUID(),
+            registrationId: UUID().uuidString,
             directoryEnabled: true,
             routeViaRegistrar: false,
             expiresString: "120",
@@ -146,7 +146,7 @@ final class RegistrationTokenTests: XCTestCase {
     func testTokenWrongExpiresString() {
         let token = RegistrationToken(
             value: UUID().uuidString,
-            registrationId: UUID(),
+            registrationId: UUID().uuidString,
             directoryEnabled: true,
             routeViaRegistrar: false,
             expiresString: "test",

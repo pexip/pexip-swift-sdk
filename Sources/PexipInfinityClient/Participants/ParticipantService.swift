@@ -108,7 +108,7 @@ public protocol ParticipantService: LiveCaptionsService {
         - id: The ID of the call
      - Returns: A new instance of ``CallService``
      */
-    func call(id: UUID) -> CallService
+    func call(id: String) -> CallService
 }
 
 // MARK: - Implementation
@@ -224,10 +224,10 @@ struct DefaultParticipantService: ParticipantService {
         return try await client.json(for: request)
     }
 
-    func call(id: UUID) -> CallService {
+    func call(id: String) -> CallService {
         let url = baseURL
             .appendingPathComponent("calls")
-            .appendingPathComponent(id.uuidString.lowercased())
+            .appendingPathComponent(id)
         return DefaultCallService(baseURL: url, client: client)
     }
 }

@@ -6,10 +6,10 @@ public struct CallDetails: Decodable, Hashable {
         case sdp
     }
 
-    public let id: UUID
+    public let id: String
     public let sdp: String?
 
-    public init(id: UUID, sdp: String?) {
+    public init(id: String, sdp: String?) {
         self.id = id
         self.sdp = sdp
     }

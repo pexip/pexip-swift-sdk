@@ -3,7 +3,7 @@ import Foundation
 // swiftlint:disable identifier_name
 public struct Participant: Codable, Hashable, Identifiable {
     public init(
-        id: UUID,
+        id: String,
         displayName: String,
         localAlias: String = "",
         overlayText: String = "",
@@ -101,7 +101,7 @@ public struct Participant: Codable, Hashable, Identifiable {
     }
 
     /// The UUID of this participant, to use with other operations.
-    public let id: UUID
+    public let id: String
     /// The display name of the participant.
     public let displayName: String
     /// The calling or "from" alias. This is the alias that the recipient would use to return the call.

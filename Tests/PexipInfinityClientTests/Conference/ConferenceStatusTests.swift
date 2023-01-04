@@ -1,8 +1,8 @@
 import XCTest
 @testable import PexipInfinityClient
 
-final class ConferenceEventTests: XCTestCase {
-    func testConferenceStatusDecoding() throws {
+final class ConferenceStatusTests: XCTestCase {
+    func testStatusDecoding() throws {
         let status = ConferenceStatus(
             started: true,
             locked: false,
@@ -29,22 +29,10 @@ final class ConferenceEventTests: XCTestCase {
             from: data
         )
 
-        XCTAssertEqual(decodedStatus.started, status.started)
-        XCTAssertEqual(decodedStatus.locked, status.locked)
-        XCTAssertEqual(decodedStatus.allMuted, status.allMuted)
-        XCTAssertEqual(decodedStatus.guestsMuted, status.guestsMuted)
-        XCTAssertEqual(
-            decodedStatus.presentationAllowed,
-            status.presentationAllowed
-        )
-        XCTAssertEqual(decodedStatus.directMedia, status.directMedia)
-        XCTAssertEqual(
-            decodedStatus.liveCaptionsAvailable,
-            status.liveCaptionsAvailable
-        )
+        XCTAssertEqual(decodedStatus, status)
     }
 
-    func testConferenceStatusDecodingWithEmptyJSONObject() throws {
+    func testDecodingWithEmptyJSONObject() throws {
         let json = "{}"
         let data = try XCTUnwrap(json.data(using: .utf8))
         let decodedStatus = try JSONDecoder().decode(

@@ -4,7 +4,7 @@ import Combine
 
 // swiftlint:disable type_body_length
 final class RosterTests: XCTestCase {
-    private let currentParticipantId = UUID()
+    private let currentParticipantId = UUID().uuidString
     private let currentParticipantName = "My User"
     private var roster: Roster!
     private var delegate: RosterDelegateMock!
@@ -35,8 +35,8 @@ final class RosterTests: XCTestCase {
 
     func testInit() {
         let participants = [
-            Participant.stub(withId: UUID(), displayName: "GuestA"),
-            Participant.stub(withId: UUID(), displayName: "GuestB")
+            Participant.stub(withId: UUID().uuidString, displayName: "GuestA"),
+            Participant.stub(withId: UUID().uuidString, displayName: "GuestB")
         ]
         roster = Roster(
             currentParticipantId: currentParticipantId,
@@ -57,7 +57,7 @@ final class RosterTests: XCTestCase {
         XCTAssertTrue(roster.isCurrentParticipant(participantA))
 
         let participantB = Participant.stub(
-            withId: UUID(),
+            withId: UUID().uuidString,
             displayName: "Test"
         )
         XCTAssertFalse(roster.isCurrentParticipant(participantB))
@@ -71,10 +71,7 @@ final class RosterTests: XCTestCase {
     }
 
     func testAvatarURLForParticipant() {
-        let participant = Participant.stub(
-            withId: UUID(),
-            displayName: "Test"
-        )
+        let participant = Participant.stub(displayName: "Test")
         XCTAssertEqual(
             roster.avatarURL(for: participant),
             Participant.avatarURL(id: participant.id)
@@ -100,9 +97,9 @@ final class RosterTests: XCTestCase {
     func testSetSyncing() async {
         // 1. Prepare test data
         let participantsToAdd = [
-            Participant.stub(withId: UUID(), displayName: "Guest1"),
-            Participant.stub(withId: UUID(), displayName: "Guest2"),
-            Participant.stub(withId: UUID(), displayName: "Guest3")
+            Participant.stub(displayName: "Guest1"),
+            Participant.stub(displayName: "Guest2"),
+            Participant.stub(displayName: "Guest3")
         ]
         let participantsToUpdate = [
             Participant.stub(
@@ -157,8 +154,8 @@ final class RosterTests: XCTestCase {
 
     func testAddParticipant() async {
         // 1. Prepare test data
-        let participantA = Participant.stub(withId: UUID(), displayName: "GuestA")
-        let participantB = Participant.stub(withId: UUID(), displayName: "GuestB")
+        let participantA = Participant.stub(displayName: "GuestA")
+        let participantB = Participant.stub(displayName: "GuestB")
         var publishCount = 0
         var publishedParticipants = [[Participant]]()
         var events = [ParticipantEvent]()
@@ -201,7 +198,7 @@ final class RosterTests: XCTestCase {
 
     func testUpdateParticipant() async {
         // 1. Prepare test data
-        let participantA = Participant.stub(withId: UUID(), displayName: "GuestA")
+        let participantA = Participant.stub(displayName: "GuestA")
         let participantB = Participant.stub(withId: participantA.id, displayName: "GuestB")
         var publishCount = 0
         var publishedParticipants = [[Participant]]()
@@ -238,8 +235,8 @@ final class RosterTests: XCTestCase {
 
     func testUpdateParticipantWithNotExisingId() async {
         // 1. Prepare test data
-        let participantA = Participant.stub(withId: UUID(), displayName: "GuestA")
-        let participantB = Participant.stub(withId: UUID(), displayName: "GuestB")
+        let participantA = Participant.stub(displayName: "GuestA")
+        let participantB = Participant.stub(displayName: "GuestB")
         var publishCount = 0
         var publishedParticipants = [[Participant]]()
         let expectedParticipants = [participantA]
@@ -269,8 +266,8 @@ final class RosterTests: XCTestCase {
 
     func testRemoveParticipant() async {
         // 1. Prepare test data
-        let participantA = Participant.stub(withId: UUID(), displayName: "GuestA")
-        let participantB = Participant.stub(withId: UUID(), displayName: "GuestB")
+        let participantA = Participant.stub(displayName: "GuestA")
+        let participantB = Participant.stub(displayName: "GuestB")
         var publishCount = 0
         var publishedParticipants = [[Participant]]()
         let expectedParticipants = [participantB]
@@ -312,7 +309,7 @@ final class RosterTests: XCTestCase {
 
     func testRemoveParticipantWithNotExistingId() async {
         // 1. Prepare test data
-        let participant = Participant.stub(withId: UUID(), displayName: "GuestA")
+        let participant = Participant.stub(displayName: "GuestA")
         var publishCount = 0
         var publishedParticipants = [[Participant]]()
         let expectedParticipants = [participant]
@@ -330,7 +327,7 @@ final class RosterTests: XCTestCase {
 
         // 3. Add and remove participants
         await roster.addParticipant(participant)
-        await roster.removeParticipant(withId: UUID())
+        await roster.removeParticipant(withId: UUID().uuidString)
 
         // 4. Assert
         XCTAssertEqual(roster.participants, expectedParticipants)
@@ -342,7 +339,7 @@ final class RosterTests: XCTestCase {
 
     func testClear() async {
         // 1. Prepare test data
-        let participant = Participant.stub(withId: UUID(), displayName: "GuestA")
+        let participant = Participant.stub(displayName: "GuestA")
         var publishCount = 0
         var publishedParticipants = [[Participant]]()
         var events = [ParticipantEvent]()

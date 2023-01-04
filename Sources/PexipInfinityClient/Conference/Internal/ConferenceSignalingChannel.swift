@@ -1,15 +1,30 @@
 import Foundation
+import Combine
 import PexipCore
 
-actor ConferenceSignalingChannel: SignalingChannel {
+// MARK: - Protocols
+
+protocol SignalingEventSender {
+    func sendEvent(_ event: SignalingEvent)
+}
+
+// MARK: - Implementation
+
+final class ConferenceSignalingChannel: SignalingChannel, SignalingEventSender {
     private typealias CallDetailsTask = Task<CallDetails, Error>
 
-    let iceServers: [IceServer]
-    private(set) var pwds = [String: String]()
+    var eventPublisher: AnyPublisher<SignalingEvent, Never> {
+        eventSubject.eraseToAnyPublisher()
+    }
 
-    var callId: UUID? {
+    let iceServers: [IceServer]
+    let data: DataChannel?
+
+    private(set) var pwds = Synchronized<[String: String]>([:])
+
+    var callId: String? {
         get async {
-            try? await callsRequestTask?.value.id
+            try? await callsRequestTask.value?.value.id
         }
     }
 
@@ -17,7 +32,8 @@ actor ConferenceSignalingChannel: SignalingChannel {
     private let tokenStore: TokenStore<ConferenceToken>
     private let roster: Roster
     private let logger: Logger?
-    private var callsRequestTask: CallDetailsTask?
+    private var callsRequestTask = Synchronized<CallDetailsTask?>(nil)
+    private let eventSubject = PassthroughSubject<SignalingEvent, Never>()
 
     // MARK: - Init
 
@@ -26,12 +42,14 @@ actor ConferenceSignalingChannel: SignalingChannel {
         tokenStore: TokenStore<ConferenceToken>,
         roster: Roster,
         iceServers: [IceServer],
+        data: DataChannel? = nil,
         logger: Logger? = nil
     ) {
         self.participantService = participantService
         self.tokenStore = tokenStore
         self.roster = roster
         self.iceServers = iceServers
+        self.data = data
         self.logger = logger
     }
 
@@ -47,8 +65,9 @@ actor ConferenceSignalingChannel: SignalingChannel {
         let callId = await self.callId
         let isUpdate = callService != nil && callId != nil
 
-        pwds = sdpPwds(from: description)
-        callsRequestTask = CallDetailsTask {
+        pwds.setValue(sdpPwds(from: description))
+
+        callsRequestTask.setValue(CallDetailsTask {
             if let callService, let callId {
                 let sdp = try await callService.update(
                     sdp: description,
@@ -65,9 +84,9 @@ actor ConferenceSignalingChannel: SignalingChannel {
                     token: token
                 )
             }
-        }
+        })
 
-        var remoteDescription = try await callsRequestTask!.value.sdp
+        var remoteDescription = try await callsRequestTask.value!.value.sdp
         remoteDescription = remoteDescription?.isEmpty == true
             ? nil
             : remoteDescription
@@ -80,7 +99,7 @@ actor ConferenceSignalingChannel: SignalingChannel {
     }
 
     func sendAnswer(_ description: String) async throws {
-        pwds = sdpPwds(from: description)
+        pwds.setValue(sdpPwds(from: description))
         try await ack(sdp: description)
     }
 
@@ -90,7 +109,7 @@ actor ConferenceSignalingChannel: SignalingChannel {
             throw ConferenceSignalingError.callNotStarted
         }
 
-        guard !pwds.isEmpty else {
+        guard !pwds.value.isEmpty else {
             logger?.warn("ConferenceSignaling.onCandidate - pwds are not set")
             throw ConferenceSignalingError.pwdsMissing
         }
@@ -105,7 +124,7 @@ actor ConferenceSignalingChannel: SignalingChannel {
                 candidate: candidate,
                 mid: mid,
                 ufrag: ufrag,
-                pwd: pwds[ufrag]
+                pwd: pwds.value[ufrag]
             ),
             token: await tokenStore.token()
         )
@@ -169,11 +188,17 @@ actor ConferenceSignalingChannel: SignalingChannel {
         return true
     }
 
+    // MARK: - Internal
+
+    func sendEvent(_ event: SignalingEvent) {
+        eventSubject.send(event)
+    }
+
     // MARK: - Private
 
     private var callService: CallService? {
         get async throws {
-            guard let callDetailsTask = callsRequestTask else {
+            guard let callDetailsTask = callsRequestTask.value else {
                 return nil
             }
             return try await participantService.call(id: callDetailsTask.value.id)

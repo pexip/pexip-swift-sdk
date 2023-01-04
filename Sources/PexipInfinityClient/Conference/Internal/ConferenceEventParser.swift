@@ -75,6 +75,8 @@ struct ConferenceEventParser: InfinityEventParser {
             return .participantDelete(event)
         case .peerDisconnected:
             return .peerDisconnected
+        case .refer:
+            return .refer(try decoder.decode(ReferEvent.self, from: data))
         case .callDisconnected:
             let event = try decoder.decode(CallDisconnectEvent.self, from: data)
             return .callDisconnected(event)

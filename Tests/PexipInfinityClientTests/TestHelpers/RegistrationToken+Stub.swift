@@ -9,7 +9,7 @@ extension RegistrationToken {
         RegistrationToken(
             value: UUID().uuidString,
             updatedAt: updatedAt,
-            registrationId: UUID(),
+            registrationId: UUID().uuidString,
             directoryEnabled: Bool.random(),
             routeViaRegistrar: Bool.random(),
             expiresString: "\(expires)",

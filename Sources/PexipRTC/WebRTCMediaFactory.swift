@@ -39,7 +39,7 @@ public final class WebRTCMediaFactory: MediaFactory {
         let audioSource = factory.audioSource(with: nil)
         let audioTrack = factory.audioTrack(
             with: audioSource,
-            trackId: UUID().uuidString
+            trackId: UUID().uuidString.lowercased()
         )
         return WebRTCLocalAudioTrack(
             rtcTrack: audioTrack,
@@ -78,7 +78,7 @@ public final class WebRTCMediaFactory: MediaFactory {
         let videoProcessor = WebRTCVideoProcessor(videoSource: videoSource)
         let videoTrack = factory.videoTrack(
             with: videoSource,
-            trackId: UUID().uuidString
+            trackId: UUID().uuidString.lowercased()
         )
         let videoCapturer = RTCCameraVideoCapturer(delegate: videoProcessor)
 
@@ -132,7 +132,7 @@ public final class WebRTCMediaFactory: MediaFactory {
         let videoSource = factory.videoSource(forScreenCast: true)
         let videoTrack = factory.videoTrack(
             with: videoSource,
-            trackId: UUID().uuidString
+            trackId: UUID().uuidString.lowercased()
         )
         let capturer = WebRTCScreenCapturer(
             videoSource: videoSource,

@@ -12,14 +12,14 @@ public protocol ChatDelegate: AnyObject {
 
 /// The object responsible for sending and receiving text messages in the conference
 public final class Chat {
-    public typealias SendMessage = (String) async throws -> Bool
+    public typealias SendMessage = (ChatMessage) async throws -> Bool
     /// The object that acts as the delegate of the chat.
     public weak var delegate: ChatDelegate?
     public var publisher: AnyPublisher<ChatMessage, Never> {
         subject.eraseToAnyPublisher()
     }
     public let senderName: String
-    public let senderId: UUID
+    public let senderId: String
 
     private let subject = PassthroughSubject<ChatMessage, Never>()
     private let _sendMessage: SendMessage
@@ -28,7 +28,7 @@ public final class Chat {
 
     public init(
         senderName: String,
-        senderId: UUID,
+        senderId: String,
         sendMessage: @escaping SendMessage
     ) {
         self.senderName = senderName
@@ -39,17 +39,17 @@ public final class Chat {
     // MARK: - Public
 
     public func sendMessage(_ text: String) async throws -> Bool {
-        guard try await _sendMessage(text) else {
-            return false
-        }
-
         let message = ChatMessage(
             senderName: senderName,
             senderId: senderId,
             payload: text
         )
-        await addMessage(message)
 
+        guard try await _sendMessage(message) else {
+            return false
+        }
+
+        await addMessage(message)
         return true
     }
 

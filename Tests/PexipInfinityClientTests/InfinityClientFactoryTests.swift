@@ -1,4 +1,5 @@
 import XCTest
+import PexipCore
 @testable import PexipInfinityClient
 
 final class InfinityClientFactoryTests: XCTestCase {
@@ -96,7 +97,8 @@ final class InfinityClientFactoryTests: XCTestCase {
         let chat = factory.chat(
             token: token,
             tokenStore: TokenStore(token: token),
-            service: service
+            service: service,
+            signalingChannel: SignalingChannelMock()
         )
 
         XCTAssertNotNil(chat)
@@ -108,19 +110,47 @@ final class InfinityClientFactoryTests: XCTestCase {
         XCTAssertEqual(service.message, message)
     }
 
+    func testChatWithDirectMedia() async throws {
+        let token = ConferenceToken.randomToken(
+            chatEnabled: true,
+            directMedia: true,
+            dataChannelId: 1
+        )
+        let service = ChatServiceMock()
+        let dataSender = DataSenderMock()
+        let signalingChannel = SignalingChannelMock()
+        signalingChannel.data?.sender = dataSender
+        let chat = factory.chat(
+            token: token,
+            tokenStore: TokenStore(token: token),
+            service: service,
+            signalingChannel: signalingChannel
+        )
+
+        XCTAssertNotNil(chat)
+
+        let message = UUID().uuidString
+        let result = try await chat?.sendMessage(message)
+
+        XCTAssertTrue(result == true)
+        XCTAssertNil(service.message)
+        XCTAssertNotNil(dataSender.data)
+    }
+
     func testChatWhenDisabled() throws {
         let token = ConferenceToken.randomToken(chatEnabled: false)
         let service = ChatServiceMock()
         let chat = factory.chat(
             token: token,
             tokenStore: TokenStore(token: token),
-            service: service
+            service: service,
+            signalingChannel: SignalingChannelMock()
         )
 
         XCTAssertNil(chat)
     }
 
-    func testRoster() async throws {
+    func testRoster() {
         let token = ConferenceToken.randomToken()
         let service = ConferenceServiceMock()
         let roster = factory.roster(token: token, service: service)
@@ -131,6 +161,46 @@ final class InfinityClientFactoryTests: XCTestCase {
             avatarURL,
             Participant.avatarURL(id: token.participantId)
         )
+    }
+
+    func testDataChannel() {
+        let token = ConferenceToken.randomToken(
+            chatEnabled: true,
+            directMedia: true,
+            dataChannelId: 11
+        )
+
+        XCTAssertEqual(factory.dataChannel(token: token)?.id, 11)
+    }
+
+    func testDataChannelWithChatDisabled() {
+        let token = ConferenceToken.randomToken(
+            chatEnabled: false,
+            directMedia: true,
+            dataChannelId: 11
+        )
+
+        XCTAssertNil(factory.dataChannel(token: token))
+    }
+
+    func testDataChannelWithDirectMediaDisabled() {
+        let token = ConferenceToken.randomToken(
+            chatEnabled: true,
+            directMedia: false,
+            dataChannelId: 11
+        )
+
+        XCTAssertNil(factory.dataChannel(token: token))
+    }
+
+    func testDataChannelWithNoDataChannelId() {
+        let token = ConferenceToken.randomToken(
+            chatEnabled: true,
+            directMedia: true,
+            dataChannelId: nil
+        )
+
+        XCTAssertNil(factory.dataChannel(token: token))
     }
 }
 
@@ -197,7 +267,7 @@ private final class ConferenceServiceMock: ConferenceService {
         fatalError("Not implemented")
     }
 
-    func participant(id: UUID) -> ParticipantService {
+    func participant(id: String) -> ParticipantService {
         ParticipantServiceMock(id: id)
     }
 
@@ -227,7 +297,7 @@ private final class ConferenceServiceMock: ConferenceService {
 
 // swiftlint:disable unavailable_function
 private struct ParticipantServiceMock: ParticipantService {
-    let id: UUID
+    let id: String
 
     func calls(
         fields: CallsFields,
@@ -268,7 +338,7 @@ private struct ParticipantServiceMock: ParticipantService {
         fatalError("Not implemented")
     }
 
-    func call(id: UUID) -> CallService {
+    func call(id: String) -> CallService {
         fatalError("Not implemented")
     }
 
@@ -278,5 +348,14 @@ private struct ParticipantServiceMock: ParticipantService {
 
     func hideLiveCaptions(token: ConferenceToken) async throws {
         fatalError("Not implemented")
+    }
+}
+
+private final class DataSenderMock: DataSender {
+    private(set) var data: Data?
+
+    func send(_ data: Data) async throws -> Bool {
+        self.data = data
+        return true
     }
 }

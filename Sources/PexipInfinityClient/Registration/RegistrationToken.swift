@@ -21,7 +21,7 @@ public struct RegistrationToken: InfinityToken, Codable, Hashable {
     public private(set) var updatedAt = Date()
 
     /// The registration id.
-    public let registrationId: UUID
+    public let registrationId: String
 
     /// The directory enabled flag.
     public let directoryEnabled: Bool
@@ -44,7 +44,7 @@ public struct RegistrationToken: InfinityToken, Codable, Hashable {
     public init(
         value: String,
         updatedAt: Date = Date(),
-        registrationId: UUID,
+        registrationId: String,
         directoryEnabled: Bool,
         routeViaRegistrar: Bool,
         expiresString: String,

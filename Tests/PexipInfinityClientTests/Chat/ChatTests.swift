@@ -4,7 +4,7 @@ import Combine
 
 final class ChatTests: XCTestCase {
     private let senderName = "Current User"
-    private let senderId = UUID()
+    private let senderId = UUID().uuidString
     private var chat: Chat!
     private var delegate: ChatDelegateMock!
     private var messageSender: MessageSender!
@@ -38,10 +38,18 @@ final class ChatTests: XCTestCase {
     }
 
     func testSendMessage() async throws {
+        func makeMessage(_ payload: String) -> ChatMessage {
+            ChatMessage(
+                senderName: senderName,
+                senderId: senderId,
+                payload: payload
+            )
+        }
+
         // 1. Prepare test data
-        let messageA = "Message A"
-        let messageB = "Message B"
-        let messageC = "Message C"
+        let messageA = makeMessage("Message A")
+        let messageB = makeMessage("Message B")
+        let messageC = makeMessage("Message C")
         var publishedMessages = [ChatMessage]()
 
         // 2. Subscibe to updates
@@ -51,12 +59,12 @@ final class ChatTests: XCTestCase {
 
         // 3. Send messages with success
         messageSender.isSuccess = true
-        let sentMessageA = try await chat.sendMessage(messageA)
-        let sentMessageB = try await chat.sendMessage(messageB)
+        let sentMessageA = try await chat.sendMessage(messageA.payload)
+        let sentMessageB = try await chat.sendMessage(messageB.payload)
 
         // 4. Send message with failure
         messageSender.isSuccess = false
-        let sentMessageC = try await chat.sendMessage(messageC)
+        let sentMessageC = try await chat.sendMessage(messageC.payload)
 
         // 4. Assert
         XCTAssertTrue(sentMessageA)
@@ -66,10 +74,13 @@ final class ChatTests: XCTestCase {
         XCTAssertTrue(publishedMessages.allSatisfy { $0.senderName == senderName })
         XCTAssertTrue(publishedMessages.allSatisfy { $0.senderId == senderId })
         XCTAssertTrue(publishedMessages.allSatisfy { $0.type == "text/plain" })
-        XCTAssertEqual(publishedMessages[0].payload, messageA)
-        XCTAssertEqual(publishedMessages[1].payload, messageB)
+        XCTAssertEqual(publishedMessages[0].payload, messageA.payload)
+        XCTAssertEqual(publishedMessages[1].payload, messageB.payload)
         XCTAssertEqual(delegate.messages, publishedMessages)
-        XCTAssertEqual(messageSender.messages, [messageA, messageB, messageC])
+        XCTAssertEqual(
+            messageSender.messages,
+            [messageA.payload, messageB.payload, messageC.payload]
+        )
     }
 
     func testAddMessage() async {
@@ -98,7 +109,11 @@ final class ChatTests: XCTestCase {
 
 extension ChatMessage {
     static func stub() -> ChatMessage {
-        ChatMessage(senderName: "Sender", senderId: UUID(), payload: "Message")
+        ChatMessage(
+            senderName: "Sender",
+            senderId: UUID().uuidString,
+            payload: "Message"
+        )
     }
 }
 
@@ -116,8 +131,8 @@ private final class MessageSender {
     var isSuccess = true
     private(set) var messages = [String]()
 
-    func sendMessage(_ message: String) -> Bool {
-        messages.append(message)
+    func sendMessage(_ message: ChatMessage) -> Bool {
+        messages.append(message.payload)
         return isSuccess
     }
 }

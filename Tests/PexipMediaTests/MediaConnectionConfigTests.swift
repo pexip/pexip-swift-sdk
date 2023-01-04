@@ -1,4 +1,5 @@
 import XCTest
+import Combine
 import PexipCore
 @testable import PexipMedia
 
@@ -19,7 +20,7 @@ final class MediaConnectionConfigTests: XCTestCase {
             presentationInMain: true
         )
 
-        XCTAssertEqual(config.signaling as? Signaling, signaling)
+        XCTAssertTrue(config.signaling is Signaling)
         XCTAssertEqual(config.iceServers, [iceServer])
         XCTAssertTrue(config.dscp)
         XCTAssertTrue(config.presentationInMain)
@@ -29,7 +30,7 @@ final class MediaConnectionConfigTests: XCTestCase {
         let signaling = Signaling()
         let config = MediaConnectionConfig(signaling: signaling)
 
-        XCTAssertEqual(config.signaling as? Signaling, signaling)
+        XCTAssertTrue(config.signaling is Signaling)
         XCTAssertEqual(config.iceServers, [MediaConnectionConfig.googleIceServer])
         XCTAssertFalse(config.dscp)
         XCTAssertFalse(config.presentationInMain)
@@ -43,7 +44,7 @@ final class MediaConnectionConfigTests: XCTestCase {
         )
         let config = MediaConnectionConfig(signaling: signaling, iceServers: [iceServer])
 
-        XCTAssertEqual(config.signaling as? Signaling, signaling)
+        XCTAssertTrue(config.signaling is Signaling)
         XCTAssertEqual(config.iceServers, [iceServer] + [MediaConnectionConfig.googleIceServer])
         XCTAssertFalse(config.dscp)
         XCTAssertFalse(config.presentationInMain)
@@ -52,9 +53,14 @@ final class MediaConnectionConfigTests: XCTestCase {
 
 // MARK: - Mocks
 
-private struct Signaling: SignalingChannel, Hashable {
-    var callId: UUID?
+private final class Signaling: SignalingChannel {
+    var callId: String?
     var iceServers = [IceServer]()
+    var data: DataChannel?
+    var eventPublisher: AnyPublisher<SignalingEvent, Never> {
+        eventSubject.eraseToAnyPublisher()
+    }
+    private let eventSubject = PassthroughSubject<SignalingEvent, Never>()
 
     func sendOffer(
         callType: String,

@@ -8,6 +8,6 @@ public protocol ConferenceDelegate: AnyObject {
      */
     func conference(
         _ conference: Conference,
-        didReceiveEvent event: ConferenceEvent
+        didReceiveEvent event: ConferenceClientEvent
     )
 }

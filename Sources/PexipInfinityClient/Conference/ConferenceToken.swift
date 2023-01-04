@@ -47,7 +47,7 @@ public struct ConferenceToken: InfinityToken, Codable, Hashable {
 
     /// The uuid associated with this newly created participant.
     /// It is used to identify this participant in the participant list.
-    public let participantId: UUID
+    public let participantId: String
 
     /// Whether the participant is connecting as a "HOST" or a "GUEST".
     public let role: Role
@@ -101,7 +101,7 @@ public struct ConferenceToken: InfinityToken, Codable, Hashable {
     public init(
         value: String,
         updatedAt: Date = Date(),
-        participantId: UUID,
+        participantId: String,
         role: ConferenceToken.Role,
         displayName: String,
         serviceType: String,

@@ -19,9 +19,6 @@ public struct MediaConnectionConfig {
     /// The list of ice servers.
     public let iceServers: [IceServer]
 
-    /// The id of the data channel
-    public let dataChannelId: Int32?
-
     /// The max bandwidth of a video stream.
     public let bandwidth: Bandwidth
 
@@ -49,7 +46,6 @@ public struct MediaConnectionConfig {
     public init(
         signaling: SignalingChannel,
         iceServers: [IceServer] = [],
-        dataChannelId: Int32? = nil,
         bandwidth: Bandwidth = .high,
         dscp: Bool = false,
         presentationInMain: Bool = false
@@ -65,7 +61,6 @@ public struct MediaConnectionConfig {
         }
 
         self.iceServers = iceServers
-        self.dataChannelId = dataChannelId
         self.bandwidth = bandwidth
         self.dscp = dscp
         self.presentationInMain = presentationInMain

@@ -54,10 +54,7 @@ final class RegistrationEventParserTests: XCTestCase {
 
         switch parsedEvent {
         case .incoming(let event):
-            XCTAssertEqual(event.conferenceAlias, expectedEvent.conferenceAlias)
-            XCTAssertEqual(event.remoteDisplayName, expectedEvent.remoteDisplayName)
-            XCTAssertEqual(event.token, expectedEvent.token)
-            XCTAssertTrue(event.receivedAt > expectedEvent.receivedAt)
+            XCTAssertEqual(event, expectedEvent)
         default:
             XCTFail("Unexpected event type")
         }
@@ -72,8 +69,7 @@ final class RegistrationEventParserTests: XCTestCase {
 
         switch parsedEvent {
         case .incomingCancelled(let event):
-            XCTAssertEqual(event.token, expectedEvent.token)
-            XCTAssertTrue(event.receivedAt > expectedEvent.receivedAt)
+            XCTAssertEqual(event, expectedEvent)
         default:
             XCTFail("Unexpected event type")
         }

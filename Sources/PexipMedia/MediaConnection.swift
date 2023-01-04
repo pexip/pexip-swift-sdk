@@ -83,21 +83,6 @@ public protocol MediaConnection {
     func stop()
 
     /**
-     Handles the incoming offer.
-     - Parameters:
-        - offer: A remote SDP offer.
-     */
-    func receiveNewOffer(_ offer: String) async throws
-
-    /**
-     Adds new incoming ICE candidate.
-     - Parameters:
-        - sdp: The SDP string for this candidate
-        - mid: The SDP mid for this candidate
-     */
-    func addCandidate(sdp: String, mid: String?) async throws
-
-    /**
      Adds or removes remote presentation track from the current media connection.
 
      - Parameters:
