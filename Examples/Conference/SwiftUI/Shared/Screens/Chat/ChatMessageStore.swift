@@ -16,7 +16,7 @@ final class ChatMessageStore: ObservableObject {
             self?.messages.append(.init(
                 title: message.senderName,
                 text: message.payload,
-                date: message.receivedAt
+                date: message.date
             ))
         }).store(in: &cancellables)
 
@@ -49,7 +49,7 @@ final class ChatMessageStore: ObservableObject {
             return false
         }
 
-        return try await !chat.sendMessage(text)
+        return try await chat.sendMessage(text)
     }
 }
 

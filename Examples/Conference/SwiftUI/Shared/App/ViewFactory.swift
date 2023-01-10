@@ -4,28 +4,7 @@ import PexipMedia
 import PexipRTC
 import PexipScreenCapture
 
-// MARK: - Protocol
-
-protocol ViewFactoryProtocol {
-    func displayNameView(
-        onComplete: @escaping () -> Void
-    ) -> DisplayNameView
-
-    func aliasView(
-        onComplete: @escaping AliasViewModel.Complete
-    ) -> AliasView
-
-    func pinChallengeView(
-        node: URL,
-        alias: ConferenceAlias,
-        tokenError: ConferenceTokenError,
-        onComplete: @escaping PinChallengeViewModel.Complete
-    ) -> PinChallengeView
-}
-
-// MARK: - Implementation
-
-struct ViewFactory: ViewFactoryProtocol {
+struct ViewFactory {
     let apiClientFactory: InfinityClientFactory
     let settings: Settings
 
@@ -67,16 +46,15 @@ struct ViewFactory: ViewFactoryProtocol {
     }
 
     func conferenceView(
-        node: URL,
-        alias: ConferenceAlias,
-        token: ConferenceToken,
-        onComplete: @escaping () -> Void
+        details: ConferenceDetails,
+        preflight: Bool,
+        onComplete: @escaping ConferenceViewModel.Complete
     ) -> ConferenceView {
         let mediaFactory = WebRTCMediaFactory()
         let conference = apiClientFactory.conference(
-            node: node,
-            alias: alias,
-            token: token
+            node: details.node,
+            alias: details.alias,
+            token: details.token
         )
         let mediaConnectionConfig = MediaConnectionConfig(
             signaling: conference.signalingChannel,
@@ -84,8 +62,13 @@ struct ViewFactory: ViewFactoryProtocol {
         )
         let viewModel = ConferenceViewModel(
             conference: conference,
+            conferenceConnector: ConferenceConnector(
+                nodeResolver: apiClientFactory.nodeResolver(dnssec: false),
+                service: apiClientFactory.infinityService()
+            ),
             mediaConnectionConfig: mediaConnectionConfig,
             mediaFactory: mediaFactory,
+            preflight: preflight,
             settings: settings,
             onComplete: onComplete
         )

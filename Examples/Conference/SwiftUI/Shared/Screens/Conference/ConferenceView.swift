@@ -242,7 +242,7 @@ struct ConferenceView_Previews: PreviewProvider {
         alias: ConferenceAlias(uri: "test@example.com")!,
         token: ConferenceToken(
             value: "test",
-            participantId: UUID(),
+            participantId: UUID().uuidString,
             role: .guest,
             displayName: "Test",
             serviceType: "",
@@ -262,12 +262,17 @@ struct ConferenceView_Previews: PreviewProvider {
         ConferenceView(
             viewModel: ConferenceViewModel(
                 conference: conference,
+                conferenceConnector: ConferenceConnector(
+                    nodeResolver: InfinityClientFactory().nodeResolver(dnssec: false),
+                    service: InfinityClientFactory().infinityService()
+                ),
                 mediaConnectionConfig: MediaConnectionConfig(
                     signaling: conference.signalingChannel
                 ),
                 mediaFactory: factory,
+                preflight: true,
                 settings: Settings(),
-                onComplete: {}
+                onComplete: { _ in }
             )
         )
     }

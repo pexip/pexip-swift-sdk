@@ -2,6 +2,8 @@ import PexipMedia
 import SwiftUI
 import PexipInfinityClient
 
+typealias IncomingCall = ConferenceDetails
+
 final class IncomingCallViewModel: ObservableObject {
     typealias Accept = (IncomingCall) -> Void
 
