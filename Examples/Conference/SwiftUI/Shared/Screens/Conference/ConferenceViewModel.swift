@@ -400,6 +400,8 @@ private extension ConferenceViewModel {
         }
     }
 
+    /// Create new media connection object
+    /// when another peer is disconnected from a direct media call.
     private func onPeerDisconnected() {
         mediaConnection.stop()
         mediaConnection = mediaFactory.createMediaConnection(
@@ -409,6 +411,11 @@ private extension ConferenceViewModel {
         join()
     }
 
+    /// Call transfer logic:
+    /// - leave the current conference (release token, unsubscribe from events, etc)
+    /// - stop media connection
+    /// - request new conference token using the one time token from the event
+    /// - create new conference and media connection objects
     private func onRefer(_ event: ReferEvent) {
         Task { @MainActor in
             do {
