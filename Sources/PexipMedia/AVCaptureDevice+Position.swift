@@ -10,4 +10,10 @@ public extension AVCaptureDevice {
             position: position
         ).devices
     }
+
+    static func videoCaptureDevice(
+        withPosition position: AVCaptureDevice.Position
+    ) -> AVCaptureDevice? {
+        videoCaptureDevices(withPosition: position).first
+    }
 }

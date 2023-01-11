@@ -24,6 +24,9 @@ public struct ChatMessage: Codable, Hashable {
     /// A date when the message was sent or received.
     public private(set) var date = Date()
 
+    @available(*, deprecated, renamed: "date")
+    public var receivedAt: Date { date }
+
     /**
      - Parameters:
         - senderName: Name of the sending participant

@@ -27,6 +27,15 @@ public protocol CallService {
     func ack(sdp: String?, token: ConferenceToken) async throws -> Bool
 
     /**
+     Starts media for the specified call (WebRTC calls only).
+     - Parameters:
+        - token: Current valid API token
+     - Returns: The result is true if successful, false otherwise.
+     - Throws: `HTTPError` if a network error was encountered during operation
+     */
+    func ack(token: ConferenceToken) async throws -> Bool
+
+    /**
      Sends a new local SDP.
      - Parameters:
         - sdp: The new local SDP
@@ -90,6 +99,10 @@ struct DefaultCallService: CallService {
         }
 
         return try await client.json(for: request)
+    }
+
+    func ack(token: ConferenceToken) async throws -> Bool {
+        try await ack(sdp: nil, token: token)
     }
 
     func update(sdp: String, token: ConferenceToken) async throws -> String? {
