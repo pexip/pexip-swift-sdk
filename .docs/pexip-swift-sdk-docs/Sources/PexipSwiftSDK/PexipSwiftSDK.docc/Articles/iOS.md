@@ -8,6 +8,8 @@ iOS platform specific documentation.
 <doc:GettingStarted>
 <doc:Examples>
 <doc:iOSScreenSharing>
+<doc:DirectMedia>
+<doc:CallTransfer>
 
 ## API reference:
 

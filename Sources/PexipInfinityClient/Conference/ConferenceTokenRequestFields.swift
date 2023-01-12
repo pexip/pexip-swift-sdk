@@ -30,14 +30,15 @@ public struct ConferenceTokenRequestFields: Encodable, Hashable {
         - conferenceExtension: Conference to connect to (when being used with a Virtual Reception)
         - idp: The identity provider used to proceed with SSO flow
         - ssoToken: The ssoToken received from the SSO flow
-        - directMedia: Indicates whether direct media is supported by the client.
+        - directMedia: Indicates whether direct media is supported by the client
+                       (disabled by default).
      */
     public init(
         displayName: String,
         conferenceExtension: String? = nil,
         idp: IdentityProvider? = nil,
         ssoToken: String? = nil,
-        directMedia: Bool = true
+        directMedia: Bool = false
     ) {
         self.displayName = displayName
         self.conferenceExtension = conferenceExtension

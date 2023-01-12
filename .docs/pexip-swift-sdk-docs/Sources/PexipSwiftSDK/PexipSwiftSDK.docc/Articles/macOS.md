@@ -9,6 +9,8 @@ macOS platform specific documentation.
 <doc:Examples>
 <doc:macOSScreenSharing>
 <doc:Registration>
+<doc:DirectMedia>
+<doc:CallTransfer>
 
 ## API reference:
 

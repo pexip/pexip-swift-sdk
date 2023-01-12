@@ -545,6 +545,10 @@ private final class CallServiceMock: CallService {
         try performAction(.ack, token: token)
     }
 
+    func ack(token: ConferenceToken) async throws -> Bool {
+        try performAction(.ack, token: token)
+    }
+
     func update(sdp: String, token: ConferenceToken) async throws -> String? {
         try performAction(.update, token: token)
     }

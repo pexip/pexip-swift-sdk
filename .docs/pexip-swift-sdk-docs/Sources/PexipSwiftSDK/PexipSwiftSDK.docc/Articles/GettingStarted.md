@@ -188,6 +188,7 @@ mediaConnection.remoteVideoTracks.$presentationTrack.receive(on: DispatchQueue.m
 Subscribe to conference events in order to:
 - Receive remote presentation from another participant of the conference
 - Be notified when the participant is being disconnected from the Pexip side
+- Perform call transfer
 
 ```swift
 conference.receiveEvents()

@@ -27,6 +27,6 @@ final class ConferenceTokenRequestFieldsTests: XCTestCase {
         XCTAssertNil(fields.conferenceExtension)
         XCTAssertNil(fields.chosenIdpId)
         XCTAssertNil(fields.ssoToken)
-        XCTAssertTrue(fields.directMedia)
+        XCTAssertFalse(fields.directMedia)
     }
 }
