@@ -52,7 +52,7 @@ final class ConferenceViewModel: ObservableObject {
         (finalCaptions + currentCaptions).joined(separator: "\n")
     }
 
-    let remoteVideoContentMode = VideoContentMode.fit16x9
+    let remoteVideoContentMode = VideoContentMode.fit
     var hasChat: Bool { conference.chat != nil }
     var roster: Roster { conference.roster }
     private(set) lazy var chatMessageStore = conference.chat.map {
