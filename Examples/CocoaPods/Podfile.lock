@@ -1,17 +1,17 @@
 PODS:
-  - PexipCore (0.5.0)
-  - PexipInfinityClient (0.5.0):
-    - PexipCore (= 0.5.0)
-  - PexipMedia (0.5.0):
-    - PexipCore (= 0.5.0)
-    - PexipScreenCapture (= 0.5.0)
-  - PexipRTC (0.5.0):
-    - PexipCore (= 0.5.0)
-    - PexipMedia (= 0.5.0)
+  - PexipCore (0.6.0)
+  - PexipInfinityClient (0.6.0):
+    - PexipCore (= 0.6.0)
+  - PexipMedia (0.6.0):
+    - PexipCore (= 0.6.0)
+    - PexipScreenCapture (= 0.6.0)
+  - PexipRTC (0.6.0):
+    - PexipCore (= 0.6.0)
+    - PexipMedia (= 0.6.0)
     - WebRTC (= 105.0.0)
-  - PexipScreenCapture (0.5.0)
-  - PexipVideoFilters (0.5.0):
-    - PexipCore (= 0.5.0)
+  - PexipScreenCapture (0.6.0)
+  - PexipVideoFilters (0.6.0):
+    - PexipCore (= 0.6.0)
   - WebRTC (105.0.0)
 
 DEPENDENCIES:
@@ -30,13 +30,13 @@ SPEC REPOS:
     - WebRTC
 
 SPEC CHECKSUMS:
-  PexipCore: 5eb128b08baf8456175652bf7ae98b0e734ac866
-  PexipInfinityClient: b9534693f0e01b0be2a3fd72c598b9557744a25e
-  PexipMedia: a1373684233a727119d17427637d2c70e4b64c71
-  PexipRTC: c4bf1dfe0d71102b597f830729da56eb876614d0
-  PexipScreenCapture: 61f7ca936e4f1b3a2dfe98c121df236db3c29a9c
-  PexipVideoFilters: 226a81f0bc8f59e42603c86c6e3ea8af4217eea8
-  WebRTC: b8b17f86695f33c70cfc538d2172e7d3d87f1287
+  PexipCore: edab7891ed4ccf85d763d88d714f00fc9a0d710f
+  PexipInfinityClient: e5d373d163053f882bfd1be7f2b78c44dcc3083d
+  PexipMedia: b0ca3c5331d0f582f0333523ec00675eb0c7123c
+  PexipRTC: 389a3b622812534138754012902736ab8ac0d067
+  PexipScreenCapture: 35ba6c21c6f72c1b43161903a4258e7b6c6eabf4
+  PexipVideoFilters: 63315b893a444542d11d3844f59f2eec5ac132f1
+  WebRTC: 76c79a63aed80e4b45c9d1c79622219273414766
 
 PODFILE CHECKSUM: ac3b795f264d61144d0ddf8636597dfa58176466
 
