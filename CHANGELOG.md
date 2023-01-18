@@ -16,12 +16,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Send chat messages via WebRTC data channel when on direct media call 
 - Calculate secure check code on each send/receive of an SDP offer/answer, see `MediaConnection.secureCheckCode`
 - Load conference themes, accessible via `Conference.splashScreens` property or `splashScreen` event
-
-### Changed
 - New conference events:
   - `splashScreen` for local rendering of splash images and messages 
   - `peerDisconnected` for restarting media connection during direct media call
   - `refer` for tranferring direct media call to transcoded call and back
+
+### Changed
 - **BREAKING**: Use String instead of UUID for various types in `PexipInfinityClient`
 - **BREAKING**: add kind property to `IceServer` struct to differentiate TURN and STUN servers
 - **BREAKING**: `CameraVideoTrackFactory`: use new `MediaDevice` type instead of `AVCaptureDevice`
