@@ -7,6 +7,28 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.6.0] - 2023-01-18
+
+### Added
+
+- Make it possible to participate in [direct media calls](https://pexip.github.io/pexip-swift-sdk/sdk/documentation/pexipswiftsdk/directmedia)
+- New `VideoContentMode.fit` to fit the size of the video view by maintaining the original aspect ratio (could be used to support portrait video on direct media call)
+- Send chat messages via WebRTC data channel when on direct media call 
+- Calculate secure check code on each send/receive of an SDP offer/answer, see `MediaConnection.secureCheckCode`
+- Load conference themes, accessible via `Conference.splashScreens` property or `splashScreen` event
+- New conference events:
+  - `splashScreen` for local rendering of splash images and messages 
+  - `peerDisconnected` for restarting media connection during direct media call
+  - `refer` for tranferring direct media call to transcoded call and back
+
+### Changed
+- **BREAKING**: Use String instead of UUID for various types in `PexipInfinityClient`
+- **BREAKING**: add kind property to `IceServer` struct to differentiate TURN and STUN servers
+- **BREAKING**: `CameraVideoTrackFactory`: use new `MediaDevice` type instead of `AVCaptureDevice`
+- **BREAKING**: `CameraVideoTrack.toggleCamera` doesn't return camera position anymore
+- **BREAKING**: `SignalingChannel.sendOffer` now returns optional SDP string
+- More changes in the public APIs of `PexipInfinityClient` and `PexipMedia` frameworks, see the [Example project](https://github.com/pexip/pexip-swift-sdk/tree/main/Examples/Conference) for more info. 
+
 ## [0.5.0] - 2022-09-13
 
 ### Added
@@ -61,7 +83,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Initial release
 
-[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.5.0...HEAD
+[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.6.0
 [0.5.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.5.0
 [0.4.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.4.0
 [0.3.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.3.0
