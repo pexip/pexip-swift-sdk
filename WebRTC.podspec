@@ -44,8 +44,8 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
     s.source = {
-      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/0.5.0/WebRTC.xcframework.zip',
-      sha256: '921c2bc805f04fdb22b2cc97f67e4bf33c538845d0097e620e635194dd68d9c3',
+      http: 'https://github.com/pexip/pexip-swift-sdk/releases/download/0.6.0/WebRTC.xcframework.zip',
+      sha256: '9178e1a2623c7215c9313fa4e6710a9a209badc8d99cee85f3e732b68c1d9675',
       type: 'zip',
       headers: ['Accept: application/octet-stream']
     }
