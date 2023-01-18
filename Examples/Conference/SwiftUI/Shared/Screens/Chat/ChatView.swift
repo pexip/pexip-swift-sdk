@@ -138,11 +138,11 @@ struct ChatView_Previews: PreviewProvider {
     static var chatView: ChatView {
         let chat = Chat(
             senderName: "User Name",
-            senderId: UUID(),
+            senderId: UUID().uuidString,
             sendMessage: { _ in true }
         )
         let roster = Roster(
-            currentParticipantId: UUID(),
+            currentParticipantId: UUID().uuidString,
             currentParticipantName: "User Name",
             avatarURL: { _ in nil }
         )

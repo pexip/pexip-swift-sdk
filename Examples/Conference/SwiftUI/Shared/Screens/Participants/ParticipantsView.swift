@@ -93,7 +93,7 @@ private struct ParticipantCell: View {
 // MARK: - Previews
 
 struct ParticipantsView_Previews: PreviewProvider {
-    private static let myId = UUID()
+    private static let myId = UUID().uuidString
 
     static var previews: some View {
         ParticipantsView(
@@ -131,7 +131,7 @@ struct ParticipantsView_Previews: PreviewProvider {
 // MARK: - Stubs
 
 private extension Participant {
-    static func stub(id: UUID = UUID(), displayName: String) -> Participant {
+    static func stub(id: String = UUID().uuidString, displayName: String) -> Participant {
         Participant(
             id: id,
             displayName: displayName,

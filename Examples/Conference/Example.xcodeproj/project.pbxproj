@@ -19,6 +19,8 @@
 		DA11B0DE27EA036500501E50 /* FormContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0D927EA007400501E50 /* FormContainerView.swift */; };
 		DA11B0E127EA0C3100501E50 /* UIViewController+Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0DF27EA0BFF00501E50 /* UIViewController+Keyboard.swift */; };
 		DA11B0E527EA104200501E50 /* UserDefaultsBacked.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0E327EA103F00501E50 /* UserDefaultsBacked.swift */; };
+		DA11E1EA2940EBF50075AE63 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11E1E92940EBF50075AE63 /* SplashView.swift */; };
+		DA11E1EB2940EBF50075AE63 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11E1E92940EBF50075AE63 /* SplashView.swift */; };
 		DA1329E627A98EC500C2EA89 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA1329D427A98EC500C2EA89 /* Assets.xcassets */; };
 		DA217DDB28995C27006E5169 /* BroadcastExtension in Frameworks */ = {isa = PBXBuildFile; productRef = DA217DDA28995C27006E5169 /* BroadcastExtension */; };
 		DA217DDD28995D2D006E5169 /* App in Frameworks */ = {isa = PBXBuildFile; productRef = DA217DDC28995D2D006E5169 /* App */; };
@@ -33,6 +35,10 @@
 		DA46569B28C6B81F008E77FD /* IncomingCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA46569A28C6B81F008E77FD /* IncomingCallView.swift */; };
 		DA476CCE28C8E414001FE9F4 /* Screen.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA476CCD28C8E414001FE9F4 /* Screen.swift */; };
 		DA476CCF28C8E414001FE9F4 /* Screen.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA476CCD28C8E414001FE9F4 /* Screen.swift */; };
+		DA5CF74A296C649600E4BFD8 /* ConferenceDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5CF749296C649600E4BFD8 /* ConferenceDetails.swift */; };
+		DA5CF74B296C649600E4BFD8 /* ConferenceDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5CF749296C649600E4BFD8 /* ConferenceDetails.swift */; };
+		DA5CF74D296C6F6500E4BFD8 /* ConferenceConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5CF74C296C6F6500E4BFD8 /* ConferenceConnector.swift */; };
+		DA5CF74E296C6F6500E4BFD8 /* ConferenceConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5CF74C296C6F6500E4BFD8 /* ConferenceConnector.swift */; };
 		DA5F0B2F286C946400E9E18B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5F0B2E286C946400E9E18B /* SettingsView.swift */; };
 		DA5F0B30286C946400E9E18B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5F0B2E286C946400E9E18B /* SettingsView.swift */; };
 		DA6196872878332300EA9151 /* ChatMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6196862878332300EA9151 /* ChatMessageStore.swift */; };
@@ -57,7 +63,6 @@
 		DAB78D4F27E3953600CB17C9 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB78D4E27E3953600CB17C9 /* Utils.swift */; };
 		DAEBE68328A3D8AD00951E3C /* CameraVideoFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEBE68228A3D8AD00951E3C /* CameraVideoFilter.swift */; };
 		DAEBE68428A3D8AD00951E3C /* CameraVideoFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEBE68228A3D8AD00951E3C /* CameraVideoFilter.swift */; };
-		DAEDA11128C93D970091193C /* IncomingCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEDA11028C93D970091193C /* IncomingCall.swift */; };
 		DAF13287284A259D0089FE8E /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAF13286284A259D0089FE8E /* ReplayKit.framework */; };
 		DAF1328A284A259D0089FE8E /* SampleHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF13289284A259D0089FE8E /* SampleHandler.swift */; };
 		DAF1328E284A259D0089FE8E /* BroadcastExtension (iOS).appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DAF13285284A259D0089FE8E /* BroadcastExtension (iOS).appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -152,6 +157,7 @@
 		DA11B0DB27EA024800501E50 /* UIView+AutoLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+AutoLayout.swift"; sourceTree = "<group>"; };
 		DA11B0DF27EA0BFF00501E50 /* UIViewController+Keyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Keyboard.swift"; sourceTree = "<group>"; };
 		DA11B0E327EA103F00501E50 /* UserDefaultsBacked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsBacked.swift; sourceTree = "<group>"; };
+		DA11E1E92940EBF50075AE63 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		DA1329D427A98EC500C2EA89 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DA1329D927A98EC500C2EA89 /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA217DD9289959B6006E5169 /* Dependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Dependencies; sourceTree = "<group>"; };
@@ -161,6 +167,8 @@
 		DA46569828C6B442008E77FD /* RegistrationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationService.swift; sourceTree = "<group>"; };
 		DA46569A28C6B81F008E77FD /* IncomingCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallView.swift; sourceTree = "<group>"; };
 		DA476CCD28C8E414001FE9F4 /* Screen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Screen.swift; sourceTree = "<group>"; };
+		DA5CF749296C649600E4BFD8 /* ConferenceDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceDetails.swift; sourceTree = "<group>"; };
+		DA5CF74C296C6F6500E4BFD8 /* ConferenceConnector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceConnector.swift; sourceTree = "<group>"; };
 		DA5F0B2E286C946400E9E18B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		DA6196862878332300EA9151 /* ChatMessageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessageStore.swift; sourceTree = "<group>"; };
 		DA6E026127CFA48700DF88A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -180,7 +188,6 @@
 		DAE8989A282469DD006C30E8 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Configs/Debug.xcconfig; sourceTree = "<group>"; };
 		DAE8989B28246B12006C30E8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Configs/Release.xcconfig; sourceTree = "<group>"; };
 		DAEBE68228A3D8AD00951E3C /* CameraVideoFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraVideoFilter.swift; sourceTree = "<group>"; };
-		DAEDA11028C93D970091193C /* IncomingCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCall.swift; sourceTree = "<group>"; };
 		DAF13285284A259D0089FE8E /* BroadcastExtension (iOS).appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "BroadcastExtension (iOS).appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAF13286284A259D0089FE8E /* ReplayKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ReplayKit.framework; path = System/Library/Frameworks/ReplayKit.framework; sourceTree = SDKROOT; };
 		DAF13289284A259D0089FE8E /* SampleHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleHandler.swift; sourceTree = "<group>"; };
@@ -392,7 +399,6 @@
 			children = (
 				DA46569A28C6B81F008E77FD /* IncomingCallView.swift */,
 				DA934F0128C7A67B002434DC /* IncomingCallViewModel.swift */,
-				DAEDA11028C93D970091193C /* IncomingCall.swift */,
 			);
 			path = IncomingCall;
 			sourceTree = "<group>";
@@ -548,6 +554,9 @@
 				DA2FE596287110CB00D8FCAB /* ConferenceState.swift */,
 				DA2FE599287110DD00D8FCAB /* ConferenceModal.swift */,
 				DAEBE68228A3D8AD00951E3C /* CameraVideoFilter.swift */,
+				DA11E1E92940EBF50075AE63 /* SplashView.swift */,
+				DA5CF749296C649600E4BFD8 /* ConferenceDetails.swift */,
+				DA5CF74C296C6F6500E4BFD8 /* ConferenceConnector.swift */,
 			);
 			path = Conference;
 			sourceTree = "<group>";
@@ -833,6 +842,7 @@
 				DAFADCC927F50C1400A9AC3D /* MainVStack.swift in Sources */,
 				DA2FE59A287110DD00D8FCAB /* ConferenceModal.swift in Sources */,
 				DA93EE6D284A35200063386F /* Constants.swift in Sources */,
+				DA11E1EA2940EBF50075AE63 /* SplashView.swift in Sources */,
 				DAFADCC727F50C1400A9AC3D /* GeometryProxy+Extensions.swift in Sources */,
 				DAFADCDD27F50C1400A9AC3D /* AliasViewModel.swift in Sources */,
 				DAFADCE727F50C1400A9AC3D /* ConferenceView.swift in Sources */,
@@ -850,6 +860,7 @@
 				DA934F0B28C7F41E002434DC /* Environment.swift in Sources */,
 				DAFADD0727F50E5D00A9AC3D /* DisplayNameViewModel.swift in Sources */,
 				DAFADD0D27F50E8800A9AC3D /* PinChallengeViewModel.swift in Sources */,
+				DA5CF74D296C6F6500E4BFD8 /* ConferenceConnector.swift in Sources */,
 				DAFADCD727F50C1400A9AC3D /* ExampleApp.swift in Sources */,
 				DAFADCD127F50C1400A9AC3D /* AsyncButton.swift in Sources */,
 				DAFADCC527F50C1400A9AC3D /* CallButtons.swift in Sources */,
@@ -857,6 +868,7 @@
 				DAFADCE927F50C1400A9AC3D /* PreflightView.swift in Sources */,
 				DAEBE68328A3D8AD00951E3C /* CameraVideoFilter.swift in Sources */,
 				DAFADCED27F50C1400A9AC3D /* ChatViewModel.swift in Sources */,
+				DA5CF74A296C649600E4BFD8 /* ConferenceDetails.swift in Sources */,
 				DAFADCD327F50C1400A9AC3D /* LargeButton.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -888,6 +900,7 @@
 				DAFADD2127F5D69A00A9AC3D /* AppCoordinator.swift in Sources */,
 				DA934F0228C7A67B002434DC /* IncomingCallViewModel.swift in Sources */,
 				DAFADCDA27F50C1400A9AC3D /* ViewFactory.swift in Sources */,
+				DA5CF74B296C649600E4BFD8 /* ConferenceDetails.swift in Sources */,
 				DA74550B28C948F300D2323C /* AppWindow.swift in Sources */,
 				DAFADD1D27F5CD8200A9AC3D /* UserInterfaceSizeClass.swift in Sources */,
 				DAFADCCE27F50C1400A9AC3D /* ModalView.swift in Sources */,
@@ -902,7 +915,6 @@
 				DAFADCCA27F50C1400A9AC3D /* MainVStack.swift in Sources */,
 				DAFADCC627F50C1400A9AC3D /* CallButtons.swift in Sources */,
 				DAFADCF027F50C1400A9AC3D /* ChatView.swift in Sources */,
-				DAEDA11128C93D970091193C /* IncomingCall.swift in Sources */,
 				DAFADCD227F50C1400A9AC3D /* AsyncButton.swift in Sources */,
 				DAFADD0A27F50E5D00A9AC3D /* DisplayNameView.swift in Sources */,
 				DAB34034286E680E001B59C5 /* Settings.swift in Sources */,
@@ -911,6 +923,7 @@
 				DAFADD0E27F50E8800A9AC3D /* PinChallengeViewModel.swift in Sources */,
 				DAFADD1F27F5D02E00A9AC3D /* NSColor+Extensions.swift in Sources */,
 				DAFADD0827F50E5D00A9AC3D /* DisplayNameViewModel.swift in Sources */,
+				DA11E1EB2940EBF50075AE63 /* SplashView.swift in Sources */,
 				DAFADCE827F50C1400A9AC3D /* ConferenceView.swift in Sources */,
 				DA934F0C28C7F41E002434DC /* Environment.swift in Sources */,
 				DA2FE598287110CB00D8FCAB /* ConferenceState.swift in Sources */,
@@ -922,6 +935,7 @@
 				DAFADCCC27F50C1400A9AC3D /* LinearGradient+Extensions.swift in Sources */,
 				DAFADCD027F50C1400A9AC3D /* LargeTextFieldStyle.swift in Sources */,
 				DAAC9A7428C69F4100BFCA5C /* RegistrationView.swift in Sources */,
+				DA5CF74E296C6F6500E4BFD8 /* ConferenceConnector.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

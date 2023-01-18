@@ -47,9 +47,12 @@ struct AppCoordinator: View {
                         switch output.token {
                         case .success(let token):
                             push(.conference(
-                                alias: output.alias,
-                                node: output.node,
-                                token: token
+                                ConferenceDetails(
+                                    node: output.node,
+                                    alias: output.alias,
+                                    token: token
+                                ),
+                                preflight: true
                             ))
                         case .failure(let error):
                             push(.pinChallenge(
@@ -69,22 +72,25 @@ struct AppCoordinator: View {
                     tokenError: tokenError,
                     onComplete: { token in
                         push(.conference(
-                            alias: alias,
-                            node: node,
-                            token: token
+                            ConferenceDetails(node: node, alias: alias, token: token),
+                            preflight: true
                         ))
                     }
                 )
             })
-        case let .conference(alias, node, token):
+        case let .conference(details, preflight):
             viewFactory.conferenceView(
-                node: node,
-                alias: alias,
-                token: token,
-                onComplete: {
-                    pop(to: .alias)
+                details: details,
+                preflight: preflight,
+                onComplete: { completion in
+                    switch completion {
+                    case .exit:
+                        pop(to: .alias)
+                    case .transfer(let details):
+                        push(.conference(details, preflight: false))
+                    }
                 }
-            )
+            ).id(details.id)
         }
     }
 

@@ -20,11 +20,15 @@ struct App: SwiftUI.App {
         WindowGroup("Main") {
             if let incomingCall = incomingCall {
                 viewModel.viewFactory.conferenceView(
-                    node: incomingCall.node,
-                    alias: incomingCall.alias,
-                    token: incomingCall.token,
-                    onComplete: {
-                        self.incomingCall = nil
+                    details: incomingCall,
+                    preflight: false,
+                    onComplete: { completion in
+                        switch completion {
+                        case .exit:
+                            self.incomingCall = nil
+                        case .transfer(let newCall):
+                            self.incomingCall = newCall
+                        }
                     })
             } else {
                 AppCoordinator()

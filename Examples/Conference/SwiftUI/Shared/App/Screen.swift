@@ -9,9 +9,5 @@ enum Screen: Equatable, Hashable {
         node: URL,
         tokenError: ConferenceTokenError
     )
-    case conference(
-        alias: ConferenceAlias,
-        node: URL,
-        token: ConferenceToken
-    )
+    case conference(ConferenceDetails, preflight: Bool)
 }

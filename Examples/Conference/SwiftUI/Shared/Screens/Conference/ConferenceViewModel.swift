@@ -6,8 +6,18 @@ import PexipInfinityClient
 import PexipVideoFilters
 import PexipScreenCapture
 
+// swiftlint:disable file_length
 final class ConferenceViewModel: ObservableObject {
+    typealias Complete = (Completion) -> Void
+
+    enum Completion {
+        case exit
+        case transfer(ConferenceDetails)
+    }
+
+    @AppStorage("displayName") private var displayName = "Guest"
     @Published private(set) var state: ConferenceState
+    @Published private(set) var splashScreen: SplashScreen?
     @Published private(set) var cameraEnabled = false
     @Published private(set) var microphoneEnabled = false
     @Published private(set) var isPresenting = false
@@ -42,7 +52,7 @@ final class ConferenceViewModel: ObservableObject {
         (finalCaptions + currentCaptions).joined(separator: "\n")
     }
 
-    let remoteVideoContentMode = VideoContentMode.fit16x9
+    let remoteVideoContentMode = VideoContentMode.fit
     var hasChat: Bool { conference.chat != nil }
     var roster: Roster { conference.roster }
     private(set) lazy var chatMessageStore = conference.chat.map {
@@ -50,12 +60,14 @@ final class ConferenceViewModel: ObservableObject {
     }
 
     private let conference: Conference
+    private let conferenceConnector: ConferenceConnector
     private let settings: Settings
     private let mediaFactory: MediaFactory
+    private let mediaConnectionConfig: MediaConnectionConfig
     private var mediaConnection: MediaConnection
     private let mainLocalAudioTrack: LocalAudioTrack
     private var cameraVideoTrack: CameraVideoTrack?
-    private let onComplete: () -> Void
+    private let onComplete: Complete
     private let videoPermission = MediaCapturePermission.video
     private let audioPermission = MediaCapturePermission.audio
     private var cancellables = Set<AnyCancellable>()
@@ -64,6 +76,7 @@ final class ConferenceViewModel: ObservableObject {
     private let videoFilterFactory = VideoFilterFactory()
     private var isSinkingLiveCaptionsSettings = false
     private var hideCaptionsTask: Task<Void, Error>?
+
     @Published private var mainRemoteVideoTrack: VideoTrack?
     @Published private var presentationRemoteVideoTrack: VideoTrack?
     @Published private var screenMediaTrack: ScreenMediaTrack?
@@ -74,14 +87,18 @@ final class ConferenceViewModel: ObservableObject {
 
     init(
         conference: Conference,
+        conferenceConnector: ConferenceConnector,
         mediaConnectionConfig: MediaConnectionConfig,
         mediaFactory: MediaFactory,
+        preflight: Bool,
         settings: Settings,
-        onComplete: @escaping () -> Void
+        onComplete: @escaping Complete
     ) {
         self.conference = conference
+        self.conferenceConnector = conferenceConnector
         self.settings = settings
         self.mediaFactory = mediaFactory
+        self.mediaConnectionConfig = mediaConnectionConfig
         self.mediaConnection = mediaFactory.createMediaConnection(
             config: mediaConnectionConfig
         )
@@ -95,6 +112,12 @@ final class ConferenceViewModel: ObservableObject {
         sinkMediaConnectionEvents()
         sinkConferenceEvents()
         sinkCameraFilterSettings()
+
+        conference.receiveEvents()
+
+        if !preflight {
+            join()
+        }
     }
 
     deinit {
@@ -113,7 +136,6 @@ extension ConferenceViewModel {
                 mediaConnection.setMainAudioTrack(mainLocalAudioTrack)
                 mediaConnection.setMainVideoTrack(cameraVideoTrack)
                 try await mediaConnection.start()
-                conference.receiveEvents()
             } catch {
                 state = .preflight
                 debugPrint(error)
@@ -130,7 +152,7 @@ extension ConferenceViewModel {
             setCameraEnabled(false)
             setMicrophoneEnabled(false)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                self?.onComplete()
+                self?.onComplete(.exit)
             }
         }
     }
@@ -140,7 +162,7 @@ extension ConferenceViewModel {
         setMicrophoneEnabled(false)
         Task {
             await conference.leave()
-            onComplete()
+            onComplete(.exit)
         }
     }
 
@@ -277,6 +299,7 @@ private extension ConferenceViewModel {
             .assign(to: &$microphoneEnabled)
     }
 
+    // swiftlint:disable cyclomatic_complexity
     func sinkConferenceEvents() {
         conference.eventPublisher
             .receive(on: DispatchQueue.main)
@@ -299,8 +322,15 @@ private extension ConferenceViewModel {
                         try self.mediaConnection.receivePresentation(false)
                     case .clientDisconnected:
                         self.leave()
-                    default:
-                        // Ignore the rest
+                    case .splashScreen(let splashScreen):
+                        self.splashScreen = splashScreen
+                    case .failure(let message):
+                        debugPrint("Received conference error event: \(message.error)")
+                    case .peerDisconnected:
+                        self.onPeerDisconnected()
+                    case .refer(let event):
+                        self.onRefer(event)
+                    case .callDisconnected:
                         break
                     }
                 } catch {
@@ -367,6 +397,39 @@ private extension ConferenceViewModel {
             try await Task.sleep(nanoseconds: UInt64(5 * 1_000_000_000))
             finalCaptions.removeAll()
             currentCaptions.removeAll()
+        }
+    }
+
+    /// Create new media connection object
+    /// when another peer is disconnected from a direct media call.
+    private func onPeerDisconnected() {
+        mediaConnection.stop()
+        mediaConnection = mediaFactory.createMediaConnection(
+            config: mediaConnectionConfig
+        )
+        sinkMediaConnectionEvents()
+        join()
+    }
+
+    /// Call transfer logic:
+    /// - leave the current conference (release token, unsubscribe from events, etc)
+    /// - stop media connection
+    /// - request new conference token using the one time token from the event
+    /// - create new conference and media connection objects
+    private func onRefer(_ event: ReferEvent) {
+        Task { @MainActor in
+            do {
+                await conference.leave()
+                mediaConnection.stop()
+                let details = try await conferenceConnector.join(
+                    using: .incomingToken(event.token),
+                    displayName: displayName,
+                    conferenceAlias: event.alias
+                )
+                onComplete(.transfer(details))
+            } catch {
+                leave()
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 import SwiftUI
 import PexipMedia
+import PexipInfinityClient
 import PexipRTC
 
 struct CallView: View {
@@ -7,6 +8,7 @@ struct CallView: View {
     let mainRemoteVideo: Video?
     let presentationLocalVideo: Video?
     let presentationRemoteVideo: Video?
+    let splashScreen: SplashScreen?
     let presenterName: String?
     let captions: String
 
@@ -97,7 +99,9 @@ private extension CallView {
     var mainVideoView: some View {
         ZStack(alignment: .center) {
             Color.black.edgesIgnoringSafeArea(.all)
-            if let video = presentationRemoteVideo {
+            if let splashScreen {
+                SplashView(splashScreen: splashScreen)
+            } else if let video = presentationRemoteVideo {
                 VideoComponent(video: video).edgesIgnoringSafeArea(.all)
             } else if let video = mainRemoteVideo {
                 VideoComponent(video: video).edgesIgnoringSafeArea(.all)
@@ -313,7 +317,8 @@ struct CallView_Previews: PreviewProvider {
                     track: VideoTrackMock(.purple),
                     contentMode: .fit16x9
                 )
-                : nil,
+            : nil,
+            splashScreen: nil,
             presenterName: withRemotePresentation ? "Presenter" : nil,
             captions: "Hello world! This is live captions.",
             showingChat: .constant(false),
