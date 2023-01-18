@@ -70,7 +70,7 @@ public struct VideoComponent: View {
         VideoViewWrapper(
             track: track,
             isMirrored: isMirrored,
-            aspectFit: aspectRatio != nil
+            aspectFit: contentMode != .fill
         )
     }
 }

@@ -14,6 +14,8 @@ public enum VideoContentMode: Equatable {
     case fitQualityProfile(QualityProfile)
     /// Fill the parent context
     case fill
+    /// Fit the size of the view by maintaining the original aspect ratio of the video
+    case fit
 
     public var aspectRatio: CGSize? {
         switch self {
@@ -25,7 +27,7 @@ public enum VideoContentMode: Equatable {
             return size
         case .fitQualityProfile(let qualityProfile):
             return qualityProfile.aspectRatio
-        case .fill:
+        case .fill, .fit:
             return nil
         }
     }

@@ -21,5 +21,6 @@ final class VideoContentTests: XCTestCase {
             QualityProfile.high.aspectRatio
         )
         XCTAssertNil(VideoContentMode.fill.aspectRatio)
+        XCTAssertNil(VideoContentMode.fit.aspectRatio)
     }
 }
