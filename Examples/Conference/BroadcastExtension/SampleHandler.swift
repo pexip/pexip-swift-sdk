@@ -14,14 +14,6 @@ final class SampleHandler: RPBroadcastSampleHandler, BroadcastSampleHandlerDeleg
         handler.broadcastStarted()
     }
 
-    override func broadcastPaused() {
-        handler.broadcastPaused()
-    }
-
-    override func broadcastResumed() {
-        handler.broadcastResumed()
-    }
-
     override func broadcastFinished() {
         handler.broadcastFinished()
     }
