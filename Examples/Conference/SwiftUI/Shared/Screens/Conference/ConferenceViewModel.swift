@@ -109,7 +109,7 @@ final class ConferenceViewModel: ObservableObject {
         self.cameraVideoTrack = mediaFactory.createCameraVideoTrack()
         self.mainLocalAudioTrack = mediaFactory.createLocalAudioTrack()
         #if os(iOS)
-        self.screenMediaTrack = try? mediaFactory.createScreenMediaTrack(
+        self.screenMediaTrack = mediaFactory.createScreenMediaTrack(
             appGroup: Constants.appGroup,
             broadcastUploadExtension: Constants.broadcastUploadExtension,
             defaultVideoProfile: localPresentationQualityProfile
@@ -161,6 +161,7 @@ extension ConferenceViewModel {
 
     func leave() {
         state = .disconnected
+        stopPresenting(reason: .callEnded)
 
         Task {
             await conference.leave()
@@ -230,7 +231,8 @@ extension ConferenceViewModel {
 
     func startPresenting(_ screenMediaSource: ScreenMediaSource) {
         screenMediaTrack = mediaFactory.createScreenMediaTrack(
-            mediaSource: screenMediaSource
+            mediaSource: screenMediaSource,
+            defaultVideoProfile: localPresentationQualityProfile
         )
         sinkScreenCaptureEvents(from: screenMediaTrack!)
         startScreenCapture()
@@ -238,7 +240,11 @@ extension ConferenceViewModel {
     #endif
 
     func stopPresenting() {
-        screenMediaTrack?.stopCapture()
+        stopPresenting(reason: nil)
+    }
+
+    func stopPresenting(reason: ScreenCaptureStopReason?) {
+        screenMediaTrack?.stopCapture(reason: reason)
         #if os(macOS)
         screenMediaTrack = nil
         #endif
@@ -268,15 +274,8 @@ private extension ConferenceViewModel {
         }
 
         isSinkingLiveCaptionsSettings = true
-
-        settings.$showLiveCaptions.sink { show in
-            Task { [weak self] in
-                do {
-                    try await self?.conference.toggleLiveCaptions(show)
-                } catch {
-                    debugPrint(error)
-                }
-            }
+        settings.$showLiveCaptions.sink { [weak self] show in
+            self?.toggleLiveCaptions(show)
         }.store(in: &cancellables)
     }
 
@@ -351,7 +350,7 @@ private extension ConferenceViewModel {
                     case .liveCaptions(let captions):
                         self.showLiveCaptions(captions)
                     case .presentationStart(let message):
-                        self.stopPresenting()
+                        self.stopPresenting(reason: .presentationStolen)
                         self.presenterName = message.presenterName
                         try self.mediaConnection.receivePresentation(true)
                     case .presentationStop:
@@ -400,6 +399,16 @@ private extension ConferenceViewModel {
 
     func setCameraFilter(_ filter: CameraVideoFilter) {
         cameraVideoTrack?.videoFilter = videoFilterFactory.videoFilter(for: filter)
+    }
+
+    func toggleLiveCaptions(_ show: Bool) {
+        Task {
+            do {
+                try await conference.toggleLiveCaptions(show)
+            } catch {
+                debugPrint(error)
+            }
+        }
     }
 
     func showLiveCaptions(_ captions: LiveCaptions) {
