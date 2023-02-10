@@ -15,14 +15,16 @@ public protocol BroadcastSampleHandlerDelegate: AnyObject {
 
 // MARK: - BroadcastSampleHandler
 
+/// A class for use in Broadcast Upload Extension on iOS.
 public final class BroadcastSampleHandler {
     public weak var delegate: BroadcastSampleHandlerDelegate?
+    public var isConnected: Bool { _isConnected.value }
 
-    let fps: UInt
-    private let client: BroadcastClient
-    private let messageLoop: BroadcastMessageLoop
+    private let userDefaults: UserDefaults?
+    private let videoSender: BroadcastVideoSender
     private let notificationCenter = BroadcastNotificationCenter.default
     private var cancellables = Set<AnyCancellable>()
+    private let _isConnected = Synchronized(false)
 
     // MARK: - Init
 
@@ -30,71 +32,69 @@ public final class BroadcastSampleHandler {
      Creates a new instance of ``BroadcastSampleHandler``
      - Parameters:
         - appGroup: The app group identifier.
-        - filemanager: An optional instance of the file manager.
+        - fileManager: An optional instance of the file manager.
      */
     public convenience init(
         appGroup: String,
         fileManager: FileManager = .default
     ) {
-        let filePath = fileManager.broadcastSocketPath(appGroup: appGroup)
-        let client = BroadcastClient(filePath: filePath)
+        let filePath = fileManager.broadcastVideoDataPath(appGroup: appGroup)
         let userDefaults = UserDefaults(suiteName: appGroup)
-        /// The broadcast extension has hard memory limit of 50MB.
-        /// Use lower frame rate to reduce the memory load.
-        let fps = min(userDefaults?.broadcastFps ?? 15, 15)
-        self.init(client: client, fps: fps)
+        self.init(
+            videoSender: BroadcastVideoSender(
+                filePath: filePath,
+                fileManager: fileManager
+            ),
+            userDefaults: userDefaults
+        )
     }
 
-    init(client: BroadcastClient, fps: UInt) {
-        self.client = client
-        self.fps = fps
-        messageLoop = BroadcastMessageLoop(fps: fps)
-
-        client.sink { [weak self] httpEvent in
-            guard let self else { return }
-
-            switch httpEvent {
-            case .connect:
-                break
-            case .stop(let error):
-                self.messageLoop.stop()
-
-                let error = BroadcastError.broadcastFinished(error: error)
-                self.delegate?.broadcastSampleHandler(self, didFinishWithError: error)
-            }
-        }.store(in: &cancellables)
-
-        messageLoop.delegate = self
+    init(
+        videoSender: BroadcastVideoSender,
+        userDefaults: UserDefaults?
+    ) {
+        self.videoSender = videoSender
+        self.userDefaults = userDefaults
     }
 
     deinit {
-        removeNotificationObservers()
+        clean()
     }
 
     // MARK: - Public
 
     /// Performs the required actions after starting a live broadcast.
     public func broadcastStarted() {
+        // Add some buffer for read/write operation to UserDefaults.
+        let timeInterval = TimeInterval(BroadcastScreenCapturer.keepAliveInterval * 5)
+
+        guard
+            let date = userDefaults?.broadcastKeepAliveDate,
+            date.timeIntervalSinceNow > -timeInterval
+        else {
+            broadcastFinished()
+            onError(.noConnection)
+            return
+        }
+
         addNotificationObservers()
-        notificationCenter.post(.broadcastStarted)
+        notificationCenter.post(.senderStarted)
     }
 
     // Performs the required actions after a live broadcast is paused.
     public func broadcastPaused() {
-        notificationCenter.post(.broadcastPaused)
+        notificationCenter.post(.senderPaused)
     }
 
     // Performs the required actions after a live broadcast is resumed.
     public func broadcastResumed() {
-        notificationCenter.post(.broadcastResumed)
+        notificationCenter.post(.senderResumed)
     }
 
     // Performs the required actions after a live broadcast is finished.
     public func broadcastFinished() {
-        removeNotificationObservers()
-        notificationCenter.post(.broadcastFinished)
-        messageLoop.stop()
-        client.stop()
+        clean()
+        notificationCenter.post(.senderFinished)
     }
 
     /**
@@ -109,45 +109,80 @@ public final class BroadcastSampleHandler {
         _ sampleBuffer: CMSampleBuffer,
         with sampleBufferType: RPSampleBufferType
     ) -> Bool {
-        guard client.isConnected else {
-            return false
-        }
+        return autoreleasepool {
+            guard _isConnected.value else {
+                return false
+            }
 
-        switch sampleBufferType {
-        case .video:
-            messageLoop.addSampleBuffer(sampleBuffer)
-            return true
-        case .audioApp, .audioMic:
-            return false
-        @unknown default:
-            return false
+            guard
+                sampleBuffer.numSamples == 1,
+                sampleBuffer.isValid,
+                sampleBuffer.dataReadiness == .ready
+            else {
+                return false
+            }
+
+            switch sampleBufferType {
+            case .video:
+                return videoSender.send(sampleBuffer)
+            case .audioApp, .audioMic:
+                return false
+            @unknown default:
+                return false
+            }
         }
     }
 
     // MARK: - Private
 
     private func addNotificationObservers() {
-        notificationCenter.addObserver(self, for: .serverStarted) { [weak self] in
-            self?.client.start()
-            self?.messageLoop.start()
+        notificationCenter.addObserver(self, for: .receiverStarted) { [weak self] in
+            self?._isConnected.setValue(true)
+            do {
+                let fps = BroadcastFps(value: self?.userDefaults?.broadcastFps)
+                try self?.videoSender.start(withFps: fps)
+            } catch {
+                self?.onError(.noConnection)
+            }
+        }
+
+        notificationCenter.addObserver(self, for: .receiverFinished) { [weak self] in
+            self?.finishWithReason(nil)
+        }
+
+        notificationCenter.addObserver(self, for: .callEnded) { [weak self] in
+            self?.finishWithReason(.callEnded)
+        }
+
+        notificationCenter.addObserver(self, for: .presentationStolen) { [weak self] in
+            self?.finishWithReason(.presentationStolen)
         }
     }
 
-    private func removeNotificationObservers() {
+    private func clean() {
+        videoSender.stop()
         notificationCenter.removeObserver(self)
     }
-}
 
-// MARK: - BroadcastMessageLoopDelegate
+    private func finishWithReason(_ reason: ScreenCaptureStopReason?) {
+        let error: BroadcastError
 
-extension BroadcastSampleHandler: BroadcastMessageLoopDelegate {
-    func broadcastMessageLoop(
-        _ messageLoop: BroadcastMessageLoop,
-        didPrepareMessage message: BroadcastMessage
-    ) {
-        Task {
-            await client.send(message: message)
+        switch reason {
+        case .none:
+            error = .broadcastFinished
+        case .callEnded:
+            error = .callEnded
+        case .presentationStolen:
+            error = .presentationStolen
         }
+
+        _isConnected.setValue(false)
+        clean()
+        onError(error)
+    }
+
+    private func onError(_ error: BroadcastError) {
+        delegate?.broadcastSampleHandler(self, didFinishWithError: error)
     }
 }
 

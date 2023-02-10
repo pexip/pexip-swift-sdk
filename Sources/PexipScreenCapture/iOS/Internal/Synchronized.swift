@@ -1,3 +1,5 @@
+#if os(iOS)
+
 import Foundation
 
 final class Synchronized<Value> {
@@ -14,9 +16,11 @@ final class Synchronized<Value> {
         return _value
     }
 
-    func mutate(_ transform: (inout Value) -> Void) {
+    func setValue(_ value: Value) {
         lock.lock()
         defer { lock.unlock() }
-        transform(&_value)
+        _value = value
     }
 }
+
+#endif

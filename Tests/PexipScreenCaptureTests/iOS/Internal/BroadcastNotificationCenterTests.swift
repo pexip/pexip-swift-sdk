@@ -7,9 +7,14 @@ import CoreMedia
 
 final class BroadcastNotificationCenterTests: XCTestCase {
     private let center = BroadcastNotificationCenter.default
-    private let testObserver = ObserverMock()
+    private var testObserver: ObserverMock!
 
     // MARK: - Setup
+
+    override func setUp() {
+        super.setUp()
+        testObserver = ObserverMock()
+    }
 
     override func tearDown() {
         center.removeAll()
@@ -21,16 +26,16 @@ final class BroadcastNotificationCenterTests: XCTestCase {
     func testAddObserver() {
         XCTAssertTrue(center.observations.isEmpty)
 
-        center.addObserver(self, for: .broadcastStarted, using: {})
-        center.addObserver(self, for: .broadcastFinished, using: {})
+        center.addObserver(self, for: .senderStarted, using: {})
+        center.addObserver(self, for: .senderFinished, using: {})
 
         XCTAssertEqual(center.observations.count, 2)
 
         XCTAssertTrue(center.observations[0].observer === self)
-        XCTAssertEqual(center.observations[0].notification, .broadcastStarted)
+        XCTAssertEqual(center.observations[0].notification, .senderStarted)
 
         XCTAssertTrue(center.observations[1].observer === self)
-        XCTAssertEqual(center.observations[1].notification, .broadcastFinished)
+        XCTAssertEqual(center.observations[1].notification, .senderFinished)
     }
 
     func testAddObserverTwice() {
@@ -39,21 +44,21 @@ final class BroadcastNotificationCenterTests: XCTestCase {
         let expectation = self.expectation(description: "Notification callback")
         var result = 0
 
-        center.addObserver(self, for: .broadcastStarted, using: {
+        center.addObserver(self, for: .senderStarted, using: {
             result = 1
         })
 
-        center.addObserver(self, for: .broadcastStarted, using: {
+        center.addObserver(self, for: .senderStarted, using: {
             result = 2
             expectation.fulfill()
         })
 
-        center.post(.broadcastStarted)
+        center.post(.senderStarted)
 
         wait(for: [expectation], timeout: 0.1)
 
         XCTAssertEqual(center.observations.count, 1)
-        XCTAssertEqual(center.observations[0].notification, .broadcastStarted)
+        XCTAssertEqual(center.observations[0].notification, .senderStarted)
         XCTAssertTrue(center.observations[0].observer === self)
         XCTAssertEqual(result, 2)
     }
@@ -61,8 +66,8 @@ final class BroadcastNotificationCenterTests: XCTestCase {
     func testRemoveObserver() {
         XCTAssertTrue(center.observations.isEmpty)
 
-        center.addObserver(self, for: .broadcastStarted, using: {})
-        center.addObserver(self, for: .broadcastFinished, using: {})
+        center.addObserver(self, for: .senderStarted, using: {})
+        center.addObserver(self, for: .senderFinished, using: {})
 
         XCTAssertEqual(center.observations.count, 2)
 
@@ -74,10 +79,10 @@ final class BroadcastNotificationCenterTests: XCTestCase {
     func testRemoveObserverWithMultipleObservers() {
         XCTAssertTrue(center.observations.isEmpty)
 
-        center.addObserver(self, for: .broadcastStarted, using: {})
-        center.addObserver(self, for: .broadcastFinished, using: {})
-        center.addObserver(testObserver, for: .broadcastStarted, using: {})
-        center.addObserver(testObserver, for: .broadcastFinished, using: {})
+        center.addObserver(self, for: .senderStarted, using: {})
+        center.addObserver(self, for: .senderFinished, using: {})
+        center.addObserver(testObserver, for: .senderStarted, using: {})
+        center.addObserver(testObserver, for: .senderFinished, using: {})
 
         XCTAssertEqual(center.observations.count, 4)
 
@@ -85,57 +90,71 @@ final class BroadcastNotificationCenterTests: XCTestCase {
 
         XCTAssertEqual(center.observations.count, 2)
 
-        XCTAssertEqual(center.observations[0].notification, .broadcastStarted)
+        XCTAssertEqual(center.observations[0].notification, .senderStarted)
         XCTAssertTrue(center.observations[0].observer === testObserver)
 
-        XCTAssertEqual(center.observations[1].notification, .broadcastFinished)
+        XCTAssertEqual(center.observations[1].notification, .senderFinished)
         XCTAssertTrue(center.observations[1].observer === testObserver)
+    }
+
+    func testRemoveDeallocatedObserver() {
+        XCTAssertTrue(center.observations.isEmpty)
+
+        center.addObserver(self, for: .senderStarted, using: {})
+        center.addObserver(testObserver, for: .senderStarted, using: {})
+
+        XCTAssertEqual(center.observations.count, 2)
+
+        testObserver = nil
+        center.removeObserver(self)
+
+        XCTAssertTrue(center.observations.isEmpty)
     }
 
     func testRemoveObserverForNotification() {
         XCTAssertTrue(center.observations.isEmpty)
 
-        center.addObserver(self, for: .broadcastStarted, using: {})
-        center.addObserver(self, for: .broadcastFinished, using: {})
+        center.addObserver(self, for: .senderStarted, using: {})
+        center.addObserver(self, for: .senderFinished, using: {})
 
         XCTAssertEqual(center.observations.count, 2)
 
-        center.removeObserver(self, for: .broadcastStarted)
+        center.removeObserver(self, for: .senderStarted)
 
         XCTAssertEqual(center.observations.count, 1)
-        XCTAssertEqual(center.observations[0].notification, .broadcastFinished)
+        XCTAssertEqual(center.observations[0].notification, .senderFinished)
         XCTAssertTrue(center.observations[0].observer === self)
     }
 
     func testRemoveObserverForNotificationWithMultipleObservers() {
         XCTAssertTrue(center.observations.isEmpty)
 
-        center.addObserver(self, for: .broadcastStarted, using: {})
-        center.addObserver(self, for: .broadcastFinished, using: {})
-        center.addObserver(testObserver, for: .broadcastStarted, using: {})
-        center.addObserver(testObserver, for: .broadcastFinished, using: {})
+        center.addObserver(self, for: .senderStarted, using: {})
+        center.addObserver(self, for: .senderFinished, using: {})
+        center.addObserver(testObserver, for: .senderStarted, using: {})
+        center.addObserver(testObserver, for: .senderFinished, using: {})
 
         XCTAssertEqual(center.observations.count, 4)
 
-        center.removeObserver(self, for: .broadcastStarted)
+        center.removeObserver(self, for: .senderStarted)
 
         XCTAssertEqual(center.observations.count, 3)
 
-        XCTAssertEqual(center.observations[0].notification, .broadcastFinished)
+        XCTAssertEqual(center.observations[0].notification, .senderFinished)
         XCTAssertTrue(center.observations[0].observer === self)
 
-        XCTAssertEqual(center.observations[1].notification, .broadcastStarted)
+        XCTAssertEqual(center.observations[1].notification, .senderStarted)
         XCTAssertTrue(center.observations[1].observer === testObserver)
 
-        XCTAssertEqual(center.observations[2].notification, .broadcastFinished)
+        XCTAssertEqual(center.observations[2].notification, .senderFinished)
         XCTAssertTrue(center.observations[2].observer === testObserver)
     }
 
     func testRemoveAll() {
         XCTAssertTrue(center.observations.isEmpty)
 
-        center.addObserver(self, for: .broadcastStarted, using: {})
-        center.addObserver(testObserver, for: .broadcastStarted, using: {})
+        center.addObserver(self, for: .senderStarted, using: {})
+        center.addObserver(testObserver, for: .senderStarted, using: {})
 
         XCTAssertEqual(center.observations.count, 2)
 
@@ -148,27 +167,27 @@ final class BroadcastNotificationCenterTests: XCTestCase {
         XCTAssertTrue(center.observations.isEmpty)
 
         let expectation1 = self.expectation(description: "Expectation 1")
-        center.addObserver(self, for: .broadcastStarted, using: {
+        center.addObserver(self, for: .senderStarted, using: {
             expectation1.fulfill()
         })
 
         let expectation2 = self.expectation(description: "Expectation 2")
-        center.addObserver(testObserver, for: .broadcastStarted, using: {
+        center.addObserver(testObserver, for: .senderStarted, using: {
             expectation2.fulfill()
         })
 
         let expectation3 = self.expectation(description: "Expectation 3")
-        center.addObserver(self, for: .broadcastFinished, using: {
+        center.addObserver(self, for: .senderFinished, using: {
             expectation3.fulfill()
         })
 
         let expectation4 = self.expectation(description: "Expectation 4")
-        center.addObserver(testObserver, for: .broadcastFinished, using: {
+        center.addObserver(testObserver, for: .senderFinished, using: {
             expectation4.fulfill()
         })
 
-        center.post(.broadcastStarted)
-        center.post(.broadcastFinished)
+        center.post(.senderStarted)
+        center.post(.senderFinished)
 
         wait(for: [expectation1, expectation2, expectation3, expectation4], timeout: 0.1)
     }

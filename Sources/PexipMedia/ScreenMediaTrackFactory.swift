@@ -9,11 +9,15 @@ public protocol ScreenMediaTrackFactory {
      - Parameters:
         - appGroup: The app group identifier.
         - broadcastUploadExtension: Bundle identifier of your broadcast upload extension.
+        - defaultVideoProfile: The default video quality profile to use
+                               when screen capture starts automatically
+                               (e.g. from the Control Center on iOS)
      - Returns: A new screen media track
      */
     func createScreenMediaTrack(
         appGroup: String,
-        broadcastUploadExtension: String
+        broadcastUploadExtension: String,
+        defaultVideoProfile: QualityProfile
     ) -> ScreenMediaTrack
 
     #else
@@ -22,9 +26,13 @@ public protocol ScreenMediaTrackFactory {
      Creates a new screen media track.
      - Parameters:
         - mediaSource: The source of the screen content (display or window).
+        - defaultVideoProfile: The default video quality profile
      - Returns: A new screen media track
      */
-    func createScreenMediaTrack(mediaSource: ScreenMediaSource) -> ScreenMediaTrack
+    func createScreenMediaTrack(
+        mediaSource: ScreenMediaSource,
+        defaultVideoProfile: QualityProfile
+    ) -> ScreenMediaTrack
 
     #endif
 }

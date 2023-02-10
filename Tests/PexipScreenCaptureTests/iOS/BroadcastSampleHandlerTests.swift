@@ -1,67 +1,57 @@
 #if os(iOS)
 
 import XCTest
-import Combine
 import CoreMedia
 @testable import PexipScreenCapture
 
 final class BroadcastSampleHandlerTests: XCTestCase {
     private let appGroup = "test"
+    private let filePath = NSTemporaryDirectory().appending("/test")
     private let fileManager = BroadcastFileManagerMock()
     private let notificationCenter = BroadcastNotificationCenter.default
     private var userDefaults: UserDefaults!
     private var handler: BroadcastSampleHandler!
-    private var cancellables = Set<AnyCancellable>()
+    private var videoSender: BroadcastVideoSender!
+    private var delegate: BroadcastSampleHandlerDelegateMock!
 
     // MARK: - Setup
 
-    override func setUp() {
-        super.setUp()
+    override func setUpWithError() throws {
+        try super.setUpWithError()
 
         userDefaults = UserDefaults(suiteName: appGroup)
-        userDefaults.broadcastFps = nil
+        userDefaults.broadcastFps = 15
+        userDefaults.broadcastKeepAliveDate = Date()
 
+        videoSender = BroadcastVideoSender(filePath: filePath)
+        delegate = BroadcastSampleHandlerDelegateMock()
         handler = BroadcastSampleHandler(
-            appGroup: appGroup,
-            fileManager: fileManager
+            videoSender: videoSender,
+            userDefaults: userDefaults
+        )
+        handler.delegate = delegate
+
+        _ = try fileManager.createMappedFile(
+            atPath: filePath,
+            size: BroadcastVideoReceiver.maxFileSize
         )
     }
 
-    override func tearDown() {
+    override func tearDownWithError() throws {
         notificationCenter.removeObserver(self)
         handler = nil
         userDefaults.removePersistentDomain(forName: appGroup)
-        super.tearDown()
+        try? fileManager.removeItem(atPath: filePath)
+        try super.tearDownWithError()
     }
 
     // MARK: - Tests
 
-    func testInitWithHigherFps() {
-        userDefaults.broadcastFps = 30
-        handler = BroadcastSampleHandler(
-            appGroup: appGroup,
-            fileManager: fileManager
-        )
-
-        XCTAssertEqual(handler.fps, 15)
-    }
-
-    func testInitWithLowerFps() {
-        let fps: UInt = 5
-
-        userDefaults.broadcastFps = fps
-        handler = BroadcastSampleHandler(
-            appGroup: appGroup,
-            fileManager: fileManager
-        )
-
-        XCTAssertEqual(handler.fps, fps)
-    }
-
     func testBroadcastStarted() {
-        let expectation = self.expectation(description: "Broadcast started")
+        let expectation = self.expectation(description: "Sender started")
 
-        notificationCenter.addObserver(self, for: .broadcastStarted, using: {
+        notificationCenter.addObserver(self, for: .senderStarted, using: { [weak self] in
+            XCTAssertTrue(self?.handler.isConnected == false)
             expectation.fulfill()
         })
         handler.broadcastStarted()
@@ -69,10 +59,56 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         wait(for: [expectation], timeout: 0.1)
     }
 
-    func testBroadcastPaused() {
-        let expectation = self.expectation(description: "Broadcast paused")
+    func testBroadcastStartedWithOutdatedKeepAliveDate() {
+        let timeInterval = TimeInterval(BroadcastScreenCapturer.keepAliveInterval * 6)
+        let errorExpectation = self.expectation(description: "Error expectation")
+        let finishExpectation = self.expectation(description: "Sender finished")
 
-        notificationCenter.addObserver(self, for: .broadcastPaused, using: {
+        notificationCenter.addObserver(self, for: .senderFinished, using: {
+            finishExpectation.fulfill()
+        })
+
+        let delegate = BroadcastSampleHandlerDelegateMock()
+        delegate.onError = { error in
+            if (error as? BroadcastError) == .noConnection {
+                errorExpectation.fulfill()
+            }
+        }
+
+        handler.delegate = delegate
+        userDefaults.broadcastKeepAliveDate = Date().addingTimeInterval(-timeInterval)
+        handler.broadcastStarted()
+
+        wait(for: [errorExpectation, finishExpectation], timeout: 0.3)
+    }
+
+    func testBroadcastStartedWithNoKeepAliveDate() {
+        let errorExpectation = self.expectation(description: "Error expectation")
+        let finishExpectation = self.expectation(description: "Sender finished")
+
+        notificationCenter.addObserver(self, for: .senderFinished, using: {
+            finishExpectation.fulfill()
+        })
+
+        let delegate = BroadcastSampleHandlerDelegateMock()
+        delegate.onError = { error in
+            if (error as? BroadcastError) == .noConnection {
+                errorExpectation.fulfill()
+            }
+        }
+
+        handler = BroadcastSampleHandler(appGroup: appGroup, fileManager: fileManager)
+        handler.delegate = delegate
+        userDefaults.broadcastKeepAliveDate = nil
+        handler.broadcastStarted()
+
+        wait(for: [errorExpectation, finishExpectation], timeout: 0.3)
+    }
+
+    func testBroadcastPaused() {
+        let expectation = self.expectation(description: "Sender paused")
+
+        notificationCenter.addObserver(self, for: .senderPaused, using: {
             expectation.fulfill()
         })
         handler.broadcastPaused()
@@ -81,9 +117,9 @@ final class BroadcastSampleHandlerTests: XCTestCase {
     }
 
     func testBroadcastResumed() {
-        let expectation = self.expectation(description: "Broadcast resumed")
+        let expectation = self.expectation(description: "Sender resumed")
 
-        notificationCenter.addObserver(self, for: .broadcastResumed, using: {
+        notificationCenter.addObserver(self, for: .senderResumed, using: {
             expectation.fulfill()
         })
         handler.broadcastResumed()
@@ -92,9 +128,9 @@ final class BroadcastSampleHandlerTests: XCTestCase {
     }
 
     func testBroadcastFinished() {
-        let expectation = self.expectation(description: "Broadcast finished")
+        let expectation = self.expectation(description: "Sender finished")
 
-        notificationCenter.addObserver(self, for: .broadcastFinished, using: {
+        notificationCenter.addObserver(self, for: .senderFinished, using: {
             expectation.fulfill()
         })
         handler.broadcastFinished()
@@ -102,136 +138,186 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         wait(for: [expectation], timeout: 0.1)
     }
 
-    func testDidFinishWithError() throws {
-        let expectation = self.expectation(description: "Did finish with error")
-
-        let filePath = fileManager.broadcastSocketPath(appGroup: appGroup)
-        let server = try BroadcastServer(filePath: filePath)
-        let client = BroadcastClient(filePath: filePath)
-        let delegate = BroadcastSampleHandlerDelegateMock()
-
-        handler = BroadcastSampleHandler(client: client, fps: 15)
-        handler.delegate = delegate
-
-        server.sink { [weak self] httpEvent in
-            guard let self = self else {
-                return
-            }
-
-            switch httpEvent {
-            case .start:
-                self.notificationCenter.post(.serverStarted)
-            default:
-                break
-            }
-        }.store(in: &cancellables)
-
-        client.sink { httpEvent in
-            switch httpEvent {
-            case .connect:
-                try? server.stop()
-            case .stop:
-                break
-            }
-        }.store(in: &cancellables)
-
-        delegate.onError = { error in
-            switch error as? BroadcastError {
-            case .broadcastFinished(let error):
-                XCTAssertNotNil(error)
-                expectation.fulfill()
-            default:
-                break
-            }
-        }
+    func testReceiverStarted() throws {
+        let expectation = self.expectation(description: "Receiver started")
 
         handler.broadcastStarted()
-        try server.start()
+        notificationCenter.addObserver(self, for: .receiverStarted, using: { [weak self] in
+            guard let self else { return }
+            XCTAssertTrue(self.handler.isConnected)
+            XCTAssertTrue(self.videoSender.isRunning)
+            expectation.fulfill()
+        })
 
-        wait(for: [expectation], timeout: 0.3)
+        notificationCenter.post(.receiverStarted)
+
+        wait(for: [expectation], timeout: 0.1)
+    }
+
+    func testReceiverStartedWithVideoSenderError() throws {
+        let expectation = self.expectation(description: "Sender finished")
+
+        videoSender = BroadcastVideoSender(filePath: "")
+        handler = BroadcastSampleHandler(videoSender: videoSender, userDefaults: userDefaults)
+        delegate.onError = { error in
+            if (error as? BroadcastError) == .noConnection {
+                expectation.fulfill()
+            }
+        }
+        handler.delegate = delegate
+        handler.broadcastStarted()
+        notificationCenter.post(.receiverStarted)
+
+        wait(for: [expectation], timeout: 0.1)
+    }
+
+    func testReceiverFinished() throws {
+        let expectation = self.expectation(description: "Sender finished")
+
+        delegate.onError = { [weak self] error in
+            guard let self else { return }
+            XCTAssertFalse(self.handler.isConnected)
+            XCTAssertFalse(self.videoSender.isRunning)
+            XCTAssertEqual(error as? BroadcastError, .broadcastFinished)
+            expectation.fulfill()
+        }
+        startAndFinishWithNotification(.receiverFinished)
+
+        wait(for: [expectation], timeout: 0.1)
+    }
+
+    func testCallEnded() throws {
+        let expectation = self.expectation(description: "Call ended")
+
+        delegate.onError = { [weak self] error in
+            guard let self else { return }
+            XCTAssertFalse(self.handler.isConnected)
+            XCTAssertFalse(self.videoSender.isRunning)
+            XCTAssertEqual(error as? BroadcastError, .callEnded)
+            expectation.fulfill()
+        }
+        startAndFinishWithNotification(.callEnded)
+
+        wait(for: [expectation], timeout: 0.1)
+    }
+
+    func testPresentationStolen() throws {
+        let expectation = self.expectation(description: "Presentation stolen")
+
+        delegate.onError = { [weak self] error in
+            guard let self else { return }
+            XCTAssertFalse(self.handler.isConnected)
+            XCTAssertFalse(self.videoSender.isRunning)
+            XCTAssertEqual(error as? BroadcastError, .presentationStolen)
+            expectation.fulfill()
+        }
+        startAndFinishWithNotification(.presentationStolen)
+
+        wait(for: [expectation], timeout: 0.1)
     }
 
     func testProcessSampleBuffer() throws {
-        let messageExpectation = self.expectation(description: "Message received")
-
-        let filePath = fileManager.broadcastSocketPath(appGroup: appGroup)
-        let server = try BroadcastServer(filePath: filePath)
-        let client = BroadcastClient(filePath: filePath)
+        let expectation = self.expectation(description: "Video frame received")
+        let receiverDelegate = BroadcastReceiverDelegateMock()
+        let receiver = BroadcastVideoReceiver(filePath: filePath, fileManager: fileManager)
         let width = 1920
         let height = 1080
         let sampleBuffer = CMSampleBuffer.stub(width: width, height: height)
 
-        handler = BroadcastSampleHandler(client: client, fps: 15)
-
-        client.sink { [weak self] httpEvent in
-            guard let self = self else {
-                return
-            }
-
-            switch httpEvent {
-            case .connect:
-                XCTAssertFalse(self.handler.processSampleBuffer(sampleBuffer, with: .audioApp))
-                XCTAssertFalse(self.handler.processSampleBuffer(sampleBuffer, with: .audioMic))
-                XCTAssertFalse(
-                    self.handler.processSampleBuffer(sampleBuffer, with: .init(rawValue: 100)!)
-                )
-                XCTAssertTrue(self.handler.processSampleBuffer(sampleBuffer, with: .video))
-            case .stop:
-                break
-            }
-        }.store(in: &cancellables)
-
-        server.sink { [weak self] httpEvent in
-            guard let self = self else {
-                return
-            }
-
-            switch httpEvent {
-            case .start:
-                self.notificationCenter.post(.serverStarted)
-            case .message(let message):
-                XCTAssertEqual(message.header.videoWidth, UInt32(width))
-                XCTAssertEqual(message.header.videoHeight, UInt32(height))
-                messageExpectation.fulfill()
-            case .stop:
-                break
-            }
-        }.store(in: &cancellables)
-
         handler.broadcastStarted()
-        try server.start()
 
-        wait(for: [messageExpectation], timeout: 0.3)
+        notificationCenter.addObserver(self, for: .receiverStarted, using: {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+                guard let self else { return }
+                XCTAssertTrue(self.handler.processSampleBuffer(sampleBuffer, with: .video))
+            }
+        })
+
+        receiverDelegate.onReceive = { videoFrame in
+            XCTAssertEqual(videoFrame.width, UInt32(width))
+            XCTAssertEqual(videoFrame.height, UInt32(height))
+            expectation.fulfill()
+        }
+
+        receiver.delegate = receiverDelegate
+        try receiver.start(withFps: BroadcastFps(value: 30))
+        notificationCenter.post(.receiverStarted)
+
+        wait(for: [expectation], timeout: 0.3)
     }
 
     func testProcessSampleBufferWhenClientNotConnected() throws {
         XCTAssertFalse(handler.processSampleBuffer(.stub(), with: .video))
     }
+
+    func testProcessSampleBufferWhenNotValid() throws {
+        let expectation = self.expectation(description: "Receiver started")
+
+        handler.broadcastStarted()
+
+        notificationCenter.addObserver(self, for: .receiverStarted, using: { [weak self] in
+            guard let self else { return }
+
+            let sampleBuffer = CMSampleBuffer.stub()
+            try? sampleBuffer.invalidate()
+            XCTAssertFalse(self.handler.processSampleBuffer(sampleBuffer, with: .video))
+            expectation.fulfill()
+        })
+
+        notificationCenter.post(.receiverStarted)
+
+        wait(for: [expectation], timeout: 0.1)
+    }
+
+    func testProcessSampleBufferWhenNotVideo() throws {
+        let expectation = self.expectation(description: "Receiver started")
+
+        handler.broadcastStarted()
+
+        notificationCenter.addObserver(self, for: .receiverStarted, using: { [weak self] in
+            guard let self else { return }
+
+            XCTAssertFalse(self.handler.processSampleBuffer(.stub(), with: .audioApp))
+            XCTAssertFalse(self.handler.processSampleBuffer(.stub(), with: .audioMic))
+            XCTAssertFalse(self.handler.processSampleBuffer(.stub(), with: .init(rawValue: 1001)!))
+            expectation.fulfill()
+        })
+
+        notificationCenter.post(.receiverStarted)
+
+        wait(for: [expectation], timeout: 0.1)
+    }
+
+    func testDeinit() {
+        let expectation = self.expectation(description: "Receiver started")
+
+        handler.broadcastStarted()
+        notificationCenter.addObserver(self, for: .receiverStarted, using: { [weak self] in
+            guard let self else { return }
+            XCTAssertTrue(self.handler.isConnected)
+            XCTAssertTrue(self.videoSender.isRunning)
+            expectation.fulfill()
+        })
+
+        notificationCenter.post(.receiverStarted)
+
+        wait(for: [expectation], timeout: 0.1)
+        handler = nil
+        XCTAssertFalse(videoSender.isRunning)
+    }
+
+    // MARK: - Private
+
+    private func startAndFinishWithNotification(_ notification: BroadcastNotification) {
+        notificationCenter.addObserver(self, for: .receiverStarted, using: { [weak self] in
+            self?.notificationCenter.post(notification)
+        })
+        handler.broadcastStarted()
+        notificationCenter.post(.receiverStarted)
+    }
 }
 
 // MARK: - Mocks
-
-final class BroadcastFileManagerMock: FileManager {
-    var fileError: Error?
-
-    override func fileExists(atPath path: String) -> Bool {
-        return fileError != nil ? true : super.fileExists(atPath: path)
-    }
-
-    override func removeItem(atPath path: String) throws {
-        if let error = fileError {
-            throw error
-        } else {
-            try super.removeItem(atPath: path)
-        }
-    }
-
-    override func containerURL(
-        forSecurityApplicationGroupIdentifier groupIdentifier: String
-    ) -> URL? {
-        return URL(string: "/tmp")
-    }
-}
 
 private final class BroadcastSampleHandlerDelegateMock: BroadcastSampleHandlerDelegate {
     var onError: ((Error) -> Void)?

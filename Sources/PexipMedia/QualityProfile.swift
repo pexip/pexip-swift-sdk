@@ -50,20 +50,19 @@ public struct QualityProfile: Hashable {
 
     // MARK: - Presentation
 
+    /// 1920x1080 (16:9)
     public static let presentationVeryHigh = QualityProfile(
         width: 1920,
         height: 1080,
-        fps: 15
+        fps: 30
     )
 
-    public static let presentationHigh = QualityProfile(
-        width: 1280,
-        height: 720,
-        fps: 15
-    )
+    /// 1280x720 (16:9)
+    public static let presentationHigh = Self.high
 
     #if os(iOS)
 
+    /// 640x480 (4:3)
     public static let presentationMedium = QualityProfile(
         width: 640,
         height: 480,

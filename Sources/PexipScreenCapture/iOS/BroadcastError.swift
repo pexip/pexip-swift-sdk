@@ -5,17 +5,23 @@ import Foundation
 /// An object that represents the error occured during IPC.
 @frozen
 public enum BroadcastError: LocalizedError, CustomStringConvertible, CustomNSError {
-    public static let errorDomain = "com.pexip.PexipMedia.BroadcastError"
+    public static let errorDomain = "com.pexip.PexipScreenCapture.BroadcastError"
 
-    case invalidHeader
-    case broadcastFinished(error: Error?)
+    case noConnection
+    case callEnded
+    case presentationStolen
+    case broadcastFinished
 
     public var description: String {
         switch self {
-        case .invalidHeader:
-            return "Invalid broadcast header"
+        case .noConnection:
+            return "No connection to the main app. Most likely you're not in a call."
+        case .callEnded:
+            return "Call ended."
+        case .presentationStolen:
+            return "Presentation has been stolen by another participant."
         case .broadcastFinished:
-            return "Screen broadcast finished"
+            return "Screen broadcast finished."
         }
     }
 
@@ -24,15 +30,7 @@ public enum BroadcastError: LocalizedError, CustomStringConvertible, CustomNSErr
     }
 
     public var errorUserInfo: [String: Any] {
-        var info: [String: Any] = [NSLocalizedDescriptionKey: description]
-
-        if case .broadcastFinished(let error) = self {
-            if let error {
-                info[NSUnderlyingErrorKey] = error
-            }
-        }
-
-        return info
+        return [NSLocalizedDescriptionKey: description]
     }
 }
 

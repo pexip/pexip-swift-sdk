@@ -32,7 +32,8 @@ let mediaFactory = WebRTCMediaFactory(logger: DefaultLogger.mediaWebRTC)
 
 // 1. Create a new screen media track.
 let screenMediaTrack = mediaFactory.createScreenMediaTrack(
-    mediaSource: screenMediaSource
+    mediaSource: screenMediaSource,
+    defaultVideoProfile: .presentationHigh
 )
 
 // 2. Start screen capture and send presentation video to all conference participants.
@@ -48,9 +49,13 @@ Screen capture might be stopped due to different reasons, so it could be useful 
 var isPresenting = false
 
 screenMediaTrack.capturingStatus.$isCapturing
+    .dropFirst()
+    .removeDuplicates()
     .receive(on: DispatchQueue.main)
     .sink { isCapturing in
-        if !isCapturing && isPresenting {
+        if isCapturing {
+            mediaConnection.setScreenMediaTrack(screenMediaTrack)
+        } else {
             mediaConnection.setScreenMediaTrack(nil)
         }
 
@@ -61,7 +66,7 @@ screenMediaTrack.capturingStatus.$isCapturing
 
 ### Handle conference events
 
-Stop screen capture if presentation has been stolen by another participant.
+Stop screen capture if presentation has been stolen by another participant or when the call ended.
 
 ```swift
 await conference.receiveEvents()
@@ -74,6 +79,9 @@ conference.eventPublisher
                 screenMediaTrack.stopCapture()
                 mediaConnection.setScreenMediaTrack(nil)
                 try mediaConnection.receivePresentation(true)
+            case .clientDisconnected:
+                screenMediaTrack.stopCapture()
+                mediaConnection.setScreenMediaTrack(nil)
             // ...
             }
         } catch {

@@ -6,35 +6,18 @@ import XCTest
 final class BroadcastErrorTests: XCTestCase {
     func testDescription() {
         let errors: [BroadcastError] = [
-            .invalidHeader,
-            .broadcastFinished(error: URLError(.badURL))
+            .noConnection,
+            .callEnded,
+            .presentationStolen,
+            .broadcastFinished
         ]
 
         for error in errors {
             XCTAssertEqual(error.description, error.errorDescription)
-        }
-    }
-
-    func testErrorUserInfo() {
-        let errors: [BroadcastError] = [
-            .invalidHeader,
-            .broadcastFinished(error: URLError(.badURL))
-        ]
-
-        for error in errors {
             XCTAssertEqual(
                 error.errorUserInfo[NSLocalizedDescriptionKey] as? String,
-                error.description
+                error.errorDescription
             )
-            switch error {
-            case .invalidHeader:
-                XCTAssertNil(error.errorUserInfo[NSUnderlyingErrorKey])
-            case .broadcastFinished:
-                XCTAssertEqual(
-                    (error.errorUserInfo[NSUnderlyingErrorKey] as? URLError)?.code,
-                    .badURL
-                )
-            }
         }
     }
 }

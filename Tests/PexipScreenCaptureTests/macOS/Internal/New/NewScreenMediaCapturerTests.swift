@@ -125,7 +125,10 @@ final class NewScreenMediaCapturerTests: XCTestCase {
 
         XCTAssertNil(stream.delegate)
         XCTAssertTrue(stream.streamOutput === capturer)
-        XCTAssertEqual(stream.sampleHandlerQueue?.label, "com.pexip.PexipMedia.NewScreenMediaCapturer")
+        XCTAssertEqual(
+            stream.sampleHandlerQueue?.label,
+            "com.pexip.PexipScreenCapture.NewScreenMediaCapturer"
+        )
         XCTAssertEqual(stream.sampleHandlerQueue?.qos, .userInteractive)
 
         XCTAssertEqual(
@@ -162,7 +165,10 @@ final class NewScreenMediaCapturerTests: XCTestCase {
 
         XCTAssertNil(stream.delegate)
         XCTAssertTrue(stream.streamOutput === capturer)
-        XCTAssertEqual(stream.sampleHandlerQueue?.label, "com.pexip.PexipMedia.NewScreenMediaCapturer")
+        XCTAssertEqual(
+            stream.sampleHandlerQueue?.label,
+            "com.pexip.PexipScreenCapture.NewScreenMediaCapturer"
+        )
         XCTAssertEqual(stream.sampleHandlerQueue?.qos, .userInteractive)
 
         XCTAssertEqual(

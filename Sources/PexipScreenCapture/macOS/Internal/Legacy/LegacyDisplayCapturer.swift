@@ -16,7 +16,7 @@ final class LegacyDisplayCapturer: ScreenMediaCapturer {
 
     private var displayStream: LegacyDisplayStream?
     private let processingQueue = DispatchQueue(
-        label: "com.pexip.PexipMedia.LegacyDisplayCapturer",
+        label: "com.pexip.PexipScreenCapture.LegacyDisplayCapturer",
         qos: .userInteractive
     )
 

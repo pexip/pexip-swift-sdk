@@ -25,7 +25,7 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>: NSObjec
     private let streamFactory: Factory
     private var stream: SCStream?
     private let dispatchQueue = DispatchQueue(
-        label: "com.pexip.PexipMedia.NewScreenMediaCapturer",
+        label: "com.pexip.PexipScreenCapture.NewScreenMediaCapturer",
         qos: .userInteractive
     )
 

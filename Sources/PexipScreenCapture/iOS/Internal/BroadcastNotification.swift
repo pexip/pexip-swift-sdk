@@ -3,11 +3,14 @@
 import Foundation
 
 enum BroadcastNotification: String {
-    case broadcastStarted = "com.pexip.PexipMedia.broadcastStarted"
-    case broadcastPaused = "com.pexip.PexipMedia.broadcastPaused"
-    case broadcastResumed = "com.pexip.PexipMedia.broadcastResumed"
-    case broadcastFinished = "com.pexip.PexipMedia.broadcastFinished"
-    case serverStarted = "com.pexip.PexipMedia.serverStarted"
+    case senderStarted = "com.pexip.PexipScreenCapture.senderStarted"
+    case senderPaused = "com.pexip.PexipScreenCapture.senderPaused"
+    case senderResumed = "com.pexip.PexipScreenCapture.senderResumed"
+    case senderFinished = "com.pexip.PexipScreenCapture.senderFinished"
+    case receiverStarted = "com.pexip.PexipScreenCapture.receiverStarted"
+    case receiverFinished = "com.pexip.PexipScreenCapture.receiverFinished"
+    case presentationStolen = "com.pexip.PexipScreenCapture.presentationStolen"
+    case callEnded = "com.pexip.PexipScreenCapture.callEnded"
 
     var cfNotificationName: CFNotificationName {
         CFNotificationName(rawValue as CFString)

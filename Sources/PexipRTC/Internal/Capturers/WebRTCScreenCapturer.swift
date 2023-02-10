@@ -4,9 +4,13 @@ import PexipMedia
 import PexipCore
 import PexipScreenCapture
 
-// MARK: - WebRTCScreenCapturerErrorDelegate
+// MARK: - WebRTCScreenCapturerDelegate
 
-protocol WebRTCScreenCapturerErrorDelegate: AnyObject {
+protocol WebRTCScreenCapturerDelegate: AnyObject {
+    #if os(iOS)
+    func webRTCScreenCapturerDidStart(_ capturer: WebRTCScreenCapturer)
+    #endif
+
     func webRTCScreenCapturer(
         _ capturer: WebRTCScreenCapturer,
         didStopWithError error: Error?
@@ -16,12 +20,12 @@ protocol WebRTCScreenCapturerErrorDelegate: AnyObject {
 // MARK: - WebRTCScreenCapturer
 
 final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate {
-    weak var errorDelegate: WebRTCScreenCapturerErrorDelegate?
+    weak var capturerDelegate: WebRTCScreenCapturerDelegate?
 
     private let videoSource: RTCVideoSource
     private let capturer: ScreenMediaCapturer
     private let logger: Logger?
-    private var videoProfile: QualityProfile?
+    private var videoProfile: QualityProfile
     private var startTimeNs: UInt64?
 
     // MARK: - Init
@@ -29,10 +33,12 @@ final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate 
     init(
         videoSource: RTCVideoSource,
         mediaCapturer: ScreenMediaCapturer,
+        defaultVideoProfile: QualityProfile,
         logger: Logger?
     ) {
         self.videoSource = videoSource
         self.capturer = mediaCapturer
+        self.videoProfile = defaultVideoProfile
         self.logger = logger
         super.init(delegate: videoSource)
         capturer.delegate = self
@@ -46,11 +52,10 @@ final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate 
             atFps: videoProfile.fps,
             outputDimensions: videoProfile.dimensions
         )
-        logger?.info("Screen capture did start.")
     }
 
-    func stopCapture() async throws {
-        try await capturer.stopCapture()
+    func stopCapture(reason: ScreenCaptureStopReason?) async throws {
+        try await capturer.stopCapture(reason: reason)
         logger?.info("Screen capture did stop.")
     }
 
@@ -61,19 +66,15 @@ final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate 
         didCaptureVideoFrame videoFrame: VideoFrame
     ) {
         let cropDimensions = videoFrame.contentDimensions
-        var adaptedDimensions = cropDimensions
+        let adaptedDimensions = videoFrame.adaptedContentDimensions(
+            to: videoProfile.dimensions
+        )
 
-        if let videoProfile {
-            adaptedDimensions = videoFrame.adaptedContentDimensions(
-                to: videoProfile.dimensions
-            )
-
-            videoSource.adaptOutputFormat(
-                toWidth: adaptedDimensions.width,
-                height: adaptedDimensions.height,
-                fps: Int32(videoProfile.fps)
-            )
-        }
+        videoSource.adaptOutputFormat(
+            toWidth: adaptedDimensions.width,
+            height: adaptedDimensions.height,
+            fps: Int32(videoProfile.fps)
+        )
 
         let rtcPixelBuffer = RTCCVPixelBuffer(
             pixelBuffer: videoFrame.pixelBuffer,
@@ -96,10 +97,19 @@ final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate 
         delegate?.capturer(self, didCapture: rtcVideoFrame)
     }
 
+    #if os(iOS)
+
+    func screenMediaCapturerDidStart(_ capturer: ScreenMediaCapturer) {
+        logger?.info("Screen capture did start.")
+        capturerDelegate?.webRTCScreenCapturerDidStart(self)
+    }
+
+    #endif
+
     func screenMediaCapturer(
         _ capturer: ScreenMediaCapturer,
         didStopWithError error: Error?
     ) {
-        errorDelegate?.webRTCScreenCapturer(self, didStopWithError: error)
+        capturerDelegate?.webRTCScreenCapturer(self, didStopWithError: error)
     }
 }

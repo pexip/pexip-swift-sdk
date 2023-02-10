@@ -77,7 +77,7 @@ final class LegacyDisplayCapturerTests: XCTestCase {
         XCTAssertEqual(displayStream.properties, properties as CFDictionary)
         XCTAssertEqual(
             displayStream.queue.label,
-            "com.pexip.PexipMedia.LegacyDisplayCapturer"
+            "com.pexip.PexipScreenCapture.LegacyDisplayCapturer"
         )
         XCTAssertEqual(displayStream.queue.qos, .userInteractive)
     }
@@ -325,6 +325,7 @@ private extension IOSurfaceRef {
 
 final class ScreenMediaCapturerDelegateMock: ScreenMediaCapturerDelegate {
     var onVideoFrame: ((VideoFrame) -> Void)?
+    var onStart: (() -> Void)?
     var onStop: ((Error?) -> Void)?
     private(set) var status: VideoFrame.Status?
 
@@ -334,6 +335,10 @@ final class ScreenMediaCapturerDelegateMock: ScreenMediaCapturerDelegate {
     ) {
         status = .complete(frame)
         onVideoFrame?(frame)
+    }
+
+    func screenMediaCapturerDidStart(_ capturer: ScreenMediaCapturer) {
+        onStart?()
     }
 
     func screenMediaCapturer(

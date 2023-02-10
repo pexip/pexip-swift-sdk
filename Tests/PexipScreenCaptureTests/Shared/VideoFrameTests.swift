@@ -8,14 +8,13 @@ final class VideoFrameTests: XCTestCase {
     private let height = 1080
     private let displayTimeNs: UInt64 = 10_000
     private let pixelFormat = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+    private var pixelBuffer: CVPixelBuffer!
     private var videoFrame: VideoFrame!
 
     // MARK: - Setup
 
     override func setUpWithError() throws {
         try super.setUpWithError()
-
-        var pixelBuffer: CVPixelBuffer?
 
         CVPixelBufferCreate(
             kCFAllocatorDefault,
@@ -34,6 +33,24 @@ final class VideoFrameTests: XCTestCase {
     }
 
     // MARK: - Tests
+
+    func testInitWithoutContentRect() {
+        videoFrame = VideoFrame(
+            pixelBuffer: pixelBuffer,
+            contentRect: nil,
+            displayTimeNs: displayTimeNs
+        )
+
+        XCTAssertEqual(
+            videoFrame.contentRect,
+            CGRect(
+                x: 0,
+                y: 0,
+                width: Int(pixelBuffer.width),
+                height: Int(pixelBuffer.height)
+            )
+        )
+    }
 
     func testDefaultOrientation() {
         XCTAssertEqual(videoFrame.orientation, .up)

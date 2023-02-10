@@ -77,7 +77,7 @@ final class BroadcastNotificationCenter {
         var newObservations = [Observation]()
 
         for observation in observations {
-            if shouldRemove(observation) {
+            if shouldRemove(observation) || observation.observer == nil {
                 CFNotificationCenterRemoveObserver(
                     center,
                     observation.rawPointer,

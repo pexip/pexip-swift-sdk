@@ -30,6 +30,17 @@ final class UserDefaultsBroadcastTests: XCTestCase {
         userDefaults.broadcastFps = nil
         XCTAssertNil(userDefaults.broadcastFps)
     }
+
+    func testBroadcastKeepAliveDate() {
+        XCTAssertNil(userDefaults.broadcastKeepAliveDate)
+
+        let date = Date()
+        userDefaults.broadcastKeepAliveDate = date
+        XCTAssertEqual(userDefaults.broadcastKeepAliveDate, date)
+
+        userDefaults.broadcastKeepAliveDate = nil
+        XCTAssertNil(userDefaults.broadcastKeepAliveDate)
+    }
 }
 
 #endif

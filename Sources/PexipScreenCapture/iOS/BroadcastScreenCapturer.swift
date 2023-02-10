@@ -6,18 +6,20 @@ import ReplayKit
 
 /// A capturer that captures the screen content from Broadcast Upload Extension on iOS.
 public final class BroadcastScreenCapturer: ScreenMediaCapturer {
+    static let keepAliveInterval: TimeInterval = 2
+
     public weak var delegate: ScreenMediaCapturerDelegate?
 
-    private let filePath: String
-    private let fileManager: FileManager
     private let broadcastUploadExtension: String
+    private let defaultFps: UInt
+    private var videoReceiver: BroadcastVideoReceiver
     private let notificationCenter = BroadcastNotificationCenter.default
     private let userDefaults: UserDefaults?
-    private var server: BroadcastServer?
     private let isCapturing = Synchronized(false)
-    private let processingQueue = DispatchQueue(
-        label: "com.pexip.PexipMedia.BroadcastScreenCapturer",
-        qos: .userInteractive
+    private var keepAliveTimer: DispatchSourceTimer?
+    private let keepAliveTimerQueue = DispatchQueue(
+        label: "com.pexip.PexipScreenCapture.BroadcastScreenCapturer.keepAliveTimer",
+        qos: .default
     )
     private var cancellables = Set<AnyCancellable>()
 
@@ -28,21 +30,50 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
      - Parameters:
         - appGroup: The app group identifier
         - broadcastUploadExtension: Bundle identifier of your broadcast upload extension
+        - defaultFps: The default fps to use when screen capture starts automatically
+                      (e.g. from the Control Center on iOS)
         - fileManager: An optional instance of the file manager
      */
-    public init(
+    public convenience init(
         appGroup: String,
         broadcastUploadExtension: String,
+        defaultFps: UInt = 15,
         fileManager: FileManager = .default
     ) {
-        self.filePath = fileManager.broadcastSocketPath(appGroup: appGroup)
-        self.fileManager = fileManager
+        self.init(
+            broadcastUploadExtension: broadcastUploadExtension,
+            defaultFps: defaultFps,
+            videoReceiver: BroadcastVideoReceiver(
+                filePath: fileManager.broadcastVideoDataPath(appGroup: appGroup),
+                fileManager: fileManager
+            ),
+            userDefaults: UserDefaults(suiteName: appGroup)
+        )
+    }
+
+    init(
+        broadcastUploadExtension: String,
+        defaultFps: UInt,
+        videoReceiver: BroadcastVideoReceiver,
+        keepAliveInterval: TimeInterval = BroadcastScreenCapturer.keepAliveInterval,
+        userDefaults: UserDefaults?
+    ) {
         self.broadcastUploadExtension = broadcastUploadExtension
-        self.userDefaults = UserDefaults(suiteName: appGroup)
+        self.defaultFps = defaultFps
+        self.videoReceiver = videoReceiver
+        self.userDefaults = userDefaults
+
+        userDefaults?.broadcastFps = defaultFps
+        videoReceiver.delegate = self
+        addNotificationObservers()
+        startKeepAliveTimer(withInterval: keepAliveInterval)
     }
 
     deinit {
         try? stopCapture()
+        stopKeepAliveTimer()
+        removeNotificationObservers()
+        userDefaults?.broadcastFps = nil
     }
 
     // MARK: - Internal
@@ -51,7 +82,8 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
      Starts the screen capture with the given video quality profile.
 
      - Parameters:
-        - videoProfile: The video ``QualityProfile``
+        - fps: The FPS of a video stream (1...30)
+        - outputDimensions: The dimensions of the output video.
      */
     public func startCapture(
         atFps fps: UInt,
@@ -61,7 +93,6 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
             return
         }
 
-        addNotificationObservers()
         userDefaults?.broadcastFps = fps
 
         let broadcastUploadExtension = self.broadcastUploadExtension
@@ -76,55 +107,50 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
         }
     }
 
-    /// Stops the screen capture.
     public func stopCapture() throws {
+        try stopCapture(reason: nil)
+    }
+
+    public func stopCapture(reason: ScreenCaptureStopReason?) throws {
         guard isCapturing.value else {
             return
         }
 
-        clean()
-        try server?.stop()
-        server = nil
+        try stopVideoReceiver()
+
+        switch reason {
+        case .none:
+            notificationCenter.post(.receiverFinished)
+        case .presentationStolen:
+            notificationCenter.post(.presentationStolen)
+        case .callEnded:
+            notificationCenter.post(.callEnded)
+        }
     }
 
     // MARK: - Private
 
     private func addNotificationObservers() {
-        notificationCenter.addObserver(self, for: .broadcastStarted) { [weak self] in
-            guard let self else {
-                return
-            }
-
-            do {
-                self.server = try BroadcastServer(
-                    filePath: self.filePath,
-                    fileManager: self.fileManager
-                )
-                self.subscribeToEvents(from: self.server!)
-                self.isCapturing.mutate { $0 = true }
-                try self.server?.start()
-            } catch {
-                if self.isCapturing.value {
-                    self.clean()
-                    self.onStop(error: error)
-                }
+        notificationCenter.addObserver(self, for: .senderStarted) { [weak self] in
+            if self?.isCapturing.value == false {
+                self?.startVideoReceiver()
             }
         }
 
-        notificationCenter.addObserver(self, for: .broadcastFinished) { [weak self] in
-            guard let self, self.isCapturing.value else {
+        notificationCenter.addObserver(self, for: .senderFinished) { [weak self] in
+            guard self?.isCapturing.value == true else {
                 return
             }
 
             var stopError: Error?
 
             do {
-                try self.stopCapture()
+                try self?.stopVideoReceiver()
             } catch {
                 stopError = error
             }
 
-            self.onStop(error: stopError)
+            self?.onStop(error: stopError)
         }
     }
 
@@ -132,57 +158,47 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
         notificationCenter.removeObserver(self)
     }
 
-    private func subscribeToEvents(from server: BroadcastServer) {
-        server.sink { [weak self] httpEvent in
-            guard let self else { return }
-
-            switch httpEvent {
-            case .start:
-                self.notificationCenter.post(.serverStarted)
-            case .message(let message):
-                self.processingQueue.async { [weak self] in
-                    self?.processMessage(message)
-                }
-            case .stop(let error):
-                if self.isCapturing.value {
-                    self.clean()
-                    self.onStop(error: error)
-                }
-            }
-        }.store(in: &self.cancellables)
-    }
-
-    private func processMessage(_ message: BroadcastMessage) {
-        let displayTimeNs = message.header.displayTimeNs
-
-        guard let pixelBuffer = CVPixelBuffer.pixelBuffer(
-            fromData: message.body,
-            width: Int(message.header.videoWidth),
-            height: Int(message.header.videoHeight),
-            pixelFormat: message.header.pixelFormat
-        ) else {
-            return
+    private func startVideoReceiver() {
+        do {
+            try videoReceiver.start(withFps: BroadcastFps(value: userDefaults?.broadcastFps))
+            isCapturing.setValue(true)
+            notificationCenter.post(.receiverStarted)
+            delegate?.screenMediaCapturerDidStart(self)
+        } catch {
+            userDefaults?.broadcastFps = defaultFps
+            notificationCenter.post(.receiverFinished)
+            onStop(error: error)
         }
-
-        let videoFrame = VideoFrame(
-            pixelBuffer: pixelBuffer,
-            contentRect: CGRect(
-                x: 0,
-                y: 0,
-                width: Int(pixelBuffer.width),
-                height: Int(pixelBuffer.height)
-            ),
-            orientation: .init(rawValue: message.header.videoOrientation) ?? .up,
-            displayTimeNs: displayTimeNs
-        )
-
-        onCapture(videoFrame: videoFrame)
     }
 
-    private func clean() {
-        isCapturing.mutate { $0 = false }
-        removeNotificationObservers()
-        userDefaults?.broadcastFps = nil
+    private func stopVideoReceiver() throws {
+        try videoReceiver.stop()
+        userDefaults?.broadcastFps = defaultFps
+        isCapturing.setValue(false)
+    }
+
+    /// Write current date to shared UserDefaults to indicate that
+    /// the broadcast capturer is waiting for new connections.
+    private func startKeepAliveTimer(withInterval interval: TimeInterval) {
+        stopKeepAliveTimer()
+        keepAliveTimer = DispatchSource.makeTimerSource(
+            flags: .strict,
+            queue: keepAliveTimerQueue
+        )
+        keepAliveTimer?.setEventHandler(handler: { [weak self] in
+            self?.userDefaults?.broadcastKeepAliveDate = Date()
+        })
+        keepAliveTimer?.schedule(
+            deadline: .now(),
+            repeating: .nanoseconds(Int(interval * Double(NSEC_PER_SEC)))
+        )
+        keepAliveTimer?.activate()
+    }
+
+    private func stopKeepAliveTimer() {
+        keepAliveTimer?.cancel()
+        keepAliveTimer = nil
+        userDefaults?.broadcastKeepAliveDate = nil
     }
 
     private func onStop(error: Error?) {
@@ -191,6 +207,17 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
 
     private func onCapture(videoFrame: VideoFrame) {
         delegate?.screenMediaCapturer(self, didCaptureVideoFrame: videoFrame)
+    }
+}
+
+// MARK: - BroadcastVideoReceiverDelegate
+
+extension BroadcastScreenCapturer: BroadcastVideoReceiverDelegate {
+    func broadcastVideoReceiver(
+        _ receiver: BroadcastVideoReceiver,
+        didReceiveVideoFrame videoFrame: VideoFrame
+    ) {
+        onCapture(videoFrame: videoFrame)
     }
 }
 

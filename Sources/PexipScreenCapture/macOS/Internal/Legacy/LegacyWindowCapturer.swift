@@ -18,7 +18,7 @@ final class LegacyWindowCapturer: ScreenMediaCapturer {
 
     private var timer: DispatchSourceTimer?
     private let processingQueue = DispatchQueue(
-        label: "com.pexip.PexipMedia.LegacyWindowMediaCapturer",
+        label: "com.pexip.PexipScreenCapture.LegacyWindowMediaCapturer",
         qos: .userInteractive
     )
     private let ciContext = CIContext()

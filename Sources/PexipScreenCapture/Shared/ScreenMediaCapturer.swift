@@ -10,6 +10,12 @@ public protocol ScreenMediaCapturerDelegate: AnyObject {
         didCaptureVideoFrame frame: VideoFrame
     )
 
+    #if os(iOS)
+
+    func screenMediaCapturerDidStart(_ capturer: ScreenMediaCapturer)
+
+    #endif
+
     func screenMediaCapturer(
         _ capturer: ScreenMediaCapturer,
         didStopWithError error: Error?
@@ -35,4 +41,32 @@ public protocol ScreenMediaCapturer: AnyObject {
 
     /// Stops screen capture
     func stopCapture() async throws
+
+    /**
+     Stops screen capture with the given reason.
+
+     - Parameters:
+        - reason: An optional reason why screen capture was stopped.
+     */
+    func stopCapture(reason: ScreenCaptureStopReason?) async throws
+}
+
+#if os(macOS)
+
+public extension ScreenMediaCapturer {
+    func stopCapture(reason: ScreenCaptureStopReason?) async throws {
+        // Stop reason is not so important on macOS,
+        // but it's possible to override this method in your own custom implementation
+        // of `ScreenMediaCapturer` if needed.
+        try await stopCapture()
+    }
+}
+
+#endif
+
+// MARK: - ScreenCaptureStopReason
+
+public enum ScreenCaptureStopReason: Int {
+    case presentationStolen
+    case callEnded
 }

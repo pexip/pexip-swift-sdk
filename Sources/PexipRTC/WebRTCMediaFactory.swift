@@ -94,22 +94,30 @@ public final class WebRTCMediaFactory: MediaFactory {
 
     public func createScreenMediaTrack(
         appGroup: String,
-        broadcastUploadExtension: String
+        broadcastUploadExtension: String,
+        defaultVideoProfile: QualityProfile
     ) -> ScreenMediaTrack {
         let screenMediaCapturer = BroadcastScreenCapturer(
             appGroup: appGroup,
             broadcastUploadExtension: broadcastUploadExtension
         )
-        return createScreenMediaTrack(screenMediaCapturer: screenMediaCapturer)
+        return createScreenMediaTrack(
+            screenMediaCapturer: screenMediaCapturer,
+            defaultVideoProfile: defaultVideoProfile
+        )
     }
 
     #else
 
     public func createScreenMediaTrack(
-        mediaSource: ScreenMediaSource
+        mediaSource: ScreenMediaSource,
+        defaultVideoProfile: QualityProfile
     ) -> ScreenMediaTrack {
         let screenMediaCapturer = ScreenMediaSource.createCapturer(for: mediaSource)
-        return createScreenMediaTrack(screenMediaCapturer: screenMediaCapturer)
+        return createScreenMediaTrack(
+            screenMediaCapturer: screenMediaCapturer,
+            defaultVideoProfile: defaultVideoProfile
+        )
     }
 
     #endif
@@ -127,7 +135,8 @@ public final class WebRTCMediaFactory: MediaFactory {
     // MARK: - Private
 
     private func createScreenMediaTrack(
-        screenMediaCapturer: ScreenMediaCapturer
+        screenMediaCapturer: ScreenMediaCapturer,
+        defaultVideoProfile: QualityProfile
     ) -> ScreenMediaTrack {
         let videoSource = factory.videoSource(forScreenCast: true)
         let videoTrack = factory.videoTrack(
@@ -137,6 +146,7 @@ public final class WebRTCMediaFactory: MediaFactory {
         let capturer = WebRTCScreenCapturer(
             videoSource: videoSource,
             mediaCapturer: screenMediaCapturer,
+            defaultVideoProfile: defaultVideoProfile,
             logger: logger
         )
         return WebRTCScreenMediaTrack(rtcTrack: videoTrack, capturer: capturer)

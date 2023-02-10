@@ -95,13 +95,17 @@ let mediaFactory = WebRTCMediaFactory(logger: DefaultLogger.mediaWebRTC)
 // 1. Create a new screen media track.
 let screenMediaTrack = mediaFactory.createScreenMediaTrack(
     appGroup: "your_app_group_id",
-    broadcastUploadExtension: "your_broadcast_upload_extension_bundle_id"
+    broadcastUploadExtension: "your_broadcast_upload_extension_bundle_id",
+    defaultVideoProfile: .presentationHigh
 )
 
 // 2. Start screen capture and send presentation video to all conference participants.
 mediaConnection.setScreenMediaTrack(screenMediaTrack)
 try await screenMediaTrack.startCapture(withVideoProfile: .presentationHigh)
 ```
+
+Create your screen media track early when the call starts, and keep a reference to it 
+if you want to start broadcast session not only from the app, but also from the iOS control panel.  
 
 ### Subscribe to status updates
 
@@ -111,9 +115,13 @@ Screen broadcast might be stopped from the iOS control panel or by the system, s
 var isPresenting = false
 
 screenMediaTrack.capturingStatus.$isCapturing
+    .dropFirst()
+    .removeDuplicates()
     .receive(on: DispatchQueue.main)
     .sink { isCapturing in
-        if !isCapturing && isPresenting {
+        if isCapturing {
+            mediaConnection.setScreenMediaTrack(screenMediaTrack)
+        } else {
             mediaConnection.setScreenMediaTrack(nil)
         }
 
@@ -124,7 +132,7 @@ screenMediaTrack.capturingStatus.$isCapturing
 
 ### Handle conference events
 
-Stop screen capture if presentation has been stolen by another participant.
+Stop screen capture if presentation has been stolen by another participant or when the call ended.
 
 ```swift
 await conference.receiveEvents()
@@ -134,9 +142,12 @@ conference.eventPublisher
         do {
             switch event {
             case .presentationStart(let message):
-                screenMediaTrack.stopCapture()
+                screenMediaTrack.stopCapture(reason: .presentationStolen)
                 mediaConnection.setScreenMediaTrack(nil)
                 try mediaConnection.receivePresentation(true)
+            case .clientDisconnected:
+                screenMediaTrack.stopCapture(reason: .callEnded)
+                mediaConnection.setScreenMediaTrack(nil)
             // ...
             }
         } catch {
@@ -149,6 +160,6 @@ conference.eventPublisher
 ### Stop screen broadcast
 
 ```swift
-screenMediaTrack.stopCapture()
+screenMediaTrack.stopCapture() // stopPresenting(reason: .callEnded)
 mediaConnection.setScreenMediaTrack(nil)
 ```

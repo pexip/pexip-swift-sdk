@@ -72,7 +72,7 @@ final class QualityProfileTests: XCTestCase {
 
         XCTAssertEqual(qualityProfile.width, 1920)
         XCTAssertEqual(qualityProfile.height, 1080)
-        XCTAssertEqual(qualityProfile.fps, 15)
+        XCTAssertEqual(qualityProfile.fps, 30)
     }
 
     func testPresentationHigh() {
@@ -80,7 +80,7 @@ final class QualityProfileTests: XCTestCase {
 
         XCTAssertEqual(qualityProfile.width, 1280)
         XCTAssertEqual(qualityProfile.height, 720)
-        XCTAssertEqual(qualityProfile.fps, 15)
+        XCTAssertEqual(qualityProfile.fps, 30)
     }
 
     #if os(iOS)

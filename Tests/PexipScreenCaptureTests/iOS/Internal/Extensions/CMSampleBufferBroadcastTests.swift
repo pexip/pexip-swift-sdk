@@ -1,10 +1,8 @@
-import CoreMedia
-import ReplayKit
-
 #if os(iOS)
 
 import XCTest
 import ImageIO
+import CoreMedia
 import TestHelpers
 @testable import PexipScreenCapture
 
