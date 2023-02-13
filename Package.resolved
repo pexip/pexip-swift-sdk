@@ -10,11 +10,11 @@
       }
     },
     {
-      "identity" : "webrtc-ios-builds",
+      "identity" : "webrtc-objc",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pexip/webrtc-ios-builds",
+      "location" : "https://github.com/pexip/webrtc-objc",
       "state" : {
-        "revision" : "8a7c849ba966981941a04082cf97ec5b8cc0521a",
+        "revision" : "87328021c5736f7ce549622d595e59e39909d464",
         "version" : "105.0.0"
       }
     }
