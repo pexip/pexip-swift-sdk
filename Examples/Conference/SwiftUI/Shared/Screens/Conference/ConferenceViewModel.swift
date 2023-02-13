@@ -37,8 +37,12 @@ final class ConferenceViewModel: ObservableObject {
     }
 
     var presentationLocalVideo: Video? {
-        screenMediaTrack.map {
-            Video(track: $0, qualityProfile: localPresentationQualityProfile)
+        if isPresenting {
+            return screenMediaTrack.map {
+                Video(track: $0, qualityProfile: localPresentationQualityProfile)
+            }
+        } else {
+            return nil
         }
     }
 
@@ -67,6 +71,7 @@ final class ConferenceViewModel: ObservableObject {
     private var mediaConnection: MediaConnection
     private let mainLocalAudioTrack: LocalAudioTrack
     private var cameraVideoTrack: CameraVideoTrack?
+    private var screenMediaTrack: ScreenMediaTrack?
     private let onComplete: Complete
     private let videoPermission = MediaCapturePermission.video
     private let audioPermission = MediaCapturePermission.audio
@@ -79,7 +84,6 @@ final class ConferenceViewModel: ObservableObject {
 
     @Published private var mainRemoteVideoTrack: VideoTrack?
     @Published private var presentationRemoteVideoTrack: VideoTrack?
-    @Published private var screenMediaTrack: ScreenMediaTrack?
     @Published private(set) var finalCaptions = [String]()
     @Published private(set) var currentCaptions = [String]()
 
@@ -104,6 +108,13 @@ final class ConferenceViewModel: ObservableObject {
         )
         self.cameraVideoTrack = mediaFactory.createCameraVideoTrack()
         self.mainLocalAudioTrack = mediaFactory.createLocalAudioTrack()
+        #if os(iOS)
+        self.screenMediaTrack = mediaFactory.createScreenMediaTrack(
+            appGroup: Constants.appGroup,
+            broadcastUploadExtension: Constants.broadcastUploadExtension,
+            defaultVideoProfile: localPresentationQualityProfile
+        )
+        #endif
         self.onComplete = onComplete
         self.state = .preflight
 
@@ -112,6 +123,11 @@ final class ConferenceViewModel: ObservableObject {
         sinkMediaConnectionEvents()
         sinkConferenceEvents()
         sinkCameraFilterSettings()
+        #if os(iOS)
+        if let screenMediaTrack {
+            sinkScreenCaptureEvents(from: screenMediaTrack)
+        }
+        #endif
 
         conference.receiveEvents()
 
@@ -145,6 +161,7 @@ extension ConferenceViewModel {
 
     func leave() {
         state = .disconnected
+        stopPresenting(reason: .callEnded)
 
         Task {
             await conference.leave()
@@ -207,26 +224,30 @@ extension ConferenceViewModel {
     #if os(iOS)
 
     func startPresenting() {
-        let track = mediaFactory.createScreenMediaTrack(
-            appGroup: Constants.appGroup,
-            broadcastUploadExtension: Constants.broadcastUploadExtension
-        )
-        startScreenCapture(withTrack: track)
+        startScreenCapture()
     }
 
     #else
 
     func startPresenting(_ screenMediaSource: ScreenMediaSource) {
-        let track = mediaFactory.createScreenMediaTrack(
-            mediaSource: screenMediaSource
+        screenMediaTrack = mediaFactory.createScreenMediaTrack(
+            mediaSource: screenMediaSource,
+            defaultVideoProfile: localPresentationQualityProfile
         )
-        startScreenCapture(withTrack: track)
+        sinkScreenCaptureEvents(from: screenMediaTrack!)
+        startScreenCapture()
     }
     #endif
 
     func stopPresenting() {
-        screenMediaTrack?.stopCapture()
+        stopPresenting(reason: nil)
+    }
+
+    func stopPresenting(reason: ScreenCaptureStopReason?) {
+        screenMediaTrack?.stopCapture(reason: reason)
+        #if os(macOS)
         screenMediaTrack = nil
+        #endif
         mediaConnection.setScreenMediaTrack(nil)
         isPresenting = false
     }
@@ -253,15 +274,8 @@ private extension ConferenceViewModel {
         }
 
         isSinkingLiveCaptionsSettings = true
-
-        settings.$showLiveCaptions.sink { show in
-            Task { [weak self] in
-                do {
-                    try await self?.conference.toggleLiveCaptions(show)
-                } catch {
-                    debugPrint(error)
-                }
-            }
+        settings.$showLiveCaptions.sink { [weak self] show in
+            self?.toggleLiveCaptions(show)
         }.store(in: &cancellables)
     }
 
@@ -299,6 +313,28 @@ private extension ConferenceViewModel {
             .assign(to: &$microphoneEnabled)
     }
 
+    func sinkScreenCaptureEvents(from track: ScreenMediaTrack) {
+        track.capturingStatus.$isCapturing
+            .dropFirst()
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isCapturing in
+                guard let self else { return }
+
+                if isCapturing {
+                    self.mediaConnection.setScreenMediaTrack(track)
+                } else {
+                    self.mediaConnection.setScreenMediaTrack(nil)
+                    #if os(macOS)
+                    self.screenMediaTrack = nil
+                    #endif
+                }
+
+                self.isPresenting = isCapturing
+            }
+            .store(in: &cancellables)
+    }
+
     // swiftlint:disable cyclomatic_complexity
     func sinkConferenceEvents() {
         conference.eventPublisher
@@ -314,7 +350,7 @@ private extension ConferenceViewModel {
                     case .liveCaptions(let captions):
                         self.showLiveCaptions(captions)
                     case .presentationStart(let message):
-                        self.stopPresenting()
+                        self.stopPresenting(reason: .presentationStolen)
                         self.presenterName = message.presenterName
                         try self.mediaConnection.receivePresentation(true)
                     case .presentationStop:
@@ -344,26 +380,13 @@ private extension ConferenceViewModel {
 // MARK: - Private
 
 private extension ConferenceViewModel {
-    func startScreenCapture(withTrack screenMediaTrack: ScreenMediaTrack) {
-        self.screenMediaTrack = screenMediaTrack
-
-        screenMediaTrack.capturingStatus.$isCapturing
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isCapturing in
-                guard let self  = self else { return }
-
-                if !isCapturing && self.isPresenting {
-                    self.screenMediaTrack = nil
-                    self.mediaConnection.setScreenMediaTrack(nil)
-                }
-
-                self.isPresenting = isCapturing
-            }
-            .store(in: &cancellables)
+    func startScreenCapture() {
+        guard let screenMediaTrack else {
+            return
+        }
 
         Task {
             do {
-                mediaConnection.setScreenMediaTrack(screenMediaTrack)
                 try await screenMediaTrack.startCapture(
                     withVideoProfile: localPresentationQualityProfile
                 )
@@ -376,6 +399,16 @@ private extension ConferenceViewModel {
 
     func setCameraFilter(_ filter: CameraVideoFilter) {
         cameraVideoTrack?.videoFilter = videoFilterFactory.videoFilter(for: filter)
+    }
+
+    func toggleLiveCaptions(_ show: Bool) {
+        Task {
+            do {
+                try await conference.toggleLiveCaptions(show)
+            } catch {
+                debugPrint(error)
+            }
+        }
     }
 
     func showLiveCaptions(_ captions: LiveCaptions) {
