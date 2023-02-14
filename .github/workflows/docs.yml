@@ -34,7 +34,7 @@ jobs:
           python-version: '3.8' 
       - name: Build docs
         run: |
-          python build_docs.py --version ${{ github.ref_name }}
+          python ./Docs/build_docs.py --version ${{ github.ref_name }}
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
