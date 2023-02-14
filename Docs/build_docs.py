@@ -88,7 +88,7 @@ def build_framework_docs():
 
     platforms = [
         Platform('ios', 'iOS', 'platform=iOS Simulator,name=iPhone 13 Pro'),
-        Platform('macos', 'macOS', 'platform=macOS,arch=arm64')
+        Platform('macos', 'macOS', 'platform=macOS,arch=x86_64')
     ]
     
     for platform in platforms:
