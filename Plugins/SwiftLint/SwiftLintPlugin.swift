@@ -25,16 +25,19 @@ struct SwiftLintPlugin: BuildToolPlugin {
         let tool = try context.tool(named: "swiftlint")
 
         return [
-            Command.buildCommand(
+            Command.prebuildCommand(
                 displayName: "Formats the source code",
                 executable: tool.path,
                 arguments: [
                     "lint",
-                    "--in-process-sourcekit",
+                    "--quiet",
+                    "--cache-path",
+                    context.pluginWorkDirectory,
                     "--config",
                     "\(context.package.directory.string)/.swiftlint.yml",
-                    context.package.directory.string
-                ]
+                    target.directory.string
+                ],
+                outputFilesDirectory: context.pluginWorkDirectory.appending("Output")
             )
         ]
     }

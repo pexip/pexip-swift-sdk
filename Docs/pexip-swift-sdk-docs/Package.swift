@@ -23,7 +23,7 @@ let package = Package(
         .library(
             name: "PexipSwiftSDK",
             targets: ["PexipSwiftSDK"]
-        ),
+        )
     ],
     dependencies: [
         .package(

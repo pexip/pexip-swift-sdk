@@ -1,7 +1,7 @@
 parent_config: .swiftlint_base.yml
 excluded:
-  - .docs
   - .build
   - .swiftpm
+  - Docs
   - Examples
   - Package.swift
