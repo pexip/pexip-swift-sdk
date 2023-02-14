@@ -22,9 +22,12 @@
 		DA11E1EA2940EBF50075AE63 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11E1E92940EBF50075AE63 /* SplashView.swift */; };
 		DA11E1EB2940EBF50075AE63 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11E1E92940EBF50075AE63 /* SplashView.swift */; };
 		DA1329E627A98EC500C2EA89 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA1329D427A98EC500C2EA89 /* Assets.xcassets */; };
-		DA217DDB28995C27006E5169 /* BroadcastExtension in Frameworks */ = {isa = PBXBuildFile; productRef = DA217DDA28995C27006E5169 /* BroadcastExtension */; };
-		DA217DDD28995D2D006E5169 /* App in Frameworks */ = {isa = PBXBuildFile; productRef = DA217DDC28995D2D006E5169 /* App */; };
-		DA217DDF28995D8F006E5169 /* App in Frameworks */ = {isa = PBXBuildFile; productRef = DA217DDE28995D8F006E5169 /* App */; };
+		DA1F8F70299BB83200B771D3 /* PexipScreenCapture in Frameworks */ = {isa = PBXBuildFile; productRef = DA1F8F6F299BB83200B771D3 /* PexipScreenCapture */; };
+		DA1F8F72299BB87200B771D3 /* PexipRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DA1F8F71299BB87200B771D3 /* PexipRTC */; };
+		DA1F8F74299BB87900B771D3 /* PexipInfinityClient in Frameworks */ = {isa = PBXBuildFile; productRef = DA1F8F73299BB87900B771D3 /* PexipInfinityClient */; };
+		DA1F8F76299BB88D00B771D3 /* PexipVideoFilters in Frameworks */ = {isa = PBXBuildFile; productRef = DA1F8F75299BB88D00B771D3 /* PexipVideoFilters */; };
+		DA1F8F78299BB8A100B771D3 /* PexipInfinityClient in Frameworks */ = {isa = PBXBuildFile; productRef = DA1F8F77299BB8A100B771D3 /* PexipInfinityClient */; };
+		DA1F8F7A299BB8A800B771D3 /* PexipRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DA1F8F79299BB8A800B771D3 /* PexipRTC */; };
 		DA2FE597287110CB00D8FCAB /* ConferenceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2FE596287110CB00D8FCAB /* ConferenceState.swift */; };
 		DA2FE598287110CB00D8FCAB /* ConferenceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2FE596287110CB00D8FCAB /* ConferenceState.swift */; };
 		DA2FE59A287110DD00D8FCAB /* ConferenceModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2FE599287110DD00D8FCAB /* ConferenceModal.swift */; };
@@ -43,6 +46,7 @@
 		DA5F0B30286C946400E9E18B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5F0B2E286C946400E9E18B /* SettingsView.swift */; };
 		DA6196872878332300EA9151 /* ChatMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6196862878332300EA9151 /* ChatMessageStore.swift */; };
 		DA6196882878332300EA9151 /* ChatMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6196862878332300EA9151 /* ChatMessageStore.swift */; };
+		DA67D731299BBB730063083A /* PexipVideoFilters in Frameworks */ = {isa = PBXBuildFile; productRef = DA67D730299BBB730063083A /* PexipVideoFilters */; };
 		DA74550928C9465200D2323C /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA74550828C9465200D2323C /* AppViewModel.swift */; };
 		DA74550B28C948F300D2323C /* AppWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA74550A28C948F300D2323C /* AppWindow.swift */; };
 		DA74550D28C9490800D2323C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA74550C28C9490800D2323C /* AppDelegate.swift */; };
@@ -160,7 +164,7 @@
 		DA11E1E92940EBF50075AE63 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		DA1329D427A98EC500C2EA89 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DA1329D927A98EC500C2EA89 /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DA217DD9289959B6006E5169 /* Dependencies */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Dependencies; sourceTree = "<group>"; };
+		DA1F8F6C299BB7FC00B771D3 /* pexip-swift-sdk */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "pexip-swift-sdk"; path = ../..; sourceTree = "<group>"; };
 		DA2FE596287110CB00D8FCAB /* ConferenceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceState.swift; sourceTree = "<group>"; };
 		DA2FE599287110DD00D8FCAB /* ConferenceModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceModal.swift; sourceTree = "<group>"; };
 		DA35EF28286F9C86008D15A7 /* CGImage+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGImage+Extensions.swift"; sourceTree = "<group>"; };
@@ -237,7 +241,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA217DDD28995D2D006E5169 /* App in Frameworks */,
+				DA1F8F74299BB87900B771D3 /* PexipInfinityClient in Frameworks */,
+				DA1F8F72299BB87200B771D3 /* PexipRTC in Frameworks */,
+				DA1F8F76299BB88D00B771D3 /* PexipVideoFilters in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,7 +251,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA217DDB28995C27006E5169 /* BroadcastExtension in Frameworks */,
+				DA1F8F70299BB83200B771D3 /* PexipScreenCapture in Frameworks */,
 				DAF13287284A259D0089FE8E /* ReplayKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -254,8 +260,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA1F8F78299BB8A100B771D3 /* PexipInfinityClient in Frameworks */,
+				DA1F8F7A299BB8A800B771D3 /* PexipRTC in Frameworks */,
 				DAAC9A7928C6A3A400BFCA5C /* KeychainAccess in Frameworks */,
-				DA217DDF28995D8F006E5169 /* App in Frameworks */,
+				DA67D731299BBB730063083A /* PexipVideoFilters in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -369,7 +377,7 @@
 		DA217DD8289959B6006E5169 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				DA217DD9289959B6006E5169 /* Dependencies */,
+				DA1F8F6C299BB7FC00B771D3 /* pexip-swift-sdk */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
@@ -620,7 +628,9 @@
 			);
 			name = "Example (iOS)";
 			packageProductDependencies = (
-				DA217DDC28995D2D006E5169 /* App */,
+				DA1F8F71299BB87200B771D3 /* PexipRTC */,
+				DA1F8F73299BB87900B771D3 /* PexipInfinityClient */,
+				DA1F8F75299BB88D00B771D3 /* PexipVideoFilters */,
 			);
 			productName = "Example (iOS)";
 			productReference = DA1329D927A98EC500C2EA89 /* Example.app */;
@@ -633,6 +643,7 @@
 				DAF13281284A259D0089FE8E /* Sources */,
 				DAF13282284A259D0089FE8E /* Frameworks */,
 				DAF13283284A259D0089FE8E /* Resources */,
+				DA81FC43299BCAB800C3026E /* SwiftLint */,
 			);
 			buildRules = (
 			);
@@ -640,7 +651,7 @@
 			);
 			name = "BroadcastExtension (iOS)";
 			packageProductDependencies = (
-				DA217DDA28995C27006E5169 /* BroadcastExtension */,
+				DA1F8F6F299BB83200B771D3 /* PexipScreenCapture */,
 			);
 			productName = PexipSDKDemoBroadcastExtension;
 			productReference = DAF13285284A259D0089FE8E /* BroadcastExtension (iOS).appex */;
@@ -661,8 +672,10 @@
 			);
 			name = "Example (macOS)";
 			packageProductDependencies = (
-				DA217DDE28995D8F006E5169 /* App */,
 				DAAC9A7828C6A3A400BFCA5C /* KeychainAccess */,
+				DA1F8F77299BB8A100B771D3 /* PexipInfinityClient */,
+				DA1F8F79299BB8A800B771D3 /* PexipRTC */,
+				DA67D730299BBB730063083A /* PexipVideoFilters */,
 			);
 			productName = PexipVideoExample;
 			productReference = DAFADC8227F5083300A9AC3D /* Example (macOS).app */;
@@ -769,7 +782,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint >/dev/null; then\n    swiftlint\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint >/dev/null; then\n    swiftlint --config .swiftlint.yml\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 		DA1A977627AD420200ADFD23 /* SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -788,7 +801,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint >/dev/null; then\n    swiftlint\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint >/dev/null; then\n    swiftlint --config .swiftlint.yml\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+		DA81FC43299BCAB800C3026E /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint >/dev/null; then\n    swiftlint --config .swiftlint.yml\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 		DAFADD1B27F5100000A9AC3D /* SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -807,7 +839,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint >/dev/null; then\n    swiftlint\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint >/dev/null; then\n    swiftlint --config .swiftlint.yml\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1420,17 +1452,33 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		DA217DDA28995C27006E5169 /* BroadcastExtension */ = {
+		DA1F8F6F299BB83200B771D3 /* PexipScreenCapture */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = BroadcastExtension;
+			productName = PexipScreenCapture;
 		};
-		DA217DDC28995D2D006E5169 /* App */ = {
+		DA1F8F71299BB87200B771D3 /* PexipRTC */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = App;
+			productName = PexipRTC;
 		};
-		DA217DDE28995D8F006E5169 /* App */ = {
+		DA1F8F73299BB87900B771D3 /* PexipInfinityClient */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = App;
+			productName = PexipInfinityClient;
+		};
+		DA1F8F75299BB88D00B771D3 /* PexipVideoFilters */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PexipVideoFilters;
+		};
+		DA1F8F77299BB8A100B771D3 /* PexipInfinityClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PexipInfinityClient;
+		};
+		DA1F8F79299BB8A800B771D3 /* PexipRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PexipRTC;
+		};
+		DA67D730299BBB730063083A /* PexipVideoFilters */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PexipVideoFilters;
 		};
 		DAAC9A7828C6A3A400BFCA5C /* KeychainAccess */ = {
 			isa = XCSwiftPackageProductDependency;

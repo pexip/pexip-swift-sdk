@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DA4B731528A6841000B5A58B /* App in Frameworks */ = {isa = PBXBuildFile; productRef = DA4B731428A6841000B5A58B /* App */; };
 		DA4B731728A6842000B5A58B /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4B731628A6842000B5A58B /* CameraViewModel.swift */; };
 		DA4B731D28A69A7200B5A58B /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4B731C28A69A7200B5A58B /* Settings.swift */; };
 		DA4B732028A6A97100B5A58B /* SettingsItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4B731F28A6A97100B5A58B /* SettingsItemView.swift */; };
@@ -17,6 +16,8 @@
 		DA7EF2D328A67DD1006827CA /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7EF2D228A67DD1006827CA /* CameraView.swift */; };
 		DA7EF2D528A67DD5006827CA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA7EF2D428A67DD5006827CA /* Assets.xcassets */; };
 		DA7EF2D828A67DD5006827CA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA7EF2D728A67DD5006827CA /* Preview Assets.xcassets */; };
+		DAADA3C8299BC9A900691631 /* PexipVideoFilters in Frameworks */ = {isa = PBXBuildFile; productRef = DAADA3C7299BC9A900691631 /* PexipVideoFilters */; };
+		DAADA3CC299BC9C300691631 /* PexipRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DAADA3CB299BC9C300691631 /* PexipRTC */; };
 		E349A69FB4A6F37404C77513 /* Pods_VideoFiltersExample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2CFF80445C1011D2C63F1A9 /* Pods_VideoFiltersExample.framework */; };
 /* End PBXBuildFile section */
 
@@ -36,6 +37,7 @@
 		DA7EF2D728A67DD5006827CA /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		DA7FE89428CF41BD00CA0BE9 /* Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Configs/Release.xcconfig; sourceTree = "<group>"; };
 		DA7FE89528CF41BD00CA0BE9 /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Configs/Debug.xcconfig; sourceTree = "<group>"; };
+		DAADA3C6299BC98200691631 /* pexip-swift-sdk */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "pexip-swift-sdk"; path = ../..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,8 +45,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA4B731528A6841000B5A58B /* App in Frameworks */,
 				E349A69FB4A6F37404C77513 /* Pods_VideoFiltersExample.framework in Frameworks */,
+				DAADA3CC299BC9C300691631 /* PexipRTC in Frameworks */,
+				DAADA3C8299BC9A900691631 /* PexipVideoFilters in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,6 +85,7 @@
 		DA7EF2C428A67DD1006827CA = {
 			isa = PBXGroup;
 			children = (
+				DAADA3C5299BC98200691631 /* Packages */,
 				DA7FE89528CF41BD00CA0BE9 /* Debug.xcconfig */,
 				DA7FE89428CF41BD00CA0BE9 /* Release.xcconfig */,
 				DA7EF2CF28A67DD1006827CA /* VideoFiltersExample */,
@@ -128,6 +132,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		DAADA3C5299BC98200691631 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				DAADA3C6299BC98200691631 /* pexip-swift-sdk */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -141,6 +153,7 @@
 				DA7EF2CB28A67DD1006827CA /* Resources */,
 				E7921AD692A4DCC7CADDD7FF /* [CP] Embed Pods Frameworks */,
 				8EB066A2108A701D6745E4C6 /* [CP] Copy Pods Resources */,
+				DA81FC44299BCAF100C3026E /* SwiftLint */,
 			);
 			buildRules = (
 			);
@@ -148,7 +161,8 @@
 			);
 			name = VideoFiltersExample;
 			packageProductDependencies = (
-				DA4B731428A6841000B5A58B /* App */,
+				DAADA3C7299BC9A900691631 /* PexipVideoFilters */,
+				DAADA3CB299BC9C300691631 /* PexipRTC */,
 			);
 			productName = VideoFiltersExample;
 			productReference = DA7EF2CD28A67DD1006827CA /* VideoFiltersExample.app */;
@@ -239,6 +253,25 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-VideoFiltersExample/Pods-VideoFiltersExample-resources.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		DA81FC44299BCAF100C3026E /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint >/dev/null; then\n    swiftlint --config .swiftlint.yml\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 		E7921AD692A4DCC7CADDD7FF /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -478,9 +511,13 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		DA4B731428A6841000B5A58B /* App */ = {
+		DAADA3C7299BC9A900691631 /* PexipVideoFilters */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = App;
+			productName = PexipVideoFilters;
+		};
+		DAADA3CB299BC9C300691631 /* PexipRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PexipRTC;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
