@@ -9,6 +9,7 @@ from pathlib import Path
 
 CWD_PATH = os.path.dirname(os.path.realpath(__file__))
 OUTPUT_PATH = os.path.join(CWD_PATH, 'output')
+SITE_PATH = os.path.join(CWD_PATH, '_site')
 HEADER_PATH = os.path.join(CWD_PATH, 'header.html')
 
 ### - CLASSES
@@ -165,6 +166,9 @@ def main():
     
     build_sdk_docs()
     build_framework_docs()
+
+    os.system(f'cp -r {OUTPUT_PATH}/sdk {SITE_PATH}')
+    os.system(f'cp -r {OUTPUT_PATH}/frameworks {SITE_PATH}')
 
 if __name__ == '__main__':
     sys.exit(main())

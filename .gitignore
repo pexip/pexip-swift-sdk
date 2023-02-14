@@ -2,6 +2,9 @@
 .envrc
 DebugLocal.xcconfig
 ReleaseLocal.xcconfig
+Docs/output
+Docs/_site/sdk
+Docs/_site/frameworks
 
 # Swift Package Manager
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
