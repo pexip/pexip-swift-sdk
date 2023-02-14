@@ -1,0 +1,23 @@
+{
+  "pins" : [
+    {
+      "identity" : "swift-snapshot-testing",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/swift-snapshot-testing.git",
+      "state" : {
+        "revision" : "f8a9c997c3c1dab4e216a8ec9014e23144cbab37",
+        "version" : "1.9.0"
+      }
+    },
+    {
+      "identity" : "webrtc-objc",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pexip/webrtc-objc",
+      "state" : {
+        "revision" : "87328021c5736f7ce549622d595e59e39909d464",
+        "version" : "105.0.0"
+      }
+    }
+  ],
+  "version" : 2
+}
