@@ -9,7 +9,7 @@ from pathlib import Path
 
 CWD_PATH = os.path.dirname(os.path.realpath(__file__))
 OUTPUT_PATH = os.path.join(CWD_PATH, 'output')
-SITE_PATH = os.path.join(CWD_PATH, '_site')
+SITE_PATH = os.path.join(CWD_PATH, 'static')
 HEADER_PATH = os.path.join(CWD_PATH, 'header.html')
 
 ### - CLASSES

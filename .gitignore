@@ -3,8 +3,8 @@
 DebugLocal.xcconfig
 ReleaseLocal.xcconfig
 Docs/output
-Docs/_site/sdk
-Docs/_site/frameworks
+Docs/static/sdk
+Docs/static/frameworks
 
 # Swift Package Manager
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
