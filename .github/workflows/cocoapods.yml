@@ -1,0 +1,23 @@
+name: Deploy to CocoaPods trunk
+
+on: 
+  release:
+    types: [published]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+      
+jobs:
+  build:
+    runs-on: macos-latest    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Deploy to CocoaPods
+      env:
+        COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+      run: |
+        for podspec in *.podspec; do
+            [ -f "$podspec" ] || break
+            pod trunk push "${podspec}.podspec"
+        done
