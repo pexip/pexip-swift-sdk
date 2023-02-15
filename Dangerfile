@@ -27,6 +27,7 @@ else
         is_swift_package: true,
         xccov_file_direct_path: [xccov_file],
         minimum_coverage_percentage: 70.0,
+        html_report: false
         skip_slack: true
     )
 end

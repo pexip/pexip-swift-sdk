@@ -1,0 +1,52 @@
+name: Build and test Swift Package
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: macos-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { name: 'iOS', destination: 'platform=iOS Simulator,name=iPhone 14 Pro,OS=16.2' }
+          - { name: 'macOS', destination: 'platform=macOS,arch=x86_64' }
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Build and test
+      run: |
+        xcodebuild \
+          -scheme Pexip-Package \
+          -destination '${{ matrix.config.destination }}' \
+          -resultBundlePath resultBundle.xcresult \
+          -enableCodeCoverage YES \
+          clean build test
+    - name: Cache RubyGems
+      if: always() && github.event_name == 'pull_request'
+      uses: actions/cache@v3
+      with:
+        path: vendor/bundle
+        key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
+        restore-keys: ${{ runner.os }}-gem-
+    
+    - name: Run code validation
+      if: always() && github.event_name == 'pull_request'
+      uses: MeilCli/danger-action@v5.6.5
+      with:
+        plugins_file: 'Gemfile'
+        install_path: 'vendor/bundle'
+        danger_file: 'Dangerfile'
+        danger_id: 'danger-${{ matrix.config.name }}'
+      env:
+        DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}

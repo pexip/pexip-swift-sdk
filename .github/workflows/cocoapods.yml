@@ -17,7 +17,9 @@ jobs:
       env:
         COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
       run: |
-        for podspec in *.podspec; do
-            [ -f "$podspec" ] || break
-            pod trunk push "${podspec}.podspec"
-        done
+        pod trunk push PexipCore.podspec
+        pod trunk push PexipScreenCapture.podspec
+        pod trunk push PexipVideoFilters.podspec
+        pod trunk push PexipInfinityClient.podspec
+        pod trunk push PexipMedia.podspec
+        pod trunk push PexipRTC.podspec

@@ -8,9 +8,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 CWD_PATH = os.path.dirname(os.path.realpath(__file__))
-OUTPUT_PATH = os.path.join(CWD_PATH, 'output')
-SITE_PATH = os.path.join(CWD_PATH, 'static')
-HEADER_PATH = os.path.join(CWD_PATH, 'header.html')
+ROOT_PATH = os.path.join(CWD_PATH, os.pardir)
+DOCS_PATH = os.path.join(ROOT_PATH, 'Docs')
+OUTPUT_PATH = os.path.join(DOCS_PATH, 'output')
+SITE_PATH = os.path.join(DOCS_PATH, 'static')
+HEADER_PATH = os.path.join(DOCS_PATH, 'header.html')
 
 ### - CLASSES
 
@@ -53,7 +55,7 @@ def remove_display_name_platform(path, platform):
         path.open('w').write(text)
 
 def build_sdk_docs():
-    package_path = os.path.join(CWD_PATH, 'pexip-swift-sdk-docs')
+    package_path = os.path.join(DOCS_PATH, 'pexip-swift-sdk-docs')
     output_path = os.path.join(OUTPUT_PATH, 'sdk')
     
     os.chdir(package_path)
@@ -71,7 +73,7 @@ def build_sdk_docs():
     add_header(output_path)
 
 def build_framework_docs():
-    package_path = os.path.join(CWD_PATH, os.pardir)
+    package_path = os.path.join(DOCS_PATH, os.pardir)
     sources_path = os.path.join(package_path, 'Sources')
     docs_data_path = os.path.join(OUTPUT_PATH, 'data')
     docs_archives_path = os.path.join(OUTPUT_PATH, 'archives')
@@ -110,7 +112,7 @@ def build_framework_docs():
         
         os.chdir(package_path)
         os.system(' '.join(cmd))
-        os.chdir(CWD_PATH)
+        os.chdir(DOCS_PATH)
 
         remove_display_name_platform(sources_path, display_name_suffix)
 
