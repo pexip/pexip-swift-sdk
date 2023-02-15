@@ -9,16 +9,6 @@
 /* Begin PBXBuildFile section */
 		DA01A9E82836A41B002A6414 /* ScreenMediaSourcePickerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA01A9E72836A41B002A6414 /* ScreenMediaSourcePickerModel.swift */; };
 		DA01A9EA283794FD002A6414 /* ScreenMediaSourcePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA01A9E42836A387002A6414 /* ScreenMediaSourcePicker.swift */; };
-		DA11B0BD27E9EA3900501E50 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0BC27E9EA3900501E50 /* AppDelegate.swift */; };
-		DA11B0BF27E9EA3900501E50 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0BE27E9EA3900501E50 /* SceneDelegate.swift */; };
-		DA11B0C127E9EA3900501E50 /* DisplayNameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0C027E9EA3900501E50 /* DisplayNameViewController.swift */; };
-		DA11B0C627E9EA3A00501E50 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA11B0C527E9EA3A00501E50 /* Assets.xcassets */; };
-		DA11B0C927E9EA3A00501E50 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DA11B0C727E9EA3A00501E50 /* LaunchScreen.storyboard */; };
-		DA11B0D827E9FE1100501E50 /* LargeTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0D627E9FDDC00501E50 /* LargeTextField.swift */; };
-		DA11B0DD27EA024B00501E50 /* UIView+AutoLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0DB27EA024800501E50 /* UIView+AutoLayout.swift */; };
-		DA11B0DE27EA036500501E50 /* FormContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0D927EA007400501E50 /* FormContainerView.swift */; };
-		DA11B0E127EA0C3100501E50 /* UIViewController+Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0DF27EA0BFF00501E50 /* UIViewController+Keyboard.swift */; };
-		DA11B0E527EA104200501E50 /* UserDefaultsBacked.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B0E327EA103F00501E50 /* UserDefaultsBacked.swift */; };
 		DA11E1EA2940EBF50075AE63 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11E1E92940EBF50075AE63 /* SplashView.swift */; };
 		DA11E1EB2940EBF50075AE63 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11E1E92940EBF50075AE63 /* SplashView.swift */; };
 		DA1329E627A98EC500C2EA89 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA1329D427A98EC500C2EA89 /* Assets.xcassets */; };
@@ -149,18 +139,6 @@
 /* Begin PBXFileReference section */
 		DA01A9E42836A387002A6414 /* ScreenMediaSourcePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenMediaSourcePicker.swift; sourceTree = "<group>"; };
 		DA01A9E72836A41B002A6414 /* ScreenMediaSourcePickerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenMediaSourcePickerModel.swift; sourceTree = "<group>"; };
-		DA11B0BA27E9EA3900501E50 /* Example (UIKit).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Example (UIKit).app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		DA11B0BC27E9EA3900501E50 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		DA11B0BE27E9EA3900501E50 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		DA11B0C027E9EA3900501E50 /* DisplayNameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayNameViewController.swift; sourceTree = "<group>"; };
-		DA11B0C527E9EA3A00501E50 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		DA11B0C827E9EA3A00501E50 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		DA11B0CA27E9EA3A00501E50 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		DA11B0D627E9FDDC00501E50 /* LargeTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeTextField.swift; sourceTree = "<group>"; };
-		DA11B0D927EA007400501E50 /* FormContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormContainerView.swift; sourceTree = "<group>"; };
-		DA11B0DB27EA024800501E50 /* UIView+AutoLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+AutoLayout.swift"; sourceTree = "<group>"; };
-		DA11B0DF27EA0BFF00501E50 /* UIViewController+Keyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Keyboard.swift"; sourceTree = "<group>"; };
-		DA11B0E327EA103F00501E50 /* UserDefaultsBacked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsBacked.swift; sourceTree = "<group>"; };
 		DA11E1E92940EBF50075AE63 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		DA1329D427A98EC500C2EA89 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DA1329D927A98EC500C2EA89 /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -230,13 +208,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		DA11B0B727E9EA3900501E50 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		DA1329D627A98EC500C2EA89 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -279,65 +250,14 @@
 			path = ScreenCapture;
 			sourceTree = "<group>";
 		};
-		DA11B0BB27E9EA3900501E50 /* UIKit */ = {
-			isa = PBXGroup;
-			children = (
-				DA11B0E227EA102700501E50 /* Utils */,
-				DA11B0D527E9FDCC00501E50 /* Components */,
-				DA11B0D327E9EFFB00501E50 /* Screens */,
-				DA11B0BC27E9EA3900501E50 /* AppDelegate.swift */,
-				DA11B0BE27E9EA3900501E50 /* SceneDelegate.swift */,
-				DA11B0C527E9EA3A00501E50 /* Assets.xcassets */,
-				DA11B0C727E9EA3A00501E50 /* LaunchScreen.storyboard */,
-				DA11B0CA27E9EA3A00501E50 /* Info.plist */,
-			);
-			path = UIKit;
-			sourceTree = "<group>";
-		};
-		DA11B0D327E9EFFB00501E50 /* Screens */ = {
-			isa = PBXGroup;
-			children = (
-				DA11B0D427E9F00C00501E50 /* DisplayName */,
-			);
-			path = Screens;
-			sourceTree = "<group>";
-		};
-		DA11B0D427E9F00C00501E50 /* DisplayName */ = {
-			isa = PBXGroup;
-			children = (
-				DA11B0C027E9EA3900501E50 /* DisplayNameViewController.swift */,
-			);
-			path = DisplayName;
-			sourceTree = "<group>";
-		};
-		DA11B0D527E9FDCC00501E50 /* Components */ = {
-			isa = PBXGroup;
-			children = (
-				DA11B0D627E9FDDC00501E50 /* LargeTextField.swift */,
-				DA11B0D927EA007400501E50 /* FormContainerView.swift */,
-			);
-			path = Components;
-			sourceTree = "<group>";
-		};
-		DA11B0E227EA102700501E50 /* Utils */ = {
-			isa = PBXGroup;
-			children = (
-				DA11B0E327EA103F00501E50 /* UserDefaultsBacked.swift */,
-				DA11B0DF27EA0BFF00501E50 /* UIViewController+Keyboard.swift */,
-				DA11B0DB27EA024800501E50 /* UIView+AutoLayout.swift */,
-			);
-			path = Utils;
-			sourceTree = "<group>";
-		};
 		DA1329CC27A98EC400C2EA89 = {
 			isa = PBXGroup;
 			children = (
-				DA217DD8289959B6006E5169 /* Packages */,
 				DAE8989B28246B12006C30E8 /* Release.xcconfig */,
 				DAE8989A282469DD006C30E8 /* Debug.xcconfig */,
-				DAFADC9227F509D700A9AC3D /* SwiftUI */,
-				DA11B0BB27E9EA3900501E50 /* UIKit */,
+				DAFADC9227F509D700A9AC3D /* App */,
 				DAF13288284A259D0089FE8E /* BroadcastExtension */,
+				DA217DD8289959B6006E5169 /* Packages */,
 				DA1329DA27A98EC500C2EA89 /* Products */,
 				DA1329F027A9902500C2EA89 /* Frameworks */,
 			);
@@ -358,7 +278,6 @@
 			isa = PBXGroup;
 			children = (
 				DA1329D927A98EC500C2EA89 /* Example.app */,
-				DA11B0BA27E9EA3900501E50 /* Example (UIKit).app */,
 				DAFADC8227F5083300A9AC3D /* Example (macOS).app */,
 				DAF13285284A259D0089FE8E /* BroadcastExtension (iOS).appex */,
 			);
@@ -463,14 +382,14 @@
 			path = macOS;
 			sourceTree = "<group>";
 		};
-		DAFADC9227F509D700A9AC3D /* SwiftUI */ = {
+		DAFADC9227F509D700A9AC3D /* App */ = {
 			isa = PBXGroup;
 			children = (
 				DA1329D127A98EC400C2EA89 /* iOS */,
 				DAFADC8327F5083300A9AC3D /* macOS */,
 				DAFADC9327F50B3700A9AC3D /* Shared */,
 			);
-			path = SwiftUI;
+			path = App;
 			sourceTree = "<group>";
 		};
 		DAFADC9327F50B3700A9AC3D /* Shared */ = {
@@ -591,26 +510,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		DA11B0B927E9EA3900501E50 /* Example (UIKit) */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = DA11B0CD27E9EA3A00501E50 /* Build configuration list for PBXNativeTarget "Example (UIKit)" */;
-			buildPhases = (
-				DA11B0B627E9EA3900501E50 /* Sources */,
-				DA11B0B727E9EA3900501E50 /* Frameworks */,
-				DA11B0B827E9EA3900501E50 /* Resources */,
-				DA11B0D227E9EC2500501E50 /* SwiftLint */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "Example (UIKit)";
-			packageProductDependencies = (
-			);
-			productName = ExampleUIKit;
-			productReference = DA11B0BA27E9EA3900501E50 /* Example (UIKit).app */;
-			productType = "com.apple.product-type.application";
-		};
 		DA1329D827A98EC500C2EA89 /* Example (iOS) */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = DA1329EA27A98EC500C2EA89 /* Build configuration list for PBXNativeTarget "Example (iOS)" */;
@@ -691,9 +590,6 @@
 				LastSwiftUpdateCheck = 1330;
 				LastUpgradeCheck = 1400;
 				TargetAttributes = {
-					DA11B0B927E9EA3900501E50 = {
-						CreatedOnToolsVersion = 13.2.1;
-					};
 					DA1329D827A98EC500C2EA89 = {
 						CreatedOnToolsVersion = 13.2.1;
 					};
@@ -723,22 +619,12 @@
 			targets = (
 				DA1329D827A98EC500C2EA89 /* Example (iOS) */,
 				DAFADC8127F5083300A9AC3D /* Example (macOS) */,
-				DA11B0B927E9EA3900501E50 /* Example (UIKit) */,
 				DAF13284284A259D0089FE8E /* BroadcastExtension (iOS) */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		DA11B0B827E9EA3900501E50 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				DA11B0C927E9EA3A00501E50 /* LaunchScreen.storyboard in Resources */,
-				DA11B0C627E9EA3A00501E50 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		DA1329D727A98EC500C2EA89 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -765,25 +651,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		DA11B0D227E9EC2500501E50 /* SwiftLint */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = SwiftLint;
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint >/dev/null; then\n    swiftlint --config .swiftlint.yml\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
-		};
 		DA1A977627AD420200ADFD23 /* SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -844,21 +711,6 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		DA11B0B627E9EA3900501E50 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				DA11B0E527EA104200501E50 /* UserDefaultsBacked.swift in Sources */,
-				DA11B0DD27EA024B00501E50 /* UIView+AutoLayout.swift in Sources */,
-				DA11B0C127E9EA3900501E50 /* DisplayNameViewController.swift in Sources */,
-				DA11B0BD27E9EA3900501E50 /* AppDelegate.swift in Sources */,
-				DA11B0BF27E9EA3900501E50 /* SceneDelegate.swift in Sources */,
-				DA11B0E127EA0C3100501E50 /* UIViewController+Keyboard.swift in Sources */,
-				DA11B0DE27EA036500501E50 /* FormContainerView.swift in Sources */,
-				DA11B0D827E9FE1100501E50 /* LargeTextField.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		DA1329D527A98EC500C2EA89 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -981,83 +833,7 @@
 		};
 /* End PBXTargetDependency section */
 
-/* Begin PBXVariantGroup section */
-		DA11B0C727E9EA3A00501E50 /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				DA11B0C827E9EA3A00501E50 /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
-
 /* Begin XCBuildConfiguration section */
-		DA11B0CB27E9EA3A00501E50 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = DAE8989A282469DD006C30E8 /* Debug.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ExampleUIKit/Info.plist;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.pexip.PexipSDKDemo;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		DA11B0CC27E9EA3A00501E50 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = DAE8989B28246B12006C30E8 /* Release.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ExampleUIKit/Info.plist;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.pexip.PexipSDKDemo;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "${PROVISIONING_PROFILE_SPECIFIER}";
-				SDKROOT = iphoneos;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
 		DA1329E827A98EC500C2EA89 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DAE8989A282469DD006C30E8 /* Debug.xcconfig */;
@@ -1182,7 +958,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = SwiftUI/iOS/iOS.entitlements;
+				CODE_SIGN_ENTITLEMENTS = App/iOS/iOS.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
@@ -1190,7 +966,7 @@
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SwiftUI/iOS/Info.plist;
+				INFOPLIST_FILE = App/iOS/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This will make sure the other participants are able to see you";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This will make sure the other participants are able to hear you";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -1223,7 +999,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = SwiftUI/iOS/iOS.entitlements;
+				CODE_SIGN_ENTITLEMENTS = App/iOS/iOS.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 3;
@@ -1232,7 +1008,7 @@
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SwiftUI/iOS/Info.plist;
+				INFOPLIST_FILE = App/iOS/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This will make sure the other participants are able to see you";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This will make sure the other participants are able to hear you";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -1324,7 +1100,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = SwiftUI/macOS/macOS.entitlements;
+				CODE_SIGN_ENTITLEMENTS = App/macOS/macOS.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -1335,7 +1111,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "SwiftUI/macOS/Example--macOS--Info.plist";
+				INFOPLIST_FILE = "App/macOS/Example--macOS--Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This will make sure the other participants are able to see you";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -1360,7 +1136,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = SwiftUI/macOS/macOS.entitlements;
+				CODE_SIGN_ENTITLEMENTS = App/macOS/macOS.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -1371,7 +1147,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "SwiftUI/macOS/Example--macOS--Info.plist";
+				INFOPLIST_FILE = "App/macOS/Example--macOS--Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This will make sure the other participants are able to see you";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -1393,15 +1169,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		DA11B0CD27E9EA3A00501E50 /* Build configuration list for PBXNativeTarget "Example (UIKit)" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				DA11B0CB27E9EA3A00501E50 /* Debug */,
-				DA11B0CC27E9EA3A00501E50 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		DA1329D027A98EC400C2EA89 /* Build configuration list for PBXProject "Example" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
