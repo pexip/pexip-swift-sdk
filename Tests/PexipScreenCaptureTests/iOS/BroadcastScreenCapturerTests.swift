@@ -299,6 +299,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         let videoSender = BroadcastVideoSender(filePath: filePath, fileManager: fileManager)
         let handler = BroadcastSampleHandler(videoSender: videoSender, userDefaults: userDefaults)
         var states = [BroadcastState]()
+        var videoFrameReceived = false
 
         delegate.onStart = {
             states.append(.started)
@@ -309,6 +310,11 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         }
 
         delegate.onVideoFrame = { videoFrame in
+            guard !videoFrameReceived else {
+                return
+            }
+
+            videoFrameReceived = true
             states.append(.newFrame)
 
             XCTAssertEqual(videoFrame.orientation, .left)

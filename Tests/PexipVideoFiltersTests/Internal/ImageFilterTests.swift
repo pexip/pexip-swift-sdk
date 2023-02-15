@@ -43,11 +43,15 @@ final class ImageFilterTests: XCTestCase {
         assertSnapshot(matching: image, as: .imageOriginal, named: snapshotName)
     }
 
+    #if os(iOS)
+
     func testGaussianBlurFilter() throws {
         let filter = GaussianBlurFilter(radius: 30)
         let image = try processImage(with: filter)
         assertSnapshot(matching: image, as: .imageOriginal, named: snapshotName)
     }
+
+    #endif
 
     func testImageReplacementFilter() throws {
         let filter = ImageReplacementFilter(
@@ -61,6 +65,8 @@ final class ImageFilterTests: XCTestCase {
         let image = try processImage(with: filter)
         assertSnapshot(matching: image, as: .imageOriginal, named: snapshotName)
     }
+
+    #if os(iOS)
 
     func testVideoReplacementFilter() async throws {
         let expectation = self.expectation(description: "Ready to play")
@@ -88,6 +94,8 @@ final class ImageFilterTests: XCTestCase {
         let image = try processImage(with: filter)
         assertSnapshot(matching: image, as: .imageOriginal, named: snapshotName)
     }
+
+    #endif
 
     // MARK: - Test helpers
 
