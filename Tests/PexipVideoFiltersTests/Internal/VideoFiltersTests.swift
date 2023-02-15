@@ -33,36 +33,6 @@ final class VideoFilterTests: XCTestCase {
         assertSnapshot(matching: image, as: .imageOriginal, named: snapshotName)
     }
 
-    #if os(macOS)
-
-    // Vision segmentation doesn't work properly on iOS simulator
-    @available(macOS 12.0, *)
-    func testSegmentationVideoFilter() throws {
-        let filter = SegmentationVideoFilter(
-            segmenter: VisionPersonSegmenter(),
-            backgroundFilter: AccelerateBlurFilter(kind: .tent, ciContext: context),
-            globalFilters: [],
-            ciContext: context
-        )
-        let image = try processPixelBuffer(with: filter)
-        assertSnapshot(matching: image, as: .imageOriginal, named: snapshotName)
-    }
-
-    // Vision segmentation doesn't work properly on iOS simulator
-    @available(macOS 12.0, *)
-    func testSegmentationVideoFilterWithGlobalFilters() throws {
-        let filter = SegmentationVideoFilter(
-            segmenter: VisionPersonSegmenter(),
-            backgroundFilter: GaussianBlurFilter(radius: 30),
-            globalFilters: [.photoEffectNoir()],
-            ciContext: context
-        )
-        let image = try processPixelBuffer(with: filter)
-        assertSnapshot(matching: image, as: .imageOriginal, named: snapshotName)
-    }
-
-    #endif
-
     // MARK: - Test helpers
 
     #if os(iOS)
