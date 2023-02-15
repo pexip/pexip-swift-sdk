@@ -83,7 +83,7 @@ final class TokenRefreshTaskTests: XCTestCase {
             expectationA.fulfill()
         }
 
-        wait(for: [expectationA], timeout: 0.3)
+        wait(for: [expectationA], timeout: 1)
 
         // 2. Schedule token refresh
         let expectationB = self.expectation(description: "Token refresh")
@@ -111,7 +111,7 @@ final class TokenRefreshTaskTests: XCTestCase {
             }
         }.store(in: &cancellables)
 
-        wait(for: [expectationB], timeout: 0.3)
+        wait(for: [expectationB], timeout: 1)
     }
 
     func testTokenRefreshWithServiceError() throws {

@@ -1,10 +1,14 @@
-source 'https://github.com/pexip/pexip-pod-specs.git'
+source 'https://github.com/CocoaPods/Specs.git'
+
 platform :ios, '13.0'
 inhibit_all_warnings!
 
 target 'Example' do
   use_frameworks!
-  pod 'PexipInfinityClient'
-  pod 'PexipRTC'
-  pod 'PexipVideoFilters'
+  pod 'PexipCore', :path => '../../'
+  pod 'PexipInfinityClient', :path => '../../'
+  pod 'PexipMedia', :path => '../../'
+  pod 'PexipRTC', :path => '../../'
+  pod 'PexipScreenCapture', :path => '../../'
+  pod 'PexipVideoFilters', :path => '../../'
 end

@@ -14,6 +14,6 @@ Pod::Spec.new do |s|
     s.osx.deployment_target = '10.15'
     s.source       = { :git => 'https://github.com/pexip/pexip-swift-sdk.git', :tag => "#{s.version}" }
     s.source_files = [
-        'Sources/PexipCore/*.swift',
+        'Sources/PexipCore/**/*.swift'
     ]
 end
