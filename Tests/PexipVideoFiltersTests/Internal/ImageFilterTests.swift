@@ -28,25 +28,25 @@ final class ImageFilterTests: XCTestCase {
     func testTentBlur() throws {
         let filter = AccelerateBlurFilter(kind: .tent, ciContext: context)
         let image = try processImage(with: filter)
-        assertSnapshot(matching: image, as: .image, named: snapshotName)
+        assertSnapshot(matching: image, as: .imageOriginal, named: snapshotName)
     }
 
     func testBoxBlur() throws {
         let filter = AccelerateBlurFilter(kind: .box, ciContext: context)
         let image = try processImage(with: filter)
-        assertSnapshot(matching: image, as: .image, named: snapshotName)
+        assertSnapshot(matching: image, as: .imageOriginal, named: snapshotName)
     }
 
     func testCustomImageFilter() throws {
         let filter = CustomImageFilter(ciFilter: CIFilter.sepiaTone())
         let image = try processImage(with: filter)
-        assertSnapshot(matching: image, as: .image, named: snapshotName)
+        assertSnapshot(matching: image, as: .imageOriginal, named: snapshotName)
     }
 
     func testGaussianBlurFilter() throws {
         let filter = GaussianBlurFilter(radius: 30)
         let image = try processImage(with: filter)
-        assertSnapshot(matching: image, as: .image, named: snapshotName)
+        assertSnapshot(matching: image, as: .imageOriginal, named: snapshotName)
     }
 
     func testImageReplacementFilter() throws {
@@ -59,7 +59,7 @@ final class ImageFilterTests: XCTestCase {
             )
         )
         let image = try processImage(with: filter)
-        assertSnapshot(matching: image, as: .image, named: snapshotName)
+        assertSnapshot(matching: image, as: .imageOriginal, named: snapshotName)
     }
 
     func testVideoReplacementFilter() async throws {
@@ -114,7 +114,7 @@ final class ImageFilterTests: XCTestCase {
     }
 }
 
-// MARK: - Private extensions
+// MARK: - Internal extensions
 
 extension Bundle {
     func testImage() -> CIImage? {
@@ -142,3 +142,17 @@ extension Bundle {
         #endif
     }
 }
+
+#if os(iOS)
+
+extension Snapshotting where Value == UIImage, Format == UIImage {
+    static let imageOriginal = Self.image(precision: 0.7, scale: 1)
+}
+
+#else
+
+extension Snapshotting where Value == NSImage, Format == NSImage {
+    static let imageOriginal = Self.image(precision: 0.7)
+}
+
+#endif

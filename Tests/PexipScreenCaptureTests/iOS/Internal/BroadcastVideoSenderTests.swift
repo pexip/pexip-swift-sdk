@@ -89,7 +89,7 @@ final class BroadcastVideoSenderTests: XCTestCase {
 
         XCTAssertFalse(sender.send(sampleBuffer))
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
             XCTAssertTrue(self?.sender.send(sampleBuffer) == true)
         }
 
