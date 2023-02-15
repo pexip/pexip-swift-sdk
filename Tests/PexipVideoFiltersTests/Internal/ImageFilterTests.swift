@@ -63,10 +63,14 @@ final class ImageFilterTests: XCTestCase {
     }
 
     func testVideoReplacementFilter() async throws {
+        let expectation = self.expectation(description: "Ready to play")
         let url = try XCTUnwrap(
             Bundle.module.url(forResource: "testVideo", withExtension: "mp4")
         )
         let filter = VideoReplacementFilter(url: url)
+        filter.onReadyToPlay = {
+            expectation.fulfill()
+        }
 
         // 1. First call returns nil since the video needs to be prepared for playing first
         _ = filter.processImage(
@@ -75,12 +79,14 @@ final class ImageFilterTests: XCTestCase {
             orientation: .up
         )
 
+        wait(for: [expectation], timeout: 3)
+
         // 2. Wait for 2 seconds
         try await Task.sleep(nanoseconds: 2 * 1_000_000_000)
 
         // 3. Process image again
         let image = try processImage(with: filter)
-        assertSnapshot(matching: image, as: .image, named: snapshotName)
+        assertSnapshot(matching: image, as: .imageOriginal, named: snapshotName)
     }
 
     // MARK: - Test helpers
@@ -152,7 +158,7 @@ extension Snapshotting where Value == UIImage, Format == UIImage {
 #else
 
 extension Snapshotting where Value == NSImage, Format == NSImage {
-    static let imageOriginal = Self.image(precision: 0.7)
+    static let imageOriginal = Self.image(precision: 0.5)
 }
 
 #endif

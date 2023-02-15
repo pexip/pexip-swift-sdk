@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ import CoreImage
 import AVFoundation
 
 final class VideoReplacementFilter: ImageFilter {
+    var onReadyToPlay: (() -> Void)?
+
     private let url: URL
     private let notificationCenter: NotificationCenter
     private var player: AVPlayer?
@@ -89,6 +91,7 @@ final class VideoReplacementFilter: ImageFilter {
 
             self?.playerItemOutput = playerItemOutput
             self?.player?.rate = 1
+            self?.onReadyToPlay?()
         }
 
         playerPlayToEndObserver = notificationCenter.addObserver(
