@@ -9,8 +9,9 @@ open Example.xcodeproj
 
 ## Targets
 
-- Universal SwiftUI app (iOS + macOS targets)
-- UIKit app (**still work in progress, use SwiftUI example as a reference**
+- Example (iOS) - iOS SwiftUI app
+- Example (macOS) - macOS SwiftUI app
+- BroadcastExtension (iOS) - broadcast upload extension for iOS app
 
 ## Features
 
