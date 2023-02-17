@@ -3,7 +3,13 @@ inhibit_all_warnings!
 
 target 'VideoFiltersExample' do
   use_frameworks!
-  pod 'GoogleMLKit/SegmentationSelfie', '3.1.0'
+  pod 'PexipCore', :path => '../../'
+  pod 'PexipInfinityClient', :path => '../../'
+  pod 'PexipMedia', :path => '../../'
+  pod 'PexipRTC', :path => '../../'
+  pod 'PexipScreenCapture', :path => '../../'
+  pod 'PexipVideoFilters', :path => '../../'
+  pod 'GoogleMLKit/SegmentationSelfie', '3.2.0'
 end
 
 post_install do |installer|

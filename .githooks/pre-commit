@@ -1,0 +1,10 @@
+#!/bin/bash
+
+./Scripts/license_headers.sh update
+
+if which swiftlint >/dev/null; then
+  swiftlint --config .swiftlint-global.yml --quiet --strict
+else
+  echo "error: SwiftLint not installed, download from https://github.com/realm/SwiftLint"
+  exit 1
+fi

@@ -22,9 +22,9 @@ import XCTest
 import ScreenCaptureKit
 #endif
 
-@available(macOS 12.3, *)
 // swiftlint:disable file_length
 // swiftlint:disable type_body_length
+@available(macOS 12.3, *)
 final class NewScreenMediaCapturerTests: XCTestCase {
     private var capturer: NewScreenMediaCapturer<ScreenCaptureStreamFactoryMock>!
     private var display: LegacyDisplay!

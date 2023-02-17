@@ -16,7 +16,6 @@
 import XCTest
 @testable import PexipInfinityClient
 
-// swiftlint:disable type_body_length
 final class ConferenceTokenTests: XCTestCase {
     private var calendar: Calendar!
 

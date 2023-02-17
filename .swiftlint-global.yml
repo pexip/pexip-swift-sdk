@@ -1,0 +1,4 @@
+parent_config: .swiftlint.yml
+included:
+  - Docs
+  - Examples
