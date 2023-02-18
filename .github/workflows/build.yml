@@ -52,10 +52,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      
       - name: Build and test
         run: |
           set -o pipefail && xcodebuild \
-            -project Examples/Conference/Example.xcodeproj \
             -scheme 'Pexip-Package' \
             -destination '${{ matrix.config.destination }}' \
             clean build test | xcpretty
@@ -73,6 +73,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      
       - name: Build
         run: |
           set -o pipefail && xcodebuild \
@@ -87,6 +88,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      
       - name: Setup CocoaPods cache
         uses: actions/cache@v2
         with:
@@ -94,8 +96,10 @@ jobs:
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-pods- 
+      
       - name: Install CocoaPods
         run: pod install --project-directory=Examples/VideoFilters 
+      
       - name: Build
         run: |
           set -o pipefail && arch -x86_64 xcodebuild \
