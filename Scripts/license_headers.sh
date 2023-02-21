@@ -34,9 +34,15 @@ for file in $modified_files; do
     fi
     if ! grep -q "$current_year" "$file"; then
       if [[ $update -eq 1 ]]; then
-        str="s/Copyright.*Pexip/Copyright 2022-$current_year Pexip/"
+        created_year=$(git log --follow --format=%ad --date=format:'%Y' $file | tail -1)
+        if [[ $current_year -eq $created_year ]]; then
+          year="$current_year"
+        else
+          year="$created_year-$current_year"
+        fi
+        str="s/Copyright.*Pexip/Copyright $year Pexip/"
         if [[ "$OSTYPE" == "darwin"* ]]; then
-          sed -i '' "$str" $file 
+          sed -i '' "$str" $file
         else
           sed -i "$str" $file
         fi
