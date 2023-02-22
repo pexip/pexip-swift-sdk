@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,15 @@
 // limitations under the License.
 
 import SwiftUI
+
+// Test that all SDK frameworks can be imported.
+import PexipInfinityClient
+import PexipMedia
+import PexipRTC
+import PexipCore
+import PexipScreenCapture
+import PexipVideoFilters
+import WebRTC
 
 @main
 struct ExampleApp: App {

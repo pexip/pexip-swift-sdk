@@ -58,20 +58,18 @@ let package = Package(
         .package(
             url: "https://github.com/pointfreeco/swift-snapshot-testing.git",
             from: "1.9.0"
-        ),
+        )
     ],
     targets: [
         // MARK: - PexipInfinityClient
 
         .target(
             name: "PexipInfinityClient",
-            dependencies: ["PexipCore"],
-            plugins: [.swiftLint]
+            dependencies: ["PexipCore"]
         ),
         .testTarget(
             name: "PexipInfinityClientTests",
-            dependencies: ["PexipInfinityClient", "TestHelpers"],
-            plugins: [.swiftLint]
+            dependencies: ["PexipInfinityClient", "TestHelpers"]
         ),
 
         // MARK: - PexipRTC
@@ -84,100 +82,69 @@ let package = Package(
             ],
             cSettings: [
                .unsafeFlags(["-w"])
-            ],
-            plugins: [.swiftLint]
+            ]
         ),
         .testTarget(
             name: "PexipRTCTests",
-            dependencies: ["PexipRTC"],
-            plugins: [.swiftLint]
+            dependencies: ["PexipRTC"]
         ),
 
         // MARK: - PexipMedia
 
         .target(
             name: "PexipMedia",
-            dependencies: ["PexipCore", "PexipScreenCapture"],
-            plugins: [.swiftLint]
+            dependencies: ["PexipCore", "PexipScreenCapture"]
         ),
         .testTarget(
             name: "PexipMediaTests",
-            dependencies: ["PexipMedia", "TestHelpers"],
-            plugins: [.swiftLint]
+            dependencies: ["PexipMedia", "TestHelpers"]
         ),
 
-        // MARK: -  PexipCore
+        // MARK: - PexipCore
 
         .target(
-            name: "PexipCore",
-            plugins: [.swiftLint]
+            name: "PexipCore"
         ),
         .testTarget(
             name: "PexipCoreTests",
-            dependencies: ["PexipCore"],
-            plugins: [.swiftLint]
+            dependencies: ["PexipCore"]
         ),
 
         // MARK: - PexipVideoFilters
 
         .target(
             name: "PexipVideoFilters",
-            dependencies: ["PexipCore"],
-            plugins: [.swiftLint]
+            dependencies: ["PexipCore"]
         ),
         .testTarget(
             name: "PexipVideoFiltersTests",
             dependencies: [
                 "PexipVideoFilters",
                 "TestHelpers",
-                .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
+                .product(name: "SnapshotTesting", package: "swift-snapshot-testing")
             ],
             exclude: ["Internal/__Snapshots__/"],
             resources: [
                 .copy("Resources/testVideo.mp4"),
-                .copy("Resources/testImage.jpg"),
-            ],
-            plugins: [.swiftLint]
+                .copy("Resources/testImage.jpg")
+            ]
         ),
 
         // MARK: - PexipScreenCapture
 
         .target(
-            name: "PexipScreenCapture",
-            plugins: [.swiftLint]
+            name: "PexipScreenCapture"
         ),
         .testTarget(
             name: "PexipScreenCaptureTests",
-            dependencies: ["PexipScreenCapture", "TestHelpers"],
-            plugins: [.swiftLint]
+            dependencies: ["PexipScreenCapture", "TestHelpers"]
         ),
 
         // MARK: - TestHelpers
 
         .target(
             name: "TestHelpers",
-            path: "Tests/TestHelpers",
-            plugins: [.swiftLint]
-        ),
-
-        // MARK: - Plugins
-
-        .binaryTarget(
-             name: "SwiftLintBinary",
-             url: "https://github.com/realm/SwiftLint/releases/download/0.48.0/SwiftLintBinary-macos.artifactbundle.zip",
-             checksum: "9c255e797260054296f9e4e4cd7e1339a15093d75f7c4227b9568d63edddba50"
-         ),
-
-        .plugin(
-            name: "SwiftLint",
-            capability: .buildTool(),
-            dependencies: [
-                "SwiftLintBinary",
-            ]
+            path: "Tests/TestHelpers"
         )
     ]
 )
-
-private extension Target.PluginUsage {
-    static let swiftLint = Self.plugin(name: "SwiftLint")
-}

@@ -90,19 +90,22 @@ pod 'PexipRTC'
 
 - Check [Swift Package Manager example app](https://github.com/pexip/pexip-swift-sdk/tree/main/Examples/Conference) to learn how to integrate **Pexip Swift SDK** in your app.
 
-- Check [Video Filters example app](https://github.com/pexip/pexip-swift-sdk/tree/main/Examples/VideoFilters) to learn how to apply various video filters and use [ML Kit's Selfie Segmentation API](https://developers.google.com/ml-kit) instead of default [Vision Person Segmentation](https://developer.apple.com/documentation/vision/vngeneratepersonsegmentationrequest), which is available only on iOS 15.0+ and macOS 12.0+.
-
-- Check [CocoaPods example app](https://github.com/pexip/pexip-swift-sdk/tree/main/Examples/CocoaPods) to 
-see how to install **Pexip Swift SDK** with Cocoa Pods.
+- Check [Video Filters example app](https://github.com/pexip/pexip-swift-sdk/tree/main/Examples/VideoFilters) to learn how to install **Pexip Swift SDK** with CocoaPods and apply various video filters with [ML Kit's Selfie Segmentation API](https://developers.google.com/ml-kit) instead of default [Vision Person Segmentation](https://developer.apple.com/documentation/vision/vngeneratepersonsegmentationrequest), which is available only on iOS 15.0+ and macOS 12.0+.
 
 - [SDK documentation and API reference](https://pexip.github.io/pexip-swift-sdk)
 
-## WIP
+## Development
 
-**Pexip Swift SDK** is still in active development, there will be breaking changes until we reach v1.0.
-If you have any questions about the SDK please contact your Pexip representative.
+- Download and install the latest version of [Xcode](https://developer.apple.com/support/xcode/).
+- Open Xcode and install additional tools.
+- Install [SwiftLint](https://github.com/realm/SwiftLint) `brew install swiftlint`
+- Download the source code `git clone git@github.com:pexip/pexip-swift-sdk.git`
+- **Review** and add custom Git hooks `git config core.hooksPath .githooks`
+- Open the `Package.swift` with Xcode or run `open Package.swift` from the command line.
+- Build "Cmd+B"
+- Test "Cmd+U"
 
 ## License
 
-**Pexip Swift SDK** is released under the Apache Software License, version 1.1. 
+**Pexip Swift SDK** is released under the Apache Software License, version 2.0. 
 See [LICENSE](https://github.com/pexip/pexip-swift-sdk/blob/main/LICENSE) for details.

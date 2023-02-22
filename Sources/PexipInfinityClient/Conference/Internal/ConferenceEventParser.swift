@@ -46,7 +46,6 @@ struct ConferenceEventParser: InfinityEventParser {
     }
 
     // swiftlint:disable cyclomatic_complexity
-    // swiftlint:disable function_body_length
     private func conferenceEvent(
         withName name: ConferenceEvent.Name,
         data: Data?

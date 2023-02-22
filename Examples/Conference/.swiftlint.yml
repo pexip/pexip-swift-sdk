@@ -1,1 +1,4 @@
-parent_config: ../../.swiftlint_base.yml
+parent_config: ../../.swiftlint.yml
+included:
+  - App
+  - BroadcastExtension
