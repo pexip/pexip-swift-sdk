@@ -39,6 +39,12 @@ public final class BroadcastSampleHandler {
     private let videoSender: BroadcastVideoSender
     private let notificationCenter = BroadcastNotificationCenter.default
     private var cancellables = Set<AnyCancellable>()
+    private let keepAliveInterval: TimeInterval
+    private var keepAliveTimer: DispatchSourceTimer?
+    private let keepAliveTimerQueue = DispatchQueue(
+        label: "com.pexip.PexipScreenCapture.BroadcastSampleHandler.keepAliveTimer",
+        qos: .default
+    )
     private let _isConnected = Synchronized(false)
 
     // MARK: - Init
@@ -66,10 +72,12 @@ public final class BroadcastSampleHandler {
 
     init(
         videoSender: BroadcastVideoSender,
-        userDefaults: UserDefaults?
+        userDefaults: UserDefaults?,
+        keepAliveInterval: TimeInterval = BroadcastScreenCapturer.keepAliveInterval
     ) {
         self.videoSender = videoSender
         self.userDefaults = userDefaults
+        self.keepAliveInterval = keepAliveInterval
     }
 
     deinit {
@@ -80,19 +88,14 @@ public final class BroadcastSampleHandler {
 
     /// Performs the required actions after starting a live broadcast.
     public func broadcastStarted() {
-        // Add some buffer for read/write operation to UserDefaults.
-        let timeInterval = TimeInterval(BroadcastScreenCapturer.keepAliveInterval * 5)
-
-        guard
-            let date = userDefaults?.broadcastKeepAliveDate,
-            date.timeIntervalSinceNow > -timeInterval
-        else {
+        guard hasConnection else {
             broadcastFinished()
             onError(.noConnection)
             return
         }
 
         addNotificationObservers()
+        startKeepAliveTimer()
         notificationCenter.post(.senderStarted)
     }
 
@@ -175,6 +178,7 @@ public final class BroadcastSampleHandler {
     }
 
     private func clean() {
+        stopKeepAliveTimer()
         videoSender.stop()
         notificationCenter.removeObserver(self)
     }
@@ -198,6 +202,49 @@ public final class BroadcastSampleHandler {
 
     private func onError(_ error: BroadcastError) {
         delegate?.broadcastSampleHandler(self, didFinishWithError: error)
+    }
+
+    /// Read keep alive date from shared UserDefaults to check that
+    /// the broadcast capturer is still running in the app.
+    private func startKeepAliveTimer() {
+        stopKeepAliveTimer()
+        let interval = DispatchTimeInterval.nanoseconds(
+            Int(keepAliveInterval * Double(NSEC_PER_SEC))
+        )
+        keepAliveTimer = DispatchSource.makeTimerSource(
+            flags: .strict,
+            queue: keepAliveTimerQueue
+        )
+        keepAliveTimer?.setEventHandler(handler: { [weak self] in
+            if self?.hasConnection == false {
+                self?.broadcastFinished()
+                self?.onError(.noConnection)
+            }
+        })
+        keepAliveTimer?.schedule(
+            deadline: .now() + interval,
+            repeating: interval
+        )
+        keepAliveTimer?.activate()
+    }
+
+    private func stopKeepAliveTimer() {
+        keepAliveTimer?.cancel()
+        keepAliveTimer = nil
+        userDefaults?.broadcastKeepAliveDate = nil
+    }
+
+    /// Check if the broadcast capturer is still running in the app.
+    private var hasConnection: Bool {
+        // Add some buffer for read/write operation to UserDefaults.
+        let timeInterval = TimeInterval(BroadcastScreenCapturer.keepAliveInterval * 5)
+        let keepAliveDate = userDefaults?.broadcastKeepAliveDate
+
+        if let date = keepAliveDate, date.timeIntervalSinceNow > -timeInterval {
+            return true
+        } else {
+            return false
+        }
     }
 }
 
