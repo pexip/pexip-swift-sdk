@@ -19,6 +19,7 @@ import XCTest
 import CoreMedia
 @testable import PexipScreenCapture
 
+// swiftlint:disable type_body_length
 final class BroadcastSampleHandlerTests: XCTestCase {
     private let appGroup = "test"
     private let filePath = NSTemporaryDirectory().appending("/test")
