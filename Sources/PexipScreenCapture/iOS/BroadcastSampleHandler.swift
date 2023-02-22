@@ -231,7 +231,6 @@ public final class BroadcastSampleHandler {
     private func stopKeepAliveTimer() {
         keepAliveTimer?.cancel()
         keepAliveTimer = nil
-        userDefaults?.broadcastKeepAliveDate = nil
     }
 
     /// Check if the broadcast capturer is still running in the app.
