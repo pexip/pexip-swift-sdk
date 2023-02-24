@@ -19,6 +19,7 @@ import XCTest
 import CoreMedia
 @testable import PexipScreenCapture
 
+// swiftlint:disable type_body_length
 final class BroadcastSampleHandlerTests: XCTestCase {
     private let appGroup = "test"
     private let filePath = NSTemporaryDirectory().appending("/test")
@@ -42,7 +43,8 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         delegate = BroadcastSampleHandlerDelegateMock()
         handler = BroadcastSampleHandler(
             videoSender: videoSender,
-            userDefaults: userDefaults
+            userDefaults: userDefaults,
+            keepAliveInterval: 20
         )
         handler.delegate = delegate
 
@@ -120,6 +122,40 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         wait(for: [errorExpectation, finishExpectation], timeout: 0.3)
     }
 
+    func testKeepAliveTimer() {
+        let startExpectation = self.expectation(description: "Sender started")
+        let errorExpectation = self.expectation(description: "Error expectation")
+        let finishExpectation = self.expectation(description: "Sender finished")
+
+        notificationCenter.addObserver(self, for: .senderStarted, using: { [weak self] in
+            // Set keep alive date 60 seconds back in time
+            self?.userDefaults.broadcastKeepAliveDate = Date().addingTimeInterval(-60)
+            startExpectation.fulfill()
+        })
+
+        notificationCenter.addObserver(self, for: .senderFinished, using: {
+            finishExpectation.fulfill()
+        })
+
+        let delegate = BroadcastSampleHandlerDelegateMock()
+        delegate.onError = { error in
+            if (error as? BroadcastError) == .noConnection {
+                errorExpectation.fulfill()
+            }
+        }
+
+        handler = BroadcastSampleHandler(
+            videoSender: videoSender,
+            userDefaults: userDefaults,
+            keepAliveInterval: 0.1
+        )
+        handler.delegate = delegate
+        userDefaults.broadcastKeepAliveDate = Date()
+        handler.broadcastStarted()
+
+        wait(for: [startExpectation, errorExpectation, finishExpectation], timeout: 0.5)
+    }
+
     func testBroadcastPaused() {
         let expectation = self.expectation(description: "Sender paused")
 
@@ -173,7 +209,11 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         let expectation = self.expectation(description: "Sender finished")
 
         videoSender = BroadcastVideoSender(filePath: "")
-        handler = BroadcastSampleHandler(videoSender: videoSender, userDefaults: userDefaults)
+        handler = BroadcastSampleHandler(
+            videoSender: videoSender,
+            userDefaults: userDefaults,
+            keepAliveInterval: 20
+        )
         delegate.onError = { error in
             if (error as? BroadcastError) == .noConnection {
                 expectation.fulfill()
