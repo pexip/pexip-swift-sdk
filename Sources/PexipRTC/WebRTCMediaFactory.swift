@@ -114,7 +114,8 @@ public final class WebRTCMediaFactory: MediaFactory {
     ) -> ScreenMediaTrack {
         let screenMediaCapturer = BroadcastScreenCapturer(
             appGroup: appGroup,
-            broadcastUploadExtension: broadcastUploadExtension
+            broadcastUploadExtension: broadcastUploadExtension,
+            defaultFps: defaultVideoProfile.fps
         )
         return createScreenMediaTrack(
             screenMediaCapturer: screenMediaCapturer,
