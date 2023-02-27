@@ -75,6 +75,7 @@ final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate 
 
     func stopCapture(reason: ScreenCaptureStopReason?) async throws {
         try await capturer.stopCapture(reason: reason)
+        startTimeNs = nil
         logger?.info("Screen capture did stop.")
     }
 
