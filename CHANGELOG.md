@@ -7,6 +7,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.0] - 2023-03-02
+
+### Added
+- Screen capture:
+  - Make it possible to start capture session not only from the app, but also from the iOS control center while on an active call
+  - Introduce keep-alive time in order to stop broadcast extension, started from the iOS control center, when there are no active calls
+  - Add more broadcast error types and the API to finish screen capture session with reason, such as callEnded or presentationStolen. See `ScreenMediaTrack.stopCapture(reason:)`
+
+### Changed
+- Screen capture: change IPC on iOS from Unix domain sockets to memory-mapped file
+- Deprecate `ScreenMediaTrackFactory.createScreenMediaTrack(appGroup:broadcastUploadExtension)` on iOS, use `createScreenMediaTrack(appGroup:broadcastUploadExtension:defaultVideoProfile)` instead
+- Deprecate `ScreenMediaTrackFactory.createScreenMediaTrack(mediaSource)` on macOS, use `createScreenMediaTrack(mediaSource:defaultVideoProfile)` instead
+- Deprecate `ScreenMediaCapturer.startCapture(atFps:outputDimensions)` on iOS, use `startCapture(atFps:)` instead
+
+### Fixed
+- Adapt WebRTC output format on iOS
+
 ## [0.6.0] - 2023-01-18
 
 ### Added
@@ -32,7 +49,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [0.5.0] - 2022-09-13
 
 ### Added
-
 - Make it possible to receive incoming calls with [Registration API](https://pexip.github.io/pexip-swift-sdk/sdk/documentation/pexipswiftsdk/registration)
 
 ### Changed
@@ -47,7 +63,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [0.4.0] - 2022-08-02
 
 ### Added
-
 - [Video filters](https://pexip.github.io/pexip-swift-sdk/sdk/documentation/pexipswiftsdk/videofilters), e.g. background blur, virtual background, custom filters, etc.
 - [Live captions](https://pexip.github.io/pexip-swift-sdk/sdk/documentation/pexipswiftsdk/livecaptions)
 - [DTMF support](https://pexip.github.io/pexip-swift-sdk/frameworks/ios/PexipConference/documentation/pexipconference/conference/dtmf(signals:))
@@ -55,7 +70,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [0.3.0] - 2022-06-27
 
 ### Added
-
 - [SDK Documentation](https://pexip.github.io/pexip-swift-sdk)
 - [Screen sharing on iOS](https://pexip.github.io/pexip-swift-sdk/sdk/documentation/pexipswiftsdk/iosscreensharing) with ReplayKit and Broadcast Upload Extensions
 - [Screen sharing on macOS](https://pexip.github.io/pexip-swift-sdk/sdk/documentation/pexipswiftsdk/macosscreensharing)
@@ -63,27 +77,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Move bandwidth setting from `QualityProfile` to `MediaConnectionConfig`
 
 ### Changed
-
 - **BREAKING**: rename public methods in `MediaConnection`, see [docs](https://pexip.github.io/pexip-swift-sdk/frameworks/ios/PexipMedia/documentation/pexipmedia/mediaconnection) for reference.
 
 ## [0.2.0] - 2022-05-12
 
 ### Added
-
 - Introduce `MediaConnectionFactory` to create local media tracks without an instance of `MediaConnection`
 - Update example projects
 
 ### Changed
-
 - Use WebRTC M96
 
 ## [0.1.0] - 2022-05-06
 
 ### Added
-
 - Initial release
 
-[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.7.0
 [0.6.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.6.0
 [0.5.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.5.0
 [0.4.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.4.0

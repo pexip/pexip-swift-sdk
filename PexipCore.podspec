@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipCore'
-    s.version      = '0.6.0'
+    s.version      = '0.7.0'
     s.summary      = 'Pexip Swift SDK extensions, utilities and shared components.'
     s.description  = <<-DESC
                      Pexip Swift SDK is designed for use by iOS/macOS voice/video applications 
