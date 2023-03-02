@@ -63,14 +63,19 @@ final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate 
 
     func startCapture(withVideoProfile videoProfile: QualityProfile) async throws {
         self.videoProfile = videoProfile
+        #if os(iOS)
+        try await capturer.startCapture(atFps: videoProfile.fps)
+        #else
         try await capturer.startCapture(
             atFps: videoProfile.fps,
             outputDimensions: videoProfile.dimensions
         )
+        #endif
     }
 
     func stopCapture(reason: ScreenCaptureStopReason?) async throws {
         try await capturer.stopCapture(reason: reason)
+        startTimeNs = nil
         logger?.info("Screen capture did stop.")
     }
 
@@ -80,17 +85,22 @@ final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate 
         _ capturer: ScreenMediaCapturer,
         didCaptureVideoFrame videoFrame: VideoFrame
     ) {
+        #if os(iOS)
+
+        // Screen frames are always portrait while video profile is landscape.
+        let adaptedDimensions = videoFrame.adaptedContentDimensions(
+            to: CMVideoDimensions(
+                width: Int32(videoProfile.height),
+                height: Int32(videoProfile.width)
+            )
+        )
+        let rtcPixelBuffer = RTCCVPixelBuffer(pixelBuffer: videoFrame.pixelBuffer)
+
+        #else
         let cropDimensions = videoFrame.contentDimensions
         let adaptedDimensions = videoFrame.adaptedContentDimensions(
             to: videoProfile.dimensions
         )
-
-        videoSource.adaptOutputFormat(
-            toWidth: adaptedDimensions.width,
-            height: adaptedDimensions.height,
-            fps: Int32(videoProfile.fps)
-        )
-
         let rtcPixelBuffer = RTCCVPixelBuffer(
             pixelBuffer: videoFrame.pixelBuffer,
             adaptedWidth: adaptedDimensions.width,
@@ -99,12 +109,19 @@ final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate 
             cropHeight: cropDimensions.height,
             cropX: videoFrame.contentX,
             cropY: videoFrame.contentY
-        )
+        ).toI420()
+
+        #endif
 
         startTimeNs = startTimeNs ?? videoFrame.displayTimeNs
+        videoSource.adaptOutputFormat(
+            toWidth: adaptedDimensions.width,
+            height: adaptedDimensions.height,
+            fps: Int32(videoProfile.fps)
+        )
 
         let rtcVideoFrame = RTCVideoFrame(
-            buffer: rtcPixelBuffer.toI420(),
+            buffer: rtcPixelBuffer,
             rotation: videoFrame.orientation.rtcRotation,
             timeStampNs: Int64(videoFrame.displayTimeNs - startTimeNs!)
         )

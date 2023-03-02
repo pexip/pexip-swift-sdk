@@ -194,31 +194,20 @@ final class BroadcastScreenCapturerTests: XCTestCase {
     }
 
     func testStartCapture() async throws {
-        try await capturer.startCapture(
-            atFps: 30,
-            outputDimensions: outputDimensions
-        )
-
+        try await capturer.startCapture(atFps: 30)
         XCTAssertEqual(userDefaults.broadcastFps, 30)
     }
 
     func testStartCaptureWhenCapturing() async throws {
         // 1. Open broadcast extension dialogue
-        try await capturer.startCapture(
-            atFps: 25,
-            outputDimensions: outputDimensions
-        )
-
+        try await capturer.startCapture(atFps: 25)
         XCTAssertEqual(userDefaults.broadcastFps, 25)
 
         // 2. Start receiver
         startReceiver()
 
         // 3. Try to start capture again
-        try await capturer.startCapture(
-            atFps: 15,
-            outputDimensions: outputDimensions
-        )
+        try await capturer.startCapture(atFps: 15)
 
         // 4. Assert that there were no fps changes
         XCTAssertEqual(userDefaults.broadcastFps, 25)

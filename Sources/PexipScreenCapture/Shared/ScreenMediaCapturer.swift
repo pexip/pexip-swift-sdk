@@ -43,6 +43,29 @@ public protocol ScreenMediaCapturerDelegate: AnyObject {
 public protocol ScreenMediaCapturer: AnyObject {
     var delegate: ScreenMediaCapturerDelegate? { get set }
 
+    #if os(iOS)
+
+    /**
+     Starts screen capture with the given fps.
+     - Parameters:
+        - fps: The FPS of a video stream (15...30)
+     */
+    func startCapture(atFps fps: UInt) async throws
+
+    /**
+     Starts screen capture with the given video quality profile.
+     - Parameters:
+        - fps: The FPS of a video stream (1...60)
+        - outputDimensions: The dimensions of the output video.
+     */
+    @available(*, deprecated, message: "Use startCapture(atFps:) instead.")
+    func startCapture(
+        atFps fps: UInt,
+        outputDimensions: CMVideoDimensions
+    ) async throws
+
+    #else
+
     /**
      Starts screen capture with the given video quality profile.
      - Parameters:
@@ -53,6 +76,8 @@ public protocol ScreenMediaCapturer: AnyObject {
         atFps fps: UInt,
         outputDimensions: CMVideoDimensions
     ) async throws
+
+    #endif
 
     /// Stops screen capture
     func stopCapture() async throws

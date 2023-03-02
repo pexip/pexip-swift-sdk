@@ -94,16 +94,11 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
     // MARK: - Internal
 
     /**
-     Starts the screen capture with the given video quality profile.
-
+     Starts screen capture with the given fps.
      - Parameters:
-        - fps: The FPS of a video stream (1...30)
-        - outputDimensions: The dimensions of the output video.
+        - fps: The FPS of a video stream (15...30)
      */
-    public func startCapture(
-        atFps fps: UInt,
-        outputDimensions: CMVideoDimensions
-    ) async throws {
+    public func startCapture(atFps fps: UInt) async throws {
         guard !isCapturing.value else {
             return
         }
@@ -120,6 +115,14 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
             let button = view.subviews.first(where: { $0 is UIButton }) as? UIButton
             button?.sendActions(for: .touchUpInside)
         }
+    }
+
+    @available(*, deprecated, message: "Use startCapture(atFps:) instead.")
+    public func startCapture(
+        atFps fps: UInt,
+        outputDimensions: CMVideoDimensions
+    ) async throws {
+        try await startCapture(atFps: fps)
     }
 
     public func stopCapture() throws {
