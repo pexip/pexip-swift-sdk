@@ -59,19 +59,19 @@ PODS:
     - nanopb/encode (= 2.30909.0)
   - nanopb/decode (2.30909.0)
   - nanopb/encode (2.30909.0)
-  - PexipCore (0.6.0)
-  - PexipInfinityClient (0.6.0):
-    - PexipCore (= 0.6.0)
-  - PexipMedia (0.6.0):
-    - PexipCore (= 0.6.0)
-    - PexipScreenCapture (= 0.6.0)
-  - PexipRTC (0.6.0):
-    - PexipCore (= 0.6.0)
-    - PexipMedia (= 0.6.0)
+  - PexipCore (0.7.0)
+  - PexipInfinityClient (0.7.0):
+    - PexipCore (= 0.7.0)
+  - PexipMedia (0.7.0):
+    - PexipCore (= 0.7.0)
+    - PexipScreenCapture (= 0.7.0)
+  - PexipRTC (0.7.0):
+    - PexipCore (= 0.7.0)
+    - PexipMedia (= 0.7.0)
     - WebRTCObjc (= 105.0.0)
-  - PexipScreenCapture (0.6.0)
-  - PexipVideoFilters (0.6.0):
-    - PexipCore (= 0.6.0)
+  - PexipScreenCapture (0.7.0)
+  - PexipVideoFilters (0.7.0):
+    - PexipCore (= 0.7.0)
   - PromisesObjC (2.2.0)
   - Protobuf (3.22.0)
   - WebRTCObjc (105.0.0)
@@ -132,12 +132,12 @@ SPEC CHECKSUMS:
   MLKitVision: 96c96571190b7f63eddf4a12068ce8a8689e0d2c
   MLKitXenoCommon: 39b7097db51f4716a2a0ff4e4459e002499f5523
   nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431
-  PexipCore: 377536199083547c191fff241655f68d374e2366
-  PexipInfinityClient: 4cfe592fd7f2db9d285daaf3a83872e07baccbc6
-  PexipMedia: 518256b706e540ba040f9d8032f052d18bd1e014
-  PexipRTC: 8dd43160a90c7845df14c15b1b8f3724def3fca1
-  PexipScreenCapture: f5220a9041844f80f87c00329141ffd1ff24395b
-  PexipVideoFilters: a12c29b7fa7b1f43e52deff842ec0f4cf933dad8
+  PexipCore: fccbf920f8112b7c143cde51f551987a4969d6c4
+  PexipInfinityClient: fbfa19b162361a1c18ae17e80b40efd1374c9b6f
+  PexipMedia: 7e2aefb66233c29502d15ff798d2501e83bfba5c
+  PexipRTC: 44717aa4a23b1c8758d5144a74ee5d5890d1b2db
+  PexipScreenCapture: ecf8b4348f0651983224eb7d13bd3ea84ed9a3bf
+  PexipVideoFilters: fc79f9c2c365696f8361e5f2d3cf9b1c5316a5ce
   PromisesObjC: 09985d6d70fbe7878040aa746d78236e6946d2ef
   Protobuf: 5e6cbc143d02fe08585d86b0098f8b755d2caaab
   WebRTCObjc: eafbb6955adb16faa7d369ff308796caf854abf3

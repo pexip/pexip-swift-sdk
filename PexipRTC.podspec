@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipRTC'
-    s.version      = '0.6.0'
+    s.version      = '0.7.0'
     s.summary      = 'Pexip WebRTC-based media stack for sending and receiving video streams.'
     s.description  = <<-DESC
                      Pexip Swift SDK is designed for use by iOS/macOS voice/video applications 
