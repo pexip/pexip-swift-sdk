@@ -117,6 +117,14 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
         }
     }
 
+    @available(*, deprecated, message: "Use startCapture(atFps:) instead.")
+    public func startCapture(
+        atFps fps: UInt,
+        outputDimensions: CMVideoDimensions
+    ) async throws {
+        try await startCapture(atFps: fps)
+    }
+
     public func stopCapture() throws {
         try stopCapture(reason: nil)
     }
