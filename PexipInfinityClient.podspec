@@ -12,6 +12,7 @@ Pod::Spec.new do |s|
     s.platform     = :ios, :osx
     s.ios.deployment_target = '13.0'
     s.osx.deployment_target = '10.15'
+    s.swift_versions = ['5']
     s.source       = { :git => 'https://github.com/pexip/pexip-swift-sdk.git', :tag => "#{s.version}" }
     s.source_files = [
         'Sources/PexipInfinityClient/**/*.swift'

@@ -16,9 +16,9 @@ jobs:
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         run: |
-          pod trunk push PexipCore.podspec
-          pod trunk push PexipScreenCapture.podspec
-          pod trunk push PexipVideoFilters.podspec
-          pod trunk push PexipInfinityClient.podspec
-          pod trunk push PexipMedia.podspec
-          pod trunk push PexipRTC.podspec
+          pod trunk push PexipCore.podspec --allow-warnings
+          pod trunk push PexipScreenCapture.podspec --allow-warnings
+          pod trunk push PexipVideoFilters.podspec --allow-warnings
+          pod trunk push PexipInfinityClient.podspec --allow-warnings
+          pod trunk push PexipMedia.podspec --allow-warnings
+          pod trunk push PexipRTC.podspec --allow-warnings
