@@ -16,6 +16,8 @@ jobs:
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         run: |
+          pod repo remove trunk
+          pod setup
           pod trunk push PexipCore.podspec --allow-warnings
           pod trunk push PexipScreenCapture.podspec --allow-warnings
           pod trunk push PexipVideoFilters.podspec --allow-warnings
