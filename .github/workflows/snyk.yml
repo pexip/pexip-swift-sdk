@@ -1,9 +1,9 @@
-name: Main branch validations
+name: Run Snyk to check for vulnerabilities
 
 on:
+  pull_request:
   push:
-    branches:
-      - main
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
@@ -11,12 +11,11 @@ concurrency:
 
 jobs:
   snyk:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@master
       - uses: snyk/actions/cocoapods@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          command: monitor
-          args: --strict-out-of-sync=true --remote-repo-url=$GITHUB_REPOSITORY
+          args: --strict-out-of-sync=true --severity-threshold=high       
