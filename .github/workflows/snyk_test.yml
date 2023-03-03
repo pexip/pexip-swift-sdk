@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   snyk:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
       - uses: snyk/actions/cocoapods@master
