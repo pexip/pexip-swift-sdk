@@ -11,11 +11,19 @@ concurrency:
 
 jobs:
   snyk:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
+    container:
+      image: docker://snyk/snyk:swift
+
     steps:
-      - uses: actions/checkout@master
-      - uses: snyk/actions/cocoapods@master
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Snyk test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --strict-out-of-sync=true --severity-threshold=high       
+          FORCE_COLOR: 2
+          SNYK_INTEGRATION_NAME: GITHUB_ACTIONS
+          SNYK_INTEGRATION_VERSION: swift
+        run: |
+          snyk test --strict-out-of-sync=true --severity-threshold=high     
