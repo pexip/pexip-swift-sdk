@@ -1,4 +1,4 @@
-name: Run Snyk test
+name: Snyk test
 
 on:
   pull_request:
@@ -22,7 +22,7 @@ jobs:
       - name: Snyk test
         run: |
           swift package show-dependencies && snyk test --severity-threshold=high
-          swift package show-dependencies --package-path=./Docs/pexip-swift-sdk-docs && snyk test --severity-threshold=high
+          swift package show-dependencies --package-path=./Docs/pexip-swift-sdk-docs && snyk test --file=./Docs/pexip-swift-sdk-docs/Package.swift --severity-threshold=high
           snyk test --file=./Examples/VideoFilters/Podfile --strict-out-of-sync=true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

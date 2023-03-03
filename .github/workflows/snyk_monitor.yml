@@ -1,4 +1,4 @@
-name: Run Snyk monitor
+name: Snyk monitor
 
 on:
   push:
