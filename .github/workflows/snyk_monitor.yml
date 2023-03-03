@@ -9,17 +9,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  snyk-package:
+  snyk:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@master
-      - uses: snyk/actions/setup@master
-
+      
       - name: Install coreutils for macOS
         run: brew install coreutils
 
       - name: Snyk monitor
+        uses: snyk/actions/setup@master
         run: |
-          snyk monitor --file=Examples/VideoFilters/Podfile --strict-out-of-sync=true
+          snyk monitor --file=./Examples/VideoFilters/Podfile --strict-out-of-sync=true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
