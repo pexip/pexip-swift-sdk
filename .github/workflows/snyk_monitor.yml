@@ -1,7 +1,6 @@
 name: Run Snyk monitor
 
 on:
-  pull_request:
   push:
     branches: [main]
 
@@ -15,6 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - uses: snyk/actions/setup@master
+
+      - name: Install coreutils for macOS
+        run: brew install coreutils
 
       - name: Snyk monitor
         run: |

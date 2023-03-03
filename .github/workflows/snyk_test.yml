@@ -2,8 +2,6 @@ name: Run Snyk test
 
 on:
   pull_request:
-  push:
-    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
@@ -15,6 +13,9 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - uses: snyk/actions/setup@master
+
+      - name: Install coreutils for macOS
+        run: brew install coreutils
 
       - name: Snyk test
         run: |
