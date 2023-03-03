@@ -1,0 +1,28 @@
+name: Snyk test
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  snyk:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@master
+      
+      - name: Install coreutils for macOS
+        run: brew install coreutils
+
+      - name: Setup Snyk
+        uses: snyk/actions/setup@master
+
+      - name: Snyk test
+        run: |
+          swift package show-dependencies && snyk test --severity-threshold=high
+          swift package show-dependencies --package-path=./Docs/pexip-swift-sdk-docs && snyk test --file=./Docs/pexip-swift-sdk-docs/Package.swift --severity-threshold=high
+          snyk test --file=./Examples/VideoFilters/Podfile --strict-out-of-sync=true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
