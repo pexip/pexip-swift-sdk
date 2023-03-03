@@ -1,4 +1,4 @@
-name: Run Snyk test
+name: Run Snyk monitor
 
 on:
   pull_request:
@@ -16,10 +16,8 @@ jobs:
       - uses: actions/checkout@master
       - uses: snyk/actions/setup@master
 
-      - name: Snyk test
+      - name: Snyk monitor
         run: |
-          swift package show-dependencies && snyk test --severity-threshold=high
-          swift package show-dependencies --package-path=./Docs/pexip-swift-sdk-docs && snyk test --severity-threshold=high
-          snyk test --file=Examples/VideoFilters/Podfile --strict-out-of-sync=true
+          snyk monitor --file=Examples/VideoFilters/Podfile --strict-out-of-sync=true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
