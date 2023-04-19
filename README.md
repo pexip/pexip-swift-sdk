@@ -39,6 +39,8 @@ media signaling technologies in the future, or Infinity might be interchanged wi
 - Swift 5.5 with structured concurrency support
 - Xcode 13
 
+:warning: **The project doesn't compile on Xcode 14.3 because of incorrect availability attributes CGDisplayStream.h file (introduced: is 13.0 instead of 10.8). Let's hope it's fixed in future Xcode versions.**
+
 ## Installation
 
 ### Swift Package Manager
