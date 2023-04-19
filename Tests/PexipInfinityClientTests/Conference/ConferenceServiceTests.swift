@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -52,8 +52,13 @@ final class ConferenceServiceTests: APITestCase {
             responseJSON: responseJSON,
             assertHTTPErrors: false,
             execute: { [weak self] in
-                var token = try await service.requestToken(fields: fields, pin: pin)
-                XCTAssertEqual(self?.lastRequest?.value(forHTTPHeaderField: "pin"), pin)
+                guard let self else {
+                    XCTFail("Test case was deallocated")
+                    return
+                }
+
+                var token = try await self.service.requestToken(fields: fields, pin: pin)
+                XCTAssertEqual(self.lastRequest?.value(forHTTPHeaderField: "pin"), pin)
                 XCTAssertEqual(token.value, expectedToken.value)
                 XCTAssertEqual(token.expires, expectedToken.expires)
                 // Update token to have the same `updatedAt` date as in expected token
@@ -82,12 +87,17 @@ final class ConferenceServiceTests: APITestCase {
             responseJSON: responseJSON,
             assertHTTPErrors: false,
             execute: { [weak self] in
-                var token = try await service.requestToken(
+                guard let self else {
+                    XCTFail("Test case was deallocated")
+                    return
+                }
+
+                var token = try await self.service.requestToken(
                     fields: fields,
                     incomingToken: incomingToken
                 )
                 XCTAssertEqual(
-                    self?.lastRequest?.value(forHTTPHeaderField: "token"),
+                    self.lastRequest?.value(forHTTPHeaderField: "token"),
                     incomingToken
                 )
                 XCTAssertEqual(token.value, expectedToken.value)
@@ -366,6 +376,7 @@ final class ConferenceServiceTests: APITestCase {
         )
     }
 }
+// swiftlint:enable type_body_length
 
 // MARK: - Private types
 

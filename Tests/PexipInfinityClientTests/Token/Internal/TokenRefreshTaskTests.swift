@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ final class TokenRefreshTaskTests: XCTestCase {
 
     // MARK: - Setup
 
-    // swiftlint:disable unowned_variable_capture
     override func setUpWithError() throws {
         try super.setUpWithError()
 
@@ -48,8 +47,8 @@ final class TokenRefreshTaskTests: XCTestCase {
         )
         store = TokenStore(
             token: .randomToken(),
-            currentDateProvider: { [unowned self] in
-                self.currentDate
+            currentDateProvider: { [weak self] in
+                self?.currentDate ?? Date()
             }
         )
         service = TokenServiceMock()
@@ -368,12 +367,13 @@ final class TokenRefreshTaskTests: XCTestCase {
         DefaultTokenRefreshTask(
             store: store,
             service: service,
-            currentDate: { [unowned self] in
-                self.currentDate
+            currentDate: { [weak self] in
+                self?.currentDate ?? Date()
             }
         )
     }
 }
+// swiftlint:enable type_body_length
 
 // MARK: - Mocks
 
@@ -404,3 +404,4 @@ private final class TokenServiceMock: TokenService {
         try releaseTokenResult.get()
     }
 }
+// swiftlint:enable file_length

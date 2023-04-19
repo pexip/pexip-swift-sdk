@@ -99,4 +99,5 @@ struct ConferenceEventParser: InfinityEventParser {
             return .clientDisconnected(event)
         }
     }
+    // swiftlint:enable cyclomatic_complexity
 }

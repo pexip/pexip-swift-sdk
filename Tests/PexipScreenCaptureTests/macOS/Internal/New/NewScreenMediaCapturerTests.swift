@@ -613,6 +613,10 @@ final class StreamMock: SCStream {
 
         return sampleBuffer!
     }
+    // swiftlint:enable function_body_length
 }
 
 #endif
+
+// swiftlint:enable type_body_length
+// swiftlint:enable file_length

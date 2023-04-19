@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -109,6 +109,7 @@ final class CameraViewModel: ObservableObject {
             )
         }
     }
+    // swiftlint:enable cyclomatic_complexity function_body_length
 
     private func segmenter(
         for segmentationSettings: Settings.Segmentation

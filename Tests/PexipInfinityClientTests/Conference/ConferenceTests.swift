@@ -19,8 +19,7 @@ import PexipCore
 import TestHelpers
 @testable import PexipInfinityClient
 
-// swiftlint:disable file_length
-// swiftlint:disable type_body_length
+// swiftlint:disable file_length type_body_length function_body_length
 final class ConferenceTests: XCTestCase {
     private var conference: DefaultConference!
     private var tokenStore: TokenStore<ConferenceToken>!
@@ -39,7 +38,6 @@ final class ConferenceTests: XCTestCase {
 
     // MARK: - Setup
 
-    // swiftlint:disable function_body_length
     override func setUp() async throws {
         try await super.setUp()
 
@@ -764,6 +762,7 @@ final class ConferenceTests: XCTestCase {
         wait(for: [assertExpectation], timeout: 0.1)
     }
 }
+// swiftlint:enable type_body_length
 
 // MARK: - Mocks
 
@@ -869,3 +868,5 @@ private extension ConferenceStatus {
         )
     }
 }
+// swiftlint:enable function_body_length
+// swiftlint:enable file_length

@@ -469,12 +469,12 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         )
     }
 }
+// swiftlint:enable type_body_length
 
 // MARK: - Mocks
 
 // swiftlint:disable unavailable_function
 // swiftlint:disable fatal_error_message
-
 private final class ParticipantServiceMock: ParticipantService {
     enum Action {
         case calls
@@ -581,3 +581,6 @@ private final class CallServiceMock: CallService {
         return try XCTUnwrap(results[action]?.get() as? T)
     }
 }
+// swiftlint:enable unavailable_function
+// swiftlint:enable fatal_error_message
+// swiftlint:enable file_length

@@ -310,7 +310,6 @@ private final class ConferenceServiceMock: ConferenceService {
     }
 }
 
-// swiftlint:disable unavailable_function
 private struct ParticipantServiceMock: ParticipantService {
     let id: String
 
@@ -365,6 +364,7 @@ private struct ParticipantServiceMock: ParticipantService {
         fatalError("Not implemented")
     }
 }
+// swiftlint:enable unavailable_function
 
 private final class DataSenderMock: DataSender {
     private(set) var data: Data?

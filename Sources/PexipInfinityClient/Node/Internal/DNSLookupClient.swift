@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -122,6 +122,7 @@ final class DNSLookupClient: DNSLookupClientProtocol {
             context.records.append(Data(bytes: bytes, count: Int(length)))
         }
     }
+    // swiftlint:enable closure_parameter_position
 }
 
 // MARK: - Private extensions

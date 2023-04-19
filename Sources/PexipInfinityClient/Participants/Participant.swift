@@ -241,3 +241,4 @@ public struct Participant: Codable, Hashable, Identifiable {
         case deny = "DENY"
     }
 }
+// swiftlint:enable identifier_name

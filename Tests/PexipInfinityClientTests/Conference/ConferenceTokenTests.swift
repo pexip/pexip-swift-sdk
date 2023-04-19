@@ -108,6 +108,7 @@ final class ConferenceTokenTests: XCTestCase {
             )
         )
     }
+    // swiftlint:enable function_body_length
 
     func testUpdating() throws {
         let date = Date()

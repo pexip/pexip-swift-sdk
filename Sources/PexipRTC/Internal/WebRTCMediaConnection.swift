@@ -594,3 +594,4 @@ extension WebRTCMediaConnection: RTCDataChannelDelegate {
         }
     }
 }
+// swiftlint:enable file_length

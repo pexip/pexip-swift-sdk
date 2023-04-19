@@ -371,6 +371,7 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         notificationCenter.post(.receiverStarted)
     }
 }
+// swiftlint:enable type_body_length
 
 // MARK: - Mocks
 
