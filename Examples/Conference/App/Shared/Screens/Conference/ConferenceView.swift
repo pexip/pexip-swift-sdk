@@ -121,8 +121,7 @@ struct ConferenceView: View {
         )
     }
 
-    @ViewBuilder
-    private var connectedView: some View {
+    @ViewBuilder private var connectedView: some View {
         GeometryReader { geometry in
             let callViewSize = callViewSize(geometry: geometry)
 

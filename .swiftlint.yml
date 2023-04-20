@@ -69,6 +69,9 @@ identifier_name:
   excluded:
     - id
     - to
+attributes:
+  always_on_same_line:
+    ["@AppStorage", "@NSApplicationDelegateAdaptor"]
 file_header:
   severity: error
   required_pattern: |

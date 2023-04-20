@@ -50,6 +50,7 @@ public struct ConferenceToken: InfinityToken, Codable, Hashable {
         case _analyticsEnabled = "analytics_enabled"
         case _directMedia = "direct_media"
     }
+    // swiftlint:enable identifier_name
 
     /// A textual representation of this type, suitable for debugging.
     public static let name = "Conference token"

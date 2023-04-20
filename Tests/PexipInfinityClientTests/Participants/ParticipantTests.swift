@@ -16,8 +16,8 @@
 import XCTest
 @testable import PexipInfinityClient
 
+// swiftlint:disable function_body_length
 final class ParticipantTests: XCTestCase {
-    // swiftlint:disable function_body_length
     func testDecoding() throws {
         let id = "50b956c8-9a63-4711-8630-3810f8666b04"
         let json = """
@@ -201,3 +201,4 @@ final class ParticipantTests: XCTestCase {
         XCTAssertFalse(participant.isTransferSupported)
     }
 }
+// swiftlint:enable function_body_length

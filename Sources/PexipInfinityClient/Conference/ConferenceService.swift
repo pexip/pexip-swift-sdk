@@ -235,3 +235,4 @@ struct DefaultConferenceService: ConferenceService {
         }
     }
 }
+// swiftlint:enable line_length

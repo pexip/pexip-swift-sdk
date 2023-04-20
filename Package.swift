@@ -79,9 +79,6 @@ let package = Package(
             dependencies: [
                 "PexipMedia",
                 .product(name: "WebRTC", package: "webrtc-objc")
-            ],
-            cSettings: [
-               .unsafeFlags(["-w"])
             ]
         ),
         .testTarget(

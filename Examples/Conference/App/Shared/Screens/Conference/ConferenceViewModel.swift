@@ -390,6 +390,7 @@ private extension ConferenceViewModel {
             }
             .store(in: &cancellables)
     }
+    // swiftlint:enable cyclomatic_complexity
 }
 
 // MARK: - Private

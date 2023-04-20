@@ -349,6 +349,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
 
         XCTAssertEqual(states, [.started, .newFrame, .stopped])
     }
+    // swiftlint:enable function_body_length
 
     func testDeinit() {
         startReceiver()
@@ -370,5 +371,6 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         wait(for: [expectation], timeout: 0.1)
     }
 }
+// swiftlint:enable type_body_length
 
 #endif

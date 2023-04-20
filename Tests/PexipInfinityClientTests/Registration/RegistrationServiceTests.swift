@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,12 +44,17 @@ final class RegistrationServiceTests: APITestCase {
             responseJSON: responseJSON,
             assertHTTPErrors: false,
             execute: { [weak self] in
+                guard let self else {
+                    XCTFail("Test case was deallocated")
+                    return
+                }
+
                 var token = try await service.requestToken(
                     username: username,
                     password: password
                 )
                 XCTAssertEqual(
-                    self?.lastRequest?.value(forHTTPHeaderField: "Authorization"),
+                    self.lastRequest?.value(forHTTPHeaderField: "Authorization"),
                     HTTPHeader.authorization(username: username, password: password).value
                 )
                 XCTAssertEqual(token.value, expectedToken.value)

@@ -29,10 +29,9 @@ import ScreenCaptureKit
  */
 @available(macOS 12.3, *)
 final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>: NSObject,
-    ScreenMediaCapturer,
-    SCStreamOutput,
-    SCStreamDelegate
-{
+                                                                         ScreenMediaCapturer,
+                                                                         SCStreamOutput,
+                                                                         SCStreamDelegate {
     let source: ScreenMediaSource
     weak var delegate: ScreenMediaCapturerDelegate?
     private(set) var isCapturing = false
@@ -121,6 +120,7 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>: NSObjec
         else {
             return
         }
+        // swiftlint:enable force_cast
 
         let transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
         contentRect = contentRect.applying(transform)

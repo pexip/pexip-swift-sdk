@@ -258,6 +258,8 @@ final class DefaultConference: Conference {
             notify(outputEvent)
         }
     }
+    // swiftlint:enable cyclomatic_complexity
+    // swiftlint:enable function_body_length
 
     @MainActor
     private func notify(_ event: ConferenceClientEvent) {

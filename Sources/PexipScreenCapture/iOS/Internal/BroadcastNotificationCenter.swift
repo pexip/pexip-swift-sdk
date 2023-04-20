@@ -67,6 +67,7 @@ final class BroadcastNotificationCenter {
                 observation.handler()
             }
         }
+        // swiftlint:enable prefer_self_in_static_references
 
         CFNotificationCenterAddObserver(
             center,

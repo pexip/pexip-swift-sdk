@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ScreenCaptureKit
 // MARK: - ShareableContent
 
 // swiftlint:disable type_name
+
 @available(macOS 12.3, *)
 protocol ShareableContent {
     associatedtype Content: ShareableContent
@@ -91,5 +92,7 @@ extension SCDisplay: Display {}
 
 @available(macOS 12.3, *)
 extension SCRunningApplication: RunningApplication {}
+
+// swiftlint:enable type_name
 
 #endif

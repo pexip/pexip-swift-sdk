@@ -383,6 +383,7 @@ final class RosterTests: XCTestCase {
         XCTAssertEqual(publishCount, 3)
     }
 }
+// swiftlint:enable type_body_length
 
 // MARK: - Mocks
 
