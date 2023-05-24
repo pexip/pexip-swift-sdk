@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -88,9 +88,18 @@ struct DefaultNodeResolver: NodeResolver {
         logger?.debug(
             "Checking if there are any A records available for \(host)"
         )
-        return try await dnsLookupClient
-            .resolveARecords(for: host, dnssec: dnssec)
-            .compactMap(\.nodeAddress)
+        let aRecords = try await dnsLookupClient.resolveARecords(
+            for: host,
+            dnssec: dnssec
+        )
+        guard !aRecords.isEmpty else {
+            return []
+        }
+
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = host
+        return [components.url].compactMap({ $0 })
     }
 }
 
