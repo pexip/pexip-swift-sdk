@@ -42,7 +42,7 @@ public struct VideoComponent: View {
         - isMirrored: Indicates whether the video should be mirrored about its vertical axis
         - isReversed: Indicates whether the aspect ratio numbers should
                       get reversed (for vertical video)
-        - setRenderer: A function that sets the give renderer
+        - setRenderer: A function that sets the given renderer
      */
     public init(
         contentMode: VideoContentMode,
