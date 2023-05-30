@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,9 +17,34 @@ import XCTest
 @testable import PexipMedia
 
 final class VideoComponentTests: XCTestCase {
+    func testInitWithSetRenderer() {
+        var expectedView: VideoRenderer?
+        var expectedAspectFit: Bool?
+        let contentMode = VideoContentMode.fit16x9
+        let view = VideoRenderer()
+        let component = VideoComponent(
+            contentMode: contentMode,
+            isMirrored: true,
+            isReversed: true,
+            setRenderer: { view, aspectFit in
+                expectedView = view
+                expectedAspectFit = aspectFit
+            }
+        )
+
+        component.setRenderer(view, true)
+
+        XCTAssertEqual(component.contentMode, contentMode)
+        XCTAssertTrue(component.isMirrored)
+        XCTAssertTrue(component.isReversed)
+        XCTAssertTrue(expectedView === view)
+        XCTAssertTrue(expectedAspectFit == true)
+    }
+
     func testInitWithTrack() {
         let track = VideoTrackMock()
         let contentMode = VideoContentMode.fit16x9
+        let view = VideoRenderer()
         let component = VideoComponent(
             track: track,
             contentMode: contentMode,
@@ -27,52 +52,67 @@ final class VideoComponentTests: XCTestCase {
             isReversed: true
         )
 
-        XCTAssertEqual(component.track as? VideoTrackMock, track)
+        component.setRenderer(view, true)
+
         XCTAssertEqual(component.contentMode, contentMode)
         XCTAssertTrue(component.isMirrored)
         XCTAssertTrue(component.isReversed)
+        XCTAssertTrue(track.view === view)
+        XCTAssertTrue(track.aspectFit == true)
     }
 
     func testInitWithTrackAndDefaultValues() {
         let track = VideoTrackMock()
         let contentMode = VideoContentMode.fit16x9
+        let view = VideoRenderer()
         let component = VideoComponent(
             track: track,
             contentMode: contentMode
         )
 
-        XCTAssertEqual(component.track as? VideoTrackMock, track)
+        component.setRenderer(view, true)
+
         XCTAssertEqual(component.contentMode, contentMode)
         XCTAssertFalse(component.isMirrored)
         XCTAssertFalse(component.isReversed)
+        XCTAssertTrue(track.view === view)
+        XCTAssertTrue(track.aspectFit == true)
     }
 
     func testInitWithVideo() {
         let track = VideoTrackMock()
         let contentMode = VideoContentMode.fit16x9
         let video = Video(track: track, contentMode: contentMode)
+        let view = VideoRenderer()
         let component = VideoComponent(
             video: video,
             isMirrored: true,
             isReversed: true
         )
 
-        XCTAssertEqual(component.track as? VideoTrackMock, track)
+        component.setRenderer(view, false)
+
         XCTAssertEqual(component.contentMode, contentMode)
         XCTAssertTrue(component.isMirrored)
         XCTAssertTrue(component.isReversed)
+        XCTAssertTrue(track.view === view)
+        XCTAssertTrue(track.aspectFit == false)
     }
 
     func testInitWithVideoAndDefaultValues() {
         let track = VideoTrackMock()
         let contentMode = VideoContentMode.fit16x9
         let video = Video(track: track, contentMode: contentMode)
+        let view = VideoRenderer()
         let component = VideoComponent(video: video)
 
-        XCTAssertEqual(component.track as? VideoTrackMock, track)
+        component.setRenderer(view, false)
+
         XCTAssertEqual(component.contentMode, contentMode)
         XCTAssertFalse(component.isMirrored)
         XCTAssertFalse(component.isReversed)
+        XCTAssertTrue(track.view === view)
+        XCTAssertTrue(track.aspectFit == false)
     }
 
     func testAspectRatio() {
@@ -103,6 +143,12 @@ final class VideoComponentTests: XCTestCase {
 
 // MARK: - Mocks
 
-private struct VideoTrackMock: VideoTrack, Hashable {
-    func setRenderer(_ view: VideoRenderer, aspectFit: Bool) {}
+private final class VideoTrackMock: VideoTrack {
+    var view: VideoRenderer?
+    var aspectFit: Bool?
+
+    func setRenderer(_ view: VideoRenderer, aspectFit: Bool) {
+        self.view = view
+        self.aspectFit = aspectFit
+    }
 }

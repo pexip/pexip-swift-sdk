@@ -19,7 +19,11 @@ import SwiftUI
 
 /// SwiftUI video view.
 public struct VideoComponent: View {
-    public let track: VideoTrack
+    public typealias SetRenderer = (
+        _ view: VideoRenderer,
+        _ aspectFit: Bool
+    ) -> Void
+
     public let contentMode: VideoContentMode
     public let isMirrored: Bool
     public let isReversed: Bool
@@ -29,6 +33,27 @@ public struct VideoComponent: View {
                 ? CGSize(width: $0.height, height: $0.width)
                 : $0
         }
+    }
+    let setRenderer: SetRenderer
+
+    /**
+     - Parameters:
+        - contentMode: Indicates whether the view should fit or fill the parent context
+        - isMirrored: Indicates whether the video should be mirrored about its vertical axis
+        - isReversed: Indicates whether the aspect ratio numbers should
+                      get reversed (for vertical video)
+        - setRenderer: A function that sets the given renderer
+     */
+    public init(
+        contentMode: VideoContentMode,
+        isMirrored: Bool = false,
+        isReversed: Bool = false,
+        setRenderer: @escaping SetRenderer
+    ) {
+        self.contentMode = contentMode
+        self.isMirrored = isMirrored
+        self.isReversed = isReversed
+        self.setRenderer = setRenderer
     }
 
     /**
@@ -45,10 +70,12 @@ public struct VideoComponent: View {
         isMirrored: Bool = false,
         isReversed: Bool = false
     ) {
-        self.track = track
         self.contentMode = contentMode
         self.isMirrored = isMirrored
         self.isReversed = isReversed
+        self.setRenderer = { view, aspectFit  in
+            track.setRenderer(view, aspectFit: aspectFit)
+        }
     }
 
     /**
@@ -63,10 +90,12 @@ public struct VideoComponent: View {
         isMirrored: Bool = false,
         isReversed: Bool = false
     ) {
-        self.track = video.track
-        self.contentMode = video.contentMode
-        self.isMirrored = isMirrored
-        self.isReversed = isReversed
+        self.init(
+            track: video.track,
+            contentMode: video.contentMode,
+            isMirrored: isMirrored,
+            isReversed: isReversed
+        )
     }
 
     public var body: some View {
@@ -83,9 +112,9 @@ public struct VideoComponent: View {
 
     private var videoView: some View {
         VideoViewWrapper(
-            track: track,
+            aspectFit: contentMode != .fill,
             isMirrored: isMirrored,
-            aspectFit: contentMode != .fill
+            setRenderer: setRenderer
         )
     }
 }
@@ -117,23 +146,13 @@ public final class VideoView: UIView {
 }
 
 private struct VideoViewWrapper: UIViewRepresentable {
-    private let track: VideoTrack
-    private let aspectFit: Bool
-    private let isMirrored: Bool
-
-    init(
-        track: VideoTrack,
-        isMirrored: Bool,
-        aspectFit: Bool
-    ) {
-        self.track = track
-        self.isMirrored = isMirrored
-        self.aspectFit = aspectFit
-    }
+    let aspectFit: Bool
+    let isMirrored: Bool
+    let setRenderer: VideoComponent.SetRenderer
 
     func makeUIView(context: Context) -> VideoView {
         let view = VideoView()
-        track.setRenderer(view, aspectFit: aspectFit)
+        setRenderer(view, aspectFit)
         view.isMirrored = isMirrored
         return view
     }
@@ -187,23 +206,13 @@ public final class VideoView: NSView {
 }
 
 private struct VideoViewWrapper: NSViewRepresentable {
-    private let track: VideoTrack
-    private let aspectFit: Bool
-    private let isMirrored: Bool
-
-    init(
-        track: VideoTrack,
-        isMirrored: Bool,
-        aspectFit: Bool
-    ) {
-        self.track = track
-        self.isMirrored = isMirrored
-        self.aspectFit = aspectFit
-    }
+    let aspectFit: Bool
+    let isMirrored: Bool
+    let setRenderer: VideoComponent.SetRenderer
 
     func makeNSView(context: Context) -> VideoView {
         let view = VideoView()
-        track.setRenderer(view, aspectFit: aspectFit)
+        setRenderer(view, aspectFit)
         view.isMirrored = isMirrored
         return view
     }
