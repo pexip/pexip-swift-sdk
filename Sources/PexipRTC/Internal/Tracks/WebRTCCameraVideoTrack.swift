@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -64,10 +64,6 @@ final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
             throw error
         }
 
-        if capturingStatus.isCapturing {
-            stopCapture()
-        }
-
         guard let format = videoProfile.bestFormat(
             from: RTCCameraVideoCapturer.supportedFormats(for: currentDevice),
             formatDescription: \.formatDescription
@@ -108,7 +104,6 @@ final class WebRTCCameraVideoTrack: WebRTCVideoTrack, CameraVideoTrack {
 
         // Restart the video capturing using another camera
         currentDevice = newDevice
-        stopCapture()
 
         if let videoProfile {
             try await startCapture(withVideoProfile: videoProfile)
