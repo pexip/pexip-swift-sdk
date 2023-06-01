@@ -60,8 +60,8 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
 
     private var signalingChannel: SignalingChannel { config.signaling }
     private var localDataChannel: RTCDataChannel?
-    private var incomingIceCandidates = [RTCIceCandidate]()
-    private var outgoingIceCandidates = [RTCIceCandidate]()
+    private var incomingIceCandidates = Synchronized([RTCIceCandidate]())
+    private var outgoingIceCandidates = Synchronized([RTCIceCandidate]())
     private let fingerprintStore = FingerprintStore()
     private let stateSubject = PassthroughSubject<MediaConnectionState, Never>()
     private var cancellables = Set<AnyCancellable>()
@@ -176,8 +176,8 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
         localDataChannel?.close()
         localDataChannel = nil
 
-        incomingIceCandidates.removeAll()
-        outgoingIceCandidates.removeAll()
+        incomingIceCandidates.setValue([])
+        outgoingIceCandidates.setValue([])
     }
 
     func receivePresentation(_ receive: Bool) throws {
@@ -248,11 +248,12 @@ private extension WebRTCMediaConnection {
                 isPolitePeer.setValue(true)
             }
 
+            isMakingOffer.setValue(false)
             try await addOutgoingIceCandidatesIfNeeded()
             logger?.debug("Outgoing offer - received answer, isPolitePeer=\(isPolitePeer.value)")
         } catch {
             logger?.error("Outgoing offer - failed to send new offer: \(error)")
-            outgoingIceCandidates.removeAll()
+            outgoingIceCandidates.setValue([])
             throw error
         }
     }
@@ -280,10 +281,11 @@ private extension WebRTCMediaConnection {
                 try await config.signaling.sendAnswer(mangle(description: localDescription))
             }
 
+            isReceivingOffer.setValue(false)
             try await addIncomingIceCandidatesIfNeeded()
             logger?.debug("Incoming offer - sent answer")
         } catch {
-            incomingIceCandidates.removeAll()
+            incomingIceCandidates.setValue([])
             logger?.error("Incoming offer - failed to accept: \(error)")
             throw error
         }
@@ -301,7 +303,9 @@ private extension WebRTCMediaConnection {
 
         do {
             if isReceivingOffer.value {
-                incomingIceCandidates.append(candidate)
+                incomingIceCandidates.mutate {
+                    $0.append(candidate)
+                }
             } else {
                 try await connection.add(candidate)
                 logger?.debug("New incoming ICE candidate added")
@@ -363,18 +367,22 @@ private extension WebRTCMediaConnection {
     }
 
     func addIncomingIceCandidatesIfNeeded() async throws {
+        let incomingIceCandidates = self.incomingIceCandidates.value
+        self.incomingIceCandidates.setValue([])
+
         for candidate in incomingIceCandidates {
             try await connection.add(candidate)
             logger?.debug("New incoming ICE candidate added")
         }
-        incomingIceCandidates.removeAll()
     }
 
     func addOutgoingIceCandidatesIfNeeded() async throws {
+        let outgoingIceCandidates = self.outgoingIceCandidates.value
+        self.outgoingIceCandidates.setValue([])
+
         for candidate in outgoingIceCandidates {
             try await addOutgoingIceCandidate(candidate)
         }
-        outgoingIceCandidates.removeAll()
     }
 
     func addOutgoingIceCandidate(_ candidate: RTCIceCandidate) async throws {
@@ -473,7 +481,9 @@ extension WebRTCMediaConnection: PeerConnectionDelegate {
         didGenerate candidate: RTCIceCandidate
     ) {
         guard !isMakingOffer.value else {
-            outgoingIceCandidates.append(candidate)
+            outgoingIceCandidates.mutate {
+                $0.append(candidate)
+            }
             return
         }
 
