@@ -212,7 +212,6 @@ struct DefaultConferenceService: ConferenceService {
                     )
                 }
                 return token
-
             case 401:
                 // Bad HTTP credentials
                 throw HTTPError.unauthorized

@@ -8,7 +8,7 @@ Integrate Pexip Swift SDK into your project using Swift Package Manager, CocoaPo
 - macOS 10.15+
 - Swift 5.5 with structured concurrency support
 - Xcode 13
-- Pexip Infinity v29 and higher.
+- Pexip Infinity v29 and higher
 
 ## Swift Package Manager
 
