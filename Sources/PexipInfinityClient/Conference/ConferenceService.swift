@@ -196,22 +196,7 @@ struct DefaultConferenceService: ConferenceService {
 
             switch response.statusCode {
             case 200:
-                let token = try parse200(from: data)
-                if token.version.versionId < "29" {
-                    logger?.warn(
-                        """
-
-                        WARNING: Infinity v\(token.version.versionId) support.
-
-                        We offer only limited support for Infinity versions prior to v29.
-                        You may experience problems with sending and receiving presentation.
-                        Use `presentationInMain` to mix presentation with main video feed.
-
-                        This will be a fatar error in Q4 2023.
-                        """
-                    )
-                }
-                return token
+                return try parse200(from: data)
             case 401:
                 // Bad HTTP credentials
                 throw HTTPError.unauthorized
