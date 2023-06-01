@@ -38,6 +38,7 @@ media signaling technologies in the future, or Infinity might be interchanged wi
 - macOS 10.15+
 - Swift 5.5 with structured concurrency support
 - Xcode 13
+- Pexip Infinity v29 and higher
 
 :warning: **The project doesn't compile on Xcode 14.3 because of incorrect availability attributes CGDisplayStream.h file (introduced: is 13.0 instead of 10.8). Let's hope it's fixed in future Xcode versions.**
 

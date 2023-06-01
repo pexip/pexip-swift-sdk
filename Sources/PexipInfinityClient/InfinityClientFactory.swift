@@ -109,6 +109,7 @@ public struct InfinityClientFactory {
         )
     }
 
+    // swiftlint:disable function_body_length
     /**
      Creates a new instance of ``Conference`` type.
 
@@ -124,6 +125,21 @@ public struct InfinityClientFactory {
         alias: ConferenceAlias,
         token: ConferenceToken
     ) -> Conference {
+        if token.version.versionId < "29" {
+            logger?.warn(
+                """
+
+                WARNING: Infinity v\(token.version.versionId) support.
+
+                We offer only limited support for Infinity versions prior to v29.
+                You may experience problems with sending and receiving presentation.
+                Use `presentationInMain` to mix presentation with main video feed.
+
+                This will be a fatar error in Q4 2023.
+                """
+            )
+        }
+
         let conferenceService = infinityService().node(url: node).conference(alias: alias)
         let tokenStore = TokenStore(token: token)
         let roster = roster(token: token, service: conferenceService)
@@ -164,6 +180,7 @@ public struct InfinityClientFactory {
             logger: logger
         )
     }
+    // swiftlint:enable function_body_length
 
     // MARK: - Internal methods
 
