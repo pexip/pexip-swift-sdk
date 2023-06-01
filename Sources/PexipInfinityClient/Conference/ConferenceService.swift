@@ -197,11 +197,11 @@ struct DefaultConferenceService: ConferenceService {
             switch response.statusCode {
             case 200:
                 let token = try parse200(from: data)
-                if let version = Double(token.version.versionId), version < 29 {
+                if token.version.versionId < "29" {
                     logger?.warn(
                         """
 
-                        WARNING: Infinity v\(version) support.
+                        WARNING: Infinity v\(token.version.versionId) support.
 
                         We offer only limited support for Infinity versions prior to v29.
                         You may experience problems with sending and receiving presentation.
