@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ final class RTCConfigurationDefaultTests: XCTestCase {
         XCTAssertEqual(configuration.iceServers.count, 1)
         XCTAssertEqual(configuration.iceServers.first?.urlStrings, iceServer.urls)
         XCTAssertEqual(configuration.sdpSemantics, .unifiedPlan)
-        XCTAssertEqual(configuration.bundlePolicy, .maxBundle)
+        XCTAssertEqual(configuration.bundlePolicy, .balanced)
         XCTAssertEqual(configuration.continualGatheringPolicy, .gatherContinually)
         XCTAssertEqual(configuration.rtcpMuxPolicy, .require)
         XCTAssertEqual(configuration.tcpCandidatePolicy, .enabled)
