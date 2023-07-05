@@ -20,7 +20,13 @@ public extension AVCaptureDevice {
         withPosition position: AVCaptureDevice.Position
     ) -> [AVCaptureDevice] {
         AVCaptureDevice.DiscoverySession(
-            deviceTypes: [.builtInWideAngleCamera],
+            deviceTypes: {
+                #if os(macOS)
+                [.builtInWideAngleCamera, .externalUnknown]
+                #else
+                [.builtInWideAngleCamera]
+                #endif
+            }(),
             mediaType: .video,
             position: position
         ).devices
