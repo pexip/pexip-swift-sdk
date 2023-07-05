@@ -36,9 +36,17 @@ public final class WebRTCMediaFactory: MediaFactory {
     // MARK: - MediaFactory
 
     public func videoInputDevices() throws -> [MediaDevice] {
-        AVCaptureDevice.videoCaptureDevices(withPosition: .unspecified)
+        let defaultDevice = AVCaptureDevice.default(for: .video)
+        return AVCaptureDevice.videoCaptureDevices(withPosition: .unspecified)
             .sorted(by: { device1, _ in
+                #if os(iOS)
                 device1.position == .front
+                #else
+                device1.uniqueID == defaultDevice?.uniqueID
+                #endif
+            })
+            .filter({
+                $0.isConnected && !$0.isSuspended
             })
             .map({
                 MediaDevice(
