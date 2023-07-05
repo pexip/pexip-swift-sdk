@@ -45,8 +45,15 @@ public final class WebRTCMediaFactory: MediaFactory {
                 device1.uniqueID == defaultDevice?.uniqueID
                 #endif
             })
-            .filter({
-                $0.isConnected && !$0.isSuspended
+            .filter({ device in
+                let isSuspended: Bool = {
+                    if #available(iOS 14.0, *) {
+                        return device.isSuspended
+                    } else {
+                        return false
+                    }
+                }()
+                return device.isConnected && !isSuspended
             })
             .map({
                 MediaDevice(
