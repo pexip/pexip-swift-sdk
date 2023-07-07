@@ -784,6 +784,7 @@ final class SignalingChannelMock: SignalingChannel, SignalingEventSender {
     }
 
     func sendAnswer(_ description: String) async throws {}
+    func ack() async throws {}
     func addCandidate(_ candidate: String, mid: String?) async throws {}
 
     func dtmf(signals: DTMFSignals) async throws -> Bool {

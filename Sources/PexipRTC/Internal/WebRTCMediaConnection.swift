@@ -51,6 +51,7 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
     private let isReceivingOffer = Synchronized(false)
     private let shouldRenegotiate = Synchronized(false)
     private let isPolitePeer = Synchronized(false)
+    private let shouldAck = Synchronized(true)
     private var canReceiveOffer: Bool {
         isPolitePeer.value || !hasOfferCollision
     }
@@ -171,6 +172,7 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
         isReceivingOffer.setValue(false)
         shouldRenegotiate.setValue(false)
         isPolitePeer.setValue(false)
+        shouldAck.setValue(true)
 
         signalingChannel.data?.sender = nil
         localDataChannel?.close()
@@ -242,6 +244,10 @@ private extension WebRTCMediaConnection {
             }) {
                 if !isReceivingOffer.value && connection.signalingState == .haveLocalOffer {
                     try await connection.setRemoteDescription(remoteDescription)
+                    if shouldAck.value {
+                        shouldAck.setValue(false)
+                        try await config.signaling.ack()
+                    }
                     fingerprintStore.setRemoteFingerprints(fingerprints(from: remoteDescription))
                 }
             } else {
