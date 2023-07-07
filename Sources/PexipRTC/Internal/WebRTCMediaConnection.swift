@@ -244,10 +244,7 @@ private extension WebRTCMediaConnection {
             }) {
                 if !isReceivingOffer.value && connection.signalingState == .haveLocalOffer {
                     try await connection.setRemoteDescription(remoteDescription)
-                    if shouldAck.value {
-                        shouldAck.setValue(false)
-                        try await config.signaling.ack()
-                    }
+
                     fingerprintStore.setRemoteFingerprints(fingerprints(from: remoteDescription))
                 }
             } else {
@@ -256,6 +253,10 @@ private extension WebRTCMediaConnection {
 
             isMakingOffer.setValue(false)
             try await addOutgoingIceCandidatesIfNeeded()
+            if shouldAck.value {
+                shouldAck.setValue(false)
+                try await config.signaling.ack()
+            }
             logger?.debug("Outgoing offer - received answer, isPolitePeer=\(isPolitePeer.value)")
         } catch {
             logger?.error("Outgoing offer - failed to send new offer: \(error)")
