@@ -40,14 +40,14 @@ final class ConferenceConnector {
     func join(
         using method: RequestMethod,
         displayName: String,
-        conferenceAlias: String
+        conferenceAddress: String
     ) async throws -> ConferenceDetails {
-        guard let alias = ConferenceAlias(uri: conferenceAlias) else {
+        guard let address = ConferenceAddress(uri: conferenceAddress) else {
             throw NodeError.invalidConferenceAlias
         }
 
-        let node = try await resolveNode(forHost: alias.host)
-        let conferenceService = service.node(url: node).conference(alias: alias)
+        let node = try await resolveNode(forHost: address.host)
+        let conferenceService = service.node(url: node).conference(alias: address.alias)
         let fields = ConferenceTokenRequestFields(displayName: displayName)
         let token: ConferenceToken
 
@@ -64,7 +64,7 @@ final class ConferenceConnector {
             )
         }
 
-        return ConferenceDetails(node: node, alias: alias, token: token)
+        return ConferenceDetails(node: node, alias: address.alias, token: token)
     }
 
     // MARK: - Private

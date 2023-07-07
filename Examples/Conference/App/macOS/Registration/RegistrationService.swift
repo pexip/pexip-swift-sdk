@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ final class RegistrationService {
         username: String,
         password: String
     ) async throws {
-        guard let deviceAlias = DeviceAlias(uri: deviceAlias) else {
+        guard let deviceAddress = DeviceAddress(uri: deviceAlias) else {
             throw RegistrationError.invalidDeviceAlias
         }
 
@@ -62,14 +62,14 @@ final class RegistrationService {
         let nodeResolver = InfinityClientFactory().nodeResolver(dnssec: false)
 
         guard let nodeURL = try await service.resolveNodeURL(
-            forHost: deviceAlias.host,
+            forHost: deviceAddress.host,
             using: nodeResolver
         ) else {
             throw RegistrationError.invalidDeviceAlias
         }
 
         let token = try await service.node(url: nodeURL)
-            .registration(deviceAlias: deviceAlias)
+            .registration(deviceAlias: deviceAddress.alias)
             .requestToken(username: username, password: password)
 
         registration = factory.registration(
@@ -80,7 +80,7 @@ final class RegistrationService {
         registration?.delegate = self
         registration?.receiveEvents()
 
-        userDefaults[string: .deviceAlias] = deviceAlias.uri
+        userDefaults[string: .deviceAlias] = deviceAlias
         keychain[string: .username] = username
         keychain[string: .password] = password
     }

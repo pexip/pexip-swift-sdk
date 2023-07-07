@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ enum Screen: Equatable, Hashable {
     case displayName
     case alias
     case pinChallenge(
-        alias: ConferenceAlias,
+        alias: String,
         node: URL,
         tokenError: ConferenceTokenError
     )

@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -70,19 +70,19 @@ final class NodeServiceTests: APITestCase {
     }
 
     func testConference() throws {
-        let alias = try XCTUnwrap(DeviceAlias(uri: "name@conference.com"))
+        let alias = "name"
         let service = service.conference(alias: alias) as? DefaultConferenceService
 
         XCTAssertEqual(
             service?.baseURL,
             baseURL
                 .appendingPathComponent("conferences")
-                .appendingPathComponent(alias.uri)
+                .appendingPathComponent(alias)
         )
     }
 
     func testRegistration() throws {
-        let deviceAlias = try XCTUnwrap(DeviceAlias(uri: "device@conference.com"))
+        let deviceAlias = "device"
         let service = service.registration(
             deviceAlias: deviceAlias
         ) as? DefaultRegistrationService
@@ -91,7 +91,7 @@ final class NodeServiceTests: APITestCase {
             service?.baseURL,
             baseURL
                 .appendingPathComponent("registrations")
-                .appendingPathComponent(deviceAlias.uri)
+                .appendingPathComponent(deviceAlias)
         )
     }
 

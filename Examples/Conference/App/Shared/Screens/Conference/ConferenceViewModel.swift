@@ -473,7 +473,7 @@ private extension ConferenceViewModel {
                 let details = try await conferenceConnector.join(
                     using: .incomingToken(event.token),
                     displayName: displayName,
-                    conferenceAlias: event.alias
+                    conferenceAddress: event.alias
                 )
                 onComplete(.transfer(details))
             } catch {

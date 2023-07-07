@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ final class AliasViewModel: ObservableObject {
     typealias Complete = (Output) -> Void
 
     struct Output {
-        let alias: ConferenceAlias
+        let alias: String
         let node: URL
         let token: Result<ConferenceToken, ConferenceTokenError>
     }
 
-    var isValid: Bool { alias != nil }
+    var isValid: Bool { address != nil }
     @AppStorage("conferenceAlias") var text = ""
     @Published private(set) var errorMessage: String?
     @AppStorage("displayName") private var displayName = "Guest"
@@ -33,8 +33,8 @@ final class AliasViewModel: ObservableObject {
     private let nodeResolver: NodeResolver
     private let service: InfinityService
     private let onComplete: Complete
-    private var alias: ConferenceAlias? {
-        ConferenceAlias(uri: text)
+    private var address: ConferenceAddress? {
+        ConferenceAddress(uri: text)
     }
 
     // MARK: - Init
@@ -57,7 +57,7 @@ final class AliasViewModel: ObservableObject {
             errorMessage = "Looks like the address you typed in doesn't exist"
         }
 
-        guard let alias = alias else {
+        guard let address else {
             showErrorMessage()
             return
         }
@@ -66,7 +66,7 @@ final class AliasViewModel: ObservableObject {
 
         do {
             node = try await service.resolveNodeURL(
-                forHost: alias.host,
+                forHost: address.host,
                 using: nodeResolver
             )
         } catch {
@@ -74,14 +74,14 @@ final class AliasViewModel: ObservableObject {
         }
 
         if let node = node {
-            await checkPinRequirement(alias: alias, node: node)
+            await checkPinRequirement(alias: address.alias, node: node)
         } else {
             showErrorMessage()
         }
     }
 
     @MainActor
-    private func checkPinRequirement(alias: ConferenceAlias, node: URL) async {
+    private func checkPinRequirement(alias: String, node: URL) async {
         do {
             let conferenceService = service.node(url: node).conference(alias: alias)
             let fields = ConferenceTokenRequestFields(displayName: displayName)

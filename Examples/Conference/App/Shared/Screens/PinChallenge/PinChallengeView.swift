@@ -59,7 +59,7 @@ struct PinChallengeView_Previews: PreviewProvider {
                 service: InfinityClientFactory()
                     .infinityService()
                     .node(url: URL(string: "https://test.example.com")!)
-                    .conference(alias: ConferenceAlias(uri: "test@example.com")!),
+                    .conference(alias: "test"),
                 onComplete: { _ in }
             )
         )

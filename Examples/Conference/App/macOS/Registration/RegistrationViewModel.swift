@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ final class RegistrationViewModel: ObservableObject {
     private let service: RegistrationService
 
     var isValid: Bool {
-        DeviceAlias(uri: alias) != nil && !username.isEmpty && !password.isEmpty
+        DeviceAddress(uri: alias) != nil && !username.isEmpty && !password.isEmpty
     }
 
     // MARK: - Init
