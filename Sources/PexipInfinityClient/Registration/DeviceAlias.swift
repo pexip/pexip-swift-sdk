@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,4 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-public typealias DeviceAlias = ConferenceAlias
+@available(*, deprecated, renamed: "DeviceAddress")
+public typealias DeviceAlias = ConferenceAddress
+
+public typealias DeviceAddress = ConferenceAddress

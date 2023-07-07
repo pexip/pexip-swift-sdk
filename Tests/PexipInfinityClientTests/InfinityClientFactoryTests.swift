@@ -40,7 +40,7 @@ final class InfinityClientFactoryTests: XCTestCase {
     func testRegistration() throws {
         let registration = factory.registration(
             node: try XCTUnwrap(URL(string: "https://example.com/conference")),
-            deviceAlias: try XCTUnwrap(DeviceAlias(uri: "device@conference.com")),
+            deviceAlias: "device",
             token: .randomToken()
         )
         XCTAssertTrue(registration is DefaultRegistration)
@@ -49,7 +49,7 @@ final class InfinityClientFactoryTests: XCTestCase {
     func testConference() throws {
         let conference = factory.conference(
             node: try XCTUnwrap(URL(string: "https://example.com/conference")),
-            alias: try XCTUnwrap(ConferenceAlias(uri: "conference@conference.com")),
+            alias: "conference",
             token: .randomToken()
         )
         XCTAssertTrue(conference is DefaultConference)

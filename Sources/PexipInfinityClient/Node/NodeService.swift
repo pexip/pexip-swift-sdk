@@ -45,7 +45,17 @@ public protocol NodeService {
         - alias: A conference alias
      - Returns: A conference service for the given alias.
      */
-    func conference(alias: ConferenceAlias) -> ConferenceService
+    @available(*, deprecated, message: "Use String based conference(alias:) instead.")
+    func conference(alias: ConferenceAddress) -> ConferenceService
+
+    /**
+     Sets the conference alias.
+
+     - Parameters:
+        - alias: A conference alias
+     - Returns: A conference service for the given alias.
+     */
+    func conference(alias: String) -> ConferenceService
 
     /**
      Sets the registration alias.
@@ -54,7 +64,17 @@ public protocol NodeService {
         - alias: A device alias
      - Returns: A registration service for the given alias.
      */
-    func registration(deviceAlias: DeviceAlias) -> RegistrationService
+    @available(*, deprecated, message: "Use String based registration(deviceAlias:) instead.")
+    func registration(deviceAlias: DeviceAddress) -> RegistrationService
+
+    /**
+     Sets the registration alias.
+
+     - Parameters:
+        - alias: A device alias
+     - Returns: A registration service for the given alias.
+     */
+    func registration(deviceAlias: String) -> RegistrationService
 }
 
 // MARK: - Implementation
@@ -84,22 +104,30 @@ struct DefaultNodeService: NodeService {
         }
     }
 
-    func conference(alias: ConferenceAlias) -> ConferenceService {
-        return DefaultConferenceService(
+    func conference(alias: ConferenceAddress) -> ConferenceService {
+        conference(alias: alias.alias)
+    }
+
+    func conference(alias: String) -> ConferenceService {
+        DefaultConferenceService(
             baseURL: baseURL
                 .appendingPathComponent("conferences")
-                .appendingPathComponent(alias.uri),
+                .appendingPathComponent(alias),
             client: client,
             decoder: decoder,
             logger: logger
         )
     }
 
-    func registration(deviceAlias: DeviceAlias) -> RegistrationService {
-        return DefaultRegistrationService(
+    func registration(deviceAlias: DeviceAddress) -> RegistrationService {
+        registration(deviceAlias: deviceAlias.alias)
+    }
+
+    func registration(deviceAlias: String) -> RegistrationService {
+        DefaultRegistrationService(
             baseURL: baseURL
                 .appendingPathComponent("registrations")
-                .appendingPathComponent(deviceAlias.uri),
+                .appendingPathComponent(deviceAlias),
             client: client,
             decoder: decoder,
             logger: logger

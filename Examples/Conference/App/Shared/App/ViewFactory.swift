@@ -43,7 +43,7 @@ struct ViewFactory {
 
     func pinChallengeView(
         node: URL,
-        alias: ConferenceAlias,
+        alias: String,
         tokenError: ConferenceTokenError,
         onComplete: @escaping PinChallengeViewModel.Complete
     ) -> PinChallengeView {

@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -60,9 +60,9 @@ final class IncomingCallViewModel: ObservableObject {
     @MainActor
     func accept() async {
         guard
-            let alias = ConferenceAlias(uri: details.conferenceAlias),
+            let address = ConferenceAddress(uri: details.conferenceAlias),
             let nodeURL = try? await service.resolveNodeURL(
-                forHost: alias.host,
+                forHost: address.host,
                 using: nodeResolver
             )
         else {
@@ -74,9 +74,9 @@ final class IncomingCallViewModel: ObservableObject {
             let displayName = self.displayName
             let fields = ConferenceTokenRequestFields(displayName: displayName)
             let token = try await service.node(url: nodeURL)
-                .conference(alias: alias)
+                .conference(alias: address.alias)
                 .requestToken(fields: fields, incomingToken: details.token)
-            onAccept(IncomingCall(node: nodeURL, alias: alias, token: token))
+            onAccept(IncomingCall(node: nodeURL, alias: address.alias, token: token))
         } catch {
             debugPrint(error)
             decline(withMessage: "Cannot join the call. Invalid token.")

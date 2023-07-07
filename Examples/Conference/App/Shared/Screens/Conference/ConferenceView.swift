@@ -253,7 +253,7 @@ struct ConferenceView: View {
 struct ConferenceView_Previews: PreviewProvider {
     private static let conference = InfinityClientFactory().conference(
         node: URL(string: "https://test.com")!,
-        alias: ConferenceAlias(uri: "test@example.com")!,
+        alias: "test",
         token: ConferenceToken(
             value: "test",
             participantId: UUID().uuidString,

@@ -101,11 +101,19 @@ private struct NodeServiceMock: NodeService {
         status
     }
 
-    func conference(alias: ConferenceAlias) -> ConferenceService {
+    func conference(alias: ConferenceAddress) -> ConferenceService {
         fatalError("Not implemented")
     }
 
-    func registration(deviceAlias: DeviceAlias) -> RegistrationService {
+    func conference(alias: String) -> PexipInfinityClient.ConferenceService {
+        fatalError("Not implemented")
+    }
+
+    func registration(deviceAlias: DeviceAddress) -> RegistrationService {
+        fatalError("Not implemented")
+    }
+
+    func registration(deviceAlias: String) -> PexipInfinityClient.RegistrationService {
         fatalError("Not implemented")
     }
 }

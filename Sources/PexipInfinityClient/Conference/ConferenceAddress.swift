@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
 
 import Foundation
 
-/// An alias of the conference you are connecting to.
-public struct ConferenceAlias: Hashable {
-    public let uri: String
+@available(*, deprecated, renamed: "ConferenceAddress")
+public typealias ConferenceAlias = ConferenceAddress
+
+/// An address of the conference you are connecting to.
+public struct ConferenceAddress: Hashable {
     public let alias: String
     public let host: String
 
@@ -31,16 +33,6 @@ public struct ConferenceAlias: Hashable {
             return nil
         }
 
-        self.init(alias: alias, host: host)
-    }
-
-    /**
-     - Parameters:
-        - alias: Conference or device alias
-        - host: Conference host in the form of "example.com"
-     */
-    public init?(alias: String, host: String) {
-        let uri = "\(alias)@\(host)"
         let checkingType = NSTextCheckingResult.CheckingType.link.rawValue
         let detector = try? NSDataDetector(types: checkingType)
         let range = NSRange(uri.startIndex..<uri.endIndex, in: uri)
@@ -55,7 +47,15 @@ public struct ConferenceAlias: Hashable {
             return nil
         }
 
-        self.uri = uri
+        self.init(alias: alias, host: host)
+    }
+
+    /**
+     - Parameters:
+        - alias: Conference or device alias
+        - host: Conference host in the form of "example.com"
+     */
+    public init(alias: String, host: String) {
         self.alias = alias
         self.host = host
     }
