@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import PexipMedia
 import WebRTC
 
 extension RTCRtpTransceiver {
@@ -43,5 +44,27 @@ extension RTCRtpTransceiver {
 
     func setSenderStreams(_ streams: [RTCMediaStream]) {
         sender.streamIds = streams.map(\.streamId)
+    }
+
+    func setNewDirectionIfNeeded(track: LocalMediaTrack?) throws {
+        if track == nil {
+            switch direction {
+            case .sendOnly:
+                try setDirection(.inactive)
+            case .sendRecv:
+                try setDirection(.recvOnly)
+            default:
+                return
+            }
+        } else {
+            switch direction {
+            case .inactive:
+                try setDirection(.sendOnly)
+            case .recvOnly:
+                try setDirection(.sendRecv)
+            default:
+                return
+            }
+        }
     }
 }

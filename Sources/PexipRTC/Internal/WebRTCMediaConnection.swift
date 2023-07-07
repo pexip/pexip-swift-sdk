@@ -107,21 +107,31 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
     // MARK: - MediaConnection (tracks)
 
     func setMainAudioTrack(_ audioTrack: LocalAudioTrack?) {
-        mainLocalAudioTrack = audioTrack.valueOrNil(WebRTCLocalAudioTrack.self)
-        mainAudioTransceiver = mainAudioTransceiver ?? connection.addTransceiver(of: .audio)
-        mainAudioTransceiver?.sender.track = mainLocalAudioTrack?.rtcTrack
-        mainLocalAudioTrack?.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
-            self?.muteAudio(!isCapturing)
-        }.store(in: &cancellables)
+        do {
+            mainLocalAudioTrack = audioTrack.valueOrNil(WebRTCLocalAudioTrack.self)
+            mainAudioTransceiver = mainAudioTransceiver ?? connection.addTransceiver(of: .audio)
+            try mainAudioTransceiver?.setNewDirectionIfNeeded(track: audioTrack)
+            mainAudioTransceiver?.sender.track = mainLocalAudioTrack?.rtcTrack
+            mainLocalAudioTrack?.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
+                self?.muteAudio(!isCapturing)
+            }.store(in: &cancellables)
+        } catch {
+            logger?.error("Failed to set main audio track - \(error)")
+        }
     }
 
     func setMainVideoTrack(_ videoTrack: CameraVideoTrack?) {
-        mainLocalVideoTrack = videoTrack.valueOrNil(WebRTCCameraVideoTrack.self)
-        mainVideoTransceiver = mainVideoTransceiver ?? connection.addTransceiver(of: .video)
-        mainVideoTransceiver?.sender.track = mainLocalVideoTrack?.rtcTrack
-        mainLocalVideoTrack?.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
-            self?.muteVideo(!isCapturing)
-        }.store(in: &cancellables)
+        do {
+            mainLocalVideoTrack = videoTrack.valueOrNil(WebRTCCameraVideoTrack.self)
+            mainVideoTransceiver = mainVideoTransceiver ?? connection.addTransceiver(of: .video)
+            try mainVideoTransceiver?.setNewDirectionIfNeeded(track: videoTrack)
+            mainVideoTransceiver?.sender.track = mainLocalVideoTrack?.rtcTrack
+            mainLocalVideoTrack?.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
+                self?.muteVideo(!isCapturing)
+            }.store(in: &cancellables)
+        } catch {
+            logger?.error("Failed to set main video track - \(error)")
+        }
     }
 
     func setScreenMediaTrack(_ screenMediaTrack: ScreenMediaTrack?) {
