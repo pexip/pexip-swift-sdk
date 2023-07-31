@@ -242,17 +242,16 @@ private extension WebRTCMediaConnection {
             ).map({
                 RTCSessionDescription(type: .answer, sdp: $0)
             }) {
+                try await addOutgoingIceCandidatesIfNeeded()
                 if !isReceivingOffer.value && connection.signalingState == .haveLocalOffer {
                     try await connection.setRemoteDescription(remoteDescription)
-
                     fingerprintStore.setRemoteFingerprints(fingerprints(from: remoteDescription))
                 }
             } else {
+                try await addOutgoingIceCandidatesIfNeeded()
                 isPolitePeer.setValue(true)
             }
 
-            isMakingOffer.setValue(false)
-            try await addOutgoingIceCandidatesIfNeeded()
             if shouldAck.value {
                 shouldAck.setValue(false)
                 try await config.signaling.ack()
