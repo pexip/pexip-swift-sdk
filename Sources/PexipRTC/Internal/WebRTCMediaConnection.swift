@@ -387,8 +387,14 @@ private extension WebRTCMediaConnection {
         let outgoingIceCandidates = self.outgoingIceCandidates.value
         self.outgoingIceCandidates.setValue([])
 
-        for candidate in outgoingIceCandidates {
-            try await addOutgoingIceCandidate(candidate)
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for candidate in outgoingIceCandidates {
+                group.addTask { [weak self] in
+                    try await self?.addOutgoingIceCandidate(candidate)
+                }
+            }
+
+            try await group.waitForAll()
         }
     }
 
