@@ -166,8 +166,8 @@ extension ConferenceViewModel {
                 state = .connecting
                 try mediaConnection.setMainAudioTrack(mainLocalAudioTrack)
                 try mediaConnection.setMainVideoTrack(cameraVideoTrack)
-                try mediaConnection.receiveRemoteAudio(true)
-                try mediaConnection.receiveRemoteVideo(true)
+                try mediaConnection.receiveMainRemoteAudio(true)
+                try mediaConnection.receiveMainRemoteVideo(true)
                 try await mediaConnection.start()
             } catch {
                 state = .preflight

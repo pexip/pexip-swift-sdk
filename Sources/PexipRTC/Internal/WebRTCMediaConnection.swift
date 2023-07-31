@@ -194,7 +194,7 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
         outgoingIceCandidates.setValue([])
     }
 
-    func receiveRemoteAudio(_ receive: Bool) throws {
+    func receiveMainRemoteAudio(_ receive: Bool) throws {
         if let mainAudioTransceiver {
             try mainAudioTransceiver.receive(receive)
         } else if receive {
@@ -202,7 +202,7 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
         }
     }
 
-    func receiveRemoteVideo(_ receive: Bool) throws {
+    func receiveMainRemoteVideo(_ receive: Bool) throws {
         if let mainVideoTransceiver {
             try mainVideoTransceiver.receive(receive)
         } else if receive {

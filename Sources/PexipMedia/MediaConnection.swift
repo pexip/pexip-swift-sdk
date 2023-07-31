@@ -97,7 +97,7 @@ public protocol MediaConnection {
      - Parameters:
         - receive true to receive remote main audio, false otherwise
     */
-    func receiveRemoteAudio(_ receive: Bool) throws
+    func receiveMainRemoteAudio(_ receive: Bool) throws
 
     /**
      Enables or disables the receive of remote video.
@@ -105,7 +105,7 @@ public protocol MediaConnection {
      - Parameters:
         - receive true to receive remote video audio, false otherwise
      */
-    func receiveRemoteVideo(_ receive: Bool) throws
+    func receiveMainRemoteVideo(_ receive: Bool) throws
 
     /// Creates a media session
     func start() async throws
