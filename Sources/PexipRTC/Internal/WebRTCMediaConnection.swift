@@ -106,32 +106,34 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
 
     // MARK: - MediaConnection (tracks)
 
-    func setMainAudioTrack(_ audioTrack: LocalAudioTrack?) {
-        do {
-            mainLocalAudioTrack = audioTrack.valueOrNil(WebRTCLocalAudioTrack.self)
-            mainAudioTransceiver = mainAudioTransceiver ?? connection.addTransceiver(of: .audio)
-            try mainAudioTransceiver?.setNewDirectionIfNeeded(track: audioTrack)
-            mainAudioTransceiver?.sender.track = mainLocalAudioTrack?.rtcTrack
-            mainLocalAudioTrack?.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
-                self?.muteAudio(!isCapturing)
-            }.store(in: &cancellables)
-        } catch {
-            logger?.error("Failed to set main audio track - \(error)")
+    func setMainAudioTrack(_ audioTrack: LocalAudioTrack?) throws {
+        mainLocalAudioTrack = audioTrack.valueOrNil(WebRTCLocalAudioTrack.self)
+
+        if mainAudioTransceiver == nil && mainLocalAudioTrack != nil {
+            mainAudioTransceiver = connection.addAudioTransceiver(.sendOnly)
         }
+
+        try mainAudioTransceiver?.send(from: mainLocalAudioTrack?.rtcTrack)
+
+        let status = mainLocalAudioTrack?.capturingStatus ?? CapturingStatus(isCapturing: false)
+        status.$isCapturing.sink { [weak self] isCapturing in
+            self?.muteAudio(!isCapturing)
+        }.store(in: &cancellables)
     }
 
-    func setMainVideoTrack(_ videoTrack: CameraVideoTrack?) {
-        do {
-            mainLocalVideoTrack = videoTrack.valueOrNil(WebRTCCameraVideoTrack.self)
-            mainVideoTransceiver = mainVideoTransceiver ?? connection.addTransceiver(of: .video)
-            try mainVideoTransceiver?.setNewDirectionIfNeeded(track: videoTrack)
-            mainVideoTransceiver?.sender.track = mainLocalVideoTrack?.rtcTrack
-            mainLocalVideoTrack?.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
-                self?.muteVideo(!isCapturing)
-            }.store(in: &cancellables)
-        } catch {
-            logger?.error("Failed to set main video track - \(error)")
+    func setMainVideoTrack(_ videoTrack: CameraVideoTrack?) throws {
+        mainLocalVideoTrack = videoTrack.valueOrNil(WebRTCCameraVideoTrack.self)
+
+        if mainVideoTransceiver == nil && mainLocalVideoTrack != nil {
+            mainVideoTransceiver = connection.addVideoTransceiver(.sendOnly)
         }
+
+        try mainVideoTransceiver?.send(from: mainLocalVideoTrack?.rtcTrack)
+
+        let status = mainLocalVideoTrack?.capturingStatus ?? CapturingStatus(isCapturing: false)
+        status.$isCapturing.sink { [weak self] isCapturing in
+            self?.muteVideo(!isCapturing)
+        }.store(in: &cancellables)
     }
 
     func setScreenMediaTrack(_ screenMediaTrack: ScreenMediaTrack?) {
@@ -190,6 +192,22 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
 
         incomingIceCandidates.setValue([])
         outgoingIceCandidates.setValue([])
+    }
+
+    func receiveRemoteAudio(_ receive: Bool) throws {
+        if let mainAudioTransceiver {
+            try mainAudioTransceiver.receive(receive)
+        } else if receive {
+            mainAudioTransceiver = connection.addAudioTransceiver(.recvOnly)
+        }
+    }
+
+    func receiveRemoteVideo(_ receive: Bool) throws {
+        if let mainVideoTransceiver {
+            try mainVideoTransceiver.receive(receive)
+        } else if receive {
+            mainVideoTransceiver = connection.addVideoTransceiver(.recvOnly)
+        }
     }
 
     func receivePresentation(_ receive: Bool) throws {

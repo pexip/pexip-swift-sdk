@@ -46,8 +46,22 @@ extension RTCRtpTransceiver {
         sender.streamIds = streams.map(\.streamId)
     }
 
-    func setNewDirectionIfNeeded(track: LocalMediaTrack?) throws {
-        if track == nil {
+    func send(from track: RTCMediaStreamTrack?) throws {
+        try send(track != nil)
+        sender.track = track
+    }
+
+    func send(_ enabled: Bool) throws {
+        if enabled {
+            switch direction {
+            case .inactive:
+                try setDirection(.sendOnly)
+            case .recvOnly:
+                try setDirection(.sendRecv)
+            default:
+                return
+            }
+        } else {
             switch direction {
             case .sendOnly:
                 try setDirection(.inactive)
@@ -56,12 +70,25 @@ extension RTCRtpTransceiver {
             default:
                 return
             }
-        } else {
+        }
+    }
+
+    func receive(_ enabled: Bool) throws {
+        if enabled {
             switch direction {
             case .inactive:
-                try setDirection(.sendOnly)
-            case .recvOnly:
+                try setDirection(.recvOnly)
+            case .sendOnly:
                 try setDirection(.sendRecv)
+            default:
+                return
+            }
+        } else {
+            switch direction {
+            case .recvOnly:
+                try setDirection(.inactive)
+            case .sendRecv:
+                try setDirection(.sendOnly)
             default:
                 return
             }

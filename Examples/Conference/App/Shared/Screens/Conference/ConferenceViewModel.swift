@@ -164,8 +164,10 @@ extension ConferenceViewModel {
         Task { @MainActor in
             do {
                 state = .connecting
-                mediaConnection.setMainAudioTrack(mainLocalAudioTrack)
-                mediaConnection.setMainVideoTrack(cameraVideoTrack)
+                try mediaConnection.setMainAudioTrack(mainLocalAudioTrack)
+                try mediaConnection.setMainVideoTrack(cameraVideoTrack)
+                try mediaConnection.receiveRemoteAudio(true)
+                try mediaConnection.receiveRemoteVideo(true)
                 try await mediaConnection.start()
             } catch {
                 state = .preflight

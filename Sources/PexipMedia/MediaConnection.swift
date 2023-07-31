@@ -69,7 +69,7 @@ public protocol MediaConnection {
      - Parameters:
         - audioTrack: Local audio track
      */
-    func setMainAudioTrack(_ audioTrack: LocalAudioTrack?)
+    func setMainAudioTrack(_ audioTrack: LocalAudioTrack?) throws
 
     /**
      Sets the given local video track as the main video track
@@ -78,7 +78,7 @@ public protocol MediaConnection {
      - Parameters:
         - localVideoTrack: Local camera video track
      */
-    func setMainVideoTrack(_ videoTrack: CameraVideoTrack?)
+    func setMainVideoTrack(_ videoTrack: CameraVideoTrack?) throws
 
     /**
      Sets the given local screen media track as the source for local presentation.
@@ -91,6 +91,22 @@ public protocol MediaConnection {
      */
     func setScreenMediaTrack(_ screenMediaTrack: ScreenMediaTrack?)
 
+    /**
+     Enables or disables the receive of remote audio.
+
+     - Parameters:
+        - receive true to receive remote main audio, false otherwise
+    */
+    func receiveRemoteAudio(_ receive: Bool) throws
+
+    /**
+     Enables or disables the receive of remote video.
+
+     - Parameters:
+        - receive true to receive remote video audio, false otherwise
+     */
+    func receiveRemoteVideo(_ receive: Bool) throws
+
     /// Creates a media session
     func start() async throws
 
@@ -99,6 +115,7 @@ public protocol MediaConnection {
 
     /**
      Adds or removes remote presentation track from the current media connection.
+     Doesn't have any effect if ``MediaConnectionConfig/presentationInMain`` is true.
 
      - Parameters:
         - receive: True to add remote presentation track, False to remove it.
