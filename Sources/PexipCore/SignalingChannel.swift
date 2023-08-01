@@ -56,6 +56,11 @@ public protocol SignalingChannel: AnyObject {
     func sendAnswer(_ description: String) async throws
 
     /**
+     Invoked when offer is set and the connection is ready to accept media.
+     */
+    func ack() async throws
+
+    /**
      Sends a new ICE candidate if doing trickle ICE.
 
      - Parameters:

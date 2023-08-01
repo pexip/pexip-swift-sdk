@@ -51,6 +51,7 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
     private let isReceivingOffer = Synchronized(false)
     private let shouldRenegotiate = Synchronized(false)
     private let isPolitePeer = Synchronized(false)
+    private let shouldAck = Synchronized(true)
     private var canReceiveOffer: Bool {
         isPolitePeer.value || !hasOfferCollision
     }
@@ -171,6 +172,7 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
         isReceivingOffer.setValue(false)
         shouldRenegotiate.setValue(false)
         isPolitePeer.setValue(false)
+        shouldAck.setValue(true)
 
         signalingChannel.data?.sender = nil
         localDataChannel?.close()
@@ -240,16 +242,20 @@ private extension WebRTCMediaConnection {
             ).map({
                 RTCSessionDescription(type: .answer, sdp: $0)
             }) {
+                try await addOutgoingIceCandidatesIfNeeded()
                 if !isReceivingOffer.value && connection.signalingState == .haveLocalOffer {
                     try await connection.setRemoteDescription(remoteDescription)
                     fingerprintStore.setRemoteFingerprints(fingerprints(from: remoteDescription))
                 }
             } else {
+                try await addOutgoingIceCandidatesIfNeeded()
                 isPolitePeer.setValue(true)
             }
 
-            isMakingOffer.setValue(false)
-            try await addOutgoingIceCandidatesIfNeeded()
+            if shouldAck.value {
+                shouldAck.setValue(false)
+                try await config.signaling.ack()
+            }
             logger?.debug("Outgoing offer - received answer, isPolitePeer=\(isPolitePeer.value)")
         } catch {
             logger?.error("Outgoing offer - failed to send new offer: \(error)")
@@ -380,8 +386,14 @@ private extension WebRTCMediaConnection {
         let outgoingIceCandidates = self.outgoingIceCandidates.value
         self.outgoingIceCandidates.setValue([])
 
-        for candidate in outgoingIceCandidates {
-            try await addOutgoingIceCandidate(candidate)
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for candidate in outgoingIceCandidates {
+                group.addTask { [weak self] in
+                    try await self?.addOutgoingIceCandidate(candidate)
+                }
+            }
+
+            try await group.waitForAll()
         }
     }
 

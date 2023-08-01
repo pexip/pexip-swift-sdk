@@ -78,7 +78,6 @@ final class ConferenceSignalingChannel: SignalingChannel, SignalingEventSender {
         let token = try await tokenStore.token()
         let callService = try await callService
         let callId = await self.callId
-        let isUpdate = callService != nil && callId != nil
 
         pwds.setValue(sdpPwds(from: description))
 
@@ -106,16 +105,16 @@ final class ConferenceSignalingChannel: SignalingChannel, SignalingEventSender {
             ? nil
             : remoteDescription
 
-        if remoteDescription != nil, !isUpdate {
-            try await ack(sdp: nil)
-        }
-
         return remoteDescription
     }
 
     func sendAnswer(_ description: String) async throws {
         pwds.setValue(sdpPwds(from: description))
         try await ack(sdp: description)
+    }
+
+    func ack() async throws {
+        try await ack(sdp: nil)
     }
 
     func addCandidate(_ candidate: String, mid: String?) async throws {

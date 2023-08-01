@@ -85,9 +85,9 @@ final class ConferenceSignalingChannelTests: XCTestCase {
             CallsFields(callType: "WEBRTC", sdp: sdpOffer, present: nil)
         )
         XCTAssertEqual(participantService.actions, [.calls])
-        XCTAssertEqual(callService.actions, [.ack])
         XCTAssertEqual(participantService.token, token)
-        XCTAssertEqual(callService.token, token)
+        XCTAssertTrue(callService.actions.isEmpty)
+        XCTAssertNil(callService.token)
     }
 
     func testSendOfferOnFirstCallWithPresentationInMain() async throws {
@@ -106,9 +106,9 @@ final class ConferenceSignalingChannelTests: XCTestCase {
             CallsFields(callType: "WEBRTC", sdp: sdpOffer, present: .main)
         )
         XCTAssertEqual(participantService.actions, [.calls])
-        XCTAssertEqual(callService.actions, [.ack])
         XCTAssertEqual(participantService.token, token)
-        XCTAssertEqual(callService.token, token)
+        XCTAssertTrue(callService.actions.isEmpty)
+        XCTAssertNil(callService.token)
     }
 
     func testSendOfferOnFirstCallWithoutSdpInResponse() async throws {
@@ -145,9 +145,9 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         XCTAssertEqual(sdpAnswer, expectedSdpAnswer)
         XCTAssertTrue(pwds.isEmpty)
         XCTAssertEqual(participantService.actions, [.calls])
-        XCTAssertEqual(callService.actions, [.ack])
         XCTAssertEqual(participantService.token, token)
-        XCTAssertEqual(callService.token, token)
+        XCTAssertTrue(callService.actions.isEmpty)
+        XCTAssertNil(callService.token)
     }
 
     func testSendOfferOnFirstCallWithInvalidPwdsLine() async throws {
@@ -162,9 +162,9 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         XCTAssertEqual(sdpAnswer, expectedSdpAnswer)
         XCTAssertTrue(pwds.isEmpty)
         XCTAssertEqual(participantService.actions, [.calls])
-        XCTAssertEqual(callService.actions, [.ack])
         XCTAssertEqual(participantService.token, token)
-        XCTAssertEqual(callService.token, token)
+        XCTAssertTrue(callService.actions.isEmpty)
+        XCTAssertNil(callService.token)
     }
 
     func testSendOfferOnSubsequentCalls() async throws {
@@ -182,7 +182,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
 
         XCTAssertEqual(sdpAnswer, sdpAnswer2)
         XCTAssertEqual(participantService.actions, [.calls])
-        XCTAssertEqual(callService.actions, [.ack, .update])
+        XCTAssertEqual(callService.actions, [.update])
         XCTAssertEqual(participantService.token, token)
         XCTAssertEqual(callService.token, token)
 
@@ -203,7 +203,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
 
         XCTAssertNil(sdpAnswer)
         XCTAssertEqual(participantService.actions, [.calls])
-        XCTAssertEqual(callService.actions, [.ack, .update])
+        XCTAssertEqual(callService.actions, [.update])
         XCTAssertEqual(participantService.token, token)
         XCTAssertEqual(callService.token, token)
 
@@ -223,7 +223,14 @@ final class ConferenceSignalingChannelTests: XCTestCase {
 
         let pwds = channel.pwds.value
         XCTAssertEqual(pwds, ["ToQy": "jSThfoPwGg6gKmxeYnTqz8ea"])
-        XCTAssertEqual(callService.actions, [.ack, .ack])
+        XCTAssertEqual(callService.actions, [.ack])
+    }
+
+    func testAck() async throws {
+        try await sendOffer(answer: UUID().uuidString)
+        try await channel.ack()
+
+        XCTAssertEqual(callService.actions, [.ack])
     }
 
     func testAddCandidate() async throws {
@@ -234,7 +241,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         try await channel.addCandidate(candidate, mid: "Test")
 
         XCTAssertEqual(participantService.actions, [.calls])
-        XCTAssertEqual(callService.actions, [.ack, .newCandidate])
+        XCTAssertEqual(callService.actions, [.newCandidate])
         XCTAssertEqual(participantService.token, token)
         XCTAssertEqual(callService.token, token)
         XCTAssertEqual(
@@ -267,9 +274,9 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         } catch {
             XCTAssertEqual(error as? ConferenceSignalingError, .pwdsMissing)
             XCTAssertEqual(participantService.actions, [.calls])
-            XCTAssertEqual(callService.actions, [.ack])
             XCTAssertEqual(participantService.token, token)
-            XCTAssertEqual(callService.token, token)
+            XCTAssertTrue(callService.actions.isEmpty)
+            XCTAssertNil(callService.token)
         }
     }
 
@@ -281,9 +288,9 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         } catch {
             XCTAssertEqual(error as? ConferenceSignalingError, .ufragMissing)
             XCTAssertEqual(participantService.actions, [.calls])
-            XCTAssertEqual(callService.actions, [.ack])
             XCTAssertEqual(participantService.token, token)
-            XCTAssertEqual(callService.token, token)
+            XCTAssertTrue(callService.actions.isEmpty)
+            XCTAssertNil(callService.token)
         }
     }
 
@@ -297,7 +304,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
 
         XCTAssertTrue(sent)
         XCTAssertEqual(participantService.actions, [.calls])
-        XCTAssertEqual(callService.actions, [.ack, .dtmf])
+        XCTAssertEqual(callService.actions, [.dtmf])
         XCTAssertEqual(participantService.token, token)
         XCTAssertEqual(callService.token, token)
     }
