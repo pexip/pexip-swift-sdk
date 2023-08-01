@@ -66,6 +66,9 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
     private let fingerprintStore = FingerprintStore()
     private let stateSubject = PassthroughSubject<MediaConnectionState, Never>()
     private var cancellables = Set<AnyCancellable>()
+    private var audioCaptureCancellable: AnyCancellable?
+    private var videoCaptureCancellable: AnyCancellable?
+    private var screenCaptureCancellable: AnyCancellable?
 
     // MARK: - Init
 
@@ -115,10 +118,14 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
 
         try mainAudioTransceiver?.send(from: mainLocalAudioTrack?.rtcTrack)
 
-        let status = mainLocalAudioTrack?.capturingStatus ?? CapturingStatus(isCapturing: false)
-        status.$isCapturing.sink { [weak self] isCapturing in
-            self?.muteAudio(!isCapturing)
-        }.store(in: &cancellables)
+        audioCaptureCancellable = mainLocalAudioTrack?.capturingStatus
+            .$isCapturing.sink { [weak self] isCapturing in
+                self?.muteAudio(!isCapturing)
+            }
+
+        if mainLocalAudioTrack == nil {
+            muteAudio(true)
+        }
     }
 
     func setMainVideoTrack(_ videoTrack: CameraVideoTrack?) throws {
@@ -130,18 +137,26 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
 
         try mainVideoTransceiver?.send(from: mainLocalVideoTrack?.rtcTrack)
 
-        let status = mainLocalVideoTrack?.capturingStatus ?? CapturingStatus(isCapturing: false)
-        status.$isCapturing.sink { [weak self] isCapturing in
-            self?.muteVideo(!isCapturing)
-        }.store(in: &cancellables)
+        videoCaptureCancellable = mainLocalVideoTrack?.capturingStatus
+            .$isCapturing.sink { [weak self] isCapturing in
+                self?.muteVideo(!isCapturing)
+            }
+
+        if mainLocalVideoTrack == nil {
+            muteVideo(true)
+        }
     }
 
     func setScreenMediaTrack(_ screenMediaTrack: ScreenMediaTrack?) {
         let track = screenMediaTrack.valueOrNil(WebRTCScreenMediaTrack.self)
         presentationVideoTransceiver?.sender.track = track?.rtcTrack
-        track?.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
-            self?.toggleLocalPresentation(isCapturing)
-        }.store(in: &cancellables)
+        screenCaptureCancellable = track?.capturingStatus
+            .$isCapturing.sink { [weak self] isCapturing in
+                self?.toggleLocalPresentation(isCapturing)
+            }
+        if track == nil {
+            toggleLocalPresentation(false)
+        }
     }
 
     // MARK: - MediaConnection (lifecycle)
@@ -159,7 +174,11 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
 
     func stop() {
         connection.close()
+
         cancellables.removeAll()
+        audioCaptureCancellable = nil
+        videoCaptureCancellable = nil
+        screenCaptureCancellable = nil
 
         mainLocalVideoTrack = nil
         mainLocalAudioTrack = nil
