@@ -66,6 +66,9 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
     private let fingerprintStore = FingerprintStore()
     private let stateSubject = PassthroughSubject<MediaConnectionState, Never>()
     private var cancellables = Set<AnyCancellable>()
+    private var audioCaptureCancellable: AnyCancellable?
+    private var videoCaptureCancellable: AnyCancellable?
+    private var screenCaptureCancellable: AnyCancellable?
 
     // MARK: - Init
 
@@ -106,30 +109,54 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
 
     // MARK: - MediaConnection (tracks)
 
-    func setMainAudioTrack(_ audioTrack: LocalAudioTrack?) {
+    func setMainAudioTrack(_ audioTrack: LocalAudioTrack?) throws {
         mainLocalAudioTrack = audioTrack.valueOrNil(WebRTCLocalAudioTrack.self)
-        mainAudioTransceiver = mainAudioTransceiver ?? connection.addTransceiver(of: .audio)
-        mainAudioTransceiver?.sender.track = mainLocalAudioTrack?.rtcTrack
-        mainLocalAudioTrack?.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
-            self?.muteAudio(!isCapturing)
-        }.store(in: &cancellables)
+
+        if mainAudioTransceiver == nil && mainLocalAudioTrack != nil {
+            mainAudioTransceiver = connection.addAudioTransceiver(.sendOnly)
+        }
+
+        try mainAudioTransceiver?.send(from: mainLocalAudioTrack?.rtcTrack)
+
+        audioCaptureCancellable = mainLocalAudioTrack?.capturingStatus
+            .$isCapturing.sink { [weak self] isCapturing in
+                self?.muteAudio(!isCapturing)
+            }
+
+        if mainLocalAudioTrack == nil {
+            muteAudio(true)
+        }
     }
 
-    func setMainVideoTrack(_ videoTrack: CameraVideoTrack?) {
+    func setMainVideoTrack(_ videoTrack: CameraVideoTrack?) throws {
         mainLocalVideoTrack = videoTrack.valueOrNil(WebRTCCameraVideoTrack.self)
-        mainVideoTransceiver = mainVideoTransceiver ?? connection.addTransceiver(of: .video)
-        mainVideoTransceiver?.sender.track = mainLocalVideoTrack?.rtcTrack
-        mainLocalVideoTrack?.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
-            self?.muteVideo(!isCapturing)
-        }.store(in: &cancellables)
+
+        if mainVideoTransceiver == nil && mainLocalVideoTrack != nil {
+            mainVideoTransceiver = connection.addVideoTransceiver(.sendOnly)
+        }
+
+        try mainVideoTransceiver?.send(from: mainLocalVideoTrack?.rtcTrack)
+
+        videoCaptureCancellable = mainLocalVideoTrack?.capturingStatus
+            .$isCapturing.sink { [weak self] isCapturing in
+                self?.muteVideo(!isCapturing)
+            }
+
+        if mainLocalVideoTrack == nil {
+            muteVideo(true)
+        }
     }
 
     func setScreenMediaTrack(_ screenMediaTrack: ScreenMediaTrack?) {
         let track = screenMediaTrack.valueOrNil(WebRTCScreenMediaTrack.self)
         presentationVideoTransceiver?.sender.track = track?.rtcTrack
-        track?.capturingStatus.$isCapturing.sink { [weak self] isCapturing in
-            self?.toggleLocalPresentation(isCapturing)
-        }.store(in: &cancellables)
+        screenCaptureCancellable = track?.capturingStatus
+            .$isCapturing.sink { [weak self] isCapturing in
+                self?.toggleLocalPresentation(isCapturing)
+            }
+        if track == nil {
+            toggleLocalPresentation(false)
+        }
     }
 
     // MARK: - MediaConnection (lifecycle)
@@ -147,7 +174,11 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
 
     func stop() {
         connection.close()
+
         cancellables.removeAll()
+        audioCaptureCancellable = nil
+        videoCaptureCancellable = nil
+        screenCaptureCancellable = nil
 
         mainLocalVideoTrack = nil
         mainLocalAudioTrack = nil
@@ -180,6 +211,22 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
 
         incomingIceCandidates.setValue([])
         outgoingIceCandidates.setValue([])
+    }
+
+    func receiveMainRemoteAudio(_ receive: Bool) throws {
+        if let mainAudioTransceiver {
+            try mainAudioTransceiver.receive(receive)
+        } else if receive {
+            mainAudioTransceiver = connection.addAudioTransceiver(.recvOnly)
+        }
+    }
+
+    func receiveMainRemoteVideo(_ receive: Bool) throws {
+        if let mainVideoTransceiver {
+            try mainVideoTransceiver.receive(receive)
+        } else if receive {
+            mainVideoTransceiver = connection.addVideoTransceiver(.recvOnly)
+        }
     }
 
     func receivePresentation(_ receive: Bool) throws {
