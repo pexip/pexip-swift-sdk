@@ -94,4 +94,22 @@ extension RTCRtpTransceiver {
             }
         }
     }
+
+    func setDegradationPreference(_ preference: DegradationPreference) {
+        let parameters = sender.parameters
+        let rtcPreference: RTCDegradationPreference = {
+            switch preference {
+            case .balanced:
+                return .balanced
+            case .maintainFramerate:
+                return .maintainFramerate
+            case .maintainResolution:
+                return .maintainResolution
+            case .disabled:
+                return .disabled
+            }
+        }()
+        parameters.degradationPreference = rtcPreference.rawValue as NSNumber
+        sender.parameters = parameters
+    }
 }
