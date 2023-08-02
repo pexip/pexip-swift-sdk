@@ -59,6 +59,9 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
         isMakingOffer.value || connection.signalingState != .stable
     }
 
+    private let mainDegradationPreference = Synchronized(DegradationPreference.balanced)
+    private let presentationDegradationPreference = Synchronized(DegradationPreference.balanced)
+
     private var signalingChannel: SignalingChannel { config.signaling }
     private var localDataChannel: RTCDataChannel?
     private var incomingIceCandidates = Synchronized([RTCIceCandidate]())
@@ -136,6 +139,7 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
         }
 
         try mainVideoTransceiver?.send(from: mainLocalVideoTrack?.rtcTrack)
+        mainVideoTransceiver?.setDegradationPreference(mainDegradationPreference.value)
 
         videoCaptureCancellable = mainLocalVideoTrack?.capturingStatus
             .$isCapturing.sink { [weak self] isCapturing in
@@ -258,6 +262,18 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
     @discardableResult
     func dtmf(signals: DTMFSignals) async throws -> Bool {
         try await signalingChannel.dtmf(signals: signals)
+    }
+
+    func setMainDegradationPreference(_ preference: DegradationPreference) {
+        guard preference != mainDegradationPreference.value else { return }
+        mainDegradationPreference.setValue(preference)
+        mainVideoTransceiver?.setDegradationPreference(preference)
+    }
+
+    func setPresentationDegradationPreference(_ preference: DegradationPreference) {
+        guard preference != presentationDegradationPreference.value else { return }
+        presentationDegradationPreference.setValue(preference)
+        presentationVideoTransceiver?.setDegradationPreference(preference)
     }
 }
 
@@ -400,6 +416,9 @@ private extension WebRTCMediaConnection {
             presentationVideoTransceiver = connection.addTransceiver(
                 of: .video,
                 init: .init(direction: .inactive)
+            )
+            presentationVideoTransceiver?.setDegradationPreference(
+                presentationDegradationPreference.value
             )
         }
     }

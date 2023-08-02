@@ -130,4 +130,22 @@ public protocol MediaConnection {
      */
     @discardableResult
     func dtmf(signals: DTMFSignals) async throws -> Bool
+
+    /**
+     Sets the ``DegradationPreference`` for main video stream.
+     If supported, implementations should set ``DegradationPreference/balanced`` as the default.
+
+     - Parameters:
+        - preference: a degradation preference
+    */
+    func setMainDegradationPreference(_ preference: DegradationPreference)
+
+    /**
+     Sets the ``DegradationPreference`` for presentation video stream.
+     If supported, implementations should set ``DegradationPreference/balanced`` as the default.
+
+     - Parameters:
+        - preference: a degradation preference
+    */
+    func setPresentationDegradationPreference(_ preference: DegradationPreference)
 }
