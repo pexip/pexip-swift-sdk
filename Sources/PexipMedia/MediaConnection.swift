@@ -148,4 +148,16 @@ public protocol MediaConnection {
         - preference: a degradation preference
     */
     func setPresentationDegradationPreference(_ preference: DegradationPreference)
+
+    /**
+     Sets the maximum bitrate for each video stream.
+     Passing an instance of ``Bitrate`` that is equal to zero bits per second will remove the
+     constraints and let the underlying media engine come up with the best value.
+
+     By default, no maximum bitrate is set.
+
+     - Parameters:
+        - bitrate a bitrate to set as maximum
+    */
+    func setMaxBitrate(_ bitrate: Bitrate)
 }

@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,48 +18,30 @@ import PexipMedia
 @testable import PexipRTC
 
 final class SessionDescriptionManagerTests: XCTestCase {
-    private func mangle(
-        _ sdp: SDP,
-        bandwidth: Bandwidth = .high,
-        profile: QualityProfile = .medium,
-        mainAudioMid: String? = nil,
-        mainVideoMid: String? = nil,
-        presentationVideoMid: String? = nil
-    ) -> SDP {
-        let manager = SessionDescriptionManager(sdp: sdp.string)
-        let outSDPString = manager.mangle(
-            bandwidth: bandwidth,
-            mainQualityProfile: profile,
-            mainAudioMid: mainAudioMid,
-            mainVideoMid: mainVideoMid,
-            presentationVideoMid: presentationVideoMid
-        )
-        return SDP(string: outSDPString)
-    }
-
-    // MARK: - Generic tests
-
-    func testSDPWithNoChanges() {
-        let inSDP = SDP([
+    func testMangleWithNoChanges() {
+        let original = SDP([
             "line1",
             "line2"
-        ])
-        let expectedSDP = inSDP
-        XCTAssertEqual(mangle(inSDP), expectedSDP)
+        ]).string
+
+        let mangled = SessionDescriptionManager(sdp: original).mangle(
+            bitrate: Bitrate.bps(0)
+        )
+
+        XCTAssertEqual(mangled, original)
     }
 
-    func testSDPWithEmptyString() {
-        let inSDP = SDP([])
-        let expectedSDP = inSDP
-        XCTAssertEqual(mangle(inSDP), expectedSDP)
+    func testMangleWithEmptyString() {
+        let original = ""
+        let mangled = SessionDescriptionManager(sdp: original).mangle(
+            bitrate: Bitrate.bps(0)
+        )
+        XCTAssertEqual(mangled, original)
     }
 
-    // MARK: - Combined tests
-
-    func testMangleWithMidLines() {
-        let profile = QualityProfile.medium
-        let bandwidth = Bandwidth.medium
-        let inSDP = SDP([
+    func testMangleWithMidLinesAndBitrate() {
+        let bitrate = Bitrate.kbps(576)!
+        let original = SDP([
             "a=mid:3",
             "a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level",
             "m=audio 64165 UDP/TLS/RTP/SAVPF 111 103 104 9 102 0 8 106 105 13 110 112 113 126",
@@ -74,8 +56,9 @@ final class SessionDescriptionManagerTests: XCTestCase {
             "a=extmap:14 urn:ietf:params:rtp-hdrext:toffset",
             "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
             "c=IN IP4 91.240.204.48"
-        ])
-        let expectedSDP = SDP([
+        ]).string
+
+        let expected = SDP([
             "a=mid:3",
             "a=content:main",
             "a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level",
@@ -87,124 +70,131 @@ final class SessionDescriptionManagerTests: XCTestCase {
             "a=extmap:14 urn:ietf:params:rtp-hdrext:toffset",
             "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
             "c=IN IP4 91.240.204.48",
-            "b=AS:\(bandwidth.rawValue)",
+            "b=TIAS:\(bitrate.bps)",
+
+            "a=mid:5",
+            "a=content:slides",
+            "a=extmap:14 urn:ietf:params:rtp-hdrext:toffset",
+            "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
+            "c=IN IP4 91.240.204.48",
+            "b=TIAS:\(bitrate.bps)"
+        ]).string
+
+        let mangled = SessionDescriptionManager(sdp: original).mangle(
+            bitrate: bitrate,
+            mainAudioMid: "3",
+            mainVideoMid: "4",
+            presentationVideoMid: "5"
+        )
+
+        XCTAssertEqual(mangled, expected)
+    }
+
+    func testMangleWithMidLinesAndZeroBitrate() {
+        let bitrate = Bitrate.bps(0)
+        let original = SDP([
+            "a=mid:3",
+            "a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level",
+            "m=audio 64165 UDP/TLS/RTP/SAVPF 111 103 104 9 102 0 8 106 105 13 110 112 113 126",
+            "c=IN IP4 91.240.204.48",
+
+            "a=mid:4",
+            "a=extmap:14 urn:ietf:params:rtp-hdrext:toffset",
+            "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
+            "c=IN IP4 91.240.204.48",
+
+            "a=mid:5",
+            "a=extmap:14 urn:ietf:params:rtp-hdrext:toffset",
+            "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
+            "c=IN IP4 91.240.204.48"
+        ]).string
+
+        let expected = SDP([
+            "a=mid:3",
+            "a=content:main",
+            "a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level",
+            "m=audio 64165 UDP/TLS/RTP/SAVPF 111 103 104 9 102 0 8 106 105 13 110 112 113 126",
+            "c=IN IP4 91.240.204.48",
+
+            "a=mid:4",
+            "a=content:main",
+            "a=extmap:14 urn:ietf:params:rtp-hdrext:toffset",
+            "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
+            "c=IN IP4 91.240.204.48",
 
             "a=mid:5",
             "a=content:slides",
             "a=extmap:14 urn:ietf:params:rtp-hdrext:toffset",
             "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
             "c=IN IP4 91.240.204.48"
-        ])
-        let outSDP = mangle(
-            inSDP,
-            bandwidth: bandwidth,
-            profile: profile,
+        ]).string
+
+        let mangled = SessionDescriptionManager(sdp: original).mangle(
+            bitrate: bitrate,
             mainAudioMid: "3",
             mainVideoMid: "4",
             presentationVideoMid: "5"
         )
 
-        XCTAssertEqual(outSDP, expectedSDP)
+        XCTAssertEqual(mangled, expected)
     }
 
-    // MARK: - Bandwidth tests
+    func testMangleBitrateWhenLowerThanOriginal() {
+        let bitrate = Bitrate.kbps(576)!
+        let original = SDP([
+            "a=mid:4",
+            "a=extmap:14 urn:ietf:params:rtp-hdrext:toffset",
+            "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
+            "c=IN IP4 91.240.204.48",
+            "b=TIAS:3732480"
+        ]).string
 
-    func testSDPAddsBandwidthToVideoSectionAfterConnection() {
-        let profile = QualityProfile.high
-        let bandwidth = Bandwidth.high
-        let inSDP = SDP([
-            "line1",
+        let expected = SDP([
+            "a=mid:4",
+            "a=extmap:14 urn:ietf:params:rtp-hdrext:toffset",
             "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
             "c=IN IP4 91.240.204.48",
-            "line4"
-        ])
-        let expectedSDP = SDP([
-            "line1",
-            "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
-            "c=IN IP4 91.240.204.48",
-            "b=AS:\(bandwidth.rawValue)",
-            "line4"
-        ])
-        let outSDP = mangle(inSDP, bandwidth: bandwidth, profile: profile)
-        XCTAssertEqual(outSDP, expectedSDP)
+            "b=TIAS:\(bitrate.bps)"
+        ]).string
+
+        let mangled = SessionDescriptionManager(
+            sdp: original
+        ).mangle(bitrate: bitrate)
+
+        XCTAssertEqual(mangled, expected)
     }
 
-    func testSDPNoBandwidthInAudioSectionAfterConnection() {
-        let profile = QualityProfile.high
-        let inSDP = SDP([
-            "line1",
-            "m=audio 64165 UDP/TLS/RTP/SAVPF 111 103 104 9 102 0 8 106 105 13 110 112 113 126",
-            "c=IN IP4 91.240.204.48",
-            "line4"
-        ])
-        let expectedSDP = inSDP
-        let outSDP = mangle(inSDP, profile: profile)
-        XCTAssertEqual(outSDP, expectedSDP)
-    }
-
-    func testSDPNoBandwidthWithoutMediaSectionAfterConnection() {
-        let profile = QualityProfile.high
-        let inSDP = SDP([
-            "line1",
-            "c=IN IP4 91.240.204.48",
-            "line3"
-        ])
-        let expectedSDP = inSDP
-        let outSDP = mangle(inSDP, profile: profile)
-        XCTAssertEqual(outSDP, expectedSDP)
-    }
-
-    func testAddsBandwidthToVideoSectionAfterConnectionWithAudioSectionFirst() {
-        let profile = QualityProfile.medium
-        let bandwidth = Bandwidth.medium
-        let inSDP = SDP([
-            "line1",
-            "m=audio 64165 UDP/TLS/RTP/SAVPF 111 103 104 9 102 0 8 106 105 13 110 112 113 126",
-            "c=IN IP4 91.240.204.48",
-            "line4",
+    func testMangleBitrateWhenHigherThanOriginal() {
+        let bitrate = Bitrate.mbps(10)!
+        let original = SDP([
+            "a=mid:4",
+            "a=extmap:14 urn:ietf:params:rtp-hdrext:toffset",
             "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
             "c=IN IP4 91.240.204.48",
-            "line7"
-        ])
-        let expectedSDP = SDP([
-            "line1",
-            "m=audio 64165 UDP/TLS/RTP/SAVPF 111 103 104 9 102 0 8 106 105 13 110 112 113 126",
-            "c=IN IP4 91.240.204.48",
-            "line4",
-            "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
-            "c=IN IP4 91.240.204.48",
-            "b=AS:\(bandwidth.rawValue)",
-            "line7"
-        ])
-        let outSDP = mangle(inSDP, bandwidth: bandwidth, profile: profile)
-        XCTAssertEqual(outSDP, expectedSDP)
+            "b=TIAS:3732480"
+        ]).string
+
+        let mangled = SessionDescriptionManager(
+            sdp: original
+        ).mangle(bitrate: bitrate)
+
+        XCTAssertEqual(mangled, original)
     }
 
-    func testNoBandwidthInVideoSectionWithoutConnection() {
-        let profile = QualityProfile.high
-        let inSDP = SDP([
-            "line1",
+    func testMangleBitrateWhenZero() {
+        let bitrate = Bitrate.mbps(0)!
+        let original = SDP([
+            "a=mid:4",
+            "a=extmap:14 urn:ietf:params:rtp-hdrext:toffset",
             "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
-            "line3"
-        ])
-        let expectedSDP = inSDP
-        let outSDP = mangle(inSDP, profile: profile)
-        XCTAssertEqual(outSDP, expectedSDP)
-    }
-
-    func testNoBandwidthInVideoSectionWithoutConnectionWithAudioSectionLast() {
-        let profile = QualityProfile.high
-        let inSDP = SDP([
-            "line1",
-            "m=video 64164 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127",
-            "line3",
-            "m=audio 64165 UDP/TLS/RTP/SAVPF 111 103 104 9 102 0 8 106 105 13 110 112 113 126",
             "c=IN IP4 91.240.204.48",
-            "line6"
-        ])
-        let expectedSDP = inSDP
-        let outSDP = mangle(inSDP, profile: profile)
-        XCTAssertEqual(outSDP, expectedSDP)
+            "b=TIAS:3732480"
+        ]).string
+        let mangled = SessionDescriptionManager(
+            sdp: original
+        ).mangle(bitrate: bitrate)
+
+        XCTAssertEqual(mangled, original)
     }
 
     func testExtractFingerprints() {

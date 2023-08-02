@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,42 +23,55 @@ struct SessionDescriptionManager {
     let sdp: String
 
     func mangle(
-        bandwidth: Bandwidth,
-        mainQualityProfile: QualityProfile?,
+        bitrate: Bitrate,
         mainAudioMid: String? = nil,
         mainVideoMid: String? = nil,
         presentationVideoMid: String? = nil
     ) -> String {
         var modifiedLines = [String]()
-        var section = "global"
-        let mainAudioMidLine = mainAudioMid?.toMidLine()
-        let mainVideoMidLine = mainVideoMid?.toMidLine()
-        let presentationVideoMidLine = presentationVideoMid?.toMidLine()
-        var addBandwidth = true
+        var section = Section.session
+        let addBitrate = bitrate.bps > 0
 
         for line in splitToLines() {
-            section = self.section(for: line) ?? section
             modifiedLines.append(line)
 
             switch line {
-            case mainAudioMidLine, mainVideoMidLine:
+            case _ where line.starts(with: "m=audio"):
+                section = .audio
+            case _ where line.starts(with: "m=video"):
+                section = .video
+            case _ where line.starts(with: "c=IN"):
+                if section == .video && addBitrate {
+                    modifiedLines.append(String(bitrate: bitrate))
+                }
+            case mainAudioMid?.toMidLine(), mainVideoMid?.toMidLine():
                 modifiedLines.append("a=content:main")
-            case presentationVideoMidLine:
+            case presentationVideoMid?.toMidLine():
                 modifiedLines.append("a=content:slides")
             default:
-                let isVideoSection = section == "video"
-                let isConnectionLine = line.starts(with: "c=")
-
-                if addBandwidth && isVideoSection && isConnectionLine {
-                    modifiedLines.append("b=AS:\(bandwidth.rawValue)")
-                    addBandwidth = false
-                }
+                break
             }
         }
 
-        return modifiedLines
-            .joined(separator: Self.delimeter)
-            .appending(Self.delimeter)
+        return sdpString(from: modifiedLines)
+    }
+
+    func mangle(bitrate: Bitrate) -> String {
+        guard bitrate.bps > 0 else {
+            return sdp
+        }
+
+        var modifiedLines = [String]()
+
+        for line in splitToLines() {
+            if let sdpBitrate = line.bitrate, bitrate.bps < sdpBitrate {
+                modifiedLines.append(String(bitrate: bitrate))
+            } else {
+                modifiedLines.append(line)
+            }
+        }
+
+        return sdpString(from: modifiedLines)
     }
 
     func extractFingerprints() -> [Fingerprint] {
@@ -84,11 +97,17 @@ struct SessionDescriptionManager {
         sdp.components(separatedBy: Self.delimeter).filter({ !$0.isEmpty })
     }
 
-    private func section(for line: String) -> String? {
-        Regex("^m=(video|audio).*$")
-            .match(line)?
-            .groupValue(at: 1)
+    private func sdpString(from lines: [String]) -> String {
+        lines.joined(separator: Self.delimeter).appending(Self.delimeter)
     }
+}
+
+// MARK: - Private types
+
+private enum Section: String {
+    case session
+    case audio
+    case video
 }
 
 // MARK: - Private extensions
@@ -96,5 +115,16 @@ struct SessionDescriptionManager {
 private extension String {
     func toMidLine() -> String {
         "a=mid:\(self)"
+    }
+
+    init(bitrate: Bitrate) {
+        self.init("b=TIAS:\(bitrate.bps)")
+    }
+
+    var bitrate: UInt? {
+        Regex("^b=TIAS:(\\d+)$")
+            .match(self)?
+            .groupValue(at: 1)
+            .flatMap(UInt.init)
     }
 }
