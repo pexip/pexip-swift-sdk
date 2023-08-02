@@ -157,7 +157,7 @@ public protocol MediaConnection {
      By default, no maximum bitrate is set.
 
      - Parameters:
-        - bitrate a bitrate to set as maximum
+        - bitrate: a bitrate to set as maximum
     */
     func setMaxBitrate(_ bitrate: Bitrate)
 }

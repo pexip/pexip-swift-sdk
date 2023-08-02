@@ -60,7 +60,7 @@ public struct Bitrate: Equatable {
      Creates a new instance of ``Bitrate``.
 
      - Parameters:
-        - rawValue: the bitrate in megabits per second (Mbit/s)
+        - value: the bitrate in megabits per second (Mbit/s)
      */
     public static func mbps(_ value: UInt) -> Bitrate? {
         Bitrate(value: value, multiplier: 1_000_000)
