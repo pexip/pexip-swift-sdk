@@ -7,6 +7,34 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.8.0] - 2023-08-03
+
+### Added
+- `VideoComponent` can be created with custom `setRenderer` closure
+- Support external cameras on macOS
+- `ConferenceAddress` can be created with alias and host with no extra validation
+- `MediaConnection.receiveMainRemoteAudio` and `MediaConnection.receiveMainRemoteVideo` to enable remote audio/video
+- `MediaConnection.setMainDegradationPreference` and `MediaConnection.setPresentationDegradationPreference` that lets one specify the desired behavior in low bandwidth conditions
+- `MediaConnection.setMaxBitrate` that controls maximum bitrate for each video stream
+
+### Changed
+- `NodeResolver` now returns a host name instead of IP adress if A-record is found 
+(fixes the issue with a certificate mismatch when the certificate is not configured to allow multi-domain)
+- Don't stop video capture on switching between front and back cameras in `WebRTCCameraVideoTrack`
+- Use default WebRTC bundle policy
+- Print a warning if Infinity version prior to v29 is detected. **This will be a hard requirement in Q4 2023**
+- `ConferenceAlias` is renamed to `ConferenceAddress`
+- `DeviceAlias` is renamed to `DeviceAddress`
+- `ack` is now called later in the call setup phase
+- **BREAKING**: `MediaConnection.setMainAudioTrack` and `MediaConnection.setMainVideoTrack` are now throwing functions, and no longer enable remote audio/video by default. Please use `MediaConnection.receiveMainRemoteAudio` and `MediaConnection.receiveMainRemoteVideo` to enable them.
+
+### Fixed
+- Prevent data races when reading/writing to arrays with ice candidates in `WebRTCMediaConnection`
+- Filter out windows without bundle ID in `ScreenMediaSourceEnumerator` on macOS
+
+## Removed
+- Removed various deprecated methods
+
 ## [0.7.0] - 2023-03-02
 
 ### Added
@@ -93,7 +121,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - Initial release
 
-[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.7.0...HEAD
+[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.8.0
 [0.7.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.7.0
 [0.6.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.6.0
 [0.5.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.5.0
