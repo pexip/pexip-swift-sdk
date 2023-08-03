@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 // limitations under the License.
 
 /// The max bandwidth of a video stream (512...6144)
+@available(*, deprecated, message: "Use ``Bitrate`` type instead.")
 public struct Bandwidth: RawRepresentable, Hashable {
     /// The max bandwidth of a video stream.
     public let rawValue: UInt

@@ -61,6 +61,7 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
 
     private let mainDegradationPreference = Synchronized(DegradationPreference.balanced)
     private let presentationDegradationPreference = Synchronized(DegradationPreference.balanced)
+    private let bitrate = Synchronized(Bitrate.bps(0))
 
     private var signalingChannel: SignalingChannel { config.signaling }
     private var localDataChannel: RTCDataChannel?
@@ -275,6 +276,12 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
         presentationDegradationPreference.setValue(preference)
         presentationVideoTransceiver?.setDegradationPreference(preference)
     }
+
+    func setMaxBitrate(_ bitrate: Bitrate) {
+        guard bitrate != self.bitrate.value else { return }
+        self.bitrate.setValue(bitrate)
+        connection.restartIce()
+    }
 }
 
 // MARK: - Private
@@ -300,10 +307,10 @@ private extension WebRTCMediaConnection {
 
             if let remoteDescription = try await config.signaling.sendOffer(
                 callType: "WEBRTC",
-                description: mangle(description: localDescription),
+                description: mangleLocalDescription(localDescription),
                 presentationInMain: config.presentationInMain
             ).map({
-                RTCSessionDescription(type: .answer, sdp: $0)
+                RTCSessionDescription(type: .answer, sdp: mangleRemoteDescription($0))
             }) {
                 try await addOutgoingIceCandidatesIfNeeded()
                 if !isReceivingOffer.value && connection.signalingState == .haveLocalOffer {
@@ -340,14 +347,15 @@ private extension WebRTCMediaConnection {
         }
 
         do {
-            let remoteDescription = RTCSessionDescription(type: .offer, sdp: offer)
+            let sdp = mangleRemoteDescription(offer)
+            let remoteDescription = RTCSessionDescription(type: .offer, sdp: sdp)
             try await connection.setRemoteDescription(remoteDescription)
             fingerprintStore.setRemoteFingerprints(fingerprints(from: remoteDescription))
 
             try await connection.setLocalDescription()
             if let localDescription = connection.localDescription {
                 fingerprintStore.setLocalFingerprints(fingerprints(from: localDescription))
-                try await config.signaling.sendAnswer(mangle(description: localDescription))
+                try await config.signaling.sendAnswer(mangleLocalDescription(localDescription))
             }
 
             isReceivingOffer.setValue(false)
@@ -487,13 +495,18 @@ private extension WebRTCMediaConnection {
         }
     }
 
-    func mangle(description: RTCSessionDescription) -> String {
+    func mangleLocalDescription(_ description: RTCSessionDescription) -> String {
         return SessionDescriptionManager(sdp: description.sdp).mangle(
-            bandwidth: config.bandwidth,
-            mainQualityProfile: mainLocalVideoTrack?.videoProfile,
+            bitrate: bitrate.value,
             mainAudioMid: connection.mid(for: mainAudioTransceiver),
             mainVideoMid: connection.mid(for: mainVideoTransceiver),
             presentationVideoMid: connection.mid(for: presentationVideoTransceiver)
+        )
+    }
+
+    func mangleRemoteDescription(_ sdp: String) -> String {
+        return SessionDescriptionManager(sdp: sdp).mangle(
+            bitrate: bitrate.value
         )
     }
 
