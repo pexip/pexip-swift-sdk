@@ -644,15 +644,9 @@ extension WebRTCMediaConnection: PeerConnectionDelegate {
         didAdd rtpReceiver: RTCRtpReceiver,
         streams mediaStreams: [RTCMediaStream]
     ) {
-        let track = rtpReceiver.track as? RTCVideoTrack
-
-        if rtpReceiver.receiverId == mainAudioTransceiver?.receiver.receiverId {
-            mainAudioTransceiver?.setSenderStreams(mediaStreams)
-        } else if rtpReceiver.receiverId == mainVideoTransceiver?.receiver.receiverId {
-            mainVideoTransceiver?.setSenderStreams(mediaStreams)
+        if rtpReceiver.receiverId == mainVideoTransceiver?.receiver.receiverId {
+            let track = rtpReceiver.track as? RTCVideoTrack
             remoteVideoTracks.setMainTrack(track.map { WebRTCVideoTrack(rtcTrack: $0) })
-        } else if rtpReceiver.receiverId == presentationVideoTransceiver?.receiver.receiverId {
-            presentationVideoTransceiver?.setSenderStreams(mediaStreams)
         }
     }
 }

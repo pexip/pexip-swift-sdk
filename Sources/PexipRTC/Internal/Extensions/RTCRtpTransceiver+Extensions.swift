@@ -42,10 +42,6 @@ extension RTCRtpTransceiver {
         }
     }
 
-    func setSenderStreams(_ streams: [RTCMediaStream]) {
-        sender.streamIds = streams.map(\.streamId)
-    }
-
     func send(from track: RTCMediaStreamTrack?) throws {
         try send(track != nil)
         sender.track = track
