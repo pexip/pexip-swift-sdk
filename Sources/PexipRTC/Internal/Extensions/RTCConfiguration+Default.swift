@@ -29,7 +29,7 @@ extension RTCConfiguration {
                 credential: $0.password
             )
         }
-        configuration.bundlePolicy = .balanced
+        configuration.bundlePolicy = .maxBundle
         configuration.sdpSemantics = .unifiedPlan
         configuration.enableDscp = dscp
         configuration.continualGatheringPolicy = .gatherContinually

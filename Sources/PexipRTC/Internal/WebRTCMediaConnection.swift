@@ -312,20 +312,20 @@ private extension WebRTCMediaConnection {
             ).map({
                 RTCSessionDescription(type: .answer, sdp: mangleRemoteDescription($0))
             }) {
-                try await addOutgoingIceCandidatesIfNeeded()
                 if !isReceivingOffer.value && connection.signalingState == .haveLocalOffer {
                     try await connection.setRemoteDescription(remoteDescription)
                     fingerprintStore.setRemoteFingerprints(fingerprints(from: remoteDescription))
+                    if shouldAck.value {
+                        try await config.signaling.ack()
+                    }
                 }
+                try await addOutgoingIceCandidatesIfNeeded()
             } else {
                 try await addOutgoingIceCandidatesIfNeeded()
                 isPolitePeer.setValue(true)
             }
 
-            if shouldAck.value {
-                shouldAck.setValue(false)
-                try await config.signaling.ack()
-            }
+            shouldAck.setValue(false)
             logger?.debug("Outgoing offer - received answer, isPolitePeer=\(isPolitePeer.value)")
         } catch {
             logger?.error("Outgoing offer - failed to send new offer: \(error)")
@@ -647,12 +647,12 @@ extension WebRTCMediaConnection: PeerConnectionDelegate {
         let track = rtpReceiver.track as? RTCVideoTrack
 
         if rtpReceiver.receiverId == mainAudioTransceiver?.receiver.receiverId {
-            mainAudioTransceiver?.setSenderStreams(mediaStreams)
+            //mainAudioTransceiver?.setSenderStreams(mediaStreams)
         } else if rtpReceiver.receiverId == mainVideoTransceiver?.receiver.receiverId {
-            mainVideoTransceiver?.setSenderStreams(mediaStreams)
+            //mainVideoTransceiver?.setSenderStreams(mediaStreams)
             remoteVideoTracks.setMainTrack(track.map { WebRTCVideoTrack(rtcTrack: $0) })
         } else if rtpReceiver.receiverId == presentationVideoTransceiver?.receiver.receiverId {
-            presentationVideoTransceiver?.setSenderStreams(mediaStreams)
+            //presentationVideoTransceiver?.setSenderStreams(mediaStreams)
         }
     }
 }
