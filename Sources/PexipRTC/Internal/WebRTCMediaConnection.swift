@@ -46,6 +46,7 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
     private var mainLocalAudioTrack: WebRTCLocalAudioTrack?
     private var mainLocalVideoTrack: WebRTCCameraVideoTrack?
 
+    private var presentationMid: String?
     private let started = Synchronized(false)
     private let isMakingOffer = Synchronized(false)
     private let isReceivingOffer = Synchronized(false)
@@ -496,15 +497,18 @@ private extension WebRTCMediaConnection {
     }
 
     func mangleLocalDescription(_ description: RTCSessionDescription) -> String {
+        syncTranscievers()
+        presentationMid = presentationMid ?? connection.mid(for: presentationVideoTransceiver)
         return SessionDescriptionManager(sdp: description.sdp).mangle(
             bitrate: bitrate.value,
             mainAudioMid: connection.mid(for: mainAudioTransceiver),
             mainVideoMid: connection.mid(for: mainVideoTransceiver),
-            presentationVideoMid: connection.mid(for: presentationVideoTransceiver)
+            presentationVideoMid: presentationMid
         )
     }
 
     func mangleRemoteDescription(_ sdp: String) -> String {
+        syncTranscievers()
         return SessionDescriptionManager(sdp: sdp).mangle(
             bitrate: bitrate.value
         )
@@ -596,6 +600,34 @@ extension WebRTCMediaConnection: PeerConnectionDelegate {
         }
     }
 
+    func syncTranscievers() {
+        for transceiver in connection.transceivers {
+            do {
+                switch transceiver.mediaType {
+                case .audio where transceiver.mid == mainAudioTransceiver?.mid:
+                    if transceiver != mainAudioTransceiver {
+                        try transceiver.sync(with: mainAudioTransceiver)
+                        mainAudioTransceiver = transceiver
+                    }
+                case .video where transceiver.mid == presentationMid:
+                    if transceiver != presentationVideoTransceiver {
+                        try transceiver.sync(with: presentationVideoTransceiver)
+                        self.presentationVideoTransceiver = transceiver
+                    }
+                case .video where transceiver.mid == mainVideoTransceiver?.mid:
+                    if transceiver != mainVideoTransceiver {
+                        try transceiver.sync(with: mainVideoTransceiver)
+                        mainVideoTransceiver = transceiver
+                    }
+                default:
+                    break
+                }
+            } catch {
+                logger?.error("Failed to replace transceiver: \(error)")
+            }
+        }
+    }
+
     func peerConnection(
         _ peerConnection: RTCPeerConnection,
         didStartReceivingOn transceiver: RTCRtpTransceiver
@@ -611,7 +643,6 @@ extension WebRTCMediaConnection: PeerConnectionDelegate {
                     mainAudioTransceiver = transceiver
                 }
             case .video:
-                let presentationMid = connection.mid(for: presentationVideoTransceiver)
                 if let presentationVideoTransceiver, presentationMid == transceiver.mid {
                     if transceiver != presentationVideoTransceiver {
                         try transceiver.sync(with: presentationVideoTransceiver)
@@ -646,13 +677,8 @@ extension WebRTCMediaConnection: PeerConnectionDelegate {
     ) {
         let track = rtpReceiver.track as? RTCVideoTrack
 
-        if rtpReceiver.receiverId == mainAudioTransceiver?.receiver.receiverId {
-            //mainAudioTransceiver?.setSenderStreams(mediaStreams)
-        } else if rtpReceiver.receiverId == mainVideoTransceiver?.receiver.receiverId {
-            //mainVideoTransceiver?.setSenderStreams(mediaStreams)
+        if rtpReceiver.receiverId == mainVideoTransceiver?.receiver.receiverId {
             remoteVideoTracks.setMainTrack(track.map { WebRTCVideoTrack(rtcTrack: $0) })
-        } else if rtpReceiver.receiverId == presentationVideoTransceiver?.receiver.receiverId {
-            //presentationVideoTransceiver?.setSenderStreams(mediaStreams)
         }
     }
 }
