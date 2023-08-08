@@ -18,6 +18,7 @@ import WebRTC
 import PexipCore
 import PexipMedia
 
+// swiftlint:disable type_body_length
 actor PeerConnection {
     enum Event {
         case shouldNegotiate
@@ -102,6 +103,8 @@ actor PeerConnection {
         for transceiver in transceivers.values where transceiver.mid == nil {
             transceiver.syncMid()
         }
+
+        syncTransceivers()
 
         let description = connection.localDescription.map {
             RTCSessionDescription(
@@ -283,6 +286,12 @@ actor PeerConnection {
         eventSubject.send(.receiverTrackUpdated(track, content: content))
     }
 
+    private func syncTransceivers() {
+        for transceiver in connection.transceivers {
+            syncTransceiver(transceiver)
+        }
+    }
+
     private func syncTransceiver(_ newTransceiver: RTCRtpTransceiver) {
         do {
             try transceivers.values
@@ -319,3 +328,4 @@ actor PeerConnection {
         SessionDescriptionManager(sdp: description.sdp).extractFingerprints()
     }
 }
+// swiftlint:enable type_body_length

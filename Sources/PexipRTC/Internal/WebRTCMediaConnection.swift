@@ -333,7 +333,6 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
     private func ack(_ description: String?) async throws {
         try await signalingChannel.ack(description)
         ackReceived = true
-
         await addIncomingIceCandidatesIfNeeded()
     }
 
