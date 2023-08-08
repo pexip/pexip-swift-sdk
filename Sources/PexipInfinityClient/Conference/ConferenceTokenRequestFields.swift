@@ -53,7 +53,7 @@ public struct ConferenceTokenRequestFields: Encodable, Hashable {
         conferenceExtension: String? = nil,
         idp: IdentityProvider? = nil,
         ssoToken: String? = nil,
-        directMedia: Bool = true
+        directMedia: Bool = false
     ) {
         self.displayName = displayName
         self.conferenceExtension = conferenceExtension

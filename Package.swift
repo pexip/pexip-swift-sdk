@@ -22,7 +22,7 @@ let package = Package(
     name: "Pexip",
     platforms: [
         .iOS(.v13),
-        .macOS(.v13)
+        .macOS(.v10_15)
     ],
     products: [
         .library(
