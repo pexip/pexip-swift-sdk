@@ -14,7 +14,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Support external cameras on macOS
 - `ConferenceAddress` can be created with alias and host with no extra validation
 - `MediaConnection.receiveMainRemoteAudio` and `MediaConnection.receiveMainRemoteVideo` to enable remote audio/video
-- `MediaConnection.setMainDegradationPreference` and `MediaConnection.setPresentationDegradationPreference` that lets one specify the desired behavior in low bandwidth conditions
+- `MediaConnection.setMainDegradationPreference` and `MediaConnection.setPresentationDegradationPreference` that let one specify the desired behavior in low bandwidth conditions
 - `MediaConnection.setMaxBitrate` that controls maximum bitrate for each video stream
 
 ### Changed
