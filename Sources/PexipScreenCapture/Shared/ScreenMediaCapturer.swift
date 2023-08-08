@@ -52,18 +52,6 @@ public protocol ScreenMediaCapturer: AnyObject {
      */
     func startCapture(atFps fps: UInt) async throws
 
-    /**
-     Starts screen capture with the given video quality profile.
-     - Parameters:
-        - fps: The FPS of a video stream (1...60)
-        - outputDimensions: The dimensions of the output video.
-     */
-    @available(*, deprecated, message: "Use startCapture(atFps:) instead.")
-    func startCapture(
-        atFps fps: UInt,
-        outputDimensions: CMVideoDimensions
-    ) async throws
-
     #else
 
     /**
