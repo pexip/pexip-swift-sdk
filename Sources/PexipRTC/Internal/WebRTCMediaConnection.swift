@@ -205,7 +205,7 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
 
     private func subscribeToEvents() {
         peerConnection.eventPublisher.sink { [weak self] event in
-            Task { @MainActor [weak self] in
+            Task { [weak self] in
                 await self?.handleEvent(event)
             }
         }.store(in: &cancellables)
