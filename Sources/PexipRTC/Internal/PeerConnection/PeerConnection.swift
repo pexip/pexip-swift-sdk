@@ -161,18 +161,21 @@ actor PeerConnection {
         from track: WebRTCLocalTrack?,
         initIfNeeded initValue: RTCRtpTransceiverInit? = nil,
         onCapture: @escaping (Bool) async throws -> Void
-    ) throws {
-        let transceiver = transceiver(
+    ) async throws {
+        if let transceiver = transceiver(
             for: content,
             initIfNeeded: track != nil ? initValue : nil
-        )
-        try transceiver?.send(from: track, onCapture: { value in
-            Task {
-                try await onCapture(value)
+        ) {
+            try transceiver.send(from: track, onCapture: { value in
+                Task {
+                    try await onCapture(value)
+                }
+            })
+            if let degradationPreference = degradationPreferences[content] {
+                transceiver.setDegradationPreference(degradationPreference)
             }
-        })
-        if let degradationPreference = degradationPreferences[content] {
-            transceiver?.setDegradationPreference(degradationPreference)
+        } else {
+            try await onCapture(false)
         }
     }
 
