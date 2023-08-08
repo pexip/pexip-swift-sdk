@@ -164,10 +164,10 @@ extension ConferenceViewModel {
         Task { @MainActor in
             do {
                 state = .connecting
-                try mediaConnection.setMainAudioTrack(mainLocalAudioTrack)
-                try mediaConnection.setMainVideoTrack(cameraVideoTrack)
-                try mediaConnection.receiveMainRemoteAudio(true)
-                try mediaConnection.receiveMainRemoteVideo(true)
+                try await mediaConnection.setMainAudioTrack(mainLocalAudioTrack)
+                try await mediaConnection.setMainVideoTrack(cameraVideoTrack)
+                try await mediaConnection.receiveMainRemoteAudio(true)
+                try await mediaConnection.receiveMainRemoteVideo(true)
                 try await mediaConnection.start()
             } catch {
                 state = .preflight
@@ -178,11 +178,11 @@ extension ConferenceViewModel {
 
     func leave() {
         state = .disconnected
-        stopPresenting(reason: .callEnded)
 
-        Task {
+        Task { @MainActor in
+            try await stopPresenting(reason: .callEnded)
             await conference.leave()
-            mediaConnection.stop()
+            await mediaConnection.stop()
             setCameraEnabled(false)
             setMicrophoneEnabled(false)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
@@ -257,15 +257,18 @@ extension ConferenceViewModel {
     #endif
 
     func stopPresenting() {
-        stopPresenting(reason: nil)
+        Task {
+            try await stopPresenting(reason: nil)
+        }
     }
 
-    func stopPresenting(reason: ScreenCaptureStopReason?) {
+    @MainActor
+    func stopPresenting(reason: ScreenCaptureStopReason?) async throws {
         screenMediaTrack?.stopCapture(reason: reason)
         #if os(macOS)
         screenMediaTrack = nil
         #endif
-        mediaConnection.setScreenMediaTrack(nil)
+        try await mediaConnection.setScreenMediaTrack(nil)
         isPresenting = false
     }
 
@@ -334,20 +337,19 @@ private extension ConferenceViewModel {
         track.capturingStatus.$isCapturing
             .dropFirst()
             .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isCapturing in
-                guard let self else { return }
+            .sink { isCapturing in
+                Task { @MainActor [weak self] in
+                    if isCapturing {
+                        try await self?.mediaConnection.setScreenMediaTrack(track)
+                    } else {
+                        try await self?.mediaConnection.setScreenMediaTrack(nil)
+                        #if os(macOS)
+                        self?.screenMediaTrack = nil
+                        #endif
+                    }
 
-                if isCapturing {
-                    self.mediaConnection.setScreenMediaTrack(track)
-                } else {
-                    self.mediaConnection.setScreenMediaTrack(nil)
-                    #if os(macOS)
-                    self.screenMediaTrack = nil
-                    #endif
+                    self?.isPresenting = isCapturing
                 }
-
-                self.isPresenting = isCapturing
             }
             .store(in: &cancellables)
     }
@@ -355,42 +357,40 @@ private extension ConferenceViewModel {
     // swiftlint:disable cyclomatic_complexity
     func sinkConferenceEvents() {
         conference.eventPublisher
-            .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
-                guard let self = self else { return }
-
-                do {
-                    switch event {
-                    case .conferenceUpdate(let status):
-                        self.settings.isLiveCaptionsAvailable = status.liveCaptionsAvailable
-                        self.sinkLiveCaptionsSettings()
-                    case .liveCaptions(let captions):
-                        self.showLiveCaptions(captions)
-                    case .presentationStart(let message):
-                        self.stopPresenting(reason: .presentationStolen)
-                        self.presenterName = message.presenterName
-                        try self.mediaConnection.receivePresentation(true)
-                    case .presentationStop:
-                        self.presenterName = nil
-                        try self.mediaConnection.receivePresentation(false)
-                    case .clientDisconnected:
-                        self.leave()
-                    case .splashScreen(let splashScreen):
-                        self.splashScreen = splashScreen
-                    case .failure(let message):
-                        debugPrint("Received conference error event: \(message.error)")
-                    case .peerDisconnected:
-                        self.onPeerDisconnected()
-                    case .refer(let event):
-                        self.onRefer(event)
-                    case .callDisconnected:
-                        break
+                Task { @MainActor [weak self] in
+                    do {
+                        switch event {
+                        case .conferenceUpdate(let status):
+                            self?.settings.isLiveCaptionsAvailable = status.liveCaptionsAvailable
+                            self?.sinkLiveCaptionsSettings()
+                        case .liveCaptions(let captions):
+                            self?.showLiveCaptions(captions)
+                        case .presentationStart(let message):
+                            try await self?.stopPresenting(reason: .presentationStolen)
+                            self?.presenterName = message.presenterName
+                            try await self?.mediaConnection.receivePresentation(true)
+                        case .presentationStop:
+                            self?.presenterName = nil
+                            try await self?.mediaConnection.receivePresentation(false)
+                        case .clientDisconnected:
+                            self?.leave()
+                        case .splashScreen(let splashScreen):
+                            self?.splashScreen = splashScreen
+                        case .failure(let message):
+                            debugPrint("Received conference error event: \(message.error)")
+                        case .peerDisconnected:
+                            await self?.onPeerDisconnected()
+                        case .refer(let event):
+                            self?.onRefer(event)
+                        case .callDisconnected:
+                            break
+                        }
+                    } catch {
+                        debugPrint("Cannot handle conference event, error: \(error)")
                     }
-                } catch {
-                    debugPrint("Cannot handle conference event, error: \(error)")
                 }
-            }
-            .store(in: &cancellables)
+            }.store(in: &cancellables)
     }
     // swiftlint:enable cyclomatic_complexity
 }
@@ -409,7 +409,7 @@ private extension ConferenceViewModel {
                     withVideoProfile: localPresentationQualityProfile
                 )
             } catch {
-                stopPresenting()
+                try? await stopPresenting(reason: nil)
                 debugPrint(error)
             }
         }
@@ -453,8 +453,8 @@ private extension ConferenceViewModel {
 
     /// Create new media connection object
     /// when another peer is disconnected from a direct media call.
-    private func onPeerDisconnected() {
-        mediaConnection.stop()
+    private func onPeerDisconnected() async {
+        await mediaConnection.stop()
         mediaConnection = mediaFactory.createMediaConnection(
             config: mediaConnectionConfig
         )
@@ -471,7 +471,7 @@ private extension ConferenceViewModel {
         Task { @MainActor in
             do {
                 await conference.leave()
-                mediaConnection.stop()
+                await mediaConnection.stop()
                 let details = try await conferenceConnector.join(
                     using: .incomingToken(event.token),
                     displayName: displayName,

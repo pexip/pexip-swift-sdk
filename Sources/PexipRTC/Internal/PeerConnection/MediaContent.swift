@@ -13,10 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Combine
 import WebRTC
-import PexipCore
-import PexipMedia
 
-actor PeerConnection: NSObject {
+struct MediaContent: Hashable {
+    static let mainAudio = MediaContent(mediaType: .audio, sdpAttribute: "main")
+    static let mainVideo = MediaContent(mediaType: .video, sdpAttribute: "main")
+    static let presentationVideo = MediaContent(mediaType: .video, sdpAttribute: "slides")
+
+    let id = UUID()
+    let mediaType: RTCRtpMediaType
+    let sdpAttribute: String
 }

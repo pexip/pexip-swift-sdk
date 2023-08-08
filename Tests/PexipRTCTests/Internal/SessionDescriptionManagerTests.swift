@@ -82,9 +82,11 @@ final class SessionDescriptionManagerTests: XCTestCase {
 
         let mangled = SessionDescriptionManager(sdp: original).mangle(
             bitrate: bitrate,
-            mainAudioMid: "3",
-            mainVideoMid: "4",
-            presentationVideoMid: "5"
+            mids: [
+                .mainAudio: "3",
+                .mainVideo: "4",
+                .presentationVideo: "5"
+            ]
         )
 
         XCTAssertEqual(mangled, expected)
@@ -131,9 +133,11 @@ final class SessionDescriptionManagerTests: XCTestCase {
 
         let mangled = SessionDescriptionManager(sdp: original).mangle(
             bitrate: bitrate,
-            mainAudioMid: "3",
-            mainVideoMid: "4",
-            presentationVideoMid: "5"
+            mids: [
+                .mainAudio: "3",
+                .mainVideo: "4",
+                .presentationVideo: "5"
+            ]
         )
 
         XCTAssertEqual(mangled, expected)
