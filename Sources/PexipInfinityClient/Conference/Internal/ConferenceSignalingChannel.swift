@@ -108,13 +108,20 @@ final class ConferenceSignalingChannel: SignalingChannel, SignalingEventSender {
         return remoteDescription
     }
 
-    func sendAnswer(_ description: String) async throws {
-        pwds.setValue(sdpPwds(from: description))
-        try await ack(sdp: description)
-    }
+    func ack( _ description: String?) async throws {
+        guard let callService = try await callService else {
+            logger?.warn("Tried to ack before starting a call")
+            return
+        }
 
-    func ack() async throws {
-        try await ack(sdp: nil)
+        if let description {
+            pwds.setValue(sdpPwds(from: description))
+        }
+
+        _ = try await callService.ack(
+            sdp: description,
+            token: await tokenStore.token()
+        )
     }
 
     func addCandidate(_ candidate: String, mid: String?) async throws {
@@ -217,18 +224,6 @@ final class ConferenceSignalingChannel: SignalingChannel, SignalingEventSender {
             }
             return try await participantService.call(id: callDetailsTask.value.id)
         }
-    }
-
-    private func ack(sdp: String?) async throws {
-        guard let callService = try await callService else {
-            logger?.warn("Tried to ack before starting a call")
-            return
-        }
-
-        _ = try await callService.ack(
-            sdp: sdp,
-            token: await tokenStore.token()
-        )
     }
 
     private func candidateUfrag(from candidate: String) -> String? {

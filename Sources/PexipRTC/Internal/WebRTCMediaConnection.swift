@@ -18,8 +18,8 @@ import WebRTC
 import PexipCore
 import PexipMedia
 
-// swiftlint:disable file_length
-actor WebRTCMediaConnection: MediaConnection {
+// swiftlint:disable type_body_length file_length
+actor WebRTCMediaConnection: MediaConnection, DataSender {
     let remoteVideoTracks = RemoteVideoTracks()
 
     nonisolated var statePublisher: AnyPublisher<MediaConnectionState, Never> {
@@ -37,11 +37,11 @@ actor WebRTCMediaConnection: MediaConnection {
     private var signalingChannel: SignalingChannel { config.signaling }
     private var started = false
     private var isMakingOffer = false
-    private var isReceivingOffer = false
+    private var ackReceived = false
     private var isPolitePeer = false
-    private var shouldAck = true
     private var incomingIceCandidates = [RTCIceCandidate]()
     private var outgoingIceCandidates = [RTCIceCandidate]()
+    private var negotiationTask: Task<Void, Error>?
     private let stateSubject = PassthroughSubject<MediaConnectionState, Never>()
     private var cancellables = Set<AnyCancellable>()
 
@@ -70,9 +70,48 @@ actor WebRTCMediaConnection: MediaConnection {
         )
         self.config = config
         self.logger = logger
+
         Task {
             await subscribeToEvents()
         }
+    }
+
+    // MARK: - MediaConnection (lifecycle)
+
+    func start() async throws {
+        guard !started else {
+            return
+        }
+
+        started = true
+        try await peerConnection.setDirection(.inactive, for: .presentationVideo)
+
+        if let dataChannelId = signalingChannel.data?.id {
+            await peerConnection.createDataChannel(withId: dataChannelId)
+            signalingChannel.data?.sender = self
+        }
+
+        try await negotiate {
+            try await $0?.sendOffer()
+        }
+    }
+
+    func stop() async {
+        await peerConnection.close()
+
+        cancellables.removeAll()
+        mainLocalAudioTrack = nil
+        signalingChannel.data?.sender = nil
+
+        setRemoteTrack(nil, content: .mainVideo)
+        setRemoteTrack(nil, content: .presentationVideo)
+
+        started = false
+        isMakingOffer = false
+        ackReceived = false
+        isPolitePeer = false
+        incomingIceCandidates.removeAll()
+        outgoingIceCandidates.removeAll()
     }
 
     // MARK: - MediaConnection (tracks)
@@ -118,44 +157,6 @@ actor WebRTCMediaConnection: MediaConnection {
         )
     }
 
-    // MARK: - MediaConnection (lifecycle)
-
-    func start() async throws {
-        guard !started else {
-            return
-        }
-
-        started = true
-        try await peerConnection.setDirection(.inactive, for: .presentationVideo)
-
-        if let dataChannelId = signalingChannel.data?.id {
-            await peerConnection.createDataChannel(withId: dataChannelId)
-            signalingChannel.data?.sender = self
-        }
-
-        try await sendOffer()
-    }
-
-    func stop() async {
-        await peerConnection.close()
-
-        cancellables.removeAll()
-        mainLocalAudioTrack = nil
-
-        remoteVideoTracks.setMainTrack(nil)
-        remoteVideoTracks.setPresentationTrack(nil)
-
-        started = false
-        isMakingOffer = false
-        isReceivingOffer = false
-        isPolitePeer = false
-        shouldAck = true
-        incomingIceCandidates.removeAll()
-        outgoingIceCandidates.removeAll()
-
-        signalingChannel.data?.sender = nil
-    }
-
     func receiveMainRemoteAudio(_ receive: Bool) async throws {
         try await peerConnection.receive(.mainAudio, receive: receive)
     }
@@ -170,12 +171,7 @@ actor WebRTCMediaConnection: MediaConnection {
         }
     }
 
-    // MARK: - Other
-
-    @discardableResult
-    func dtmf(signals: DTMFSignals) async throws -> Bool {
-        try await signalingChannel.dtmf(signals: signals)
-    }
+    // MARK: - MediaConnection (preferences)
 
     func setMainDegradationPreference(_ preference: DegradationPreference) async {
         await peerConnection.setDegradationPreference(preference, for: .mainVideo)
@@ -188,140 +184,27 @@ actor WebRTCMediaConnection: MediaConnection {
     func setMaxBitrate(_ bitrate: Bitrate) async {
         await peerConnection.setMaxBitrate(bitrate)
     }
-}
 
-// MARK: - Private
-
-private extension WebRTCMediaConnection {
-    func sendOffer() async throws {
-        isMakingOffer = true
-
-        defer {
-            isMakingOffer = false
-        }
-
-        logger?.debug("Outgoing offer - initiated")
-
-        do {
-            guard let localDescription = try await peerConnection.setLocalDescription() else {
-                return
-            }
-
-            if let remoteDescription = try await config.signaling.sendOffer(
-                callType: "WEBRTC",
-                description: localDescription.sdp,
-                presentationInMain: config.presentationInMain
-            ).map({
-                RTCSessionDescription(type: .answer, sdp: $0)
-            }) {
-                try await peerConnection.setRemoteDescription(remoteDescription)
-                if shouldAck {
-                    shouldAck = false
-                    try await config.signaling.ack()
-                }
-            } else {
-                isPolitePeer = true
-            }
-
-            isMakingOffer = false
-            try await addOutgoingIceCandidatesIfNeeded()
-            logger?.debug("Outgoing offer - received answer, isPolitePeer=\(isPolitePeer)")
-        } catch {
-            logger?.error("Outgoing offer - failed to send new offer: \(error)")
-            outgoingIceCandidates.removeAll()
-            throw error
-        }
+    @discardableResult
+    func dtmf(signals: DTMFSignals) async throws -> Bool {
+        try await signalingChannel.dtmf(signals: signals)
     }
 
-    func receiveNewOffer(_ offer: String) async {
-        isReceivingOffer = true
+    // MARK: - Data channel
 
-        defer {
-            isReceivingOffer = false
-        }
-
-        logger?.debug("Incoming offer - received")
-        guard await canReceiveOffer else {
-            logger?.debug("Incoming offer - ignored")
-            return
-        }
-
-        do {
-            let remoteDescription = RTCSessionDescription(type: .offer, sdp: offer)
-            try await peerConnection.setRemoteDescription(remoteDescription)
-
-            if let localDescription = try await peerConnection.setLocalDescription() {
-                try await config.signaling.sendAnswer(localDescription.sdp)
-            }
-
-            isReceivingOffer = false
-            try await addIncomingIceCandidatesIfNeeded()
-            logger?.debug("Incoming offer - sent answer")
-        } catch {
-            incomingIceCandidates.removeAll()
-            logger?.error("Incoming offer - failed to accept: \(error)")
-        }
+    func send(_ data: Data) async throws -> Bool {
+        try await peerConnection.send(data)
     }
 
-    func receiveCandidate(_ candidate: String, mid: String?) async {
-        guard !candidate.isEmpty else {
-            return
-        }
-        let candidate = RTCIceCandidate(
-            sdp: candidate,
-            sdpMLineIndex: mid.flatMap({ Int32($0) }) ?? 0,
-            sdpMid: mid
-        )
-
-        do {
-            if isReceivingOffer {
-                incomingIceCandidates.append(candidate)
-            } else {
-                try await peerConnection.addCandidate(candidate)
-                logger?.debug("New incoming ICE candidate added")
-            }
-        } catch {
-            if await canReceiveOffer {
-                logger?.error("Failed to add new incoming ICE candidate")
-            }
-        }
+    private func receive(_ data: Data) async throws {
+        let result = try await signalingChannel.data?.receiver?.receive(data)
+        logger?.debug("Data channel - did receive data, success=\(result == true).")
     }
 
-    func addIncomingIceCandidatesIfNeeded() async throws {
-        let incomingIceCandidates = self.incomingIceCandidates
-        self.incomingIceCandidates.removeAll()
+    // MARK: - Events
 
-        for candidate in incomingIceCandidates {
-            try await peerConnection.addCandidate(candidate)
-            logger?.debug("New incoming ICE candidate added")
-        }
-    }
-
-    func addOutgoingIceCandidatesIfNeeded() async throws {
-        let outgoingIceCandidates = self.outgoingIceCandidates
-        self.outgoingIceCandidates.removeAll()
-
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            for candidate in outgoingIceCandidates {
-                group.addTask { [weak self] in
-                    try await self?.addOutgoingIceCandidate(candidate)
-                }
-            }
-
-            try await group.waitForAll()
-        }
-    }
-
-    func addOutgoingIceCandidate(_ candidate: RTCIceCandidate) async throws {
-        try await signalingChannel.addCandidate(
-            candidate.sdp,
-            mid: candidate.sdpMid
-        )
-        logger?.debug("New outgoing ICE candidate added")
-    }
-
-    func subscribeToEvents() {
-        peerConnection.eventPublisher.sink { event in
+    private func subscribeToEvents() {
+        peerConnection.eventPublisher.sink { [weak self] event in
             Task { @MainActor [weak self] in
                 await self?.handleEvent(event)
             }
@@ -331,63 +214,196 @@ private extension WebRTCMediaConnection {
             self?.logger?.debug("Secure Check Code: \(value)")
         }.store(in: &cancellables)
 
-        config.signaling.eventPublisher.sink { event in
+        signalingChannel.eventPublisher.sink { [weak self] event in
             Task { [weak self] in
                 await self?.handleEvent(event)
             }
         }.store(in: &cancellables)
     }
 
-    func handleEvent(_ event: PeerConnection.Event) async {
-        switch event {
-        case .shouldNegotiate:
-            if !isReceivingOffer {
-                try? await sendOffer()
+    private func handleEvent(_ event: PeerConnection.Event) async {
+        do {
+            switch event {
+            case .shouldNegotiate:
+                try await negotiate {
+                    try await $0?.sendOffer()
+                }
+            case .newPeerConnectionState(let newState):
+                stateSubject.send(newState)
+                #if os(iOS)
+                if newState == .connected {
+                    mainLocalAudioTrack?.speakerOn()
+                }
+                #endif
+            case .newCandidate(let candidate):
+                if isMakingOffer {
+                    outgoingIceCandidates.append(candidate)
+                } else {
+                    await addOutgoingIceCandidate(candidate)
+                }
+            case let .receiverTrackUpdated(track, content):
+                setRemoteTrack(track, content: content)
+            case let .dataReceived(data):
+                try await receive(data)
             }
-        case .newPeerConnectionState(let newState):
-            stateSubject.send(newState)
-            #if os(iOS)
-            if newState == .connected {
-                mainLocalAudioTrack?.speakerOn()
-            }
-            #endif
-        case .newCandidate(let candidate):
-            await onNewCandidate(candidate)
-        case let .receiverTrackUpdated(track, content):
-            onReceiverTrack(track, content: content)
-        case let .dataReceived(data):
-            do {
-                let result = try await signalingChannel.data?.receiver?.receive(data)
-                logger?.debug("Data channel - did receive data, success=\(result == true).")
-            } catch {
-                logger?.error("Data channel - failed to process incoming data: \(error)")
-            }
+        } catch {
+            logger?.error("Failed to handle peer connection event: \(error)")
         }
     }
 
-    func handleEvent(_ event: SignalingEvent) async {
-        switch event {
-        case .newOffer(let sdp):
-            await receiveNewOffer(sdp)
-        case let .newCandidate(candidate, mid):
-            await receiveCandidate(candidate, mid: mid)
+    private func handleEvent(_ event: SignalingEvent) async {
+        do {
+            switch event {
+            case .newOffer(let sdp):
+                try await negotiate {
+                    await $0?.receiveNewOffer(sdp)
+                }
+            case let .newCandidate(candidate, mid):
+                await receiveCandidate(candidate, mid: mid)
+            }
+        } catch {
+            logger?.error("Failed to handle signaling event: \(error)")
         }
     }
 
-    func onNewCandidate(_ candidate: RTCIceCandidate) async {
-        guard !isMakingOffer else {
-            outgoingIceCandidates.append(candidate)
+    // MARK: - Negotiation
+
+    private func negotiate(
+        _ task: @escaping (WebRTCMediaConnection?) async throws -> Void
+    ) async throws {
+        negotiationTask = Task { [weak self, negotiationTask] in
+            _ = await negotiationTask?.result
+            try await task(self)
+        }
+        try await negotiationTask?.result.get()
+    }
+
+    private func sendOffer() async throws {
+        isMakingOffer = true
+        logger?.debug("Outgoing offer - initiated")
+
+        do {
+            guard let offer = try await peerConnection.setLocalDescription() else {
+                return
+            }
+
+            if let answer = try await signalingChannel.sendOffer(
+                callType: "WEBRTC",
+                description: offer.sdp,
+                presentationInMain: config.presentationInMain
+            ) {
+                try await peerConnection.setRemoteAnswer(answer)
+                try await ack(nil)
+            } else {
+                isPolitePeer = true
+            }
+
+            isMakingOffer = false
+            await addOutgoingIceCandidatesIfNeeded()
+            logger?.debug("Outgoing offer - received answer, isPolitePeer=\(isPolitePeer)")
+        } catch {
+            isMakingOffer = false
+            logger?.error("Outgoing offer - failed to send new offer: \(error)")
+            throw error
+        }
+    }
+
+    private func receiveNewOffer(_ offer: String) async {
+        logger?.debug("Incoming offer - initiated")
+
+        guard await canReceiveOffer else {
+            logger?.debug("Incoming offer - ignored")
             return
         }
 
         do {
-            try await addOutgoingIceCandidate(candidate)
+            try await peerConnection.setRemoteOffer(offer)
+
+            if let answer = try await peerConnection.setLocalDescription() {
+                try await ack(answer.sdp)
+            }
+
+            logger?.debug("Incoming offer - sent answer")
+        } catch {
+            incomingIceCandidates.removeAll()
+            logger?.error("Incoming offer - failed to accept: \(error)")
+        }
+    }
+
+    private func ack(_ description: String?) async throws {
+        try await signalingChannel.ack(description)
+        ackReceived = true
+
+        await addIncomingIceCandidatesIfNeeded()
+    }
+
+    private func receiveCandidate(_ candidate: String, mid: String?) async {
+        guard let mid = mid.flatMap({ Int32($0) }), !candidate.isEmpty else {
+            return
+        }
+
+        let candidate = RTCIceCandidate(
+            sdp: candidate,
+            sdpMLineIndex: mid,
+            sdpMid: "\(mid)"
+        )
+
+        if ackReceived {
+            await addIncomingIceCandidate(candidate)
+        } else {
+            incomingIceCandidates.append(candidate)
+        }
+    }
+
+    private func addIncomingIceCandidatesIfNeeded() async {
+        let incomingIceCandidates = self.incomingIceCandidates
+        self.incomingIceCandidates.removeAll()
+
+        await withTaskGroup(of: Void.self) { group in
+            for candidate in incomingIceCandidates {
+                group.addTask { [weak self] in
+                    await self?.addIncomingIceCandidate(candidate)
+                }
+            }
+            await group.waitForAll()
+        }
+    }
+
+    private func addIncomingIceCandidate(_ candidate: RTCIceCandidate) async {
+        do {
+            try await peerConnection.addCandidate(candidate)
+            logger?.debug("New incoming ICE candidate added")
+        } catch {
+            if await canReceiveOffer {
+                logger?.error("Failed to add new incoming ICE candidate")
+            }
+        }
+    }
+
+    private func addOutgoingIceCandidatesIfNeeded() async {
+        let outgoingIceCandidates = self.outgoingIceCandidates
+        self.outgoingIceCandidates.removeAll()
+
+        await withTaskGroup(of: Void.self) { group in
+            for candidate in outgoingIceCandidates {
+                group.addTask { [weak self] in
+                    await self?.addOutgoingIceCandidate(candidate)
+                }
+            }
+            await group.waitForAll()
+        }
+    }
+
+    private func addOutgoingIceCandidate(_ candidate: RTCIceCandidate) async {
+        do {
+            try await signalingChannel.addCandidate(candidate.sdp, mid: candidate.sdpMid)
+            logger?.debug("New outgoing ICE candidate added")
         } catch {
             logger?.error("Failed to add outgoing ICE candidate: \(error)")
         }
     }
 
-    func onReceiverTrack(_ track: RTCMediaStreamTrack?, content: MediaContent) {
+    private func setRemoteTrack(_ track: RTCMediaStreamTrack?, content: MediaContent) {
         func videoTrack() -> WebRTCVideoTrack? {
             (track as? RTCVideoTrack).map { WebRTCVideoTrack(rtcTrack: $0) }
         }
@@ -402,13 +418,4 @@ private extension WebRTCMediaConnection {
         }
     }
 }
-
-// MARK: - DataSender
-
-extension WebRTCMediaConnection: DataSender {
-    func send(_ data: Data) async throws -> Bool {
-        try await peerConnection.send(data)
-    }
-}
-
-// swiftlint:enable file_length
+// swiftlint:enable type_body_length file_length

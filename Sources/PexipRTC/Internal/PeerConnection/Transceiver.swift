@@ -18,8 +18,8 @@ import WebRTC
 import PexipMedia
 
 final class Transceiver {
-    var mid: String?
     var receiverId: String { transceiver.receiver.receiverId }
+    private(set) var mid: String?
 
     private var transceiver: RTCRtpTransceiver
     private var senderTrack: WebRTCLocalTrack?

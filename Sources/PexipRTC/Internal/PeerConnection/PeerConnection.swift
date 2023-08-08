@@ -41,8 +41,8 @@ actor PeerConnection {
     private var bitrate = Bitrate.bps(0)
     private var dataChannel: RTCDataChannel?
     private let fingerprintStore = FingerprintStore()
-    private var cancellables = Set<AnyCancellable>()
     private let eventSubject = PassthroughSubject<Event, Never>()
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
 
@@ -118,6 +118,14 @@ actor PeerConnection {
         }
 
         return description
+    }
+
+    func setRemoteOffer(_ offer: String) async throws {
+        try await setRemoteDescription(RTCSessionDescription(type: .offer, sdp: offer))
+    }
+
+    func setRemoteAnswer(_ answer: String) async throws {
+        try await setRemoteDescription(RTCSessionDescription(type: .answer, sdp: answer))
     }
 
     func setRemoteDescription(_ description: RTCSessionDescription) async throws {
@@ -210,31 +218,7 @@ actor PeerConnection {
         logger?.debug("Data channel - new data channel created.")
     }
 
-    // MARK: - Private
-
-    private func transceiver(
-        for content: MediaContent,
-        initIfNeeded initValue: RTCRtpTransceiverInit? = nil
-    ) -> Transceiver? {
-        if let transceiver = transceivers[content] {
-            return transceiver
-        } else if let initValue {
-            let transceiver = connection.addTransceiver(
-                of: content.mediaType,
-                init: initValue
-            ).map(Transceiver.init)
-
-            transceivers[content] = transceiver
-
-            return transceiver
-        } else {
-            return nil
-        }
-    }
-
-    private func fingerprints(from description: RTCSessionDescription) -> [Fingerprint] {
-        SessionDescriptionManager(sdp: description.sdp).extractFingerprints()
-    }
+    // MARK: - Events
 
     private func subscribeToEvents() {
         connectionDelegateProxy.eventPublisher.sink { [weak self] event in
@@ -307,5 +291,31 @@ actor PeerConnection {
         } catch {
             logger?.error("Failed to replace transceiver: \(error)")
         }
+    }
+
+    // MARK: - Helpers
+
+    private func transceiver(
+        for content: MediaContent,
+        initIfNeeded initValue: RTCRtpTransceiverInit? = nil
+    ) -> Transceiver? {
+        if let transceiver = transceivers[content] {
+            return transceiver
+        } else if let initValue {
+            let transceiver = connection.addTransceiver(
+                of: content.mediaType,
+                init: initValue
+            ).map(Transceiver.init)
+
+            transceivers[content] = transceiver
+
+            return transceiver
+        } else {
+            return nil
+        }
+    }
+
+    private func fingerprints(from description: RTCSessionDescription) -> [Fingerprint] {
+        SessionDescriptionManager(sdp: description.sdp).extractFingerprints()
     }
 }
