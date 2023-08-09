@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pexip/webrtc-objc",
       "state" : {
-        "revision" : "87328021c5736f7ce549622d595e59e39909d464",
-        "version" : "105.0.0"
+        "revision" : "8be81671be179bb54a6e0348cb9e921b97cf364b",
+        "version" : "115.0.5790"
       }
     }
   ],
