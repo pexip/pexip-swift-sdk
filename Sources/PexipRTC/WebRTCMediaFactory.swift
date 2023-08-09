@@ -24,8 +24,19 @@ public final class WebRTCMediaFactory: MediaFactory {
 
     // MARK: - Init
 
-    public convenience init(logger: Logger? = DefaultLogger.mediaWebRTC) {
-        self.init(factory: .defaultFactory(), logger: logger)
+    public convenience init(
+        videoEncoderFactory: RTCVideoEncoderFactory = RTCDefaultVideoEncoderFactory(),
+        videoDecoderFactory: RTCVideoDecoderFactory = RTCDefaultVideoDecoderFactory(),
+        logger: Logger? = DefaultLogger.mediaWebRTC
+    ) {
+        RTCInitializeSSL()
+        self.init(
+            factory: RTCPeerConnectionFactory(
+                encoderFactory: videoEncoderFactory,
+                decoderFactory: videoDecoderFactory
+            ),
+            logger: logger
+        )
     }
 
     init(factory: RTCPeerConnectionFactory, logger: Logger? = nil) {

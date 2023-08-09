@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +12,3 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-import WebRTC
-
-extension RTCPeerConnectionFactory {
-    static func defaultFactory() -> RTCPeerConnectionFactory {
-        RTCInitializeSSL()
-        #if targetEnvironment(simulator) || os(macOS)
-        let videoEncoderFactory = VideoEncoderFactoryVP8()
-        let videoDecoderFactory = VideoDecoderFactoryVP8()
-        #else
-        let videoEncoderFactory = RTCVideoEncoderFactoryH264()
-        let videoDecoderFactory = RTCVideoDecoderFactoryH264()
-        #endif
-        return RTCPeerConnectionFactory(
-            encoderFactory: videoEncoderFactory,
-            decoderFactory: videoDecoderFactory
-        )
-    }
-}
