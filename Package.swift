@@ -53,7 +53,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/pexip/webrtc-objc",
-            exact: "105.0.0"
+            exact: "115.0.5790"
         ),
         .package(
             url: "https://github.com/pointfreeco/swift-snapshot-testing.git",
