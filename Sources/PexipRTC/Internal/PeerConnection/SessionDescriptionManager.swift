@@ -24,9 +24,7 @@ struct SessionDescriptionManager {
 
     func mangle(
         bitrate: Bitrate,
-        mainAudioMid: String? = nil,
-        mainVideoMid: String? = nil,
-        presentationVideoMid: String? = nil
+        mids: [MediaContent: String] = [:]
     ) -> String {
         var modifiedLines = [String]()
         var section = Section.session
@@ -44,12 +42,12 @@ struct SessionDescriptionManager {
                 if section == .video && addBitrate {
                     modifiedLines.append(String(bitrate: bitrate))
                 }
-            case mainAudioMid?.toMidLine(), mainVideoMid?.toMidLine():
-                modifiedLines.append("a=content:main")
-            case presentationVideoMid?.toMidLine():
-                modifiedLines.append("a=content:slides")
             default:
-                break
+                if let (content, _) = mids.first(where: { _, mid in
+                    line == "a=mid:\(mid)"
+                }) {
+                    modifiedLines.append("a=content:\(content.sdpAttribute)")
+                }
             }
         }
 
@@ -113,10 +111,6 @@ private enum Section: String {
 // MARK: - Private extensions
 
 private extension String {
-    func toMidLine() -> String {
-        "a=mid:\(self)"
-    }
-
     init(bitrate: Bitrate) {
         self.init("b=TIAS:\(bitrate.bps)")
     }

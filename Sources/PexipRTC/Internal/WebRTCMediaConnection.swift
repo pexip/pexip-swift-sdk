@@ -18,61 +18,40 @@ import WebRTC
 import PexipCore
 import PexipMedia
 
-// swiftlint:disable file_length
-final class WebRTCMediaConnection: NSObject, MediaConnection {
-    var remoteVideoTracks = RemoteVideoTracks(
-        mainTrack: nil,
-        presentationTrack: nil
-    )
+// swiftlint:disable type_body_length file_length
+actor WebRTCMediaConnection: MediaConnection, DataSender {
+    let remoteVideoTracks = RemoteVideoTracks()
 
-    var statePublisher: AnyPublisher<MediaConnectionState, Never> {
-        stateSubject.eraseToAnyPublisher()
+    nonisolated var statePublisher: AnyPublisher<MediaConnectionState, Never> {
+        stateSubject.receive(on: DispatchQueue.main).eraseToAnyPublisher()
     }
 
-    var secureCheckCode: SecureCheckCode {
-        fingerprintStore.secureCheckCode
+    nonisolated var secureCheckCode: AnyPublisher<String, Never> {
+        peerConnection.secureCheckCode
     }
 
+    private let peerConnection: PeerConnection
     private let config: MediaConnectionConfig
-    private let factory: RTCPeerConnectionFactory
-    private let connection: RTCPeerConnection
-    private let connectionDelegateProxy: PeerConnectionDelegateProxy
     private let logger: Logger?
-
-    private var mainAudioTransceiver: RTCRtpTransceiver?
-    private var mainVideoTransceiver: RTCRtpTransceiver?
-    private var presentationVideoTransceiver: RTCRtpTransceiver?
-
     private var mainLocalAudioTrack: WebRTCLocalAudioTrack?
-    private var mainLocalVideoTrack: WebRTCCameraVideoTrack?
-
-    private let started = Synchronized(false)
-    private let isMakingOffer = Synchronized(false)
-    private let isReceivingOffer = Synchronized(false)
-    private let shouldRenegotiate = Synchronized(false)
-    private let isPolitePeer = Synchronized(false)
-    private let shouldAck = Synchronized(true)
-    private var canReceiveOffer: Bool {
-        isPolitePeer.value || !hasOfferCollision
-    }
-    private var hasOfferCollision: Bool {
-        isMakingOffer.value || connection.signalingState != .stable
-    }
-
-    private let mainDegradationPreference = Synchronized(DegradationPreference.balanced)
-    private let presentationDegradationPreference = Synchronized(DegradationPreference.balanced)
-    private let bitrate = Synchronized(Bitrate.bps(0))
-
     private var signalingChannel: SignalingChannel { config.signaling }
-    private var localDataChannel: RTCDataChannel?
-    private var incomingIceCandidates = Synchronized([RTCIceCandidate]())
-    private var outgoingIceCandidates = Synchronized([RTCIceCandidate]())
-    private let fingerprintStore = FingerprintStore()
+    private var started = false
+    private var isMakingOffer = false
+    private var ackReceived = false
+    private var isPolitePeer = false
+    private var incomingIceCandidates = [RTCIceCandidate]()
+    private var outgoingIceCandidates = [RTCIceCandidate]()
+    private var negotiationTask: Task<Void, Error>?
     private let stateSubject = PassthroughSubject<MediaConnectionState, Never>()
     private var cancellables = Set<AnyCancellable>()
-    private var audioCaptureCancellable: AnyCancellable?
-    private var videoCaptureCancellable: AnyCancellable?
-    private var screenCaptureCancellable: AnyCancellable?
+
+    private var canReceiveOffer: Bool {
+        get async {
+            let state = await peerConnection.signalingState
+            let hasOfferCollision = isMakingOffer || state != .stable
+            return isPolitePeer || !hasOfferCollision
+        }
+    }
 
     // MARK: - Init
 
@@ -81,612 +60,361 @@ final class WebRTCMediaConnection: NSObject, MediaConnection {
         factory: RTCPeerConnectionFactory,
         logger: Logger? = nil
     ) {
-        connectionDelegateProxy = PeerConnectionDelegateProxy(logger: logger)
-
-        guard let connection = factory.peerConnection(
-            with: .defaultConfiguration(
+        peerConnection = PeerConnection(
+            factory: factory,
+            configuration: .defaultConfiguration(
                 withIceServers: config.iceServers,
                 dscp: config.dscp
             ),
-            constraints: RTCMediaConstraints(
-                mandatoryConstraints: nil,
-                optionalConstraints: nil
-            ),
-            delegate: connectionDelegateProxy
-        ) else {
-            fatalError("Could not create new RTCPeerConnection")
-        }
-
+            logger: logger
+        )
         self.config = config
-        self.factory = factory
-        self.connection = connection
         self.logger = logger
-        super.init()
 
-        self.connectionDelegateProxy.delegate = self
-        subscribeToEvents()
-    }
-
-    deinit {
-        stop()
-    }
-
-    // MARK: - MediaConnection (tracks)
-
-    func setMainAudioTrack(_ audioTrack: LocalAudioTrack?) throws {
-        mainLocalAudioTrack = audioTrack.valueOrNil(WebRTCLocalAudioTrack.self)
-
-        if mainAudioTransceiver == nil && mainLocalAudioTrack != nil {
-            mainAudioTransceiver = connection.addAudioTransceiver(.sendOnly)
-        }
-
-        try mainAudioTransceiver?.send(from: mainLocalAudioTrack?.rtcTrack)
-
-        audioCaptureCancellable = mainLocalAudioTrack?.capturingStatus
-            .$isCapturing.sink { [weak self] isCapturing in
-                self?.muteAudio(!isCapturing)
-            }
-
-        if mainLocalAudioTrack == nil {
-            muteAudio(true)
-        }
-    }
-
-    func setMainVideoTrack(_ videoTrack: CameraVideoTrack?) throws {
-        mainLocalVideoTrack = videoTrack.valueOrNil(WebRTCCameraVideoTrack.self)
-
-        if mainVideoTransceiver == nil && mainLocalVideoTrack != nil {
-            mainVideoTransceiver = connection.addVideoTransceiver(.sendOnly)
-        }
-
-        try mainVideoTransceiver?.send(from: mainLocalVideoTrack?.rtcTrack)
-        mainVideoTransceiver?.setDegradationPreference(mainDegradationPreference.value)
-
-        videoCaptureCancellable = mainLocalVideoTrack?.capturingStatus
-            .$isCapturing.sink { [weak self] isCapturing in
-                self?.muteVideo(!isCapturing)
-            }
-
-        if mainLocalVideoTrack == nil {
-            muteVideo(true)
-        }
-    }
-
-    func setScreenMediaTrack(_ screenMediaTrack: ScreenMediaTrack?) {
-        let track = screenMediaTrack.valueOrNil(WebRTCScreenMediaTrack.self)
-        presentationVideoTransceiver?.sender.track = track?.rtcTrack
-        screenCaptureCancellable = track?.capturingStatus
-            .$isCapturing.sink { [weak self] isCapturing in
-                self?.toggleLocalPresentation(isCapturing)
-            }
-        if track == nil {
-            toggleLocalPresentation(false)
+        Task {
+            await subscribeToEvents()
         }
     }
 
     // MARK: - MediaConnection (lifecycle)
 
     func start() async throws {
-        guard !started.value else {
+        guard !started else {
             return
         }
 
-        started.setValue(true)
-        createPresentationVideoTransceiverIfNeeded()
-        createDataChannelIfNeeded()
-        try await sendOffer()
+        started = true
+        try await peerConnection.setDirection(.inactive, for: .presentationVideo)
+
+        if let dataChannelId = signalingChannel.data?.id {
+            await peerConnection.createDataChannel(withId: dataChannelId)
+            signalingChannel.data?.sender = self
+        }
+
+        try await negotiate {
+            try await $0?.sendOffer()
+        }
     }
 
-    func stop() {
-        connection.close()
+    func stop() async {
+        await peerConnection.close()
 
         cancellables.removeAll()
-        audioCaptureCancellable = nil
-        videoCaptureCancellable = nil
-        screenCaptureCancellable = nil
-
-        mainLocalVideoTrack = nil
         mainLocalAudioTrack = nil
-
-        let transceivers = [
-            mainAudioTransceiver,
-            mainVideoTransceiver,
-            presentationVideoTransceiver
-        ].compactMap { $0 }
-
-        transceivers.forEach(connection.stopTransceiver(_:))
-
-        mainAudioTransceiver = nil
-        mainVideoTransceiver = nil
-        presentationVideoTransceiver = nil
-
-        remoteVideoTracks.setMainTrack(nil)
-        remoteVideoTracks.setPresentationTrack(nil)
-
-        started.setValue(false)
-        isMakingOffer.setValue(false)
-        isReceivingOffer.setValue(false)
-        shouldRenegotiate.setValue(false)
-        isPolitePeer.setValue(false)
-        shouldAck.setValue(true)
-
         signalingChannel.data?.sender = nil
-        localDataChannel?.close()
-        localDataChannel = nil
 
-        incomingIceCandidates.setValue([])
-        outgoingIceCandidates.setValue([])
+        setRemoteTrack(nil, content: .mainVideo)
+        setRemoteTrack(nil, content: .presentationVideo)
+
+        started = false
+        isMakingOffer = false
+        ackReceived = false
+        isPolitePeer = false
+        incomingIceCandidates.removeAll()
+        outgoingIceCandidates.removeAll()
     }
 
-    func receiveMainRemoteAudio(_ receive: Bool) throws {
-        if let mainAudioTransceiver {
-            try mainAudioTransceiver.receive(receive)
-        } else if receive {
-            mainAudioTransceiver = connection.addAudioTransceiver(.recvOnly)
-        }
-    }
+    // MARK: - MediaConnection (tracks)
 
-    func receiveMainRemoteVideo(_ receive: Bool) throws {
-        if let mainVideoTransceiver {
-            try mainVideoTransceiver.receive(receive)
-        } else if receive {
-            mainVideoTransceiver = connection.addVideoTransceiver(.recvOnly)
-        }
-    }
-
-    func receivePresentation(_ receive: Bool) throws {
-        guard
-            let transceiver = presentationVideoTransceiver,
-            !config.presentationInMain
-        else {
-            return
-        }
-
-        switch receive {
-        case true where transceiver.direction != .recvOnly:
-            try transceiver.setDirection(.recvOnly)
-            if let track = transceiver.receiver.track as? RTCVideoTrack {
-                remoteVideoTracks.setPresentationTrack(
-                    WebRTCVideoTrack(rtcTrack: track)
-                )
+    func setMainAudioTrack(_ audioTrack: LocalAudioTrack?) async throws {
+        mainLocalAudioTrack = audioTrack.valueOrNil(WebRTCLocalAudioTrack.self)
+        try await peerConnection.send(
+            .mainAudio,
+            from: mainLocalAudioTrack,
+            initIfNeeded: .init(direction: .sendOnly),
+            onCapture: { [weak self] isCapturing in
+                try await self?.signalingChannel.muteAudio(!isCapturing)
             }
-        case false where transceiver.direction == .recvOnly:
-            try transceiver.setDirection(.inactive)
-            remoteVideoTracks.setPresentationTrack(nil)
-        default:
-            break
+        )
+    }
+
+    func setMainVideoTrack(_ videoTrack: CameraVideoTrack?) async throws {
+        try await peerConnection.send(
+            .mainVideo,
+            from: videoTrack.valueOrNil(WebRTCCameraVideoTrack.self),
+            initIfNeeded: .init(direction: .sendOnly),
+            onCapture: { [weak self] isCapturing in
+                try await self?.signalingChannel.muteVideo(!isCapturing)
+            }
+        )
+    }
+
+    func setScreenMediaTrack(_ screenMediaTrack: ScreenMediaTrack?) async throws {
+        try await peerConnection.send(
+            .presentationVideo,
+            from: screenMediaTrack.valueOrNil(WebRTCScreenMediaTrack.self),
+            onCapture: { [weak self] isCapturing in
+                do {
+                    if isCapturing {
+                        try await self?.signalingChannel.takeFloor()
+                    } else {
+                        try await self?.signalingChannel.releaseFloor()
+                    }
+                } catch {
+                    self?.logger?.error("Error on takeFloow/releaseFloor: \(error)")
+                }
+            }
+        )
+    }
+
+    func receiveMainRemoteAudio(_ receive: Bool) async throws {
+        try await peerConnection.receive(.mainAudio, receive: receive)
+    }
+
+    func receiveMainRemoteVideo(_ receive: Bool) async throws {
+        try await peerConnection.receive(.mainVideo, receive: receive)
+    }
+
+    func receivePresentation(_ receive: Bool) async throws {
+        if !config.presentationInMain {
+            try await peerConnection.receive(.presentationVideo, receive: receive)
         }
     }
 
-    // MARK: - Other
+    // MARK: - MediaConnection (preferences)
+
+    func setMainDegradationPreference(_ preference: DegradationPreference) async {
+        await peerConnection.setDegradationPreference(preference, for: .mainVideo)
+    }
+
+    func setPresentationDegradationPreference(_ preference: DegradationPreference) async {
+        await peerConnection.setDegradationPreference(preference, for: .presentationVideo)
+    }
+
+    func setMaxBitrate(_ bitrate: Bitrate) async {
+        await peerConnection.setMaxBitrate(bitrate)
+    }
 
     @discardableResult
     func dtmf(signals: DTMFSignals) async throws -> Bool {
         try await signalingChannel.dtmf(signals: signals)
     }
 
-    func setMainDegradationPreference(_ preference: DegradationPreference) {
-        guard preference != mainDegradationPreference.value else { return }
-        mainDegradationPreference.setValue(preference)
-        mainVideoTransceiver?.setDegradationPreference(preference)
+    // MARK: - Data channel
+
+    func send(_ data: Data) async throws -> Bool {
+        try await peerConnection.send(data)
     }
 
-    func setPresentationDegradationPreference(_ preference: DegradationPreference) {
-        guard preference != presentationDegradationPreference.value else { return }
-        presentationDegradationPreference.setValue(preference)
-        presentationVideoTransceiver?.setDegradationPreference(preference)
+    private func receive(_ data: Data) async throws {
+        let result = try await signalingChannel.data?.receiver?.receive(data)
+        logger?.debug("Data channel - did receive data, success=\(result == true).")
     }
 
-    func setMaxBitrate(_ bitrate: Bitrate) {
-        guard bitrate != self.bitrate.value else { return }
-        self.bitrate.setValue(bitrate)
-        connection.restartIce()
+    // MARK: - Events
+
+    private func subscribeToEvents() {
+        peerConnection.eventPublisher.sink { [weak self] event in
+            Task { [weak self] in
+                await self?.handleEvent(event)
+            }
+        }.store(in: &cancellables)
+
+        secureCheckCode.sink { [weak self] value in
+            self?.logger?.debug("Secure Check Code: \(value)")
+        }.store(in: &cancellables)
+
+        signalingChannel.eventPublisher.sink { [weak self] event in
+            Task { [weak self] in
+                await self?.handleEvent(event)
+            }
+        }.store(in: &cancellables)
     }
-}
 
-// MARK: - Private
-
-private extension WebRTCMediaConnection {
-    func sendOffer() async throws {
-        isMakingOffer.setValue(true)
-        defer {
-            isMakingOffer.setValue(false)
+    private func handleEvent(_ event: PeerConnection.Event) async {
+        do {
+            switch event {
+            case .shouldNegotiate:
+                try await negotiate {
+                    try await $0?.sendOffer()
+                }
+            case .newPeerConnectionState(let newState):
+                stateSubject.send(newState)
+                #if os(iOS)
+                if newState == .connected {
+                    mainLocalAudioTrack?.speakerOn()
+                }
+                #endif
+            case .newCandidate(let candidate):
+                if isMakingOffer {
+                    outgoingIceCandidates.append(candidate)
+                } else {
+                    await addOutgoingIceCandidate(candidate)
+                }
+            case let .receiverTrackUpdated(track, content):
+                setRemoteTrack(track, content: content)
+            case let .dataReceived(data):
+                try await receive(data)
+            }
+        } catch {
+            logger?.error("Failed to handle peer connection event: \(error)")
         }
+    }
 
+    private func handleEvent(_ event: SignalingEvent) async {
+        do {
+            switch event {
+            case .newOffer(let sdp):
+                try await negotiate {
+                    await $0?.receiveNewOffer(sdp)
+                }
+            case let .newCandidate(candidate, mid):
+                await receiveCandidate(candidate, mid: mid)
+            }
+        } catch {
+            logger?.error("Failed to handle signaling event: \(error)")
+        }
+    }
+
+    // MARK: - Negotiation
+
+    private func negotiate(
+        _ task: @escaping (WebRTCMediaConnection?) async throws -> Void
+    ) async throws {
+        negotiationTask = Task { [weak self, negotiationTask] in
+            _ = await negotiationTask?.result
+            try await task(self)
+        }
+        try await negotiationTask?.result.get()
+    }
+
+    private func sendOffer() async throws {
+        isMakingOffer = true
         logger?.debug("Outgoing offer - initiated")
-        try await connection.setLocalDescription()
 
         do {
-            guard let localDescription = connection.localDescription,
-                  !isReceivingOffer.value
-            else {
+            guard let offer = try await peerConnection.setLocalDescription() else {
                 return
             }
 
-            fingerprintStore.setLocalFingerprints(fingerprints(from: localDescription))
-
-            if let remoteDescription = try await config.signaling.sendOffer(
+            if let answer = try await signalingChannel.sendOffer(
                 callType: "WEBRTC",
-                description: mangleLocalDescription(localDescription),
+                description: offer.sdp,
                 presentationInMain: config.presentationInMain
-            ).map({
-                RTCSessionDescription(type: .answer, sdp: mangleRemoteDescription($0))
-            }) {
-                try await addOutgoingIceCandidatesIfNeeded()
-                if !isReceivingOffer.value && connection.signalingState == .haveLocalOffer {
-                    try await connection.setRemoteDescription(remoteDescription)
-                    fingerprintStore.setRemoteFingerprints(fingerprints(from: remoteDescription))
-                }
+            ) {
+                try await peerConnection.setRemoteAnswer(answer)
+                try await ack(nil)
             } else {
-                try await addOutgoingIceCandidatesIfNeeded()
-                isPolitePeer.setValue(true)
+                isPolitePeer = true
             }
 
-            if shouldAck.value {
-                shouldAck.setValue(false)
-                try await config.signaling.ack()
-            }
-            logger?.debug("Outgoing offer - received answer, isPolitePeer=\(isPolitePeer.value)")
+            isMakingOffer = false
+            await addOutgoingIceCandidatesIfNeeded()
+            logger?.debug("Outgoing offer - received answer, isPolitePeer=\(isPolitePeer)")
         } catch {
+            isMakingOffer = false
             logger?.error("Outgoing offer - failed to send new offer: \(error)")
-            outgoingIceCandidates.setValue([])
             throw error
         }
     }
 
-    func receiveNewOffer(_ offer: String) async throws {
-        isReceivingOffer.setValue(true)
-        defer {
-            isReceivingOffer.setValue(false)
-        }
+    private func receiveNewOffer(_ offer: String) async {
+        logger?.debug("Incoming offer - initiated")
 
-        logger?.debug("Incoming offer - received")
-        guard canReceiveOffer else {
+        guard await canReceiveOffer else {
             logger?.debug("Incoming offer - ignored")
             return
         }
 
         do {
-            let sdp = mangleRemoteDescription(offer)
-            let remoteDescription = RTCSessionDescription(type: .offer, sdp: sdp)
-            try await connection.setRemoteDescription(remoteDescription)
-            fingerprintStore.setRemoteFingerprints(fingerprints(from: remoteDescription))
+            try await peerConnection.setRemoteOffer(offer)
 
-            try await connection.setLocalDescription()
-            if let localDescription = connection.localDescription {
-                fingerprintStore.setLocalFingerprints(fingerprints(from: localDescription))
-                try await config.signaling.sendAnswer(mangleLocalDescription(localDescription))
+            if let answer = try await peerConnection.setLocalDescription() {
+                try await ack(answer.sdp)
             }
 
-            isReceivingOffer.setValue(false)
-            try await addIncomingIceCandidatesIfNeeded()
             logger?.debug("Incoming offer - sent answer")
         } catch {
-            incomingIceCandidates.setValue([])
+            incomingIceCandidates.removeAll()
             logger?.error("Incoming offer - failed to accept: \(error)")
-            throw error
         }
     }
 
-    func receiveCandidate(_ candidate: String, mid: String?) async throws {
-        guard !candidate.isEmpty else {
+    private func ack(_ description: String?) async throws {
+        try await signalingChannel.ack(description)
+        ackReceived = true
+        await addIncomingIceCandidatesIfNeeded()
+    }
+
+    private func receiveCandidate(_ candidate: String, mid: String?) async {
+        guard let mid = mid.flatMap({ Int32($0) }), !candidate.isEmpty else {
             return
         }
+
         let candidate = RTCIceCandidate(
             sdp: candidate,
-            sdpMLineIndex: mid.flatMap({ Int32($0) }) ?? 0,
-            sdpMid: mid
+            sdpMLineIndex: mid,
+            sdpMid: "\(mid)"
         )
 
+        if ackReceived {
+            await addIncomingIceCandidate(candidate)
+        } else {
+            incomingIceCandidates.append(candidate)
+        }
+    }
+
+    private func addIncomingIceCandidatesIfNeeded() async {
+        let incomingIceCandidates = self.incomingIceCandidates
+        self.incomingIceCandidates.removeAll()
+
+        await withTaskGroup(of: Void.self) { group in
+            for candidate in incomingIceCandidates {
+                group.addTask { [weak self] in
+                    await self?.addIncomingIceCandidate(candidate)
+                }
+            }
+            await group.waitForAll()
+        }
+    }
+
+    private func addIncomingIceCandidate(_ candidate: RTCIceCandidate) async {
         do {
-            if isReceivingOffer.value {
-                incomingIceCandidates.mutate {
-                    $0.append(candidate)
-                }
-            } else {
-                try await connection.add(candidate)
-                logger?.debug("New incoming ICE candidate added")
-            }
-        } catch {
-            if canReceiveOffer {
-                logger?.error("Failed to add new incoming ICE candidate")
-                throw error
-            }
-        }
-    }
-
-    func toggleLocalPresentation(_ isPresenting: Bool) {
-        guard let transceiver = presentationVideoTransceiver else {
-            return
-        }
-
-        Task {
-            do {
-                switch isPresenting {
-                case true where transceiver.direction != .sendRecv:
-                    remoteVideoTracks.setPresentationTrack(nil)
-                    try transceiver.setDirection(.sendRecv)
-                    try await signalingChannel.takeFloor()
-                case false where transceiver.direction == .sendRecv:
-                    try transceiver.setDirection(.inactive)
-                    try await signalingChannel.releaseFloor()
-                default:
-                    break
-                }
-            } catch {
-                logger?.error("Error on taking/releasing presentation floor: \(error)")
-            }
-        }
-    }
-
-    func createPresentationVideoTransceiverIfNeeded() {
-        if presentationVideoTransceiver == nil {
-            presentationVideoTransceiver = connection.addTransceiver(
-                of: .video,
-                init: .init(direction: .inactive)
-            )
-            presentationVideoTransceiver?.setDegradationPreference(
-                presentationDegradationPreference.value
-            )
-        }
-    }
-
-    func createDataChannelIfNeeded() {
-        if let dataChannelId = signalingChannel.data?.id, localDataChannel == nil {
-            let config = RTCDataChannelConfiguration()
-            config.isNegotiated = true
-            config.channelId = dataChannelId
-            localDataChannel = connection.dataChannel(
-                forLabel: "pexChannel",
-                configuration: config
-            )
-            localDataChannel?.delegate = self
-            signalingChannel.data?.sender = self
-            logger?.debug("Data channel - new data channel created.")
-        }
-    }
-
-    func addIncomingIceCandidatesIfNeeded() async throws {
-        let incomingIceCandidates = self.incomingIceCandidates.value
-        self.incomingIceCandidates.setValue([])
-
-        for candidate in incomingIceCandidates {
-            try await connection.add(candidate)
+            try await peerConnection.addCandidate(candidate)
             logger?.debug("New incoming ICE candidate added")
+        } catch {
+            if await canReceiveOffer {
+                logger?.error("Failed to add new incoming ICE candidate")
+            }
         }
     }
 
-    func addOutgoingIceCandidatesIfNeeded() async throws {
-        let outgoingIceCandidates = self.outgoingIceCandidates.value
-        self.outgoingIceCandidates.setValue([])
+    private func addOutgoingIceCandidatesIfNeeded() async {
+        let outgoingIceCandidates = self.outgoingIceCandidates
+        self.outgoingIceCandidates.removeAll()
 
-        try await withThrowingTaskGroup(of: Void.self) { group in
+        await withTaskGroup(of: Void.self) { group in
             for candidate in outgoingIceCandidates {
                 group.addTask { [weak self] in
-                    try await self?.addOutgoingIceCandidate(candidate)
+                    await self?.addOutgoingIceCandidate(candidate)
                 }
             }
-
-            try await group.waitForAll()
+            await group.waitForAll()
         }
     }
 
-    func addOutgoingIceCandidate(_ candidate: RTCIceCandidate) async throws {
-        try await signalingChannel.addCandidate(
-            candidate.sdp,
-            mid: candidate.sdpMid
-        )
-        logger?.debug("New outgoing ICE candidate added")
-    }
-
-    func muteVideo(_ muted: Bool) {
-        Task {
-            try await signalingChannel.muteVideo(muted)
-        }
-    }
-
-    func muteAudio(_ muted: Bool) {
-        Task {
-            do {
-                try await signalingChannel.muteAudio(muted)
-            } catch {
-                logger?.error("Cannot mute audio, error: \(error)")
-            }
-        }
-    }
-
-    func mangleLocalDescription(_ description: RTCSessionDescription) -> String {
-        return SessionDescriptionManager(sdp: description.sdp).mangle(
-            bitrate: bitrate.value,
-            mainAudioMid: connection.mid(for: mainAudioTransceiver),
-            mainVideoMid: connection.mid(for: mainVideoTransceiver),
-            presentationVideoMid: connection.mid(for: presentationVideoTransceiver)
-        )
-    }
-
-    func mangleRemoteDescription(_ sdp: String) -> String {
-        return SessionDescriptionManager(sdp: sdp).mangle(
-            bitrate: bitrate.value
-        )
-    }
-
-    func fingerprints(from description: RTCSessionDescription) -> [Fingerprint] {
-        SessionDescriptionManager(sdp: description.sdp).extractFingerprints()
-    }
-
-    func subscribeToEvents() {
-        secureCheckCode.$value.sink { [weak self] value in
-            self?.logger?.debug("Secure Check Code: \(value)")
-        }.store(in: &cancellables)
-
-        config.signaling.eventPublisher.sink { event in
-            Task { [weak self] in
-                switch event {
-                case .newOffer(let sdp):
-                    try await self?.receiveNewOffer(sdp)
-                case let .newCandidate(candidate, mid):
-                    try await self?.receiveCandidate(candidate, mid: mid)
-                }
-            }
-        }.store(in: &cancellables)
-    }
-}
-
-// MARK: - PeerConnectionDelegate
-
-extension WebRTCMediaConnection: PeerConnectionDelegate {
-    func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {
-        guard ![.closed, .disconnected].contains(peerConnection.connectionState) else {
-            return
-        }
-
-        // Skip the first call to negotiateIfNeeded() since it's
-        // called right after RTCPeerConnection creation,
-        // and we're still not ready to use sendOffer()
-        if shouldRenegotiate.value {
-            Task {
-                try await sendOffer()
-            }
-        } else {
-            shouldRenegotiate.setValue(true)
-        }
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didChange newState: MediaConnectionState
-    ) {
-        Task { @MainActor in
-            stateSubject.send(newState)
-        }
-
-        if newState == .connected {
-            #if os(iOS)
-            mainLocalAudioTrack?.speakerOn()
-            #endif
-        }
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didGenerate candidate: RTCIceCandidate
-    ) {
-        guard !isMakingOffer.value else {
-            outgoingIceCandidates.mutate {
-                $0.append(candidate)
-            }
-            return
-        }
-
-        Task {
-            do {
-                try await addOutgoingIceCandidate(candidate)
-            } catch {
-                logger?.error("Failed to add outgoing ICE candidate: \(error)")
-            }
-        }
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didChange newState: RTCIceConnectionState
-    ) {
-        if newState == .failed {
-            peerConnection.restartIce()
-        }
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didStartReceivingOn transceiver: RTCRtpTransceiver
-    ) {
-        var oldTransceiver: RTCRtpTransceiver?
-
+    private func addOutgoingIceCandidate(_ candidate: RTCIceCandidate) async {
         do {
-            switch transceiver.mediaType {
-            case .audio:
-                if transceiver != mainAudioTransceiver {
-                    try transceiver.sync(with: mainAudioTransceiver)
-                    oldTransceiver = mainAudioTransceiver
-                    mainAudioTransceiver = transceiver
-                }
-            case .video:
-                let presentationMid = connection.mid(for: presentationVideoTransceiver)
-                if let presentationVideoTransceiver, presentationMid == transceiver.mid {
-                    if transceiver != presentationVideoTransceiver {
-                        try transceiver.sync(with: presentationVideoTransceiver)
-                        oldTransceiver = presentationVideoTransceiver
-                        self.presentationVideoTransceiver = transceiver
-                    }
-                } else {
-                    if transceiver != mainVideoTransceiver {
-                        try transceiver.sync(with: mainVideoTransceiver)
-                        oldTransceiver = mainVideoTransceiver
-                        mainVideoTransceiver = transceiver
-                    }
-                }
-            case .data, .unsupported:
-                break
-            @unknown default:
-                break
-            }
+            try await signalingChannel.addCandidate(candidate.sdp, mid: candidate.sdpMid)
+            logger?.debug("New outgoing ICE candidate added")
         } catch {
-            logger?.error("Failed to replace transceiver: \(error)")
-        }
-
-        if let oldTransceiver, oldTransceiver.mid.isEmpty {
-            connection.stopTransceiver(oldTransceiver)
+            logger?.error("Failed to add outgoing ICE candidate: \(error)")
         }
     }
 
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didAdd rtpReceiver: RTCRtpReceiver,
-        streams mediaStreams: [RTCMediaStream]
-    ) {
-        if rtpReceiver.receiverId == mainVideoTransceiver?.receiver.receiverId {
-            let track = rtpReceiver.track as? RTCVideoTrack
-            remoteVideoTracks.setMainTrack(track.map { WebRTCVideoTrack(rtcTrack: $0) })
-        }
-    }
-}
-
-// MARK: - DataSender
-
-extension WebRTCMediaConnection: DataSender {
-    func send(_ data: Data) async throws -> Bool {
-        guard let localDataChannel else {
-            logger?.warn("Data channel - no local data channel created.")
-            return false
+    private func setRemoteTrack(_ track: RTCMediaStreamTrack?, content: MediaContent) {
+        func videoTrack() -> WebRTCVideoTrack? {
+            (track as? RTCVideoTrack).map { WebRTCVideoTrack(rtcTrack: $0) }
         }
 
-        let buffer = RTCDataBuffer(data: data, isBinary: false)
-        let result = localDataChannel.sendData(buffer)
-        logger?.debug("Data channel - did send data, success=\(result).")
-        return result
-    }
-}
-
-// MARK: - RTCDataChannelDelegate
-
-extension WebRTCMediaConnection: RTCDataChannelDelegate {
-    func dataChannelDidChangeState(_ dataChannel: RTCDataChannel) {
-        let state = DataChannelState(dataChannel.readyState)
-        logger?.debug("Data channel - did change state: \(state)")
-    }
-
-    func dataChannel(
-        _ dataChannel: RTCDataChannel,
-        didReceiveMessageWith buffer: RTCDataBuffer
-    ) {
-        Task {
-            do {
-                let result = try await signalingChannel.data?.receiver?.receive(buffer.data)
-                logger?.debug("Data channel - did receive data, success=\(result == true).")
-            } catch {
-                logger?.error("Data channel - failed to process incoming data: \(error)")
-            }
+        switch content {
+        case .mainVideo:
+            remoteVideoTracks.setMainTrack(videoTrack())
+        case .presentationVideo:
+            remoteVideoTracks.setPresentationTrack(videoTrack())
+        default:
+            break
         }
     }
 }
-// swiftlint:enable file_length
+// swiftlint:enable type_body_length file_length

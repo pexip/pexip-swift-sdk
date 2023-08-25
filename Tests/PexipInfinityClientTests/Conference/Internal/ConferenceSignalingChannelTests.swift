@@ -211,7 +211,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         XCTAssertEqual(pwds, ["ToQx": "jSThfoPwGg6gKmxeTmTqz8ea"])
     }
 
-    func testSendAnswer() async throws {
+    func testAckWithDescription() async throws {
         let answer = """
         a=ice-ufrag:ToQy\r
         a=ice-pwd:jSThfoPwGg6gKmxeYnTqz8ea\r
@@ -219,16 +219,16 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         """
 
         try await sendOffer(answer: UUID().uuidString)
-        try await channel.sendAnswer(answer)
+        try await channel.ack(answer)
 
         let pwds = channel.pwds.value
         XCTAssertEqual(pwds, ["ToQy": "jSThfoPwGg6gKmxeYnTqz8ea"])
         XCTAssertEqual(callService.actions, [.ack])
     }
 
-    func testAck() async throws {
+    func testAckWithoutDescription() async throws {
         try await sendOffer(answer: UUID().uuidString)
-        try await channel.ack()
+        try await channel.ack(nil)
 
         XCTAssertEqual(callService.actions, [.ack])
     }

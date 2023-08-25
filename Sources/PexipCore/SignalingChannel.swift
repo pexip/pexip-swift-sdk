@@ -48,17 +48,12 @@ public protocol SignalingChannel: AnyObject {
     ) async throws -> String?
 
     /**
-     Sends a new SDP answer.
+     Invoked when offer is set and the connection is ready to accept media.
 
      - Parameters:
-        - description: The new SDP answer
+        - description: Optional SDP answer
      */
-    func sendAnswer(_ description: String) async throws
-
-    /**
-     Invoked when offer is set and the connection is ready to accept media.
-     */
-    func ack() async throws
+    func ack(_ description: String?) async throws
 
     /**
      Sends a new ICE candidate if doing trickle ICE.

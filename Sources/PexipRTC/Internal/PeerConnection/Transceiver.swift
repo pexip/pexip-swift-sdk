@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,43 +13,86 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import PexipMedia
+import Combine
 import WebRTC
+import PexipMedia
 
-extension RTCRtpTransceiver {
+final class Transceiver {
+    var receiverId: String { transceiver.receiver.receiverId }
+    private(set) var mid: String?
+
+    private var transceiver: RTCRtpTransceiver
+    private var senderTrack: WebRTCLocalTrack?
+    private var senderCancellable: AnyCancellable?
+
+    // MARK: - Init
+
+    init(_ transceiver: RTCRtpTransceiver) {
+        self.transceiver = transceiver
+    }
+
+    deinit {
+        transceiver.stopInternal()
+    }
+
+    // MARK: - Internal
+
+    var canReceive: Bool {
+        transceiver.direction == .recvOnly || transceiver.direction == .sendRecv
+    }
+
     func setDirection(_ direction: RTCRtpTransceiverDirection) throws {
-        guard self.direction != direction else {
+        guard transceiver.direction != direction else {
             return
         }
 
         var error: NSError?
-        setDirection(direction, error: &error)
+        transceiver.setDirection(direction, error: &error)
 
         if let error {
             throw error
         }
     }
 
-    func sync(with transceiver: RTCRtpTransceiver?) throws {
-        guard let transceiver else {
+    func syncMid() {
+        mid = transceiver.mid
+    }
+
+    func sync(with newTransceiver: RTCRtpTransceiver?) throws {
+        guard let newTransceiver, newTransceiver != transceiver else {
             return
         }
 
-        try setDirection(transceiver.direction)
+        let oldTransceiver = transceiver
+        transceiver = newTransceiver
 
-        if let track = transceiver.sender.track {
-            sender.track = track
+        try setDirection(oldTransceiver.direction)
+        transceiver.sender.track = oldTransceiver.sender.track
+
+        if oldTransceiver.mid.isEmpty {
+            oldTransceiver.stopInternal()
         }
     }
 
-    func send(from track: RTCMediaStreamTrack?) throws {
+    func send(
+        from track: WebRTCLocalTrack?,
+        onCapture: @escaping (Bool) -> Void
+    ) throws {
         try send(track != nil)
-        sender.track = track
+        transceiver.sender.track = track?.streamMediaTrack
+        senderCancellable = track?.capturingStatus
+            .$isCapturing.sink { isCapturing in
+                onCapture(isCapturing)
+            }
+        if track == nil {
+            onCapture(false)
+        }
+        senderTrack = track
     }
 
     func send(_ enabled: Bool) throws {
         if enabled {
-            switch direction {
+            switch transceiver.direction {
             case .inactive:
                 try setDirection(.sendOnly)
             case .recvOnly:
@@ -58,7 +101,7 @@ extension RTCRtpTransceiver {
                 return
             }
         } else {
-            switch direction {
+            switch transceiver.direction {
             case .sendOnly:
                 try setDirection(.inactive)
             case .sendRecv:
@@ -71,7 +114,7 @@ extension RTCRtpTransceiver {
 
     func receive(_ enabled: Bool) throws {
         if enabled {
-            switch direction {
+            switch transceiver.direction {
             case .inactive:
                 try setDirection(.recvOnly)
             case .sendOnly:
@@ -80,7 +123,7 @@ extension RTCRtpTransceiver {
                 return
             }
         } else {
-            switch direction {
+            switch transceiver.direction {
             case .recvOnly:
                 try setDirection(.inactive)
             case .sendRecv:
@@ -92,7 +135,7 @@ extension RTCRtpTransceiver {
     }
 
     func setDegradationPreference(_ preference: DegradationPreference) {
-        let parameters = sender.parameters
+        let parameters = transceiver.sender.parameters
         let rtcPreference: RTCDegradationPreference = {
             switch preference {
             case .balanced:
@@ -106,6 +149,6 @@ extension RTCRtpTransceiver {
             }
         }()
         parameters.degradationPreference = rtcPreference.rawValue as NSNumber
-        sender.parameters = parameters
+        transceiver.sender.parameters = parameters
     }
 }

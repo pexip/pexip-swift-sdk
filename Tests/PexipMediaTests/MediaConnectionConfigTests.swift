@@ -85,8 +85,7 @@ private final class Signaling: SignalingChannel {
         return ""
     }
 
-    func sendAnswer(_ description: String) async throws {}
-    func ack() async throws {}
+    func ack(_ description: String?) async throws {}
     func addCandidate(_ candidate: String, mid: String?) async throws {}
     func muteVideo(_ muted: Bool) async throws -> Bool { true }
     func muteAudio(_ muted: Bool) async throws -> Bool { true }

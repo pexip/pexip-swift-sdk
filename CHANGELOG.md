@@ -7,6 +7,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## Changed
+- **BREAKING**: `MediaConnection.secureCheckCode` is now a publisher
+- **BREAKING**: All functions in `MediaConnection` are now async
+
 ## [0.8.0] - 2023-08-03
 
 ### Added

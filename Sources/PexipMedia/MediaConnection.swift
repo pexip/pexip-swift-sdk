@@ -32,7 +32,7 @@ public final class RemoteVideoTracks: ObservableObject {
         - mainTrack: The main remote video track
         - presentationTrack: The presentation remote video track
      */
-    public init(mainTrack: VideoTrack?, presentationTrack: VideoTrack?) {
+    public init(mainTrack: VideoTrack? = nil, presentationTrack: VideoTrack? = nil) {
         self.mainTrack = mainTrack
         self.presentationTrack = presentationTrack
     }
@@ -60,7 +60,7 @@ public protocol MediaConnection {
 
     /// Observable object that holds secure check code.
     /// Check algorithm is triggered on each send / receive of an SDP offer / answer.
-    var secureCheckCode: SecureCheckCode { get }
+    var secureCheckCode: AnyPublisher<String, Never> { get }
 
     /**
      Sets the given local audio track as the main audio track
@@ -69,7 +69,7 @@ public protocol MediaConnection {
      - Parameters:
         - audioTrack: Local audio track
      */
-    func setMainAudioTrack(_ audioTrack: LocalAudioTrack?) throws
+    func setMainAudioTrack(_ audioTrack: LocalAudioTrack?) async throws
 
     /**
      Sets the given local video track as the main video track
@@ -78,7 +78,7 @@ public protocol MediaConnection {
      - Parameters:
         - localVideoTrack: Local camera video track
      */
-    func setMainVideoTrack(_ videoTrack: CameraVideoTrack?) throws
+    func setMainVideoTrack(_ videoTrack: CameraVideoTrack?) async throws
 
     /**
      Sets the given local screen media track as the source for local presentation.
@@ -89,7 +89,7 @@ public protocol MediaConnection {
      - Parameters:
         - screenMediaTrack: Local screen media track
      */
-    func setScreenMediaTrack(_ screenMediaTrack: ScreenMediaTrack?)
+    func setScreenMediaTrack(_ screenMediaTrack: ScreenMediaTrack?) async throws
 
     /**
      Enables or disables the receive of remote audio.
@@ -97,7 +97,7 @@ public protocol MediaConnection {
      - Parameters:
         - receive true to receive remote main audio, false otherwise
     */
-    func receiveMainRemoteAudio(_ receive: Bool) throws
+    func receiveMainRemoteAudio(_ receive: Bool) async throws
 
     /**
      Enables or disables the receive of remote video.
@@ -105,13 +105,13 @@ public protocol MediaConnection {
      - Parameters:
         - receive true to receive remote video audio, false otherwise
      */
-    func receiveMainRemoteVideo(_ receive: Bool) throws
+    func receiveMainRemoteVideo(_ receive: Bool) async throws
 
     /// Creates a media session
     func start() async throws
 
     /// Terminates all media and deallocates resources
-    func stop()
+    func stop() async
 
     /**
      Adds or removes remote presentation track from the current media connection.
@@ -120,7 +120,7 @@ public protocol MediaConnection {
      - Parameters:
         - receive: True to add remote presentation track, False to remove it.
      */
-    func receivePresentation(_ receive: Bool) throws
+    func receivePresentation(_ receive: Bool) async throws
 
     /**
      Sends a sequence of DTMF signals
@@ -138,7 +138,7 @@ public protocol MediaConnection {
      - Parameters:
         - preference: a degradation preference
     */
-    func setMainDegradationPreference(_ preference: DegradationPreference)
+    func setMainDegradationPreference(_ preference: DegradationPreference) async
 
     /**
      Sets the ``DegradationPreference`` for presentation video stream.
@@ -147,7 +147,7 @@ public protocol MediaConnection {
      - Parameters:
         - preference: a degradation preference
     */
-    func setPresentationDegradationPreference(_ preference: DegradationPreference)
+    func setPresentationDegradationPreference(_ preference: DegradationPreference) async
 
     /**
      Sets the maximum bitrate for each video stream.
@@ -159,5 +159,5 @@ public protocol MediaConnection {
      - Parameters:
         - bitrate: a bitrate to set as maximum
     */
-    func setMaxBitrate(_ bitrate: Bitrate)
+    func setMaxBitrate(_ bitrate: Bitrate) async
 }

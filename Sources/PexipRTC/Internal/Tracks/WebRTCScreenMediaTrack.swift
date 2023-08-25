@@ -18,9 +18,11 @@ import PexipMedia
 import PexipScreenCapture
 
 final class WebRTCScreenMediaTrack: WebRTCVideoTrack,
+                                    WebRTCLocalTrack,
                                     ScreenMediaTrack,
                                     WebRTCScreenCapturerDelegate {
     let capturingStatus = CapturingStatus(isCapturing: false)
+    var streamMediaTrack: RTCMediaStreamTrack { rtcTrack }
     private let capturer: WebRTCScreenCapturer
     private let defaultVideoProfile: QualityProfile
 

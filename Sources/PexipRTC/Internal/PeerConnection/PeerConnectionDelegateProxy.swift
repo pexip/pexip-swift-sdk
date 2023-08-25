@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,50 +13,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import Combine
 import WebRTC
 import PexipCore
 import PexipMedia
 
-// MARK: - Delegate
-
-protocol PeerConnectionDelegate: AnyObject {
-    func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection)
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didChange newState: MediaConnectionState
-    )
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didGenerate candidate: RTCIceCandidate
-    )
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didChange newState: RTCIceConnectionState
-    )
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didStartReceivingOn transceiver: RTCRtpTransceiver
-    )
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didAdd rtpReceiver: RTCRtpReceiver,
-        streams mediaStreams: [RTCMediaStream]
-    )
-}
-
 // MARK: - Proxy
 
 final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
-    weak var delegate: PeerConnectionDelegate?
+    enum Event {
+        case shouldNegotiate
+        case newPeerConnectionState(MediaConnectionState)
+        case newSignalingState(SignalingState)
+        case newIceConnectionState(IceConnectionState)
+        case newCandidate(RTCIceCandidate)
+        case startedReceivingOnTranceiver(RTCRtpTransceiver)
+        case receiverAdded(RTCRtpReceiver)
+        case receiverRemoved(RTCRtpReceiver)
+    }
+
+    var eventPublisher: AnyPublisher<Event, Never> {
+        eventSubject.eraseToAnyPublisher()
+    }
+    private var eventSubject = PassthroughSubject<Event, Never>()
     private let logger: Logger?
+
+    // MARK: - Init
 
     init(logger: Logger?) {
         self.logger = logger
     }
 
+    // MARK: - RTCPeerConnectionDelegate
+
     func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {
         logger?.debug("Peer connection - should negotiate")
-        delegate?.peerConnectionShouldNegotiate(peerConnection)
+        eventSubject.send(.shouldNegotiate)
     }
 
     func peerConnection(
@@ -65,7 +57,7 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
     ) {
         let state = MediaConnectionState(newState)
         logger?.debug("Peer connection - new peer connection state: \(state)")
-        delegate?.peerConnection(peerConnection, didChange: state)
+        eventSubject.send(.newPeerConnectionState(state))
     }
 
     func peerConnection(
@@ -73,7 +65,7 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
         didGenerate candidate: RTCIceCandidate
     ) {
         logger?.debug("Peer connection - did generate local ICE candidate")
-        delegate?.peerConnection(peerConnection, didGenerate: candidate)
+        eventSubject.send(.newCandidate(candidate))
     }
 
     func peerConnection(
@@ -82,6 +74,7 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
     ) {
         let state = SignalingState(stateChanged)
         logger?.debug("Peer connection - new signaling state: \(state)")
+        eventSubject.send(.newSignalingState(state))
     }
 
     func peerConnection(
@@ -104,7 +97,7 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
     ) {
         let state = IceConnectionState(newState)
         logger?.debug("Peer connection - new ICE connection state: \(state)")
-        delegate?.peerConnection(peerConnection, didChange: newState)
+        eventSubject.send(.newIceConnectionState(state))
     }
 
     func peerConnection(
@@ -136,7 +129,14 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
         streams mediaStreams: [RTCMediaStream]
     ) {
         logger?.debug("Peer connection - did add rtpReceiver")
-        delegate?.peerConnection(peerConnection, didAdd: rtpReceiver, streams: mediaStreams)
+        eventSubject.send(.receiverAdded(rtpReceiver))
+    }
+
+    func peerConnection(
+        _ peerConnection: RTCPeerConnection,
+        didRemove rtpReceiver: RTCRtpReceiver
+    ) {
+        eventSubject.send(.receiverRemoved(rtpReceiver))
     }
 
     func peerConnection(
@@ -144,6 +144,6 @@ final class PeerConnectionDelegateProxy: NSObject, RTCPeerConnectionDelegate {
         didStartReceivingOn transceiver: RTCRtpTransceiver
     ) {
         logger?.debug("Peer connection - did start receiving on transceiver")
-        delegate?.peerConnection(peerConnection, didStartReceivingOn: transceiver)
+        eventSubject.send(.startedReceivingOnTranceiver(transceiver))
     }
 }
