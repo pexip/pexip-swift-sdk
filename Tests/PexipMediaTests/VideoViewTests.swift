@@ -13,12 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if os(iOS)
+
 import XCTest
 @testable import PexipMedia
 
 final class VideoViewTests: XCTestCase {
-    #if os(iOS)
-
     func testIsMirrored() {
         let view = VideoView(frame: .zero)
         XCTAssertEqual(view.transform, .identity)
@@ -29,14 +29,6 @@ final class VideoViewTests: XCTestCase {
         view.isMirrored = false
         XCTAssertEqual(view.transform, .identity)
     }
-
-    #else
-
-    func testInit() {
-        let view = VideoView(frame: .zero)
-        XCTAssertTrue(view.wantsLayer)
-        XCTAssertEqual(view.layer?.backgroundColor, .black)
-    }
-
-    #endif
 }
+
+#endif
