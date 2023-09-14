@@ -15,6 +15,7 @@
 
 import SwiftUI
 import PexipInfinityClient
+import AVFoundation
 
 final class AliasViewModel: ObservableObject {
     typealias Complete = (Output) -> Void

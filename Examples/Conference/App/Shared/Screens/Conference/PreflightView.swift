@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -67,8 +67,11 @@ struct PreflightView: View {
     }
 
     private var topBar: some View {
-        HStack {
+        HStack(spacing: 4) {
             Spacer()
+            AudioRoutePickerView()
+                .frame(width: 50, height: 50)
+                .padding(.vertical)
             viewFactory.settingsView()
         }
         .padding(.top)

@@ -39,7 +39,7 @@ public struct AudioConfiguration: Equatable {
 
 public extension AudioConfiguration {
     static let idle = AudioConfiguration(
-        category: .ambient,
+        category: .soloAmbient,
         mode: .default,
         options: []
     )
@@ -49,8 +49,7 @@ public extension AudioConfiguration {
         mode: .voiceChat,
         options: [
             .allowBluetooth,
-            .allowBluetoothA2DP,
-            .defaultToSpeaker
+            .allowBluetoothA2DP
         ]
     )
 

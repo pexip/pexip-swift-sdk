@@ -215,6 +215,9 @@ private extension CallView {
             Spacer()
             ChatButton(action: { showingChat?.toggle() })
                 .opacity(showingChat != nil ? 1 : 0)
+            AudioRoutePickerView()
+                .frame(width: 50, height: 50)
+                .padding(.vertical)
             viewFactory
                 .settingsView()
         }
