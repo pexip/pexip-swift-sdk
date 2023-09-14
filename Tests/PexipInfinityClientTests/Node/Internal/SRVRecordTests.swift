@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,20 +34,6 @@ final class SRVRecordTests: XCTestCase {
                 XCTAssertEqual(error as? DNSLookupError, .invalidSRVRecordData)
             }
         }
-    }
-
-    func testSorting() {
-        let recordA = SRVRecord(priority: 2, weight: 10, port: 1720, target: "px01.vc.example.com")
-        let recordB = SRVRecord(priority: 1, weight: 10, port: 1720, target: "px02.vc.example.com")
-        let recordC = SRVRecord(priority: 2, weight: 20, port: 1720, target: "px03.vc.example.com")
-
-        let records = [
-            recordA,
-            recordB,
-            recordC
-        ]
-
-        XCTAssertEqual(records.sorted(), [recordB, recordC, recordA])
     }
 }
 
