@@ -94,6 +94,10 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
         try await negotiate {
             try await $0?.sendOffer()
         }
+
+        #if os(iOS)
+        await AudioSession.shared.activate(for: .call)
+        #endif
     }
 
     func stop() async {
@@ -112,6 +116,10 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
         isPolitePeer = false
         incomingIceCandidates.removeAll()
         outgoingIceCandidates.removeAll()
+
+        #if os(iOS)
+        await AudioSession.shared.deactivate()
+        #endif
     }
 
     // MARK: - MediaConnection (tracks)
@@ -150,6 +158,11 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
                     } else {
                         try await self?.signalingChannel.releaseFloor()
                     }
+                    #if os(iOS)
+                    await AudioSession.shared.activate(
+                        for: isCapturing ? .screenCapture : .call
+                    )
+                    #endif
                 } catch {
                     self?.logger?.error("Error on takeFloow/releaseFloor: \(error)")
                 }
@@ -230,11 +243,6 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
                 }
             case .newPeerConnectionState(let newState):
                 stateSubject.send(newState)
-                #if os(iOS)
-                if newState == .connected {
-                    mainLocalAudioTrack?.speakerOn()
-                }
-                #endif
             case .newCandidate(let candidate):
                 if isMakingOffer {
                     outgoingIceCandidates.append(candidate)
