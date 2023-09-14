@@ -65,7 +65,7 @@ final class RegistrationEventServiceTests: APITestCase {
         }
 
         // 3. Assert request
-        assertRequest(
+        try assertRequest(
             withMethod: .GET,
             url: baseURL.appendingPathComponent("events"),
             token: token,

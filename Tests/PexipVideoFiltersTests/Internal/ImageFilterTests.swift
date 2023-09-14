@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ final class ImageFilterTests: XCTestCase {
             orientation: .up
         )
 
-        wait(for: [expectation], timeout: 3)
+        await fulfillment(of: [expectation], timeout: 3)
 
         // 2. Wait for 2 seconds
         try await Task.sleep(nanoseconds: 2 * 1_000_000_000)

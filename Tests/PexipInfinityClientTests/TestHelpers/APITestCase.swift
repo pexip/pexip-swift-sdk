@@ -78,7 +78,7 @@ class APITestCase: XCTestCase {
         // 1. Success
         try setResponse(statusCode: 200, json: responseJSON)
         try await execute()
-        assertRequest(withMethod: method, url: url, token: token, jsonBody: body)
+        try assertRequest(withMethod: method, url: url, token: token, jsonBody: body)
 
         // 2. HTTP errors
         if assertHTTPErrors {
@@ -89,7 +89,7 @@ class APITestCase: XCTestCase {
                     XCTFail("Should fail with error")
                 } catch {
                     XCTAssertEqual(error as? HTTPError, .unacceptableStatusCode(statusCode))
-                    assertRequest(withMethod: method, url: url, token: token, jsonBody: body)
+                    try assertRequest(withMethod: method, url: url, token: token, jsonBody: body)
                 }
             }
         }
@@ -102,7 +102,7 @@ class APITestCase: XCTestCase {
             XCTFail("Should fail with error")
         } catch {
             XCTAssertEqual((error as? URLError)?.code, .unknown)
-            assertRequest(withMethod: method, url: url, token: token, jsonBody: body)
+            try assertRequest(withMethod: method, url: url, token: token, jsonBody: body)
         }
     }
     // swiftlint:enable function_parameter_count
@@ -112,7 +112,7 @@ class APITestCase: XCTestCase {
         url: URL,
         token: InfinityToken?,
         jsonBody: Data?
-    ) {
+    ) throws {
         XCTAssertEqual(lastRequest?.url, url)
         XCTAssertEqual(lastRequest?.httpMethod, method.rawValue)
 
@@ -123,7 +123,7 @@ class APITestCase: XCTestCase {
             )
         }
 
-        assertRequest(withMethod: method, url: url, token: token, data: jsonBody)
+        try assertRequest(withMethod: method, url: url, token: token, data: jsonBody)
     }
 
     func assertRequest(
@@ -131,13 +131,17 @@ class APITestCase: XCTestCase {
         url: URL,
         token: InfinityToken? = nil,
         data: Data?
-    ) {
+    ) throws {
         XCTAssertEqual(lastRequest?.url, url)
         XCTAssertEqual(lastRequest?.httpMethod, method.rawValue)
 
         if let data = data {
             XCTAssertNotNil(lastRequest?.httpBody)
-            XCTAssertEqual(lastRequest?.httpBody, data)
+            let httpBodyObject = try JSONSerialization.jsonObject(
+                with: try XCTUnwrap(lastRequest?.httpBody)
+            ) as AnyObject
+            let expectedDataObject = try JSONSerialization.jsonObject(with: data) as AnyObject
+            XCTAssertTrue(httpBodyObject.isEqual(expectedDataObject))
         } else {
             XCTAssertNil(lastRequest?.httpBody)
         }

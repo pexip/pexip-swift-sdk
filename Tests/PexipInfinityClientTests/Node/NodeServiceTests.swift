@@ -35,7 +35,7 @@ final class NodeServiceTests: APITestCase {
         let status = try await service.status()
 
         XCTAssertFalse(status)
-        assertStatusRequest()
+        try assertStatusRequest()
     }
 
     /// Not in maintenance mode
@@ -44,7 +44,7 @@ final class NodeServiceTests: APITestCase {
         let status = try await service.status()
 
         XCTAssertTrue(status)
-        assertStatusRequest()
+        try assertStatusRequest()
     }
 
     func testStatusWith404() async throws {
@@ -54,7 +54,7 @@ final class NodeServiceTests: APITestCase {
             _ = try await service.status()
         } catch {
             XCTAssertEqual(error as? HTTPError, .resourceNotFound("Node"))
-            assertStatusRequest()
+            try assertStatusRequest()
         }
     }
 
@@ -65,7 +65,7 @@ final class NodeServiceTests: APITestCase {
             _ = try await service.status()
         } catch {
             XCTAssertEqual(error as? HTTPError, .unacceptableStatusCode(401))
-            assertStatusRequest()
+            try assertStatusRequest()
         }
     }
 
@@ -97,8 +97,8 @@ final class NodeServiceTests: APITestCase {
 
     // MARK: - Test helpers
 
-    private func assertStatusRequest() {
-        assertRequest(
+    private func assertStatusRequest() throws {
+        try assertRequest(
             withMethod: .GET,
             url: baseURL.appendingPathComponent("status"),
             data: nil

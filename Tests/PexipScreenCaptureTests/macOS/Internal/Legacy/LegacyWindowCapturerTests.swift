@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ final class LegacyWindowCapturerTests: XCTestCase {
             }
         }
 
-        wait(for: [expectation1, expectation2], timeout: 1)
+        await fulfillment(of: [expectation1, expectation2], timeout: 1)
     }
 
     func testStopCapture() async throws {
