@@ -131,9 +131,11 @@ final class ConferenceViewModel: ObservableObject {
         )
         #endif
         self.onComplete = {
+            #if os(iOS)
             Task {
                 await AudioSession.shared.deactivate()
             }
+            #endif
             onComplete($0)
         }
         self.state = .preflight
@@ -155,9 +157,11 @@ final class ConferenceViewModel: ObservableObject {
             join()
         }
 
+        #if os(iOS)
         Task {
             await AudioSession.shared.activate(for: .call)
         }
+        #endif
     }
 
     deinit {

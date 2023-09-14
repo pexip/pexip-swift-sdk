@@ -21,16 +21,12 @@ import PexipCore
 public actor AudioSession {
     public static let shared = AudioSession(logger: DefaultLogger.media)
 
-    private let audioSession: AVAudioSession
+    private let audioSession = AVAudioSession.sharedInstance()
     private let logger: Logger?
 
     // MARK: - Init
 
-    init(
-        audioSession: AVAudioSession = .sharedInstance(),
-        logger: Logger? = nil
-    ) {
-        self.audioSession = audioSession
+    init(logger: Logger? = nil) {
         self.logger = logger
     }
 
@@ -68,9 +64,9 @@ public actor AudioSession {
     ) throws {
         try audioSession.setCategory(
             configuration.category,
+            mode: configuration.mode,
             options: configuration.options
         )
-        try audioSession.setMode(configuration.mode)
         try audioSession.setActive(active, options: .notifyOthersOnDeactivation)
     }
 

@@ -69,9 +69,11 @@ struct PreflightView: View {
     private var topBar: some View {
         HStack(spacing: 4) {
             Spacer()
+            #if os(iOS)
             AudioRoutePickerView()
                 .frame(width: 50, height: 50)
                 .padding(.vertical)
+            #endif
             viewFactory.settingsView()
         }
         .padding(.top)
