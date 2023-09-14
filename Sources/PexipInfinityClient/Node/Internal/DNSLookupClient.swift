@@ -15,6 +15,7 @@
 
 import Foundation
 import dnssd
+import PexipCore
 
 // MARK: - Protocol
 
@@ -132,7 +133,7 @@ private extension DNSLookupTaskProtocol {
         withTimeout timeout: TimeInterval,
         flags: DNSServiceFlags
     ) async throws {
-        let isTimeoutReached = Isolated(value: false)
+        let isTimeoutReached = Isolated(false)
 
         let timeoutTask = Task<Void, Error> {
             let nanoseconds = UInt64(timeout * 1_000_000_000)
@@ -165,19 +166,5 @@ private extension DNSLookupTaskProtocol {
         guard errorCode == kDNSServiceErr_NoError else {
             throw DNSLookupError.lookupFailed(code: errorCode)
         }
-    }
-}
-
-// MARK: - Private types
-
-private actor Isolated<T> {
-    var value: T
-
-    init(value: T) {
-        self.value = value
-    }
-
-    func setValue(_ value: T) {
-        self.value = value
     }
 }

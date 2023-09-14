@@ -143,8 +143,10 @@ final class BroadcastVideoReceiver {
 
             func copyMemory<T>(to value: inout T) {
                 let count = MemoryLayout<T>.size
-                memcpy(&value, baseAddress.advanced(by: position), count)
-                position += count
+                withUnsafeMutablePointer(to: &value) { pointer in
+                    memcpy(pointer, baseAddress.advanced(by: position), count)
+                    position += count
+                }
             }
 
             copyMemory(to: &displayTimeNs)
