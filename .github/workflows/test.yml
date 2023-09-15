@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { destination: 'platform=iOS Simulator,name=iPhone 14 Pro,OS=17.0' }
+          - { destination: 'platform=iOS Simulator,name=iPhone 14 Pro,OS=16.2' }
           - { destination: 'platform=macOS,arch=x86_64' }
     
     steps:
@@ -42,7 +42,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { scheme: 'Example (iOS)', destination: 'platform=iOS Simulator,name=iPhone 14 Pro,OS=17.0' }
+          - { scheme: 'Example (iOS)', destination: 'platform=iOS Simulator,name=iPhone 14 Pro,OS=16.2' }
           - { scheme: 'Example (macOS)', destination: 'platform=macOS,arch=x86_64' }
     
     steps:
@@ -82,5 +82,5 @@ jobs:
           set -o pipefail && arch -x86_64 xcodebuild \
             -workspace Examples/VideoFilters/VideoFiltersExample.xcworkspace \
             -scheme 'VideoFiltersExample' \
-            -destination 'platform=iOS Simulator,name=iPhone 14 Pro,OS=17.0' \
+            -destination 'platform=iOS Simulator,name=iPhone 14 Pro,OS=16.2' \
             clean build CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" | xcpretty
