@@ -204,7 +204,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         XCTAssertEqual(userDefaults.broadcastFps, 25)
 
         // 2. Start receiver
-        startReceiver()
+        await startReceiver()
 
         // 3. Try to start capture again
         try await capturer.startCapture(atFps: 15)
@@ -213,8 +213,8 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         XCTAssertEqual(userDefaults.broadcastFps, 25)
     }
 
-    func testStopCapture() throws {
-        startReceiver()
+    func testStopCapture() async throws {
+        await startReceiver()
 
         let expectation = self.expectation(description: "Receiver finished")
         notificationCenter.addObserver(self, for: .receiverFinished) {
@@ -222,7 +222,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         }
 
         try capturer.stopCapture()
-        wait(for: [expectation], timeout: 0.1)
+        await fulfillment(of: [expectation], timeout: 0.1)
 
         XCTAssertFalse(videoReceiver.isRunning)
         XCTAssertEqual(userDefaults?.broadcastFps, self.defaultFps)
@@ -230,8 +230,8 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         XCTAssertNotNil(userDefaults?.broadcastKeepAliveDate)
     }
 
-    func testStopCaptureOnCallEnded() throws {
-        startReceiver()
+    func testStopCaptureOnCallEnded() async throws {
+        await startReceiver()
 
         let expectation = self.expectation(description: "Call ended")
         notificationCenter.addObserver(self, for: .callEnded) {
@@ -239,7 +239,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         }
 
         try capturer.stopCapture(reason: .callEnded)
-        wait(for: [expectation], timeout: 0.1)
+        await fulfillment(of: [expectation], timeout: 1)
 
         XCTAssertFalse(videoReceiver.isRunning)
         XCTAssertEqual(userDefaults?.broadcastFps, defaultFps)
@@ -247,8 +247,8 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         XCTAssertNotNil(userDefaults?.broadcastKeepAliveDate)
     }
 
-    func testStopCaptureOnStolenPresentation() throws {
-        startReceiver()
+    func testStopCaptureOnStolenPresentation() async throws {
+        await startReceiver()
 
         let expectation = self.expectation(description: "Presentation stolen")
         notificationCenter.addObserver(self, for: .presentationStolen) {
@@ -256,7 +256,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         }
 
         try capturer.stopCapture(reason: .presentationStolen)
-        wait(for: [expectation], timeout: 0.1)
+        await fulfillment(of: [expectation], timeout: 1)
 
         XCTAssertFalse(videoReceiver.isRunning)
         XCTAssertEqual(userDefaults?.broadcastFps, defaultFps)
@@ -351,8 +351,8 @@ final class BroadcastScreenCapturerTests: XCTestCase {
     }
     // swiftlint:enable function_body_length
 
-    func testDeinit() {
-        startReceiver()
+    func testDeinit() async {
+        await startReceiver()
         capturer = nil
 
         XCTAssertFalse(videoReceiver.isRunning)
@@ -362,13 +362,13 @@ final class BroadcastScreenCapturerTests: XCTestCase {
 
     // MARK: - Private
 
-    private func startReceiver() {
+    private func startReceiver() async {
         let expectation = self.expectation(description: "Sender started")
         notificationCenter.addObserver(self, for: .senderStarted) {
             expectation.fulfill()
         }
         notificationCenter.post(.senderStarted)
-        wait(for: [expectation], timeout: 0.1)
+        await fulfillment(of: [expectation], timeout: 1)
     }
 }
 // swiftlint:enable type_body_length

@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -67,22 +67,22 @@ final class RegistrationTests: XCTestCase {
 
     // MARK: - Tests
 
-    func testFailureEventOnTokenRefreshError() {
+    func testFailureEventOnTokenRefreshError() async {
         let error = URLError(.unknown)
         var receivedEvents = [RegistrationEvent]()
 
         // 1. Send events
-        wait(
-            for: { expectation in
-                registration.eventPublisher.sink { event in
+        await fulfillment(
+            of: { expectation in
+                self.registration.eventPublisher.sink { event in
                     receivedEvents.append(event)
                     expectation.fulfill()
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
                 Task(priority: .low) {
-                    tokenRefreshTask.subject.send(.tokenReleased)
-                    tokenRefreshTask.subject.send(.failed(error))
+                    self.tokenRefreshTask.subject.send(.tokenReleased)
+                    self.tokenRefreshTask.subject.send(.failed(error))
                 }
             }
         )
@@ -99,7 +99,7 @@ final class RegistrationTests: XCTestCase {
         }
     }
 
-    func testReceiveEvents() {
+    func testReceiveEvents() async {
         // 1. Subscribe to events
         XCTAssertTrue(registration.receiveEvents())
 
@@ -117,20 +117,20 @@ final class RegistrationTests: XCTestCase {
         var receivedEvents = [RegistrationEvent]()
 
         // 3. Send events
-        wait(
-            for: { expectation in
-                registration.eventPublisher.sink { event in
+        await fulfillment(
+            of: { expectation in
+                self.registration.eventPublisher.sink { event in
                     receivedEvents.append(event)
                     if receivedEvents.count == 3 {
                         expectation.fulfill()
                     }
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
                 for event in events {
-                    eventSender.send(.success(event))
+                    self.eventSender.send(.success(event))
                 }
-                eventSender.send(.failure(InfinityTokenError.tokenExpired))
+                self.eventSender.send(.failure(InfinityTokenError.tokenExpired))
             }
         )
 

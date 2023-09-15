@@ -32,7 +32,7 @@ final class RemoteVideoTracksTests: XCTestCase {
         XCTAssertEqual(tracks.presentationTrack as? VideoTrackMock, presentationTrack)
     }
 
-    func testSetMainTrack() async {
+    func testSetMainTrack() {
         let track = VideoTrackMock()
         let tracks = RemoteVideoTracks(
             mainTrack: nil,
@@ -40,13 +40,10 @@ final class RemoteVideoTracksTests: XCTestCase {
         )
 
         tracks.setMainTrack(track)
-
-        await Task { @MainActor in
-            XCTAssertEqual(tracks.mainTrack as? VideoTrackMock, track)
-        }.value
+        XCTAssertEqual(tracks.mainTrack as? VideoTrackMock, track)
     }
 
-    func testSetPresentationTrack() async {
+    func testSetPresentationTrack() {
         let track = VideoTrackMock()
         let tracks = RemoteVideoTracks(
             mainTrack: nil,
@@ -54,10 +51,7 @@ final class RemoteVideoTracksTests: XCTestCase {
         )
 
         tracks.setPresentationTrack(track)
-
-        await Task { @MainActor in
-            XCTAssertEqual(tracks.presentationTrack as? VideoTrackMock, track)
-        }.value
+        XCTAssertEqual(tracks.presentationTrack as? VideoTrackMock, track)
     }
 }
 

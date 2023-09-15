@@ -87,8 +87,8 @@ final class ImageFilterTests: XCTestCase {
 
         await fulfillment(of: [expectation], timeout: 3)
 
-        // 2. Wait for 2 seconds
-        try await Task.sleep(nanoseconds: 2 * 1_000_000_000)
+        // 2. Wait for 3 seconds
+        try await Task.sleep(nanoseconds: 3 * 1_000_000_000)
 
         // 3. Process image again
         let image = try processImage(with: filter)

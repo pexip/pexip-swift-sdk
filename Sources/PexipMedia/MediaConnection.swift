@@ -37,16 +37,14 @@ public final class RemoteVideoTracks: ObservableObject {
         self.presentationTrack = presentationTrack
     }
 
+    @MainActor
     public func setMainTrack(_ track: VideoTrack?) {
-        Task { @MainActor in
-            mainTrack = track
-        }
+        mainTrack = track
     }
 
+    @MainActor
     public func setPresentationTrack(_ track: VideoTrack?) {
-        Task { @MainActor in
-            presentationTrack = track
-        }
+        presentationTrack = track
     }
 }
 
