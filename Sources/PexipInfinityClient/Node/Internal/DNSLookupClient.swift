@@ -54,11 +54,6 @@ final class DNSLookupClient: DNSLookupClientProtocol {
             forName: name,
             dnssec: dnssec
         )
-
-        if records.first?.target == ".", records.count == 1 {
-            return []
-        }
-
         return DNSLookupUtils.sortSRVRecords(records)
     }
 
