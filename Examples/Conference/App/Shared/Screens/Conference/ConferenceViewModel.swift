@@ -130,7 +130,14 @@ final class ConferenceViewModel: ObservableObject {
             defaultVideoProfile: localPresentationQualityProfile
         )
         #endif
-        self.onComplete = onComplete
+        self.onComplete = {
+            #if os(iOS)
+            Task {
+                await AudioSession.shared.deactivate()
+            }
+            #endif
+            onComplete($0)
+        }
         self.state = .preflight
 
         setCameraEnabled(videoPermission.isAuthorized)
@@ -149,6 +156,12 @@ final class ConferenceViewModel: ObservableObject {
         if !preflight {
             join()
         }
+
+        #if os(iOS)
+        Task {
+            await AudioSession.shared.activate(for: .call)
+        }
+        #endif
     }
 
     deinit {

@@ -25,10 +25,6 @@ final class WebRTCLocalAudioTrack: WebRTCLocalTrack, LocalAudioTrack {
     private let permission: MediaCapturePermission
     private let logger: Logger?
 
-    #if os(iOS)
-    private lazy var audioManager = AudioManager(logger: logger)
-    #endif
-
     // MARK: - Init
 
     init(
@@ -74,11 +70,15 @@ final class WebRTCLocalAudioTrack: WebRTCLocalTrack, LocalAudioTrack {
     #if os(iOS)
 
     func speakerOn() {
-        audioManager.speakerOn()
+        Task {
+            await AudioSession.shared.speakerOn()
+        }
     }
 
     func speakerOff() {
-        audioManager.speakerOff()
+        Task {
+            await AudioSession.shared.speakerOff()
+        }
     }
 
     #endif

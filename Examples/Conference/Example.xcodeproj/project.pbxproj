@@ -55,6 +55,8 @@
 		DAB34033286E680E001B59C5 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB34032286E680E001B59C5 /* Settings.swift */; };
 		DAB34034286E680E001B59C5 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB34032286E680E001B59C5 /* Settings.swift */; };
 		DAB78D4F27E3953600CB17C9 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB78D4E27E3953600CB17C9 /* Utils.swift */; };
+		DAE9B7B62AB3413C0005ABFF /* AudioRoutePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE9B7B52AB3413C0005ABFF /* AudioRoutePickerView.swift */; };
+		DAE9B7B72AB3413C0005ABFF /* AudioRoutePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE9B7B52AB3413C0005ABFF /* AudioRoutePickerView.swift */; };
 		DAEBE68328A3D8AD00951E3C /* CameraVideoFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEBE68228A3D8AD00951E3C /* CameraVideoFilter.swift */; };
 		DAEBE68428A3D8AD00951E3C /* CameraVideoFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEBE68228A3D8AD00951E3C /* CameraVideoFilter.swift */; };
 		DAF13287284A259D0089FE8E /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAF13286284A259D0089FE8E /* ReplayKit.framework */; };
@@ -169,6 +171,7 @@
 		DAC1891C28C8182C004EA7D3 /* Example--macOS--Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Example--macOS--Info.plist"; sourceTree = "<group>"; };
 		DAE8989A282469DD006C30E8 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Configs/Debug.xcconfig; sourceTree = "<group>"; };
 		DAE8989B28246B12006C30E8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Configs/Release.xcconfig; sourceTree = "<group>"; };
+		DAE9B7B52AB3413C0005ABFF /* AudioRoutePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRoutePickerView.swift; sourceTree = "<group>"; };
 		DAEBE68228A3D8AD00951E3C /* CameraVideoFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraVideoFilter.swift; sourceTree = "<group>"; };
 		DAF13285284A259D0089FE8E /* BroadcastExtension (iOS).appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "BroadcastExtension (iOS).appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAF13286284A259D0089FE8E /* ReplayKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ReplayKit.framework; path = System/Library/Frameworks/ReplayKit.framework; sourceTree = SDKROOT; };
@@ -270,6 +273,7 @@
 				DAFADC9127F508CE00A9AC3D /* iOS.entitlements */,
 				DAFADCA127F50C1400A9AC3D /* ExampleApp.swift */,
 				DA93EE6C284A35200063386F /* Constants.swift */,
+				DAE9B7B52AB3413C0005ABFF /* AudioRoutePickerView.swift */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -698,6 +702,7 @@
 				DAFADCCD27F50C1400A9AC3D /* ModalView.swift in Sources */,
 				DAB78D4F27E3953600CB17C9 /* Utils.swift in Sources */,
 				DA7AC0FE281096B400739C4E /* AppCoordinator.swift in Sources */,
+				DAE9B7B62AB3413C0005ABFF /* AudioRoutePickerView.swift in Sources */,
 				DA6196872878332300EA9151 /* ChatMessageStore.swift in Sources */,
 				DAFADCEF27F50C1400A9AC3D /* ChatView.swift in Sources */,
 				DAFADD0F27F50E8800A9AC3D /* PinChallengeView.swift in Sources */,
@@ -743,6 +748,7 @@
 			files = (
 				DAF1328A284A259D0089FE8E /* SampleHandler.swift in Sources */,
 				DA93EE6E284A35200063386F /* Constants.swift in Sources */,
+				DAE9B7B72AB3413C0005ABFF /* AudioRoutePickerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
