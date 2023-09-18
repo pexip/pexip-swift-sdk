@@ -54,14 +54,7 @@ final class DNSLookupClient: DNSLookupClientProtocol {
             forName: name,
             dnssec: dnssec
         )
-
-        // RFC 2782: if there is precisely one SRV RR, and its Target is "."
-        // (the root domain), abort."
-        if records.first?.target == ".", records.count == 1 {
-            return []
-        }
-
-        return records.sorted()
+        return DNSLookupUtils.sortSRVRecords(records)
     }
 
     func resolveARecords(
