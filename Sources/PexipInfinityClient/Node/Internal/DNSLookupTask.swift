@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,30 +25,40 @@ protocol DNSLookupTaskProtocol {
 
 // MARK: - Implementation
 
-struct DNSLookupTask: DNSLookupTaskProtocol {
+final class DNSLookupTask: DNSLookupTaskProtocol {
     let query: DNSLookupQuery
-    private let sdRef: UnsafeMutablePointer<OpaquePointer?> = .allocate(
-        capacity: MemoryLayout<OpaquePointer>.size
-    )
+    private var sdRef: DNSServiceRef?
+
+    init(query: DNSLookupQuery) {
+        self.query = query
+    }
 
     func prepare(withFlags flags: DNSServiceFlags) -> DNSServiceErrorType {
-        DNSServiceQueryRecord(
-            sdRef,
-            flags,
-            0,
-            query.domain,
-            UInt16(query.serviceType),
-            UInt16(kDNSServiceClass_IN),
-            query.handler,
-            &query.result
-        )
+        withUnsafeMutablePointer(to: &query.result) { pointer in
+            DNSServiceQueryRecord(
+                &sdRef,
+                flags,
+                0,
+                query.domain,
+                UInt16(query.serviceType),
+                UInt16(kDNSServiceClass_IN),
+                query.handler,
+                pointer
+            )
+        }
     }
 
     func start() async -> DNSServiceErrorType {
-        DNSServiceProcessResult(sdRef.pointee)
+        if let sdRef {
+            return DNSServiceProcessResult(sdRef)
+        } else {
+            return DNSServiceErrorType(kDNSServiceErr_Unknown)
+        }
     }
 
     func cancel() {
-        DNSServiceRefDeallocate(sdRef.pointee)
+        if let sdRef {
+            DNSServiceRefDeallocate(sdRef)
+        }
     }
 }

@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -360,19 +360,21 @@ private final class DNSLookupTaskMock: DNSLookupTaskProtocol {
             try? await Task.sleep(seconds: startDelay)
 
             for data in result {
-                query?.handler(
-                    nil,
-                    resultFlags,
-                    0,
-                    Int32(kDNSServiceErr_NoError),
-                    nil,
-                    0,
-                    0,
-                    UInt16(data.count),
-                    [UInt8](data),
-                    0,
-                    &query.result
-                )
+                withUnsafeMutablePointer(to: &query.result) { pointer in
+                    query?.handler(
+                        nil,
+                        resultFlags,
+                        0,
+                        Int32(kDNSServiceErr_NoError),
+                        nil,
+                        0,
+                        0,
+                        UInt16(data.count),
+                        [UInt8](data),
+                        0,
+                        pointer
+                    )
+                }
             }
 
             return processingErrorCode
