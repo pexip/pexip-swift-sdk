@@ -16,7 +16,7 @@
 import XCTest
 @testable import PexipInfinityClient
 
-// swiftlint:disable type_body_length
+// swiftlint:disable type_body_length file_length
 final class ConferenceServiceTests: APITestCase {
     private let baseURL = URL(string: "https://example.com/api/conference/name")!
     private var service: ConferenceService!
@@ -198,7 +198,7 @@ final class ConferenceServiceTests: APITestCase {
         }
     }
 
-    func testRequestTokenWith403AndInvalidPinError() async throws {
+    func testRequestTokenWith403AndPinRequiredErrorWhenPinIsPresent() async throws {
         let string = """
         {
             "status": "success",
@@ -206,6 +206,30 @@ final class ConferenceServiceTests: APITestCase {
                 "pin": "required",
                 "guest_pin": "none"
             }
+        }
+        """
+        let data = try XCTUnwrap(string.data(using: .utf8))
+
+        // 1. Mock response
+        URLProtocolMock.makeResponse = { _ in
+            .http(statusCode: 403, data: data, headers: nil)
+        }
+
+        do {
+            // 2. Make request
+            let fields = ConferenceTokenRequestFields(displayName: "Guest")
+            _ = try await service.requestToken(fields: fields, pin: "1234")
+        } catch {
+            // 3. Assert error
+            XCTAssertEqual(error as? ConferenceTokenError, .invalidPin)
+        }
+    }
+
+    func testRequestTokenWithInvalidPinError() async throws {
+        let string = """
+        {
+            "status": "success",
+            "result": "Invalid PIN"
         }
         """
         let data = try XCTUnwrap(string.data(using: .utf8))
@@ -383,3 +407,5 @@ final class ConferenceServiceTests: APITestCase {
 private struct Container<T>: Codable, Hashable where T: Codable, T: Hashable {
     let result: T
 }
+
+// swiftlint:enable file_length

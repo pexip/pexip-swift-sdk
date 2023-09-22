@@ -222,16 +222,20 @@ struct DefaultConferenceService: ConferenceService {
     }
 
     private func parse403Error(from data: Data, pin: String?) throws -> Error {
-        let error = try decoder.decode(
-            ResponseContainer<ConferenceTokenError>.self,
-            from: data
-        ).result
+        do {
+            let error = try decoder.decode(
+                ResponseContainer<ConferenceTokenError>.self,
+                from: data
+            ).result
 
-        switch error {
-        case .pinRequired:
-            return pin != nil ? ConferenceTokenError.invalidPin : error
-        default:
-            return error
+            switch error {
+            case .pinRequired:
+                return pin != nil ? ConferenceTokenError.invalidPin : error
+            default:
+                return error
+            }
+        } catch {
+            return ConferenceTokenError.invalidPin
         }
     }
 }
