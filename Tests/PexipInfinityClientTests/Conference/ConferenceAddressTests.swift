@@ -27,7 +27,7 @@ final class ConferenceAddressTests: XCTestCase {
         XCTAssertNil(ConferenceAddress(uri: "conference@example.com conference@example.com"))
 
         let name = try XCTUnwrap(ConferenceAddress(uri: "conference@example.com"))
-        XCTAssertEqual(name.alias, "conference")
+        XCTAssertEqual(name.alias, "conference@example.com")
         XCTAssertEqual(name.host, "example.com")
     }
 

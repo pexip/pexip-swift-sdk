@@ -29,7 +29,7 @@ public struct ConferenceAddress: Hashable {
     public init?(uri: String) {
         let parts = uri.components(separatedBy: "@")
 
-        guard let alias = parts.first, let host = parts.last, parts.count == 2 else {
+        guard let host = parts.last, parts.count == 2 else {
             return nil
         }
 
@@ -47,7 +47,7 @@ public struct ConferenceAddress: Hashable {
             return nil
         }
 
-        self.init(alias: alias, host: host)
+        self.init(alias: uri, host: host)
     }
 
     /**
