@@ -111,21 +111,21 @@ final class ConferenceTests: XCTestCase {
         XCTAssertTrue(conference.signalingChannel.data?.receiver === conference)
     }
 
-    func testFailureEventOnTokenRefreshError() {
+    func testFailureEventOnTokenRefreshError() async {
         let error = URLError(.unknown)
         var receivedEvents = [ConferenceClientEvent]()
 
         // 1. Wait for events
-        wait(
-            for: { expectation in
-                conference.eventPublisher.sink { event in
+        await fulfillment(
+            of: { expectation in
+                self.conference.eventPublisher.sink { event in
                     receivedEvents.append(event)
                     expectation.fulfill()
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
                 Task(priority: .low) {
-                    tokenRefreshTask.subject.send(.failed(error))
+                    self.tokenRefreshTask.subject.send(.failed(error))
                 }
             }
         )
@@ -142,7 +142,7 @@ final class ConferenceTests: XCTestCase {
         }
     }
 
-    func testReceiveEvents() {
+    func testReceiveEvents() async {
         // 1. Subscribe to events
         XCTAssertTrue(conference.receiveEvents())
 
@@ -171,39 +171,41 @@ final class ConferenceTests: XCTestCase {
         var receivedEvents = [ConferenceClientEvent]()
 
         // 3. Send events
-        wait(
-            for: { expectation in
-                conference.eventPublisher.sink { event in
+        await fulfillment(
+            of: { expectation in
+                self.conference.eventPublisher.sink { event in
                     receivedEvents.append(event)
                     if receivedEvents.count == 9 {
                         expectation.fulfill()
                     }
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
                 for event in events {
-                    eventSender.send(.success(event))
+                    self.eventSender.send(.success(event))
                 }
-                eventSender.send(.failure(InfinityTokenError.tokenExpired))
+                self.eventSender.send(.failure(InfinityTokenError.tokenExpired))
             }
         )
 
         // 4. Assert
         XCTAssertEqual(delegateMock.events, receivedEvents)
-        XCTAssertEqual(
-            receivedEvents,
-            [
-                .splashScreen(nil),
-                .conferenceUpdate(conferenceStatus),
-                .liveCaptions(liveCaptions),
-                .presentationStart(presentationStart),
-                .presentationStop,
-                .callDisconnected(callDisconnect),
-                .clientDisconnected(clientDisconnect),
-                .peerDisconnected,
-                .refer(refer)
-            ]
-        )
+        XCTAssertEqual(receivedEvents.count, 10)
+        XCTAssertEqual(receivedEvents[0], .splashScreen(nil))
+        XCTAssertEqual(receivedEvents[1], .conferenceUpdate(conferenceStatus))
+        XCTAssertEqual(receivedEvents[2], .liveCaptions(liveCaptions))
+        XCTAssertEqual(receivedEvents[3], .presentationStart(presentationStart))
+        XCTAssertEqual(receivedEvents[4], .presentationStop)
+        XCTAssertEqual(receivedEvents[5], .callDisconnected(callDisconnect))
+        XCTAssertEqual(receivedEvents[6], .clientDisconnected(clientDisconnect))
+        XCTAssertEqual(receivedEvents[7], .peerDisconnected)
+        XCTAssertEqual(receivedEvents[8], .refer(refer))
+
+        if case .failure = receivedEvents[9] {
+            XCTAssertTrue(true)
+        } else {
+            XCTFail("Invalid event")
+        }
     }
 
     func testReceiveEventsWhenAlreadySubscribed() {
@@ -211,19 +213,19 @@ final class ConferenceTests: XCTestCase {
         XCTAssertFalse(conference.receiveEvents())
     }
 
-    func testReceiveEventsAfterEventSourceError() {
+    func testReceiveEventsAfterEventSourceError() async {
         // 1. Subscribe to events
         XCTAssertTrue(conference.receiveEvents())
 
         // 2. Send failure event
-        wait(
-            for: { expectation in
-                conference.eventPublisher.sink { _ in
+        await fulfillment(
+            of: { expectation in
+                self.conference.eventPublisher.sink { _ in
                     expectation.fulfill()
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
-                eventSender.send(.failure(URLError(.unknown)))
+                self.eventSender.send(.failure(URLError(.unknown)))
             }
         )
 
@@ -231,7 +233,7 @@ final class ConferenceTests: XCTestCase {
         XCTAssertTrue(conference.receiveEvents())
     }
 
-    func testSkipFirstPresentationStop() {
+    func testSkipFirstPresentationStop() async {
         // 1. Subscribe to events
         XCTAssertTrue(conference.receiveEvents())
 
@@ -244,18 +246,18 @@ final class ConferenceTests: XCTestCase {
         var receivedEvents = [ConferenceClientEvent]()
 
         // 3. Send events
-        wait(
-            for: { expectation in
-                conference.eventPublisher.sink { event in
+        await fulfillment(
+            of: { expectation in
+                self.conference.eventPublisher.sink { event in
                     receivedEvents.append(event)
                     if receivedEvents.count == 2 {
                         expectation.fulfill()
                     }
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
                 for event in events {
-                    eventSender.send(.success(event))
+                    self.eventSender.send(.success(event))
                 }
             }
         )
@@ -265,7 +267,7 @@ final class ConferenceTests: XCTestCase {
         XCTAssertEqual(receivedEvents, [.splashScreen(nil), .presentationStop])
     }
 
-    func testHandleSplashScreenEvent() {
+    func testHandleSplashScreenEvent() async {
         // 1. Subscribe to events
         conference.receiveEvents()
 
@@ -279,32 +281,30 @@ final class ConferenceTests: XCTestCase {
         splashScreenService.splashScreens = [key: splashScreen]
 
         // 3. Send event and assert
-        wait(
-            for: { expectation in
-                conference.eventPublisher.sink { event in
-                    Task { @MainActor [weak self] in
-                        switch event {
-                        case .splashScreen(let event):
-                            XCTAssertEqual(event, splashScreen)
-                            XCTAssertNotNil(self?.conference.splashScreens)
-                            XCTAssertEqual(
-                                self?.conference.splashScreens,
-                                self?.splashScreenService.splashScreens
-                            )
-                            expectation.fulfill()
-                        default:
-                            XCTFail("Unexpected event")
-                        }
+        await fulfillment(
+            of: { expectation in
+                self.conference.eventPublisher.sink { event in
+                    switch event {
+                    case .splashScreen(let event):
+                        XCTAssertEqual(event, splashScreen)
+                        XCTAssertNotNil(self.conference.splashScreens)
+                        XCTAssertEqual(
+                            self.conference.splashScreens,
+                            self.splashScreenService.splashScreens
+                        )
+                        expectation.fulfill()
+                    default:
+                        XCTFail("Unexpected event")
                     }
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
-                eventSender.send(.success(.splashScreen(.init(key: key))))
+                self.eventSender.send(.success(.splashScreen(.init(key: key))))
             }
         )
     }
 
-    func testHandleNewOfferEvent() {
+    func testHandleNewOfferEvent() async {
         // 1. Subscribe to events
         conference.receiveEvents()
 
@@ -312,27 +312,25 @@ final class ConferenceTests: XCTestCase {
         let expectedOffer = UUID().uuidString
 
         // 3. Send event and assert
-        wait(
-            for: { expectation in
-                signalingChannel.eventPublisher.sink { event in
-                    Task { @MainActor in
-                        switch event {
-                        case .newOffer(let offer):
-                            XCTAssertEqual(offer, expectedOffer)
-                            expectation.fulfill()
-                        default:
-                            XCTFail("Unexpected event")
-                        }
+        await fulfillment(
+            of: { expectation in
+                self.signalingChannel.eventPublisher.sink { event in
+                    switch event {
+                    case .newOffer(let offer):
+                        XCTAssertEqual(offer, expectedOffer)
+                        expectation.fulfill()
+                    default:
+                        XCTFail("Unexpected event")
                     }
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
-                eventSender.send(.success(.newOffer(NewOfferMessage(sdp: expectedOffer))))
+                self.eventSender.send(.success(.newOffer(NewOfferMessage(sdp: expectedOffer))))
             }
         )
     }
 
-    func testHandleUpdateSdpEvent() {
+    func testHandleUpdateSdpEvent() async {
         // 1. Subscribe to events
         conference.receiveEvents()
 
@@ -340,27 +338,25 @@ final class ConferenceTests: XCTestCase {
         let expectedOffer = UUID().uuidString
 
         // 3. Send event and assert
-        wait(
-            for: { expectation in
-                signalingChannel.eventPublisher.sink { event in
-                    Task { @MainActor in
-                        switch event {
-                        case .newOffer(let offer):
-                            XCTAssertEqual(offer, expectedOffer)
-                            expectation.fulfill()
-                        default:
-                            XCTFail("Unexpected event")
-                        }
+        await fulfillment(
+            of: { expectation in
+                self.signalingChannel.eventPublisher.sink { event in
+                    switch event {
+                    case .newOffer(let offer):
+                        XCTAssertEqual(offer, expectedOffer)
+                        expectation.fulfill()
+                    default:
+                        XCTFail("Unexpected event")
                     }
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
-                eventSender.send(.success(.updateSdp(UpdateSdpMessage(sdp: expectedOffer))))
+                self.eventSender.send(.success(.updateSdp(UpdateSdpMessage(sdp: expectedOffer))))
             }
         )
     }
 
-    func testHandleNewCandidateEvent() {
+    func testHandleNewCandidateEvent() async {
         // 1. Subscribe to events
         conference.receiveEvents()
 
@@ -373,51 +369,47 @@ final class ConferenceTests: XCTestCase {
         )
 
         // 3. Send event and assert
-        wait(
-            for: { expectation in
-                signalingChannel.eventPublisher.sink { event in
-                    Task { @MainActor in
-                        switch event {
-                        case let .newCandidate(candidate, mid):
-                            XCTAssertEqual(candidate, expectedCandidate.candidate)
-                            XCTAssertEqual(mid, expectedCandidate.mid)
-                            expectation.fulfill()
-                        default:
-                            XCTFail("Unexpected event")
-                        }
+        await fulfillment(
+            of: { expectation in
+                self.signalingChannel.eventPublisher.sink { event in
+                    switch event {
+                    case let .newCandidate(candidate, mid):
+                        XCTAssertEqual(candidate, expectedCandidate.candidate)
+                        XCTAssertEqual(mid, expectedCandidate.mid)
+                        expectation.fulfill()
+                    default:
+                        XCTFail("Unexpected event")
                     }
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
-                eventSender.send(.success(.newCandidate(expectedCandidate)))
+                self.eventSender.send(.success(.newCandidate(expectedCandidate)))
             }
         )
     }
 
-    func testHandleConferenceUpdateEvent() {
+    func testHandleConferenceUpdateEvent() async {
         let status = ConferenceStatus.stub()
 
         // 1. Subscribe to events
         conference.receiveEvents()
 
         // 2. Send event and assert
-        wait(
-            for: { expectation in
-                conference.eventPublisher.sink { _ in
-                    Task { [weak self] in
-                        let conferenceStatus = self?.conference.status
-                        XCTAssertEqual(conferenceStatus, status)
-                        expectation.fulfill()
-                    }
-                }.store(in: &cancellables)
+        await fulfillment(
+            of: { expectation in
+                self.conference.eventPublisher.sink { _ in
+                    let conferenceStatus = self.conference.status
+                    XCTAssertEqual(conferenceStatus, status)
+                    expectation.fulfill()
+                }.store(in: &self.cancellables)
             },
             after: {
-                eventSender.send(.success(.conferenceUpdate(status)))
+                self.eventSender.send(.success(.conferenceUpdate(status)))
             }
         )
     }
 
-    func testHandleMessageReceivedEvent() {
+    func testHandleMessageReceivedEvent() async {
         // 1. Subscribe to events
         conference.receiveEvents()
 
@@ -430,20 +422,20 @@ final class ConferenceTests: XCTestCase {
         let event = ConferenceEvent.messageReceived(message)
 
         // 3. Send event and assert
-        wait(
-            for: { expectation in
-                chat.publisher.sink { (newMessage: ChatMessage) in
+        await fulfillment(
+            of: { expectation in
+                self.chat.publisher.sink { (newMessage: ChatMessage) in
                     XCTAssertEqual(newMessage, message)
                     expectation.fulfill()
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
-                eventSender.send(.success(event))
+                self.eventSender.send(.success(event))
             }
         )
     }
 
-    func testHandleParticipantEvents() {
+    func testHandleParticipantEvents() async {
         // 1. Subscribe to events
         conference.receiveEvents()
 
@@ -455,55 +447,53 @@ final class ConferenceTests: XCTestCase {
         let participantC = Participant.stub(withId: idA, displayName: "C")
 
         // 3. Send events and assert
-        wait(
-            for: { expectation in
-                conference.roster.eventPublisher.sink { event in
-                    Task { @MainActor in
-                        switch event {
-                        case .reloaded(let participants):
-                            XCTAssertEqual(participants, [participantC])
-                            expectation.fulfill()
-                        default:
-                            XCTFail("Invalid event")
-                        }
+        await fulfillment(
+            of: { expectation in
+                self.conference.roster.eventPublisher.sink { event in
+                    switch event {
+                    case .reloaded(let participants):
+                        XCTAssertEqual(participants, [participantC])
+                        expectation.fulfill()
+                    default:
+                        XCTFail("Invalid event")
                     }
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
-                eventSender.send(.success(.participantSyncBegin))
-                eventSender.send(.success(.participantCreate(participantA)))
-                eventSender.send(.success(.participantCreate(participantB)))
-                eventSender.send(.success(.participantUpdate(participantC)))
-                eventSender.send(.success(.participantDelete(.init(id: idB))))
-                eventSender.send(.success(.participantSyncEnd))
+                self.eventSender.send(.success(.participantSyncBegin))
+                self.eventSender.send(.success(.participantCreate(participantA)))
+                self.eventSender.send(.success(.participantCreate(participantB)))
+                self.eventSender.send(.success(.participantUpdate(participantC)))
+                self.eventSender.send(.success(.participantDelete(.init(id: idB))))
+                self.eventSender.send(.success(.participantSyncEnd))
             }
         )
     }
 
-    func testHandleClientDisconnectedEvent() {
+    func testHandleClientDisconnectedEvent() async {
         // 1. Subscribe to events
         XCTAssertTrue(conference.receiveEvents())
 
         // 2. Send events
-        wait(
-            for: { expectation in
-                conference.eventPublisher.sink { event in
+        await fulfillment(
+            of: { expectation in
+                self.conference.eventPublisher.sink { event in
                     if case .failure = event {
                         expectation.fulfill()
                     }
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
-                eventSender.send(
+                self.eventSender.send(
                     .success(.callDisconnected(.init(
                         callId: UUID().uuidString,
                         reason: "Unknown")
                     ))
                 )
-                eventSender.send(
+                self.eventSender.send(
                     .success(.clientDisconnected(.init(reason: "Unknown")))
                 )
-                eventSender.send(.failure(URLError(.unknown)))
+                self.eventSender.send(.failure(URLError(.unknown)))
             }
         )
 
@@ -512,14 +502,14 @@ final class ConferenceTests: XCTestCase {
         XCTAssertFalse(conference.receiveEvents())
     }
 
-    func testToggleLiveCaptions() {
+    func testToggleLiveCaptions() async {
         // 1. Subscribe to events
         conference.receiveEvents()
 
         // 2. Send event and assert
-        wait(
-            for: { expectation in
-                conference.eventPublisher.sink { _ in
+        await fulfillment(
+            of: { expectation in
+                self.conference.eventPublisher.sink { _ in
                     Task { [weak self] in
                         let result1 = try await self?.conference.toggleLiveCaptions(true)
                         XCTAssertTrue(result1 == true)
@@ -531,10 +521,10 @@ final class ConferenceTests: XCTestCase {
 
                         expectation.fulfill()
                     }
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
-                eventSender.send(.success(
+                self.eventSender.send(.success(
                     .conferenceUpdate(.stub(liveCaptionsAvailable: true))
                 ))
             }
@@ -547,106 +537,98 @@ final class ConferenceTests: XCTestCase {
         XCTAssertNil(liveCaptionsService.flag)
     }
 
-    func testToggleLiveCaptionsWhenNotAvailable() {
+    func testToggleLiveCaptionsWhenNotAvailable() async {
         // 1. Subscribe to events
         conference.receiveEvents()
 
         // 2. Send event and assert
-        wait(
-            for: { expectation in
-                conference.eventPublisher.sink { _ in
-                    Task { [weak self] in
+        await fulfillment(
+            of: { expectation in
+                self.conference.eventPublisher.sink { _ in
+                    Task {
                         // 4. Assert
-                        let result = try await self?.conference.toggleLiveCaptions(true)
+                        let result = try await self.conference.toggleLiveCaptions(true)
                         XCTAssertTrue(result == false)
-                        XCTAssertNil(self?.liveCaptionsService.flag)
+                        XCTAssertNil(self.liveCaptionsService.flag)
 
                         expectation.fulfill()
                     }
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
-                eventSender.send(.success(
+                self.eventSender.send(.success(
                     .conferenceUpdate(.stub(liveCaptionsAvailable: false))
                 ))
             }
         )
     }
 
-    func testLeave() {
+    func testLeave() async {
         leaveExpectation = expectation(description: "Leave expectation")
 
         // 1. Subscribe to events
         conference.receiveEvents()
 
         // 2. Leave
-        Task {
-            await roster.addParticipant(.stub(
-                withId: UUID().uuidString,
-                displayName: "Test"
-            ))
-            await conference.leave()
-        }
+        await roster.addParticipant(.stub(
+            withId: UUID().uuidString,
+            displayName: "Test"
+        ))
+        await conference.leave()
 
-        wait(for: [leaveExpectation!], timeout: 0.1)
+        await fulfillment(of: [leaveExpectation!], timeout: 1)
 
         // 3. Assert
         let assertExpectation = expectation(description: "Assert expectation")
 
-        Task { @MainActor in
-            XCTAssertFalse(tokenRefreshTask.isCancelCalled)
-            XCTAssertTrue(tokenRefreshTask.isCancelAndReleaseCalled)
-            XCTAssertTrue(isEventSourceTerminated)
-            XCTAssertTrue(roster.participants.isEmpty)
-            assertExpectation.fulfill()
-        }
+        XCTAssertFalse(tokenRefreshTask.isCancelCalled)
+        XCTAssertTrue(tokenRefreshTask.isCancelAndReleaseCalled)
+        XCTAssertTrue(isEventSourceTerminated)
+        XCTAssertTrue(roster.participants.isEmpty)
+        assertExpectation.fulfill()
 
-        wait(for: [assertExpectation], timeout: 0.1)
+        await fulfillment(of: [assertExpectation], timeout: 1)
     }
 
-    func testLeaveWhenDisconnected() {
+    func testLeaveWhenDisconnected() async {
         leaveExpectation = expectation(description: "Leave expectation")
 
         // 1. Subscribe to events
         conference.receiveEvents()
 
         // 2. Send events
-        wait(
-            for: { expectation in
-                conference.eventPublisher.sink { _ in
+        await fulfillment(
+            of: { expectation in
+                self.conference.eventPublisher.sink { _ in
                     expectation.fulfill()
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
-                eventSender.send(
+                self.eventSender.send(
                     .success(.clientDisconnected(.init(reason: "Unknown")))
                 )
             }
         )
 
         // 3. Leave
-        Task {
-            await roster.addParticipant(.stub(
-                withId: UUID().uuidString,
-                displayName: "Test"
-            ))
-            await conference.leave()
-        }
+        await roster.addParticipant(.stub(
+            withId: UUID().uuidString,
+            displayName: "Test"
+        ))
+        await conference.leave()
 
-        wait(for: [leaveExpectation!], timeout: 0.1)
+        await fulfillment(of: [leaveExpectation!], timeout: 0.1)
 
         // 4. Assert
         let assertExpectation = expectation(description: "Assert expectation")
 
-        Task { @MainActor in
-            XCTAssertTrue(tokenRefreshTask.isCancelCalled)
-            XCTAssertFalse(tokenRefreshTask.isCancelAndReleaseCalled)
-            XCTAssertTrue(isEventSourceTerminated)
-            XCTAssertTrue(roster.participants.isEmpty)
-            assertExpectation.fulfill()
-        }
+        XCTAssertTrue(tokenRefreshTask.isCancelCalled)
+        XCTAssertFalse(tokenRefreshTask.isCancelAndReleaseCalled)
+        XCTAssertTrue(isEventSourceTerminated)
+        XCTAssertTrue(roster.participants.isEmpty)
+        assertExpectation.fulfill()
 
-        wait(for: [assertExpectation], timeout: 0.1)
+        await fulfillment(of: [assertExpectation], timeout: 0.1)
     }
 
     func testReceiveDataWithoutDirectMedia() async throws {
@@ -654,7 +636,7 @@ final class ConferenceTests: XCTestCase {
         XCTAssertFalse(result)
     }
 
-    func testReceiveDataWithDirectMedia() throws {
+    func testReceiveDataWithDirectMedia() async throws {
         let status = ConferenceStatus.stub(directMedia: true)
         let message = ChatMessage(
             senderName: "Name",
@@ -668,35 +650,35 @@ final class ConferenceTests: XCTestCase {
         conference.receiveEvents()
 
         // 2. Send event and assert
-        wait(
-            for: { expectation in
-                conference.eventPublisher.sink { event in
+        await fulfillment(
+            of: { expectation in
+                self.conference.eventPublisher.sink { event in
                     switch event {
                     case .conferenceUpdate:
-                        Task { [weak self] in
-                            let result = try await self?.conference.receive(data)
+                        Task {
+                            let result = try await self.conference.receive(data)
                             XCTAssertTrue(result == true)
                         }
                     default:
                         break
                     }
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
 
-                chat.publisher.sink { (newMessage: ChatMessage) in
+                self.chat.publisher.sink { (newMessage: ChatMessage) in
                     XCTAssertEqual(newMessage.senderName, message.senderName)
                     XCTAssertEqual(newMessage.senderId, message.senderId)
                     XCTAssertEqual(newMessage.type, message.type)
                     XCTAssertEqual(newMessage.payload, message.payload)
                     expectation.fulfill()
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
-                eventSender.send(.success(.conferenceUpdate(status)))
+                self.eventSender.send(.success(.conferenceUpdate(status)))
             }
         )
     }
 
-    func testDeinit() {
+    func testDeinit() async {
         leaveExpectation = expectation(description: "Leave expectation")
 
         // 1. Subscribe to events
@@ -707,7 +689,7 @@ final class ConferenceTests: XCTestCase {
             conference = nil
         }
 
-        wait(for: [leaveExpectation!], timeout: 0.1)
+        await fulfillment(of: [leaveExpectation!], timeout: 0.1)
 
         // 3. Assert
         let assertExpectation = expectation(description: "Assert expectation")
@@ -719,24 +701,24 @@ final class ConferenceTests: XCTestCase {
             assertExpectation.fulfill()
         }
 
-        wait(for: [assertExpectation], timeout: 0.1)
+        await fulfillment(of: [assertExpectation], timeout: 0.1)
     }
 
-    func testDeinitWhenDisconnected() {
+    func testDeinitWhenDisconnected() async {
         leaveExpectation = expectation(description: "Leave expectation")
 
         // 1. Subscribe to events
         conference.receiveEvents()
 
         // 2. Send events
-        wait(
-            for: { expectation in
-                conference.eventPublisher.sink { _ in
+        await fulfillment(
+            of: { expectation in
+                self.conference.eventPublisher.sink { _ in
                     expectation.fulfill()
-                }.store(in: &cancellables)
+                }.store(in: &self.cancellables)
             },
             after: {
-                eventSender.send(
+                self.eventSender.send(
                     .success(.clientDisconnected(.init(reason: "Unknown")))
                 )
             }
@@ -747,7 +729,7 @@ final class ConferenceTests: XCTestCase {
             conference = nil
         }
 
-        wait(for: [leaveExpectation!], timeout: 0.1)
+        await fulfillment(of: [leaveExpectation!], timeout: 1)
 
         // 4. Assert
         let assertExpectation = expectation(description: "Assert expectation")
@@ -759,7 +741,7 @@ final class ConferenceTests: XCTestCase {
             assertExpectation.fulfill()
         }
 
-        wait(for: [assertExpectation], timeout: 0.1)
+        await fulfillment(of: [assertExpectation], timeout: 1)
     }
 }
 // swiftlint:enable type_body_length

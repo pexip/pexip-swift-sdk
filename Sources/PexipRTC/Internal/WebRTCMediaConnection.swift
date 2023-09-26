@@ -107,8 +107,8 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
         mainLocalAudioTrack = nil
         signalingChannel.data?.sender = nil
 
-        setRemoteTrack(nil, content: .mainVideo)
-        setRemoteTrack(nil, content: .presentationVideo)
+        await setRemoteTrack(nil, content: .mainVideo)
+        await setRemoteTrack(nil, content: .presentationVideo)
 
         started = false
         isMakingOffer = false
@@ -250,7 +250,7 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
                     await addOutgoingIceCandidate(candidate)
                 }
             case let .receiverTrackUpdated(track, content):
-                setRemoteTrack(track, content: content)
+                await setRemoteTrack(track, content: content)
             case let .dataReceived(data):
                 try await receive(data)
             }
@@ -410,6 +410,7 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
         }
     }
 
+    @MainActor
     private func setRemoteTrack(_ track: RTCMediaStreamTrack?, content: MediaContent) {
         func videoTrack() -> WebRTCVideoTrack? {
             (track as? RTCVideoTrack).map { WebRTCVideoTrack(rtcTrack: $0) }

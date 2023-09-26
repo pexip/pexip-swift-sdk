@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,15 +35,15 @@ public extension XCTestCase {
         Self.snapshotName
     }
 
-    func wait(
-        for operation: (XCTestExpectation) -> Void,
-        after: () -> Void,
+    func fulfillment(
+        of operation: @escaping (XCTestExpectation) -> Void,
+        after: @escaping () -> Void,
         timeout: TimeInterval = 0.3
-    ) {
+    ) async {
         let expectation = expectation(description: "Test expectation")
         operation(expectation)
 
         after()
-        wait(for: [expectation], timeout: timeout)
+        await fulfillment(of: [expectation], timeout: timeout)
     }
 }

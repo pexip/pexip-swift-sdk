@@ -87,34 +87,32 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         }
     }
 
-    func testDeinit() throws {
+    func testDeinit() async throws {
         let expectation = self.expectation(description: "Deinit")
         ShareableContentMock.displays = [display]
 
-        Task {
-            try await capturer.startCapture(
-                atFps: fps,
-                outputDimensions: outputDimensions
+        try await capturer.startCapture(
+            atFps: fps,
+            outputDimensions: outputDimensions
+        )
+        let stream = try XCTUnwrap(factory.stream)
+
+        stream.onStop = {
+            XCTAssertEqual(
+                stream.actions,
+                [
+                    .addStreamOutput(.screen),
+                    .startCapture,
+                    .removeStreamOutput(.screen),
+                    .stopCapture
+                ]
             )
-            let stream = try XCTUnwrap(factory.stream)
-
-            stream.onStop = {
-                XCTAssertEqual(
-                    stream.actions,
-                    [
-                        .addStreamOutput(.screen),
-                        .startCapture,
-                        .removeStreamOutput(.screen),
-                        .stopCapture
-                    ]
-                )
-                expectation.fulfill()
-            }
-
-            capturer = nil
+            expectation.fulfill()
         }
 
-        wait(for: [expectation], timeout: 0.3)
+        capturer = nil
+
+        await fulfillment(of: [expectation], timeout: 1)
     }
 
     func testStartCaptureDisplay() async throws {
