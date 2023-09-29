@@ -34,6 +34,7 @@ public struct VideoComponent: View {
     public let isMirrored: Bool
     public let isReversed: Bool
     public let backgroundColor: NativeColor
+    public let cornerRadius: CGFloat
     public var aspectRatio: CGSize? {
         contentMode.aspectRatio.map {
             isReversed
@@ -50,6 +51,7 @@ public struct VideoComponent: View {
         - isReversed: Indicates whether the aspect ratio numbers should
                       get reversed (for vertical video)
         - backgroundColor: the background color of the view
+        - cornerRadius: the corner radius of the view
         - setRenderer: A function that sets the given renderer
      */
     public init(
@@ -57,12 +59,14 @@ public struct VideoComponent: View {
         isMirrored: Bool = false,
         isReversed: Bool = false,
         backgroundColor: NativeColor = .black,
+        cornerRadius: CGFloat = 0,
         setRenderer: @escaping SetRenderer
     ) {
         self.contentMode = contentMode
         self.isMirrored = isMirrored
         self.isReversed = isReversed
         self.backgroundColor = backgroundColor
+        self.cornerRadius = cornerRadius
         self.setRenderer = setRenderer
     }
 
@@ -74,18 +78,21 @@ public struct VideoComponent: View {
         - isReversed: Indicates whether the aspect ratio numbers should
                       get reversed (for vertical video)
         - backgroundColor: the background color of the view
+        - cornerRadius: the corner radius of the view
      */
     public init(
         track: VideoTrack,
         contentMode: VideoContentMode,
         isMirrored: Bool = false,
         isReversed: Bool = false,
-        backgroundColor: NativeColor = .black
+        backgroundColor: NativeColor = .black,
+        cornerRadius: CGFloat = 0
     ) {
         self.contentMode = contentMode
         self.isMirrored = isMirrored
         self.isReversed = isReversed
         self.backgroundColor = backgroundColor
+        self.cornerRadius = cornerRadius
         self.setRenderer = { view, aspectFit  in
             track.setRenderer(view, aspectFit: aspectFit)
         }
@@ -98,19 +105,22 @@ public struct VideoComponent: View {
         - isReversed: Indicates whether the aspect ratio numbers should
                       get reversed (for vertical video)
         - backgroundColor: the background color of the view
+        - cornerRadius: the corner radius of the view
      */
     public init(
         video: Video,
         isMirrored: Bool = false,
         isReversed: Bool = false,
-        backgroundColor: NativeColor = .black
+        backgroundColor: NativeColor = .black,
+        cornerRadius: CGFloat = 0
     ) {
         self.init(
             track: video.track,
             contentMode: video.contentMode,
             isMirrored: isMirrored,
             isReversed: isReversed,
-            backgroundColor: backgroundColor
+            backgroundColor: backgroundColor,
+            cornerRadius: cornerRadius
         )
     }
 
@@ -131,6 +141,7 @@ public struct VideoComponent: View {
             aspectFit: contentMode != .fill,
             isMirrored: isMirrored,
             backgroundColor: backgroundColor,
+            cornerRadius: cornerRadius,
             setRenderer: setRenderer
         )
     }
@@ -152,12 +163,15 @@ private struct VideoViewWrapper: UIViewRepresentable {
     let aspectFit: Bool
     let isMirrored: Bool
     let backgroundColor: UIColor
+    let cornerRadius: CGFloat
     let setRenderer: VideoComponent.SetRenderer
 
     func makeUIView(context: Context) -> VideoView {
         let view = VideoView()
         setRenderer(view, aspectFit)
         view.backgroundColor = backgroundColor
+        view.layer.cornerRadius = cornerRadius
+        view.layer.masksToBounds = true
         view.isMirrored = isMirrored
         return view
     }
@@ -199,6 +213,7 @@ private struct VideoViewWrapper: NSViewRepresentable {
     let aspectFit: Bool
     let isMirrored: Bool
     let backgroundColor: NSColor
+    let cornerRadius: CGFloat
     let setRenderer: VideoComponent.SetRenderer
 
     func makeNSView(context: Context) -> VideoView {
@@ -206,6 +221,8 @@ private struct VideoViewWrapper: NSViewRepresentable {
         setRenderer(view, aspectFit)
         view.wantsLayer = true
         view.layer?.backgroundColor = backgroundColor.cgColor
+        view.layer?.cornerRadius = cornerRadius
+        view.layer?.masksToBounds = true
         view.isMirrored = isMirrored
         return view
     }

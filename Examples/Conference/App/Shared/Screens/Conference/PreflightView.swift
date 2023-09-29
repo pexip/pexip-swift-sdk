@@ -57,12 +57,23 @@ struct PreflightView: View {
     }
 
     private var localVideoView: some View {
-        mainLocalVideoTrack.map { track in
+        #if os(iOS)
+        let contentMode: VideoContentMode = .fill
+        let cornerRadius: CGFloat = 0
+        #else
+        let contentMode: VideoContentMode = .fit16x9
+        let cornerRadius: CGFloat = 16
+        #endif
+
+        return mainLocalVideoTrack.map { track in
             VideoComponent(
                 track: track,
-                contentMode: .fill,
-                isMirrored: true
+                contentMode: contentMode,
+                isMirrored: true,
+                backgroundColor: .black,
+                cornerRadius: cornerRadius
             )
+            .padding()
         }
     }
 
