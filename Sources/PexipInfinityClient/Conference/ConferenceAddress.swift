@@ -15,9 +15,6 @@
 
 import Foundation
 
-@available(*, deprecated, renamed: "ConferenceAddress")
-public typealias ConferenceAlias = ConferenceAddress
-
 /// An address of the conference you are connecting to.
 public struct ConferenceAddress: Hashable {
     public let alias: String

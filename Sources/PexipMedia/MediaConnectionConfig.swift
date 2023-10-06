@@ -34,9 +34,6 @@ public struct MediaConnectionConfig {
     /// The list of ice servers.
     public let iceServers: [IceServer]
 
-    /// The max bandwidth of a video stream.
-    public let bandwidth: Bandwidth
-
     /// Sets whether DSCP is enabled (default is false).
     ///
     /// DSCP (Differentiated Services Code Point) values mark individual packets
@@ -54,14 +51,12 @@ public struct MediaConnectionConfig {
      - Parameters:
         - signaling: The object responsible for setting up and controlling a communication session.
         - iceServers: The list of ice servers.
-        - bandwidth: The max bandwidth of a video stream.
         - dscp: Sets whether DSCP is enabled.
         - presentationInMain: Sets whether presentation will be mixed with main video feed.
      */
     public init(
         signaling: SignalingChannel,
         iceServers: [IceServer] = [],
-        bandwidth: Bandwidth = .high,
         dscp: Bool = false,
         presentationInMain: Bool = false
     ) {
@@ -76,7 +71,6 @@ public struct MediaConnectionConfig {
         }
 
         self.iceServers = iceServers
-        self.bandwidth = bandwidth
         self.dscp = dscp
         self.presentationInMain = presentationInMain
     }

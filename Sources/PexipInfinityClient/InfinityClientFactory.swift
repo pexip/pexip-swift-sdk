@@ -83,25 +83,6 @@ public struct InfinityClientFactory {
 
      - Returns: A new instance of ``Registration``.
      */
-    @available(*, deprecated, message: "Use String based registration(node:deviceAlias:token) instead.")
-    public func registration(
-        node: URL,
-        deviceAlias: DeviceAddress,
-        token: RegistrationToken
-    ) -> Registration {
-        registration(node: node, deviceAlias: deviceAlias.alias, token: token)
-    }
-
-    /**
-     Creates a new instance of ``Registration`` type.
-
-     - Parameters:
-        - node: A conferencing node address in the form of https://example.com
-        - deviceAlias: A device alias
-        - token: A registration token
-
-     - Returns: A new instance of ``Registration``.
-     */
     public func registration(
         node: URL,
         deviceAlias: String,
@@ -126,25 +107,6 @@ public struct InfinityClientFactory {
             ),
             logger: logger
         )
-    }
-
-    /**
-     Creates a new instance of ``Conference`` type.
-
-     - Parameters:
-        - node: A conferencing node address in the form of https://example.com
-        - alias: A conference alias
-        - token: A token of the conference
-
-     - Returns: A new instance of ``Conference``.
-     */
-    @available(*, deprecated, message: "Use String based conference(node:alias:token) instead.")
-    public func conference(
-        node: URL,
-        alias: ConferenceAddress,
-        token: ConferenceToken
-    ) -> Conference {
-        conference(node: node, alias: alias.alias, token: token)
     }
 
     // swiftlint:disable function_body_length

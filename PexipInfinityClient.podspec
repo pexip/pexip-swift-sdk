@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipInfinityClient'
-    s.version      = '0.8.0'
+    s.version      = '0.9.0'
     s.summary      = 'A fluent client for Pexip Infinity REST API v2, conference controls, events, media signaling and token refreshing.'
     s.description  = <<-DESC
                      Pexip Swift SDK is designed for use by iOS/macOS voice/video applications 
