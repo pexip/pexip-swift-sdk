@@ -56,11 +56,9 @@ struct DefaultNodeResolver: NodeResolver {
         }
 
         if nodes.isEmpty {
-            logger?.warn("No SRV or A records were found for \(host)")
+            logger?.warn("No SRV or A records were found")
         } else {
-            logger?.info(
-                "Found \(nodes.count) conferencing nodes for \(host)"
-            )
+            logger?.info("Found \(nodes.count) conferencing nodes")
         }
 
         return nodes
@@ -69,10 +67,7 @@ struct DefaultNodeResolver: NodeResolver {
     private func resolveSRVRecords(for host: String) async throws -> [URL] {
         let name = "_\(Constants.service)._\(Constants.proto).\(host)"
 
-        logger?.debug(
-            "Performing a look up for \(name) to see if there are any " +
-            "SRV records available for \(host)"
-        )
+        logger?.debug("Performing a look up to see if there are any SRV records available")
 
         do {
             return try await dnsLookupClient
@@ -85,9 +80,7 @@ struct DefaultNodeResolver: NodeResolver {
     }
 
     private func resolveARecords(for host: String) async throws -> [URL] {
-        logger?.debug(
-            "Checking if there are any A records available for \(host)"
-        )
+        logger?.debug("Checking if there are any A records available")
         let aRecords = try await dnsLookupClient.resolveARecords(
             for: host,
             dnssec: dnssec

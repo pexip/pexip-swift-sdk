@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,13 +37,15 @@ struct HTTPClient {
 
     func data(
         for request: URLRequest,
-        validate: Bool = true
+        validate: Bool = true,
+        fileID: StaticString = #fileID,
+        function: StaticString = #function
     ) async throws -> (Data, HTTPURLResponse) {
         let request = request.withUserAgentHeader()
-        let requestName = request.methodWithDescription
+        let callerName = self.callerName(fileID: fileID, function: function)
 
         do {
-            logger?.debug("\(requestName) requested...")
+            logger?.debug("\(callerName) requested...")
 
             let (data, response) = try await session.data(for: request)
 
@@ -52,7 +54,7 @@ struct HTTPClient {
             }
 
             logger?.debug(
-                "\(requestName) received server response, status: \(response.statusCode)"
+                "\(callerName) received server response, status: \(response.statusCode)"
             )
 
             if validate {
@@ -61,16 +63,23 @@ struct HTTPClient {
 
             return (data, response)
         } catch {
-            logger?.error("\(requestName) failed with error: \(error)")
+            logger?.error("\(callerName) failed with error: \(error)")
             throw error
         }
     }
 
     func json<T>(
         for request: URLRequest,
-        validate: Bool = true
+        validate: Bool = true,
+        fileID: StaticString = #fileID,
+        function: StaticString = #function
     ) async throws -> T where T: Decodable, T: Hashable {
-        let (data, _) = try await data(for: request, validate: validate)
+        let (data, _) = try await data(
+            for: request,
+            validate: validate,
+            fileID: fileID,
+            function: function
+        )
 
         do {
             return try decoder.decode(
@@ -78,8 +87,9 @@ struct HTTPClient {
                 from: data
             ).result
         } catch {
+            let callerName = self.callerName(fileID: fileID, function: function)
             logger?.error(
-                "Failed decoding data for \(request.methodWithDescription)"
+                "Failed decoding data for \(callerName)"
             )
             throw error
         }
@@ -95,6 +105,24 @@ struct HTTPClient {
             lastEventId: lastEventId,
             transform: transform
         )
+    }
+
+    func callerName(
+        fileID: StaticString,
+        function: StaticString
+    ) -> String {
+        var name = ""
+
+        if let url = URL(string: fileID.description) {
+            let typeName = url.deletingPathExtension().lastPathComponent
+            name = typeName + "."
+        }
+
+        if let function = function.description.components(separatedBy: "(").first {
+            name = "\(name)\(function)"
+        }
+
+        return name
     }
 }
 

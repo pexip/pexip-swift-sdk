@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public struct DefaultLogger: Logger {
 
     public func log(_ message: String, level: LogLevel) {
         let message = "\(level.rawValue) \(message)"
-        os_log("%@", log: logContainer, type: level.osLogType, message)
+        os_log("%{public}@", log: logContainer, type: level.osLogType, message)
         onLog?(message)
     }
 }
