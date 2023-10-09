@@ -7,9 +7,28 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.9.0] - 2023-10-08
+
+### Added
+- New `AudioSession` class for configuring audio on iOS
+- New customization options for `VideoComponent`: background color, corner radius
+- Sort SRV records according to RFC 2782 specs
+
 ## Changed
 - **BREAKING**: `MediaConnection.secureCheckCode` is now a publisher
 - **BREAKING**: All functions in `MediaConnection` are now async
+- Update WebRTC to M115
+- Make it possible to create `WebRTCMediaFactory` with video encoder and decoder factories
+- Use `RTCDefaultVideoEncoderFactory` and `RTCDefaultVideoDecoderFactory` as default factories on all platforms
+
+### Fixed
+- Fix `DNSServiceProcessResult` crash
+- Fix Xcode 15 warnings
+- Fall back to `.invalidPin` error on 403
+- Fix creating conference address with uri
+
+## Removed
+- Remove various deprecated methods and types
 
 ## [0.8.0] - 2023-08-03
 
@@ -125,7 +144,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - Initial release
 
-[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.8.0...HEAD
+[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.9.0...HEAD
+[0.9.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.9.0
 [0.8.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.8.0
 [0.7.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.7.0
 [0.6.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.6.0

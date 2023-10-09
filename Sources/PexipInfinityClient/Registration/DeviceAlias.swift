@@ -13,7 +13,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-@available(*, deprecated, renamed: "DeviceAddress")
-public typealias DeviceAlias = ConferenceAddress
-
 public typealias DeviceAddress = ConferenceAddress

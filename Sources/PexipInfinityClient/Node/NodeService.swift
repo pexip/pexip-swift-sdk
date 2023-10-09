@@ -45,27 +45,7 @@ public protocol NodeService {
         - alias: A conference alias
      - Returns: A conference service for the given alias.
      */
-    @available(*, deprecated, message: "Use String based conference(alias:) instead.")
-    func conference(alias: ConferenceAddress) -> ConferenceService
-
-    /**
-     Sets the conference alias.
-
-     - Parameters:
-        - alias: A conference alias
-     - Returns: A conference service for the given alias.
-     */
     func conference(alias: String) -> ConferenceService
-
-    /**
-     Sets the registration alias.
-
-     - Parameters:
-        - alias: A device alias
-     - Returns: A registration service for the given alias.
-     */
-    @available(*, deprecated, message: "Use String based registration(deviceAlias:) instead.")
-    func registration(deviceAlias: DeviceAddress) -> RegistrationService
 
     /**
      Sets the registration alias.
