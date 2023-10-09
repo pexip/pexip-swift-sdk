@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -126,5 +126,10 @@ final class HTTPClientTests: XCTestCase {
         } catch {
             XCTAssertTrue(error is DecodingError)
         }
+    }
+
+    func testCallerName() {
+        let name = client.callerName(fileID: #fileID, function: #function)
+        XCTAssertEqual(name, "HTTPClientTests.testCallerName")
     }
 }

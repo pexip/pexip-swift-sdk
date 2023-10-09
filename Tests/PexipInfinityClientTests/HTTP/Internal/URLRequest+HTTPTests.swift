@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -79,21 +79,6 @@ final class URLRequestHTTPTests: XCTestCase {
                 from: try XCTUnwrap(request.httpBody)
             ),
             parameters
-        )
-    }
-
-    func testMethodWithDescription() {
-        var request = URLRequest(url: url, httpMethod: .POST)
-        XCTAssertEqual(
-            request.methodWithDescription,
-            "POST \(request.description)"
-        )
-
-        // No HTTP method
-        request.httpMethod = nil
-        XCTAssertEqual(
-            request.methodWithDescription,
-            "GET \(request.description)"
         )
     }
 }
