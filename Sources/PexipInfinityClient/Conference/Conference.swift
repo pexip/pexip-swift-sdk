@@ -220,6 +220,7 @@ final class DefaultConference: Conference {
         case .liveCaptions(let event):
             outputEvent = .liveCaptions(event)
         case .presentationStart(let event):
+            skipPresentationStop.setValue(false)
             outputEvent = .presentationStart(event)
         case .presentationStop:
             outputEvent = .presentationStop
