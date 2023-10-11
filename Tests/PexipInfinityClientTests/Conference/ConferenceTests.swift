@@ -160,8 +160,8 @@ final class ConferenceTests: XCTestCase {
             .splashScreen(nil),
             .conferenceUpdate(conferenceStatus),
             .liveCaptions(liveCaptions),
-            .presentationStart(presentationStart),
             .presentationStop, // First presentationStop event should be skipped.
+            .presentationStart(presentationStart),
             .presentationStop,
             .callDisconnected(callDisconnect),
             .clientDisconnected(clientDisconnect),
