@@ -36,7 +36,6 @@ actor PeerConnection {
     private let connectionDelegateProxy: PeerConnectionDelegateProxy
     private let dataChannelDelegateProxy: DataChannelDelegateProxy
     private let logger: Logger?
-    private var shouldRenegotiate = false
     private var transceivers = [MediaContent: Transceiver]()
     private var degradationPreferences = [MediaContent: DegradationPreference]()
     private var bitrate = Bitrate.bps(0)
@@ -94,7 +93,6 @@ actor PeerConnection {
         dataChannel = nil
 
         fingerprintStore.reset()
-        shouldRenegotiate = false
     }
 
     func setLocalDescription() async throws -> RTCSessionDescription? {
@@ -267,15 +265,7 @@ actor PeerConnection {
         guard ![.closed, .disconnected].contains(connection.connectionState) else {
             return
         }
-
-        // Skip the first call to negotiateIfNeeded() since it's
-        // called right after RTCPeerConnection creation,
-        // and we're still not ready for negotiation.
-        if shouldRenegotiate {
-            eventSubject.send(.shouldNegotiate)
-        } else {
-            shouldRenegotiate = true
-        }
+        eventSubject.send(.shouldNegotiate)
     }
 
     private func onReceiver(_ receiver: RTCRtpReceiver, removed: Bool) {

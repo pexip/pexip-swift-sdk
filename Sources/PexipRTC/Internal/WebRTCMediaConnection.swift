@@ -83,7 +83,6 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
             return
         }
 
-        started = true
         try await peerConnection.setDirection(.inactive, for: .presentationVideo)
 
         if let dataChannelId = signalingChannel.data?.id {
@@ -98,6 +97,8 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
         #if os(iOS)
         await AudioSession.shared.activate(for: .call)
         #endif
+
+        started = true
     }
 
     func stop() async {
@@ -238,6 +239,9 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
         do {
             switch event {
             case .shouldNegotiate:
+                guard started else {
+                    return
+                }
                 try await negotiate {
                     try await $0?.sendOffer()
                 }
