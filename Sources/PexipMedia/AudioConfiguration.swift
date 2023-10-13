@@ -57,6 +57,8 @@ public extension AudioConfiguration {
         category: .playAndRecord,
         mode: .voiceChat,
         options: [
+            .allowBluetooth,
+            .allowBluetoothA2DP,
             .mixWithOthers
         ]
     )
