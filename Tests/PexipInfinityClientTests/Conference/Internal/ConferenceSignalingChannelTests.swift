@@ -364,19 +364,6 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         XCTAssertNil(callService.token)
     }
 
-    func testMuteAudioWhenNotHost() async throws {
-        participantService.results[.mute] = .success(true)
-
-        try await tokenStore.updateToken(.randomToken(role: .guest))
-        let result = try await channel.muteAudio(false)
-
-        XCTAssertFalse(result)
-        XCTAssertTrue(participantService.actions.isEmpty)
-        XCTAssertNil(participantService.token)
-        XCTAssertTrue(callService.actions.isEmpty)
-        XCTAssertNil(callService.token)
-    }
-
     func testTakeFloor() async throws {
         participantService.results[.takeFloor] = .success(())
 

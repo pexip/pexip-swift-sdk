@@ -176,10 +176,6 @@ final class ConferenceSignalingChannel: SignalingChannel, SignalingEventSender {
     func muteAudio(_ muted: Bool) async throws -> Bool {
         let token = try await tokenStore.token()
 
-        guard token.role == .host else {
-            return false
-        }
-
         if muted {
             return try await participantService.mute(token: token)
         }
