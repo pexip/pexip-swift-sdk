@@ -97,7 +97,11 @@ final class DNSLookupClient: DNSLookupClientProtocol {
             return try query.result.records.compactMap(T.init)
         }
 
-        return try await task.value
+        return try await withTaskCancellationHandler {
+            return try await task.value
+        } onCancel: {
+            task.cancel()
+        }
     }
 
     // swiftlint:disable closure_parameter_position
@@ -135,29 +139,39 @@ private extension DNSLookupTaskProtocol {
             cancel()
         }
 
-        defer {
-            Task {
-                if await !isTimeoutReached.value {
-                    timeoutTask.cancel()
-                    cancel()
+        let task = Task {
+            defer {
+                Task {
+                    if await !isTimeoutReached.value {
+                        timeoutTask.cancel()
+                        cancel()
+                    }
                 }
+            }
+
+            var errorCode = prepare(withFlags: flags)
+
+            guard errorCode == kDNSServiceErr_NoError else {
+                throw DNSLookupError.lookupFailed(code: errorCode)
+            }
+
+            errorCode = await start()
+
+            guard await !isTimeoutReached.value else {
+                throw DNSLookupError.timeout
+            }
+
+            guard errorCode == kDNSServiceErr_NoError else {
+                throw DNSLookupError.lookupFailed(code: errorCode)
             }
         }
 
-        var errorCode = prepare(withFlags: flags)
-
-        guard errorCode == kDNSServiceErr_NoError else {
-            throw DNSLookupError.lookupFailed(code: errorCode)
-        }
-
-        errorCode = await start()
-
-        guard await !isTimeoutReached.value else {
-            throw DNSLookupError.timeout
-        }
-
-        guard errorCode == kDNSServiceErr_NoError else {
-            throw DNSLookupError.lookupFailed(code: errorCode)
+        try await withTaskCancellationHandler {
+            try await task.value
+        } onCancel: {
+            task.cancel()
+            timeoutTask.cancel()
+            cancel()
         }
     }
 }

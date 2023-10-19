@@ -40,13 +40,12 @@ public extension InfinityService {
         forHost host: String,
         using nodeResolver: NodeResolver
     ) async throws -> URL? {
-        // swiftlint: disable for_where
         for url in try await nodeResolver.resolveNodes(for: host) {
+            try Task.checkCancellation()
             if try await node(url: url).status() {
                 return url
             }
         }
-        // swiftlint: enable for_where
 
         return nil
     }
