@@ -51,6 +51,8 @@ struct DefaultNodeResolver: NodeResolver {
     func resolveNodes(for host: String) async throws -> [URL] {
         var nodes = try await resolveSRVRecords(for: host)
 
+        try Task.checkCancellation()
+
         if nodes.isEmpty {
             nodes = try await resolveARecords(for: host)
         }
