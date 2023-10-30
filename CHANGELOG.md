@@ -7,6 +7,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## Added
+- `MediaFactory.audioSession` to use instead of deprecated `AudioSession.shared`
+
 ## [0.9.0] - 2023-10-08
 
 ### Added

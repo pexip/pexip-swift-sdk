@@ -21,6 +21,9 @@ import PexipScreenCapture
 public final class WebRTCMediaFactory: MediaFactory {
     private let factory: RTCPeerConnectionFactory
     private let logger: Logger?
+    #if os(iOS)
+    public let audioSession: AudioSessionConfigurator
+    #endif
 
     // MARK: - Init
 
@@ -42,6 +45,11 @@ public final class WebRTCMediaFactory: MediaFactory {
     init(factory: RTCPeerConnectionFactory, logger: Logger? = nil) {
         self.factory = factory
         self.logger = logger
+        #if os(iOS)
+        self.audioSession = WebRTCAudioSession(
+            logger: logger
+        )
+        #endif
     }
 
     // MARK: - MediaFactory
@@ -82,10 +90,14 @@ public final class WebRTCMediaFactory: MediaFactory {
             with: audioSource,
             trackId: UUID().uuidString.lowercased()
         )
-        return WebRTCLocalAudioTrack(
+        let track = WebRTCLocalAudioTrack(
             rtcTrack: audioTrack,
             logger: logger
         )
+        #if os(iOS)
+        track.audioSession = audioSession
+        #endif
+        return track
     }
 
     public func createCameraVideoTrack() -> CameraVideoTrack? {
@@ -167,11 +179,15 @@ public final class WebRTCMediaFactory: MediaFactory {
     public func createMediaConnection(
         config: MediaConnectionConfig
     ) -> MediaConnection {
-        WebRTCMediaConnection(
+        var parameters = WebRTCMediaConnection.InitParameters(
             config: config,
-            factory: factory,
-            logger: logger
+            factory: factory
         )
+        parameters.logger = logger
+        #if os(iOS)
+        parameters.audioSession = audioSession
+        #endif
+        return WebRTCMediaConnection(parameters)
     }
 
     // MARK: - Private

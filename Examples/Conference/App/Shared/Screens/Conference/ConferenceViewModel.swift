@@ -87,6 +87,7 @@ final class ConferenceViewModel: ObservableObject {
     private let mainLocalAudioTrack: LocalAudioTrack
     private var cameraVideoTrack: CameraVideoTrack?
     private var screenMediaTrack: ScreenMediaTrack?
+    private let audioSession: AudioSessionConfigurator
     private let onComplete: Complete
     private let videoPermission = MediaCapturePermission.video
     private let audioPermission = MediaCapturePermission.audio
@@ -123,6 +124,8 @@ final class ConferenceViewModel: ObservableObject {
         )
         self.cameraVideoTrack = mediaFactory.createCameraVideoTrack()
         self.mainLocalAudioTrack = mediaFactory.createLocalAudioTrack()
+        let audioSession = mediaFactory.audioSession
+        self.audioSession = audioSession
         #if os(iOS)
         self.screenMediaTrack = mediaFactory.createScreenMediaTrack(
             appGroup: Constants.appGroup,
@@ -132,8 +135,8 @@ final class ConferenceViewModel: ObservableObject {
         #endif
         self.onComplete = {
             #if os(iOS)
-            Task {
-                await AudioSession.shared.deactivate()
+            Task { [weak audioSession] in
+                await audioSession?.deactivate()
             }
             #endif
             onComplete($0)
@@ -158,8 +161,8 @@ final class ConferenceViewModel: ObservableObject {
         }
 
         #if os(iOS)
-        Task {
-            await AudioSession.shared.activate(for: .call)
+        Task { [weak audioSession] in
+            await audioSession?.activate(for: .call)
         }
         #endif
     }
