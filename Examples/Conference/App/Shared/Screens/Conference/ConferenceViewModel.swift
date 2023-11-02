@@ -87,7 +87,9 @@ final class ConferenceViewModel: ObservableObject {
     private let mainLocalAudioTrack: LocalAudioTrack
     private var cameraVideoTrack: CameraVideoTrack?
     private var screenMediaTrack: ScreenMediaTrack?
+    #if os(iOS)
     private let audioSession: AudioSessionConfigurator
+    #endif
     private let onComplete: Complete
     private let videoPermission = MediaCapturePermission.video
     private let audioPermission = MediaCapturePermission.audio
@@ -124,9 +126,9 @@ final class ConferenceViewModel: ObservableObject {
         )
         self.cameraVideoTrack = mediaFactory.createCameraVideoTrack()
         self.mainLocalAudioTrack = mediaFactory.createLocalAudioTrack()
+        #if os(iOS)
         let audioSession = mediaFactory.audioSession
         self.audioSession = audioSession
-        #if os(iOS)
         self.screenMediaTrack = mediaFactory.createScreenMediaTrack(
             appGroup: Constants.appGroup,
             broadcastUploadExtension: Constants.broadcastUploadExtension,
