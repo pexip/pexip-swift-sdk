@@ -20,6 +20,15 @@ import PexipMedia
 
 // swiftlint:disable type_body_length file_length
 actor WebRTCMediaConnection: MediaConnection, DataSender {
+    struct InitParameters {
+        let config: MediaConnectionConfig
+        let factory: RTCPeerConnectionFactory
+        #if os(iOS)
+        var audioSession: AudioSessionConfigurator?
+        #endif
+        var logger: Logger?
+    }
+
     let remoteVideoTracks = RemoteVideoTracks()
 
     nonisolated var statePublisher: AnyPublisher<MediaConnectionState, Never> {
@@ -32,6 +41,9 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
 
     private let peerConnection: PeerConnection
     private let config: MediaConnectionConfig
+    #if os(iOS)
+    private var audioSession: AudioSessionConfigurator?
+    #endif
     private let logger: Logger?
     private var mainLocalAudioTrack: WebRTCLocalAudioTrack?
     private var signalingChannel: SignalingChannel { config.signaling }
@@ -55,21 +67,20 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
 
     // MARK: - Init
 
-    init(
-        config: MediaConnectionConfig,
-        factory: RTCPeerConnectionFactory,
-        logger: Logger? = nil
-    ) {
+    init(_ parameters: InitParameters) {
         peerConnection = PeerConnection(
-            factory: factory,
+            factory: parameters.factory,
             configuration: .defaultConfiguration(
-                withIceServers: config.iceServers,
-                dscp: config.dscp
+                withIceServers: parameters.config.iceServers,
+                dscp: parameters.config.dscp
             ),
-            logger: logger
+            logger: parameters.logger
         )
-        self.config = config
-        self.logger = logger
+        self.config = parameters.config
+        self.logger = parameters.logger
+        #if os(iOS)
+        self.audioSession = parameters.audioSession
+        #endif
 
         Task {
             await subscribeToEvents()
@@ -95,7 +106,7 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
         }
 
         #if os(iOS)
-        await AudioSession.shared.activate(for: .call)
+        await audioSession?.activate(for: .call)
         #endif
 
         started = true
@@ -119,7 +130,7 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
         outgoingIceCandidates.removeAll()
 
         #if os(iOS)
-        await AudioSession.shared.deactivate()
+        await audioSession?.deactivate()
         #endif
     }
 
@@ -160,7 +171,7 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
                         try await self?.signalingChannel.releaseFloor()
                     }
                     #if os(iOS)
-                    await AudioSession.shared.activate(
+                    await self?.audioSession?.activate(
                         for: isCapturing ? .screenCapture : .call
                     )
                     #endif

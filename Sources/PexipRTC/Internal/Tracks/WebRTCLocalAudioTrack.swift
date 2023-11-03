@@ -21,7 +21,9 @@ final class WebRTCLocalAudioTrack: WebRTCLocalTrack, LocalAudioTrack {
     let capturingStatus = CapturingStatus(isCapturing: false)
     let rtcTrack: RTCAudioTrack
     var streamMediaTrack: RTCMediaStreamTrack { rtcTrack }
-
+    #if os(iOS)
+    var audioSession: AudioSessionConfigurator?
+    #endif
     private let permission: MediaCapturePermission
     private let logger: Logger?
 
@@ -71,13 +73,13 @@ final class WebRTCLocalAudioTrack: WebRTCLocalTrack, LocalAudioTrack {
 
     func speakerOn() {
         Task {
-            await AudioSession.shared.speakerOn()
+            await audioSession?.speakerOn()
         }
     }
 
     func speakerOff() {
         Task {
-            await AudioSession.shared.speakerOff()
+            await audioSession?.speakerOff()
         }
     }
 

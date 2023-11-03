@@ -15,41 +15,26 @@
 
 #if os(iOS)
 
-import AVFoundation
+import WebRTC
 import PexipCore
+import PexipMedia
 
-public protocol AudioSessionConfigurator: AnyObject {
-    var isActive: Bool { get async }
-    var configuration: AudioConfiguration? { get async }
-    func activate(for configuration: AudioConfiguration) async
-    func deactivate() async
-    func speakerOn() async
-    func speakerOff() async
-}
+final actor WebRTCAudioSession: AudioSessionConfigurator {
+    var isActive = false
+    var configuration: AudioConfiguration?
 
-public actor AudioSession: AudioSessionConfigurator {
-    @available(*, deprecated, renamed: "AudioSession.init")
-    public static let shared = AudioSession(logger: DefaultLogger.media)
-
-    public var isActive = false
-    public var configuration: AudioConfiguration?
-
-    private let audioSession: AVAudioSession
+    private var audioSession = RTCAudioSession.sharedInstance()
     private let logger: Logger?
 
     // MARK: - Init
 
-    public init(
-        audioSession: AVAudioSession = AVAudioSession.sharedInstance(),
-        logger: Logger? = nil
-    ) {
-        self.audioSession = audioSession
+    init(logger: Logger? = nil) {
         self.logger = logger
     }
 
     // MARK: - Public
 
-    public func activate(for configuration: AudioConfiguration) {
+    func activate(for configuration: AudioConfiguration) {
         do {
             try setActive(true, configuration: configuration)
         } catch {
@@ -57,7 +42,7 @@ public actor AudioSession: AudioSessionConfigurator {
         }
     }
 
-    public func deactivate() {
+    func deactivate() {
         do {
             try setActive(false, configuration: .idle)
         } catch {
@@ -65,11 +50,11 @@ public actor AudioSession: AudioSessionConfigurator {
         }
     }
 
-    public func speakerOn() {
+    func speakerOn() {
         overrideOutputAudioPort(.speaker)
     }
 
-    public func speakerOff() {
+    func speakerOff() {
         overrideOutputAudioPort(.none)
     }
 
@@ -79,19 +64,29 @@ public actor AudioSession: AudioSessionConfigurator {
         _ isActive: Bool,
         configuration: AudioConfiguration
     ) throws {
-        try audioSession.setCategory(
-            configuration.category,
-            mode: configuration.mode,
-            options: configuration.options
-        )
-        if self.isActive != isActive {
-            try audioSession.setActive(isActive, options: .notifyOthersOnDeactivation)
+        audioSession.lockForConfiguration()
+        defer {
+            audioSession.unlockForConfiguration()
         }
+
+        let rtcConfiguration = RTCAudioSessionConfiguration.webRTC()
+        rtcConfiguration.mode = configuration.mode.rawValue
+        rtcConfiguration.category = configuration.category.rawValue
+        rtcConfiguration.categoryOptions = configuration.options
+
+        try audioSession.setConfiguration(rtcConfiguration)
+        try audioSession.setActive(isActive)
+
         self.isActive = isActive
         self.configuration = configuration
     }
 
     private func overrideOutputAudioPort(_ port: AVAudioSession.PortOverride) {
+        audioSession.lockForConfiguration()
+        defer {
+            audioSession.unlockForConfiguration()
+        }
+
         do {
             try self.audioSession.overrideOutputAudioPort(port)
         } catch {
