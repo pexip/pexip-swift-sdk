@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2023 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -65,6 +65,9 @@ final actor WebRTCAudioSession: AudioSessionConfigurator {
         configuration: AudioConfiguration
     ) throws {
         audioSession.lockForConfiguration()
+        defer {
+            audioSession.unlockForConfiguration()
+        }
 
         let rtcConfiguration = RTCAudioSessionConfiguration.webRTC()
         rtcConfiguration.mode = configuration.mode.rawValue
@@ -74,17 +77,18 @@ final actor WebRTCAudioSession: AudioSessionConfigurator {
         try audioSession.setConfiguration(rtcConfiguration)
         try audioSession.setActive(isActive)
 
-        audioSession.unlockForConfiguration()
-
         self.isActive = isActive
         self.configuration = configuration
     }
 
     private func overrideOutputAudioPort(_ port: AVAudioSession.PortOverride) {
-        do {
-            audioSession.lockForConfiguration()
-            try self.audioSession.overrideOutputAudioPort(port)
+        audioSession.lockForConfiguration()
+        defer {
             audioSession.unlockForConfiguration()
+        }
+
+        do {
+            try self.audioSession.overrideOutputAudioPort(port)
         } catch {
             logger?.error("Error overriding AVAudioSession output audio port: \(error)")
         }
