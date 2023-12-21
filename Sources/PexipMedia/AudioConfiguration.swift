@@ -44,24 +44,43 @@ public extension AudioConfiguration {
         options: []
     )
 
-    static let call = AudioConfiguration(
-        category: .playAndRecord,
-        mode: .voiceChat,
-        options: [
+    static func audioCall(
+        mixWithOthers: Bool = false
+    ) -> AudioConfiguration {
+        call(
+            withMode: .voiceChat,
+            mixWithOthers: mixWithOthers
+        )
+    }
+
+    static func videoCall(
+        mixWithOthers: Bool = false
+    ) -> AudioConfiguration {
+        call(
+            withMode: .videoChat,
+            mixWithOthers: mixWithOthers
+        )
+    }
+
+    private static func call(
+        withMode mode: AVAudioSession.Mode,
+        mixWithOthers: Bool
+    ) -> AudioConfiguration {
+        var options: AVAudioSession.CategoryOptions = [
             .allowBluetooth,
             .allowBluetoothA2DP
         ]
-    )
 
-    static let screenCapture = AudioConfiguration(
-        category: .playAndRecord,
-        mode: .voiceChat,
-        options: [
-            .allowBluetooth,
-            .allowBluetoothA2DP,
-            .mixWithOthers
-        ]
-    )
+        if mixWithOthers {
+            options.insert(.mixWithOthers)
+        }
+
+        return AudioConfiguration(
+            category: .playAndRecord,
+            mode: mode,
+            options: options
+        )
+    }
 }
 
 #endif

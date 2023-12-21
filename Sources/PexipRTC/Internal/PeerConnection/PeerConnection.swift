@@ -222,6 +222,14 @@ actor PeerConnection {
         logger?.debug("Data channel - new data channel created.")
     }
 
+    func contains(_ content: MediaContent) -> Bool {
+        if let transceiver = transceivers[content] {
+            return transceiver.canSend || transceiver.canReceive
+        } else {
+            return false
+        }
+    }
+
     // MARK: - Events
 
     private func subscribeToEvents() {

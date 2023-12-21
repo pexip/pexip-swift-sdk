@@ -106,7 +106,9 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
         }
 
         #if os(iOS)
-        await audioSession?.activate(for: .call)
+        if let audioConfig = await audioConfig(mixWithOthers: false) {
+            await audioSession?.activate(for: audioConfig)
+        }
         #endif
 
         started = true
@@ -171,9 +173,9 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
                         try await self?.signalingChannel.releaseFloor()
                     }
                     #if os(iOS)
-                    await self?.audioSession?.activate(
-                        for: isCapturing ? .screenCapture : .call
-                    )
+                    if let audioConfig = await self?.audioConfig(mixWithOthers: isCapturing) {
+                        await self?.audioSession?.activate(for: audioConfig)
+                    }
                     #endif
                 } catch {
                     self?.logger?.error("Error on takeFloow/releaseFloor: \(error)")
@@ -440,5 +442,16 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
             break
         }
     }
+
+    #if os(iOS)
+    private func audioConfig(mixWithOthers: Bool) async -> AudioConfiguration? {
+        guard !config.externalAudioManagement else {
+            return nil
+        }
+        return await peerConnection.contains(.mainVideo)
+            ? .videoCall(mixWithOthers: mixWithOthers)
+            : .audioCall(mixWithOthers: mixWithOthers)
+    }
+    #endif
 }
 // swiftlint:enable type_body_length file_length

@@ -41,6 +41,10 @@ final class Transceiver {
         transceiver.direction == .recvOnly || transceiver.direction == .sendRecv
     }
 
+    var canSend: Bool {
+        transceiver.direction == .sendOnly || transceiver.direction == .sendRecv
+    }
+
     func setDirection(_ direction: RTCRtpTransceiverDirection) throws {
         guard transceiver.direction != direction else {
             return

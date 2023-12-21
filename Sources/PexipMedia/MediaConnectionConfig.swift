@@ -45,6 +45,11 @@ public struct MediaConnectionConfig {
     /// Sets whether presentation will be mixed with main video feed.
     public let presentationInMain: Bool
 
+    #if os(iOS)
+    /// Sets whether audio session is managed outside of the SDK.
+    public var externalAudioManagement = false
+    #endif
+
     /**
      Creates a new instance of ``MediaConnectionConfig``.
 
