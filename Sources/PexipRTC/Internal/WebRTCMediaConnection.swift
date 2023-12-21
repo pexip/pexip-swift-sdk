@@ -132,7 +132,9 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
         outgoingIceCandidates.removeAll()
 
         #if os(iOS)
-        await audioSession?.deactivate()
+        if !config.externalAudioManagement {
+            await audioSession?.deactivate()
+        }
         #endif
     }
 

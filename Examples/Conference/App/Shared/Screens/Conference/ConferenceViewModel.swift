@@ -164,7 +164,7 @@ final class ConferenceViewModel: ObservableObject {
 
         #if os(iOS)
         Task { [weak audioSession] in
-            await audioSession?.activate(for: .call)
+            await audioSession?.activate(for: .videoCall())
         }
         #endif
     }
