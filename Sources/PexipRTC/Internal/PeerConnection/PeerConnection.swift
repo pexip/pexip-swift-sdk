@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Pexip AS
+// Copyright 2023-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -222,7 +222,7 @@ actor PeerConnection {
         logger?.debug("Data channel - new data channel created.")
     }
 
-    func contains(_ content: MediaContent) -> Bool {
+    func canSendOrReceive(_ content: MediaContent) -> Bool {
         if let transceiver = transceivers[content] {
             return transceiver.canSend || transceiver.canReceive
         } else {
