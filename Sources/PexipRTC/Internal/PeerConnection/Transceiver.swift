@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Pexip AS
+// Copyright 2023-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,6 +39,10 @@ final class Transceiver {
 
     var canReceive: Bool {
         transceiver.direction == .recvOnly || transceiver.direction == .sendRecv
+    }
+
+    var canSend: Bool {
+        transceiver.direction == .sendOnly || transceiver.direction == .sendRecv
     }
 
     func setDirection(_ direction: RTCRtpTransceiverDirection) throws {

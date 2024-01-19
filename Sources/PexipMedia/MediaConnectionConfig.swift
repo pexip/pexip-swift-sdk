@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,6 +44,11 @@ public struct MediaConnectionConfig {
 
     /// Sets whether presentation will be mixed with main video feed.
     public let presentationInMain: Bool
+
+    #if os(iOS)
+    /// Sets whether audio session is managed outside of the SDK.
+    public var externalAudioManagement = false
+    #endif
 
     /**
      Creates a new instance of ``MediaConnectionConfig``.
