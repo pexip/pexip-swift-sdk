@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,6 +50,21 @@ public enum ScreenMediaSource: Equatable {
     }
 
     /// Creates a new screen media capturer for the specified media source.
+    @available(macOS 13.0, *)
+    public static func createCapturer(
+        for mediaSource: ScreenMediaSource,
+        capturesAudio: Bool
+    ) -> ScreenMediaCapturer {
+        // Use ScreenCaptureKit
+        // https://developer.apple.com/documentation/screencapturekit
+        return NewScreenMediaCapturer(
+            source: mediaSource,
+            capturesAudio: capturesAudio,
+            streamFactory: SCStreamFactory()
+        )
+    }
+
+    /// Creates a new screen media capturer for the specified media source.
     public static func createCapturer(
         for mediaSource: ScreenMediaSource
     ) -> ScreenMediaCapturer {
@@ -58,6 +73,7 @@ public enum ScreenMediaSource: Equatable {
             // https://developer.apple.com/documentation/screencapturekit
             return NewScreenMediaCapturer(
                 source: mediaSource,
+                capturesAudio: false,
                 streamFactory: SCStreamFactory()
             )
         } else {
