@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,11 +19,35 @@ import Foundation
 
 extension FileManager {
     func broadcastVideoDataPath(appGroup: String) -> String {
-        let url = containerURL(
-            forSecurityApplicationGroupIdentifier: appGroup
-        )
-        let suffix = "pex_broadcast_video"
-        return url?.appendingPathComponent(suffix).path ?? suffix
+        broadcastDataPath(appGroup: appGroup, name: "pex_broadcast_video")
+    }
+
+    func broadcastAudioDataPath(appGroup: String) -> String {
+        broadcastDataPath(appGroup: appGroup, name: "pex_broadcast_audio")
+    }
+
+    func namedPipeFile(
+        atPath path: String,
+        createIfNeeded: Bool = false
+    ) throws -> NamedPipeFile? {
+        let fileDescriptor: Int32
+        if createIfNeeded {
+            if fileExists(atPath: path) {
+                try removeItem(atPath: path)
+            }
+
+            unlink(path)
+            mkfifo(path, 0o666)
+            fileDescriptor = open(path, O_RDONLY | O_NONBLOCK, Self.mode)
+        } else {
+            fileDescriptor = open(path, O_WRONLY | O_NONBLOCK, Self.mode)
+        }
+
+        guard fileDescriptor != -1 else {
+            return nil
+        }
+
+        return NamedPipeFile(path: path, fileDescriptor: fileDescriptor)
     }
 
     func createMappedFile(atPath path: String, size: Int) throws -> MemoryMappedFile? {
@@ -31,7 +55,7 @@ extension FileManager {
             try removeItem(atPath: path)
         }
 
-        let fileDescriptor = openFile(atPath: path, createIfNeeded: true)
+        let fileDescriptor = open(path, O_RDWR | O_APPEND | O_CREAT, Self.mode)
 
         if fileDescriptor < 0 {
             return nil
@@ -47,7 +71,7 @@ extension FileManager {
     }
 
     func mappedFile(atPath path: String) -> MemoryMappedFile? {
-        let fileDescriptor = openFile(atPath: path, createIfNeeded: false)
+        let fileDescriptor = open(path, O_RDWR | O_APPEND, Self.mode)
 
         if fileDescriptor < 0 {
             return nil
@@ -65,18 +89,14 @@ extension FileManager {
 
     // MARK: - Private
 
-    private func openFile(
-        atPath path: String,
-        createIfNeeded: Bool
-    ) -> Int32 {
-        var oflag: Int32 = O_RDWR | O_APPEND
-
-        if createIfNeeded {
-            oflag |= O_CREAT
-        }
-
-        return open(path, oflag, S_IRUSR | S_IWUSR)
+    private func broadcastDataPath(appGroup: String, name: String) -> String {
+        let url = containerURL(
+            forSecurityApplicationGroupIdentifier: appGroup
+        )
+        return url?.appendingPathComponent(name).path ?? name
     }
+
+    private static let mode: mode_t = S_IRUSR | S_IWUSR
 }
 
 #endif

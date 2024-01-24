@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ public final class BroadcastSampleHandler {
 
     private let userDefaults: UserDefaults?
     private let videoSender: BroadcastVideoSender
+    private let audioSender: BroadcastAudioSender
     private let notificationCenter = BroadcastNotificationCenter.default
     private var cancellables = Set<AnyCancellable>()
     private let keepAliveInterval: TimeInterval
@@ -59,11 +60,14 @@ public final class BroadcastSampleHandler {
         appGroup: String,
         fileManager: FileManager = .default
     ) {
-        let filePath = fileManager.broadcastVideoDataPath(appGroup: appGroup)
         let userDefaults = UserDefaults(suiteName: appGroup)
         self.init(
             videoSender: BroadcastVideoSender(
-                filePath: filePath,
+                filePath: fileManager.broadcastVideoDataPath(appGroup: appGroup),
+                fileManager: fileManager
+            ),
+            audioSender: BroadcastAudioSender(
+                filePath: fileManager.broadcastAudioDataPath(appGroup: appGroup),
                 fileManager: fileManager
             ),
             userDefaults: userDefaults
@@ -72,10 +76,12 @@ public final class BroadcastSampleHandler {
 
     init(
         videoSender: BroadcastVideoSender,
+        audioSender: BroadcastAudioSender,
         userDefaults: UserDefaults?,
         keepAliveInterval: TimeInterval = BroadcastScreenCapturer.keepAliveInterval
     ) {
         self.videoSender = videoSender
+        self.audioSender = audioSender
         self.userDefaults = userDefaults
         self.keepAliveInterval = keepAliveInterval
     }
@@ -132,18 +138,20 @@ public final class BroadcastSampleHandler {
                 return false
             }
 
-            guard
-                sampleBuffer.numSamples == 1,
-                sampleBuffer.isValid,
-                sampleBuffer.dataReadiness == .ready
-            else {
-                return false
-            }
-
             switch sampleBufferType {
             case .video:
+                guard
+                    sampleBuffer.numSamples == 1,
+                    sampleBuffer.isValid,
+                    sampleBuffer.dataReadiness == .ready
+                else {
+                    return false
+                }
+
                 return videoSender.send(sampleBuffer)
-            case .audioApp, .audioMic:
+            case .audioApp:
+                return audioSender.send(sampleBuffer)
+            case .audioMic:
                 return false
             @unknown default:
                 return false
@@ -159,6 +167,7 @@ public final class BroadcastSampleHandler {
             do {
                 let fps = BroadcastFps(value: self?.userDefaults?.broadcastFps)
                 try self?.videoSender.start(withFps: fps)
+                try self?.audioSender.start()
             } catch {
                 self?.onError(.noConnection)
             }
@@ -180,6 +189,7 @@ public final class BroadcastSampleHandler {
     private func clean() {
         stopKeepAliveTimer()
         videoSender.stop()
+        audioSender.stop()
         notificationCenter.removeObserver(self)
     }
 

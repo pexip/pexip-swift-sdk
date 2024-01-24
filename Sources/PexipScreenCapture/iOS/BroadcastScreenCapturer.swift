@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
     private let broadcastUploadExtension: String
     private let defaultFps: UInt
     private var videoReceiver: BroadcastVideoReceiver
+    private var audioReceiver: BroadcastAudioReceiver
     private let notificationCenter = BroadcastNotificationCenter.default
     private let userDefaults: UserDefaults?
     private let isCapturing = Synchronized(false)
@@ -62,6 +63,10 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
                 filePath: fileManager.broadcastVideoDataPath(appGroup: appGroup),
                 fileManager: fileManager
             ),
+            audioReceiver: BroadcastAudioReceiver(
+                filePath: fileManager.broadcastAudioDataPath(appGroup: appGroup),
+                fileManager: fileManager
+            ),
             userDefaults: UserDefaults(suiteName: appGroup)
         )
     }
@@ -70,16 +75,19 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
         broadcastUploadExtension: String,
         defaultFps: UInt,
         videoReceiver: BroadcastVideoReceiver,
+        audioReceiver: BroadcastAudioReceiver,
         keepAliveInterval: TimeInterval = BroadcastScreenCapturer.keepAliveInterval,
         userDefaults: UserDefaults?
     ) {
         self.broadcastUploadExtension = broadcastUploadExtension
         self.defaultFps = defaultFps
         self.videoReceiver = videoReceiver
+        self.audioReceiver = audioReceiver
         self.userDefaults = userDefaults
 
         userDefaults?.broadcastFps = defaultFps
         videoReceiver.delegate = self
+        audioReceiver.delegate = self
         addNotificationObservers()
         startKeepAliveTimer(withInterval: keepAliveInterval)
     }
@@ -126,7 +134,7 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
             return
         }
 
-        try stopVideoReceiver()
+        try stopReceiver()
 
         switch reason {
         case .none:
@@ -143,7 +151,7 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
     private func addNotificationObservers() {
         notificationCenter.addObserver(self, for: .senderStarted) { [weak self] in
             if self?.isCapturing.value == false {
-                self?.startVideoReceiver()
+                self?.startReceiver()
             }
         }
 
@@ -155,7 +163,7 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
             var stopError: Error?
 
             do {
-                try self?.stopVideoReceiver()
+                try self?.stopReceiver()
             } catch {
                 stopError = error
             }
@@ -168,9 +176,10 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
         notificationCenter.removeObserver(self)
     }
 
-    private func startVideoReceiver() {
+    private func startReceiver() {
         do {
             try videoReceiver.start(withFps: BroadcastFps(value: userDefaults?.broadcastFps))
+            try audioReceiver.start()
             isCapturing.setValue(true)
             notificationCenter.post(.receiverStarted)
             delegate?.screenMediaCapturerDidStart(self)
@@ -181,8 +190,9 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
         }
     }
 
-    private func stopVideoReceiver() throws {
+    private func stopReceiver() throws {
         try videoReceiver.stop()
+        try audioReceiver.stop()
         userDefaults?.broadcastFps = defaultFps
         isCapturing.setValue(false)
     }
@@ -218,6 +228,10 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
     private func onCapture(videoFrame: VideoFrame) {
         delegate?.screenMediaCapturer(self, didCaptureVideoFrame: videoFrame)
     }
+
+    private func onCapture(audioFrame: AudioFrame) {
+        delegate?.screenMediaCapturer(self, didCaptureAudioFrame: audioFrame)
+    }
 }
 
 // MARK: - BroadcastVideoReceiverDelegate
@@ -228,6 +242,17 @@ extension BroadcastScreenCapturer: BroadcastVideoReceiverDelegate {
         didReceiveVideoFrame videoFrame: VideoFrame
     ) {
         onCapture(videoFrame: videoFrame)
+    }
+}
+
+// MARK: - BroadcastAudioReceiverDelegate
+
+extension BroadcastScreenCapturer: BroadcastAudioReceiverDelegate {
+    func broadcastAudioReceiver(
+        _ receiver: BroadcastAudioReceiver,
+        didReceiveAudioFrame frame: AudioFrame
+    ) {
+        onCapture(audioFrame: frame)
     }
 }
 
