@@ -28,7 +28,7 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
     private let broadcastUploadExtension: String
     private let defaultFps: UInt
     private var videoReceiver: BroadcastVideoReceiver
-    private var audioReceiver: BroadcastAudioReceiver
+    private var audioReceiver: BroadcastAudioReceiver?
     private let notificationCenter = BroadcastNotificationCenter.default
     private let userDefaults: UserDefaults?
     private let isCapturing = Synchronized(false)
@@ -48,12 +48,14 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
         - broadcastUploadExtension: Bundle identifier of your broadcast upload extension
         - defaultFps: The default fps to use when screen capture starts automatically
                       (e.g. from the Control Center on iOS)
+        - capturesAudio: Controls whether or not screen audio is captured
         - fileManager: An optional instance of the file manager
      */
     public convenience init(
         appGroup: String,
         broadcastUploadExtension: String,
         defaultFps: UInt = 15,
+        capturesAudio: Bool = false,
         fileManager: FileManager = .default
     ) {
         self.init(
@@ -63,10 +65,12 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
                 filePath: fileManager.broadcastVideoDataPath(appGroup: appGroup),
                 fileManager: fileManager
             ),
-            audioReceiver: BroadcastAudioReceiver(
-                filePath: fileManager.broadcastAudioDataPath(appGroup: appGroup),
-                fileManager: fileManager
-            ),
+            audioReceiver: capturesAudio
+                ? BroadcastAudioReceiver(
+                    filePath: fileManager.broadcastAudioDataPath(appGroup: appGroup),
+                    fileManager: fileManager
+                )
+                : nil,
             userDefaults: UserDefaults(suiteName: appGroup)
         )
     }
@@ -75,7 +79,7 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
         broadcastUploadExtension: String,
         defaultFps: UInt,
         videoReceiver: BroadcastVideoReceiver,
-        audioReceiver: BroadcastAudioReceiver,
+        audioReceiver: BroadcastAudioReceiver?,
         keepAliveInterval: TimeInterval = BroadcastScreenCapturer.keepAliveInterval,
         userDefaults: UserDefaults?
     ) {
@@ -87,7 +91,7 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
 
         userDefaults?.broadcastFps = defaultFps
         videoReceiver.delegate = self
-        audioReceiver.delegate = self
+        audioReceiver?.delegate = self
         addNotificationObservers()
         startKeepAliveTimer(withInterval: keepAliveInterval)
     }
@@ -179,7 +183,7 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
     private func startReceiver() {
         do {
             try videoReceiver.start(withFps: BroadcastFps(value: userDefaults?.broadcastFps))
-            try audioReceiver.start()
+            try audioReceiver?.start()
             isCapturing.setValue(true)
             notificationCenter.post(.receiverStarted)
             delegate?.screenMediaCapturerDidStart(self)
@@ -192,7 +196,7 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
 
     private func stopReceiver() throws {
         var resultError: Error?
-        for stop in [videoReceiver.stop, audioReceiver.stop] {
+        for stop in [videoReceiver.stop, audioReceiver?.stop].compactMap({ $0 }) {
             do {
                 _ = try stop()
             } catch {

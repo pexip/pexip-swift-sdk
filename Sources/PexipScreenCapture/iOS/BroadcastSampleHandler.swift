@@ -37,7 +37,7 @@ public final class BroadcastSampleHandler {
 
     private let userDefaults: UserDefaults?
     private let videoSender: BroadcastVideoSender
-    private let audioSender: BroadcastAudioSender
+    private let audioSender: BroadcastAudioSender?
     private let notificationCenter = BroadcastNotificationCenter.default
     private var cancellables = Set<AnyCancellable>()
     private let keepAliveInterval: TimeInterval
@@ -54,10 +54,12 @@ public final class BroadcastSampleHandler {
      Creates a new instance of ``BroadcastSampleHandler``
      - Parameters:
         - appGroup: The app group identifier.
+        - capturesAudio: Controls whether or not screen audio is captured.
         - fileManager: An optional instance of the file manager.
      */
     public convenience init(
         appGroup: String,
+        capturesAudio: Bool = false,
         fileManager: FileManager = .default
     ) {
         let userDefaults = UserDefaults(suiteName: appGroup)
@@ -66,17 +68,19 @@ public final class BroadcastSampleHandler {
                 filePath: fileManager.broadcastVideoDataPath(appGroup: appGroup),
                 fileManager: fileManager
             ),
-            audioSender: BroadcastAudioSender(
-                filePath: fileManager.broadcastAudioDataPath(appGroup: appGroup),
-                fileManager: fileManager
-            ),
+            audioSender: capturesAudio
+                ? BroadcastAudioSender(
+                    filePath: fileManager.broadcastAudioDataPath(appGroup: appGroup),
+                    fileManager: fileManager
+                )
+                : nil,
             userDefaults: userDefaults
         )
     }
 
     init(
         videoSender: BroadcastVideoSender,
-        audioSender: BroadcastAudioSender,
+        audioSender: BroadcastAudioSender?,
         userDefaults: UserDefaults?,
         keepAliveInterval: TimeInterval = BroadcastScreenCapturer.keepAliveInterval
     ) {
@@ -150,7 +154,7 @@ public final class BroadcastSampleHandler {
 
                 return videoSender.send(sampleBuffer)
             case .audioApp:
-                return audioSender.send(sampleBuffer)
+                return audioSender?.send(sampleBuffer) == true
             case .audioMic:
                 return false
             @unknown default:
@@ -167,7 +171,7 @@ public final class BroadcastSampleHandler {
             do {
                 let fps = BroadcastFps(value: self?.userDefaults?.broadcastFps)
                 try self?.videoSender.start(withFps: fps)
-                try self?.audioSender.start()
+                try self?.audioSender?.start()
             } catch {
                 self?.onError(.noConnection)
             }
@@ -189,7 +193,7 @@ public final class BroadcastSampleHandler {
     private func clean() {
         stopKeepAliveTimer()
         videoSender.stop()
-        audioSender.stop()
+        audioSender?.stop()
         notificationCenter.removeObserver(self)
     }
 
