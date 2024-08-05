@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,11 @@ final class FileManagerBroadcastTests: XCTestCase {
     func testBroadcastVideoDataPath() {
         let path = fileManager.broadcastVideoDataPath(appGroup: "Test")
         XCTAssertTrue(path.hasSuffix("pex_broadcast_video"))
+    }
+
+    func testBroadcastAudioDataPath() {
+        let path = fileManager.broadcastAudioDataPath(appGroup: "Test")
+        XCTAssertTrue(path.hasSuffix("pex_broadcast_audio"))
     }
 
     func testBroadcastVideoDataPathWithNoContainerURL() {

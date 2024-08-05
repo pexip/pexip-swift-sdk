@@ -191,10 +191,19 @@ public final class BroadcastScreenCapturer: ScreenMediaCapturer {
     }
 
     private func stopReceiver() throws {
-        try videoReceiver.stop()
-        try audioReceiver.stop()
+        var resultError: Error?
+        for stop in [videoReceiver.stop, audioReceiver.stop] {
+            do {
+                _ = try stop()
+            } catch {
+                resultError = error
+            }
+        }
         userDefaults?.broadcastFps = defaultFps
         isCapturing.setValue(false)
+        if let error = resultError {
+            throw error
+        }
     }
 
     /// Write current date to shared UserDefaults to indicate that

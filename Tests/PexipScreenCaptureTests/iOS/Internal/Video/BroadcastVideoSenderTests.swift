@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright -2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ final class BroadcastVideoSenderTests: XCTestCase {
     func testSend() throws {
         let expectation = self.expectation(description: "Receive video frame")
         let receiver = BroadcastVideoReceiver(filePath: filePath)
-        let delegate = BroadcastReceiverDelegateMock()
+        let delegate = BroadcastVideoReceiverDelegateMock()
         let width = 1920
         let height = 1080
         let sampleBuffer = CMSampleBuffer.stub(width: width, height: height)
@@ -90,7 +90,7 @@ final class BroadcastVideoSenderTests: XCTestCase {
         XCTAssertFalse(sender.send(sampleBuffer))
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-            XCTAssertTrue(self?.sender.send(sampleBuffer) == true)
+            XCTAssertEqual(self?.sender.send(sampleBuffer), true)
         }
 
         wait(for: [expectation], timeout: 1)

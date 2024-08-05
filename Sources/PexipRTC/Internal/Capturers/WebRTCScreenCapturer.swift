@@ -130,8 +130,8 @@ final class WebRTCScreenCapturer: RTCVideoCapturer, ScreenMediaCapturerDelegate 
     }
 
     func screenMediaCapturer(
-        _ capturer: PexipScreenCapture.ScreenMediaCapturer,
-        didCaptureAudioBuffer frame: AVAudioPCMBuffer
+        _ capturer: ScreenMediaCapturer,
+        didCaptureAudioFrame frame: AudioFrame
     ) {}
 
     #if os(iOS)

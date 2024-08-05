@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,16 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// swiftlint:disable type_body_length file_length
+
 #if os(iOS)
 
 import XCTest
 import CoreMedia
 @testable import PexipScreenCapture
 
-// swiftlint:disable type_body_length
 final class BroadcastScreenCapturerTests: XCTestCase {
     private enum BroadcastState {
-        case started, newFrame, stopped
+        case started, newVideoFrame, newAudioFrame, stopped
     }
 
     private let appGroup = "test"
@@ -32,10 +33,14 @@ final class BroadcastScreenCapturerTests: XCTestCase {
     private var delegate: ScreenMediaCapturerDelegateMock!
     private var capturer: BroadcastScreenCapturer!
     private var videoReceiver: BroadcastVideoReceiver!
+    private var audioReceiver: BroadcastAudioReceiver!
     private let defaultFps: UInt = 15
     private let outputDimensions = CMVideoDimensions(width: 1280, height: 720)
-    private var filePath: String {
+    private var videoFilePath: String {
         fileManager.broadcastVideoDataPath(appGroup: appGroup)
+    }
+    private var audioFilePath: String {
+        fileManager.broadcastAudioDataPath(appGroup: appGroup)
     }
 
     // MARK: - Setup
@@ -47,13 +52,18 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         fileManager = BroadcastFileManagerMock()
         delegate = ScreenMediaCapturerDelegateMock()
         videoReceiver = BroadcastVideoReceiver(
-            filePath: filePath,
+            filePath: videoFilePath,
+            fileManager: fileManager
+        )
+        audioReceiver = BroadcastAudioReceiver(
+            filePath: audioFilePath,
             fileManager: fileManager
         )
         capturer = BroadcastScreenCapturer(
             broadcastUploadExtension: "test",
             defaultFps: defaultFps,
             videoReceiver: videoReceiver,
+            audioReceiver: audioReceiver,
             keepAliveInterval: 0.1,
             userDefaults: userDefaults
         )
@@ -65,7 +75,8 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         userDefaults.removePersistentDomain(forName: appGroup)
         capturer = nil
         fileManager.fileError = nil
-        try? fileManager.removeItem(atPath: filePath)
+        try? fileManager.removeItem(atPath: videoFilePath)
+        try? fileManager.removeItem(atPath: audioFilePath)
         super.tearDown()
     }
 
@@ -98,6 +109,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         notificationCenter.addObserver(self, for: .senderStarted) { [weak self] in
             guard let self else { return }
             XCTAssertTrue(self.videoReceiver.isRunning)
+            XCTAssertTrue(self.audioReceiver.isRunning)
             senderExpectation.fulfill()
             self.notificationCenter.removeObserver(self, for: .senderStarted)
             // Post `senderStarted` again to check that
@@ -129,6 +141,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         delegate.onStop = { [weak self] error in
             guard let self else { return }
             XCTAssertFalse(self.videoReceiver.isRunning)
+            XCTAssertFalse(self.audioReceiver.isRunning)
             XCTAssertEqual(self.userDefaults?.broadcastFps, self.defaultFps)
             XCTAssertEqual(error as? BroadcastError, .noConnection)
             delegateExpectation.fulfill()
@@ -150,6 +163,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         delegate.onStop = { [weak self] error in
             guard let self else { return }
             XCTAssertFalse(self.videoReceiver.isRunning)
+            XCTAssertFalse(self.audioReceiver.isRunning)
             XCTAssertEqual(self.userDefaults?.broadcastFps, self.defaultFps)
             XCTAssertNil(error)
             delegateExpectation.fulfill()
@@ -171,6 +185,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         delegate.onStop = { [weak self] error in
             guard let self else { return }
             XCTAssertFalse(self.videoReceiver.isRunning)
+            XCTAssertFalse(self.audioReceiver.isRunning)
             XCTAssertEqual(self.userDefaults?.broadcastFps, self.defaultFps)
             XCTAssertEqual(error as? BroadcastError, .noConnection)
             delegateExpectation.fulfill()
@@ -178,7 +193,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
 
         notificationCenter.post(.senderStarted)
 
-        wait(for: [delegateExpectation], timeout: 0.1)
+        wait(for: [delegateExpectation], timeout: 10.1)
     }
 
     func testSenderFinishedWhenNotCapturing() {
@@ -225,6 +240,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 0.1)
 
         XCTAssertFalse(videoReceiver.isRunning)
+        XCTAssertFalse(audioReceiver.isRunning)
         XCTAssertEqual(userDefaults?.broadcastFps, self.defaultFps)
         // Check that keep alive timer wasn't cancelled
         XCTAssertNotNil(userDefaults?.broadcastKeepAliveDate)
@@ -242,6 +258,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 1)
 
         XCTAssertFalse(videoReceiver.isRunning)
+        XCTAssertFalse(audioReceiver.isRunning)
         XCTAssertEqual(userDefaults?.broadcastFps, defaultFps)
         // Check that keep alive timer wasn't cancelled
         XCTAssertNotNil(userDefaults?.broadcastKeepAliveDate)
@@ -259,6 +276,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 1)
 
         XCTAssertFalse(videoReceiver.isRunning)
+        XCTAssertFalse(audioReceiver.isRunning)
         XCTAssertEqual(userDefaults?.broadcastFps, defaultFps)
         // Check that keep alive timer wasn't cancelled
         XCTAssertNotNil(userDefaults?.broadcastKeepAliveDate)
@@ -279,22 +297,33 @@ final class BroadcastScreenCapturerTests: XCTestCase {
     func testBroadcast() throws {
         let startExpectation = self.expectation(description: "Broadcast started")
         let videoFrameExpectation = self.expectation(description: "Video frame received")
+        let audioFrameExpectation = self.expectation(description: "Audio frame received")
         let stopExpectation = self.expectation(description: "Broadcast finished")
 
         let width = 1920
         let height = 1080
-        let sampleBuffer = CMSampleBuffer.stub(width: width, height: height, orientation: .left)
-        let pixelBuffer = try XCTUnwrap(sampleBuffer.imageBuffer)
-        let videoSender = BroadcastVideoSender(filePath: filePath, fileManager: fileManager)
-        let handler = BroadcastSampleHandler(videoSender: videoSender, userDefaults: userDefaults)
+        let videoBuffer = CMSampleBuffer.stub(width: width, height: height, orientation: .left)
+        let audioBuffer = CMSampleBuffer.audioStub()
+        let pixelBuffer = try XCTUnwrap(videoBuffer.imageBuffer)
+        let videoSender = BroadcastVideoSender(filePath: videoFilePath, fileManager: fileManager)
+        let audioSender = BroadcastAudioSender(filePath: audioFilePath, fileManager: fileManager)
+        let handler = BroadcastSampleHandler(
+            videoSender: videoSender,
+            audioSender: audioSender,
+            userDefaults: userDefaults
+        )
         var states = [BroadcastState]()
         var videoFrameReceived = false
+        var audioFrameReceived = false
 
         delegate.onStart = {
             states.append(.started)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                XCTAssertTrue(handler.processSampleBuffer(sampleBuffer, with: .video))
-                startExpectation.fulfill()
+                XCTAssertTrue(handler.processSampleBuffer(videoBuffer, with: .video))
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    XCTAssertTrue(handler.processSampleBuffer(audioBuffer, with: .audioApp))
+                    startExpectation.fulfill()
+                }
             }
         }
 
@@ -304,7 +333,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
             }
 
             videoFrameReceived = true
-            states.append(.newFrame)
+            states.append(.newVideoFrame)
 
             XCTAssertEqual(videoFrame.orientation, .left)
             XCTAssertEqual(videoFrame.width, UInt32(width))
@@ -333,8 +362,17 @@ final class BroadcastScreenCapturerTests: XCTestCase {
                     CVPixelBufferGetHeightOfPlane(pixelBuffer, plane)
                 )
             }
-            handler.broadcastFinished()
             videoFrameExpectation.fulfill()
+        }
+
+        delegate.onAudioFrame = { _ in
+            guard !audioFrameReceived else {
+                return
+            }
+
+            audioFrameReceived = true
+            states.append(.newAudioFrame)
+            audioFrameExpectation.fulfill()
         }
 
         delegate.onStop = { error in
@@ -345,9 +383,12 @@ final class BroadcastScreenCapturerTests: XCTestCase {
 
         userDefaults.broadcastFps = 30
         handler.broadcastStarted()
-        wait(for: [startExpectation, videoFrameExpectation, stopExpectation], timeout: 0.5)
+        wait(for: [startExpectation, videoFrameExpectation, audioFrameExpectation], timeout: 0.5)
 
-        XCTAssertEqual(states, [.started, .newFrame, .stopped])
+        handler.broadcastFinished()
+        wait(for: [stopExpectation], timeout: 0.3)
+
+        XCTAssertEqual(states, [.started, .newVideoFrame, .newAudioFrame, .stopped])
     }
     // swiftlint:enable function_body_length
 
@@ -356,6 +397,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         capturer = nil
 
         XCTAssertFalse(videoReceiver.isRunning)
+        XCTAssertFalse(audioReceiver.isRunning)
         XCTAssertNil(userDefaults?.broadcastFps)
         XCTAssertNil(userDefaults?.broadcastKeepAliveDate)
     }
@@ -371,6 +413,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 1)
     }
 }
-// swiftlint:enable type_body_length
 
 #endif
+
+// swiftlint:enable type_body_length file_length

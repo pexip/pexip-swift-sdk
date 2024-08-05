@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,21 +13,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// swiftlint:disable type_body_length file_length
+
 #if os(iOS)
 
 import XCTest
 import CoreMedia
 @testable import PexipScreenCapture
 
-// swiftlint:disable type_body_length
 final class BroadcastSampleHandlerTests: XCTestCase {
     private let appGroup = "test"
-    private let filePath = NSTemporaryDirectory().appending("/test")
+    private let videoFilePath = NSTemporaryDirectory().appending("video")
+    private let audioFilePath = NSTemporaryDirectory().appending("audio")
     private let fileManager = BroadcastFileManagerMock()
     private let notificationCenter = BroadcastNotificationCenter.default
     private var userDefaults: UserDefaults!
     private var handler: BroadcastSampleHandler!
     private var videoSender: BroadcastVideoSender!
+    private var audioSender: BroadcastAudioSender!
+    private var audioReceiver: BroadcastAudioReceiver!
     private var delegate: BroadcastSampleHandlerDelegateMock!
 
     // MARK: - Setup
@@ -39,17 +43,23 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         userDefaults.broadcastFps = 15
         userDefaults.broadcastKeepAliveDate = Date()
 
-        videoSender = BroadcastVideoSender(filePath: filePath)
+        videoSender = BroadcastVideoSender(filePath: videoFilePath)
+        audioSender = BroadcastAudioSender(filePath: audioFilePath)
+        audioReceiver = BroadcastAudioReceiver(
+            filePath: audioFilePath,
+            fileManager: fileManager
+        )
         delegate = BroadcastSampleHandlerDelegateMock()
         handler = BroadcastSampleHandler(
             videoSender: videoSender,
+            audioSender: audioSender,
             userDefaults: userDefaults,
             keepAliveInterval: 20
         )
         handler.delegate = delegate
 
         _ = try fileManager.createMappedFile(
-            atPath: filePath,
+            atPath: videoFilePath,
             size: BroadcastVideoReceiver.maxFileSize
         )
     }
@@ -58,7 +68,8 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         notificationCenter.removeObserver(self)
         handler = nil
         userDefaults.removePersistentDomain(forName: appGroup)
-        try? fileManager.removeItem(atPath: filePath)
+        try? fileManager.removeItem(atPath: videoFilePath)
+        try? fileManager.removeItem(atPath: audioFilePath)
         try super.tearDownWithError()
     }
 
@@ -68,7 +79,7 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         let expectation = self.expectation(description: "Sender started")
 
         notificationCenter.addObserver(self, for: .senderStarted, using: { [weak self] in
-            XCTAssertTrue(self?.handler.isConnected == false)
+            XCTAssertEqual(self?.handler.isConnected, false)
             expectation.fulfill()
         })
         handler.broadcastStarted()
@@ -146,6 +157,7 @@ final class BroadcastSampleHandlerTests: XCTestCase {
 
         handler = BroadcastSampleHandler(
             videoSender: videoSender,
+            audioSender: audioSender,
             userDefaults: userDefaults,
             keepAliveInterval: 0.1
         )
@@ -197,9 +209,11 @@ final class BroadcastSampleHandlerTests: XCTestCase {
             guard let self else { return }
             XCTAssertTrue(self.handler.isConnected)
             XCTAssertTrue(self.videoSender.isRunning)
+            XCTAssertTrue(self.audioSender.isRunning)
             expectation.fulfill()
         })
 
+        try audioReceiver.start()
         notificationCenter.post(.receiverStarted)
 
         wait(for: [expectation], timeout: 0.1)
@@ -211,6 +225,7 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         videoSender = BroadcastVideoSender(filePath: "")
         handler = BroadcastSampleHandler(
             videoSender: videoSender,
+            audioSender: audioSender,
             userDefaults: userDefaults,
             keepAliveInterval: 20
         )
@@ -233,6 +248,7 @@ final class BroadcastSampleHandlerTests: XCTestCase {
             guard let self else { return }
             XCTAssertFalse(self.handler.isConnected)
             XCTAssertFalse(self.videoSender.isRunning)
+            XCTAssertFalse(self.audioSender.isRunning)
             XCTAssertEqual(error as? BroadcastError, .broadcastFinished)
             expectation.fulfill()
         }
@@ -248,6 +264,7 @@ final class BroadcastSampleHandlerTests: XCTestCase {
             guard let self else { return }
             XCTAssertFalse(self.handler.isConnected)
             XCTAssertFalse(self.videoSender.isRunning)
+            XCTAssertFalse(self.audioSender.isRunning)
             XCTAssertEqual(error as? BroadcastError, .callEnded)
             expectation.fulfill()
         }
@@ -263,6 +280,7 @@ final class BroadcastSampleHandlerTests: XCTestCase {
             guard let self else { return }
             XCTAssertFalse(self.handler.isConnected)
             XCTAssertFalse(self.videoSender.isRunning)
+            XCTAssertFalse(self.audioSender.isRunning)
             XCTAssertEqual(error as? BroadcastError, .presentationStolen)
             expectation.fulfill()
         }
@@ -271,10 +289,10 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         wait(for: [expectation], timeout: 0.1)
     }
 
-    func testProcessSampleBuffer() throws {
+    func testProcessVideoSampleBuffer() throws {
         let expectation = self.expectation(description: "Video frame received")
-        let receiverDelegate = BroadcastReceiverDelegateMock()
-        let receiver = BroadcastVideoReceiver(filePath: filePath, fileManager: fileManager)
+        let receiverDelegate = BroadcastVideoReceiverDelegateMock()
+        let receiver = BroadcastVideoReceiver(filePath: videoFilePath, fileManager: fileManager)
         let width = 1920
         let height = 1080
         let sampleBuffer = CMSampleBuffer.stub(width: width, height: height)
@@ -301,11 +319,36 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         wait(for: [expectation], timeout: 0.3)
     }
 
+    func testProcessAudioSampleBuffer() throws {
+        let expectation = self.expectation(description: "Audio frame received")
+        let receiverDelegate = BroadcastAudioReceiverDelegateMock()
+        let sampleBuffer = CMSampleBuffer.audioStub()
+
+        handler.broadcastStarted()
+
+        notificationCenter.addObserver(self, for: .receiverStarted, using: {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+                guard let self else { return }
+                XCTAssertTrue(self.handler.processSampleBuffer(sampleBuffer, with: .audioApp))
+            }
+        })
+
+        receiverDelegate.onReceive = { _ in
+            expectation.fulfill()
+        }
+
+        audioReceiver.delegate = receiverDelegate
+        try audioReceiver.start()
+        notificationCenter.post(.receiverStarted)
+
+        wait(for: [expectation], timeout: 0.3)
+    }
+
     func testProcessSampleBufferWhenClientNotConnected() throws {
         XCTAssertFalse(handler.processSampleBuffer(.stub(), with: .video))
     }
 
-    func testProcessSampleBufferWhenNotValid() throws {
+    func testProcessVideoSampleBufferWhenNotValid() throws {
         let expectation = self.expectation(description: "Receiver started")
 
         handler.broadcastStarted()
@@ -324,7 +367,7 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         wait(for: [expectation], timeout: 0.1)
     }
 
-    func testProcessSampleBufferWhenNotVideo() throws {
+    func testProcessSampleBufferWithOtherTypes() throws {
         let expectation = self.expectation(description: "Receiver started")
 
         handler.broadcastStarted()
@@ -332,7 +375,6 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         notificationCenter.addObserver(self, for: .receiverStarted, using: { [weak self] in
             guard let self else { return }
 
-            XCTAssertFalse(self.handler.processSampleBuffer(.stub(), with: .audioApp))
             XCTAssertFalse(self.handler.processSampleBuffer(.stub(), with: .audioMic))
             XCTAssertFalse(self.handler.processSampleBuffer(.stub(), with: .init(rawValue: 1001)!))
             expectation.fulfill()
@@ -343,7 +385,7 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         wait(for: [expectation], timeout: 0.1)
     }
 
-    func testDeinit() {
+    func testDeinit() throws {
         let expectation = self.expectation(description: "Receiver started")
 
         handler.broadcastStarted()
@@ -351,14 +393,17 @@ final class BroadcastSampleHandlerTests: XCTestCase {
             guard let self else { return }
             XCTAssertTrue(self.handler.isConnected)
             XCTAssertTrue(self.videoSender.isRunning)
+            XCTAssertTrue(self.audioSender.isRunning)
             expectation.fulfill()
         })
 
+        try audioReceiver.start()
         notificationCenter.post(.receiverStarted)
 
         wait(for: [expectation], timeout: 0.1)
         handler = nil
         XCTAssertFalse(videoSender.isRunning)
+        XCTAssertFalse(audioSender.isRunning)
     }
 
     // MARK: - Private
@@ -367,11 +412,11 @@ final class BroadcastSampleHandlerTests: XCTestCase {
         notificationCenter.addObserver(self, for: .receiverStarted, using: { [weak self] in
             self?.notificationCenter.post(notification)
         })
+        _ = try? audioReceiver.start()
         handler.broadcastStarted()
         notificationCenter.post(.receiverStarted)
     }
 }
-// swiftlint:enable type_body_length
 
 // MARK: - Mocks
 
@@ -387,3 +432,5 @@ private final class BroadcastSampleHandlerDelegateMock: BroadcastSampleHandlerDe
 }
 
 #endif
+
+// swiftlint:enable type_body_length file_length

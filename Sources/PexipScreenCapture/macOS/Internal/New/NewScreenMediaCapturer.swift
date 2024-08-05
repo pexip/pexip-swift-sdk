@@ -59,6 +59,9 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>: NSObjec
 
     deinit {
         try? stream?.removeStreamOutput(self, type: .screen)
+        if #available(macOS 13.0, *) {
+            try? stream?.removeStreamOutput(self, type: .audio)
+        }
         stream?.stopCapture(completionHandler: { _ in })
     }
 
