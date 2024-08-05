@@ -18,15 +18,6 @@ import AVFoundation
 @testable import PexipScreenCapture
 
 final class AudioFrameTests: XCTestCase {
-    private let width = 1920
-    private let height = 1080
-    private let displayTimeNs: UInt64 = 10_000
-    private let pixelFormat = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
-    private var pixelBuffer: CVPixelBuffer!
-    private var videoFrame: VideoFrame!
-
-    // MARK: - Setup
-
     func testIsSignedInteger() {
         do {
             let frame = AudioFrame(streamDescription: .init(), data: Data())

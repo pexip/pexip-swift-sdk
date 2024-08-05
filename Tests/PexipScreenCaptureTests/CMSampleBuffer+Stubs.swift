@@ -17,7 +17,7 @@ import CoreMedia
 import ReplayKit
 
 @available(macOS 11.0, *)
-public extension CMSampleBuffer {
+extension CMSampleBuffer {
     static func stub(
         width: Int = 1920,
         height: Int = 1080,

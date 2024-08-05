@@ -60,7 +60,9 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>: NSObjec
     deinit {
         try? stream?.removeStreamOutput(self, type: .screen)
         if #available(macOS 13.0, *) {
-            try? stream?.removeStreamOutput(self, type: .audio)
+            if capturesAudio {
+                try? stream?.removeStreamOutput(self, type: .audio)
+            }
         }
         stream?.stopCapture(completionHandler: { _ in })
     }
@@ -111,7 +113,9 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>: NSObjec
         isCapturing = false
         try stream?.removeStreamOutput(self, type: .screen)
         if #available(macOS 13.0, *) {
-            try stream?.removeStreamOutput(self, type: .audio)
+            if capturesAudio {
+                try stream?.removeStreamOutput(self, type: .audio)
+            }
         }
         try await stream?.stopCapture()
         stream = nil
@@ -128,7 +132,9 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>: NSObjec
         case .screen:
             handleVideoSampleBuffer(sampleBuffer)
         case .audio:
-            handleAudioSampleBuffer(sampleBuffer)
+            if capturesAudio {
+                handleAudioSampleBuffer(sampleBuffer)
+            }
         @unknown default:
             break
         }

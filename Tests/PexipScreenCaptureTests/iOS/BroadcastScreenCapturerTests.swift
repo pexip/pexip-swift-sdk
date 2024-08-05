@@ -193,7 +193,7 @@ final class BroadcastScreenCapturerTests: XCTestCase {
 
         notificationCenter.post(.senderStarted)
 
-        wait(for: [delegateExpectation], timeout: 10.1)
+        wait(for: [delegateExpectation], timeout: 0.1)
     }
 
     func testSenderFinishedWhenNotCapturing() {
