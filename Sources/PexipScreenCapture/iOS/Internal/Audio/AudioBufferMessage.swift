@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,16 +15,28 @@
 
 #if os(iOS)
 
-struct BroadcastFps {
-    static let minValue: UInt = 15
-    static let maxValue: UInt = 30
+import Foundation
 
-    let value: UInt
+enum AudioBufferMessage {
+    case header(AudioBufferHeader)
+    case data(Data)
 
-    init(value: UInt?) {
-        // The broadcast extension has hard memory limit of 50MB.
-        // Use lower frame rate to reduce the memory load.
-        self.value = min(value ?? Self.minValue, Self.maxValue)
+    var size: Int {
+        switch self {
+        case .header:
+            return AudioBufferHeader.size
+        case .data(let data):
+            return data.count
+        }
+    }
+
+    func encoded() -> Data? {
+        switch self {
+        case .header(let header):
+            return header.encoded()
+        case .data(let data):
+            return data
+        }
     }
 }
 

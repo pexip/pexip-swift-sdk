@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 #if os(macOS)
 
 import XCTest
+import CoreMedia
 @testable import PexipScreenCapture
 
 #if canImport(ScreenCaptureKit)
@@ -24,7 +25,7 @@ import ScreenCaptureKit
 
 // swiftlint:disable file_length
 // swiftlint:disable type_body_length
-@available(macOS 12.3, *)
+@available(macOS 13.0, *)
 final class NewScreenMediaCapturerTests: XCTestCase {
     private var capturer: NewScreenMediaCapturer<ScreenCaptureStreamFactoryMock>!
     private var display: LegacyDisplay!
@@ -46,6 +47,7 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         factory = ScreenCaptureStreamFactoryMock()
         capturer = NewScreenMediaCapturer(
             source: mediaSource,
+            capturesAudio: true,
             streamFactory: factory
         )
         capturer.delegate = delegate
@@ -61,6 +63,7 @@ final class NewScreenMediaCapturerTests: XCTestCase {
     func testInitWithDisplayMediaSource() {
         capturer = NewScreenMediaCapturer(
             source: .display(display),
+            capturesAudio: true,
             streamFactory: factory
         )
 
@@ -76,8 +79,11 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         let window = try XCTUnwrap(window)
         capturer = NewScreenMediaCapturer(
             source: .window(window),
+            capturesAudio: false,
             streamFactory: factory
         )
+
+        XCTAssertFalse(capturer.capturesAudio)
 
         switch capturer.source {
         case .display:
@@ -102,8 +108,10 @@ final class NewScreenMediaCapturerTests: XCTestCase {
                 stream.actions,
                 [
                     .addStreamOutput(.screen),
+                    .addStreamOutput(.audio),
                     .startCapture,
                     .removeStreamOutput(.screen),
+                    .removeStreamOutput(.audio),
                     .stopCapture
                 ]
             )
@@ -124,6 +132,7 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         )
         let stream = try XCTUnwrap(factory.stream)
 
+        XCTAssertTrue(stream.configuration.capturesAudio)
         XCTAssertEqual(stream.configuration.backgroundColor, .black)
         XCTAssertEqual(
             stream.configuration.minimumFrameInterval,
@@ -137,17 +146,14 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         )
 
         XCTAssertNil(stream.delegate)
-        XCTAssertTrue(stream.streamOutput === capturer)
-        XCTAssertEqual(
-            stream.sampleHandlerQueue?.label,
-            "com.pexip.PexipScreenCapture.NewScreenMediaCapturer"
-        )
-        XCTAssertEqual(stream.sampleHandlerQueue?.qos, .userInteractive)
+        XCTAssertTrue(stream.videoStreamOutput === capturer)
+        XCTAssertTrue(stream.audioStreamOutput === capturer)
 
         XCTAssertEqual(
             stream.actions,
             [
                 .addStreamOutput(.screen),
+                .addStreamOutput(.audio),
                 .startCapture
             ]
         )
@@ -160,6 +166,7 @@ final class NewScreenMediaCapturerTests: XCTestCase {
 
         capturer = NewScreenMediaCapturer(
             source: .window(window),
+            capturesAudio: false,
             streamFactory: factory
         )
 
@@ -169,6 +176,8 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         )
         let stream = try XCTUnwrap(factory.stream)
 
+        XCTAssertFalse(capturer.capturesAudio)
+        XCTAssertFalse(stream.configuration.capturesAudio)
         XCTAssertEqual(
             stream.configuration.minimumFrameInterval,
             CMTime(fps: fps)
@@ -177,12 +186,8 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         XCTAssertEqual(stream.configuration.height, Int(outputDimensions.height))
 
         XCTAssertNil(stream.delegate)
-        XCTAssertTrue(stream.streamOutput === capturer)
-        XCTAssertEqual(
-            stream.sampleHandlerQueue?.label,
-            "com.pexip.PexipScreenCapture.NewScreenMediaCapturer"
-        )
-        XCTAssertEqual(stream.sampleHandlerQueue?.qos, .userInteractive)
+        XCTAssertTrue(stream.videoStreamOutput === capturer)
+        XCTAssertNil(stream.audioStreamOutput)
 
         XCTAssertEqual(
             stream.actions,
@@ -212,15 +217,17 @@ final class NewScreenMediaCapturerTests: XCTestCase {
             stream.actions,
             [
                 .addStreamOutput(.screen),
+                .addStreamOutput(.audio),
                 .startCapture,
                 .removeStreamOutput(.screen),
+                .removeStreamOutput(.audio),
                 .stopCapture
             ]
         )
         XCTAssertFalse(capturer.isCapturing)
     }
 
-    func testSampleBufferWithoutAttachments() async throws {
+    func testVideoSampleBufferWithoutAttachments() async throws {
         ShareableContentMock.displays = [display]
 
         try await capturer.startCapture(
@@ -242,7 +249,7 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         XCTAssertNil(delegate.status)
     }
 
-    func testSampleBufferWithoutStatus() async throws {
+    func testVideoSampleBufferWithoutStatus() async throws {
         ShareableContentMock.displays = [display]
 
         try await capturer.startCapture(
@@ -265,7 +272,7 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         XCTAssertNil(delegate.status)
     }
 
-    func testSampleBufferWithoutDisplayTime() async throws {
+    func testVideoSampleBufferWithoutDisplayTime() async throws {
         ShareableContentMock.displays = [display]
 
         try await capturer.startCapture(
@@ -287,7 +294,7 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         XCTAssertNil(delegate.status)
     }
 
-    func testSampleBufferWithoutContentRect() async throws {
+    func testVideoSampleBufferWithoutContentRect() async throws {
         ShareableContentMock.displays = [display]
 
         try await capturer.startCapture(
@@ -309,7 +316,7 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         XCTAssertNil(delegate.status)
     }
 
-    func testSampleBufferWithoutScaleFactor() async throws {
+    func testVideoSampleBufferWithoutScaleFactor() async throws {
         ShareableContentMock.displays = [display]
 
         try await capturer.startCapture(
@@ -331,7 +338,7 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         XCTAssertNil(delegate.status)
     }
 
-    func testSampleBufferWithStatusStopped() async throws {
+    func testVideoSampleBufferWithStatusStopped() async throws {
         ShareableContentMock.displays = [display]
 
         try await capturer.startCapture(
@@ -360,7 +367,7 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         }
     }
 
-    func testSampleBufferWithStatusComplete() async throws {
+    func testVideoSampleBufferWithStatusComplete() async throws {
         ShareableContentMock.displays = [display]
 
         try await capturer.startCapture(
@@ -399,7 +406,7 @@ final class NewScreenMediaCapturerTests: XCTestCase {
         }
     }
 
-    func testSampleBufferWithOtherStatuses() async throws {
+    func testVideoSampleBufferWithOtherStatuses() async throws {
         ShareableContentMock.displays = [display]
 
         try await capturer.startCapture(
@@ -426,6 +433,23 @@ final class NewScreenMediaCapturerTests: XCTestCase {
             XCTAssertTrue(capturer.isCapturing)
             XCTAssertNil(delegate.status)
         }
+    }
+
+    func testAudioSampleBuffer() async throws {
+        ShareableContentMock.displays = [display]
+
+        try await capturer.startCapture(
+            atFps: fps,
+            outputDimensions: outputDimensions
+        )
+
+        let stream = try XCTUnwrap(factory.stream)
+        let buffer = CMSampleBuffer.audioStub()
+
+        capturer.stream(stream, didOutputSampleBuffer: buffer, of: .audio)
+
+        XCTAssertTrue(capturer.isCapturing)
+        XCTAssertEqual(delegate?.lastAudioFrame?.streamDescription.mSampleRate, 44100)
     }
 }
 
@@ -454,7 +478,7 @@ final class ScreenCaptureStreamFactoryMock: ScreenCaptureStreamFactory {
     }
 }
 
-@available(macOS 12.3, *)
+@available(macOS 13.0, *)
 final class StreamMock: SCStream {
     enum Action: Hashable {
         case startCapture
@@ -469,9 +493,9 @@ final class StreamMock: SCStream {
     let configuration: SCStreamConfiguration
     var onStop: (() -> Void)?
     private(set) var actions = [Action]()
-    private(set) weak var streamOutput: SCStreamOutput?
+    private(set) weak var videoStreamOutput: SCStreamOutput?
+    private(set) weak var audioStreamOutput: SCStreamOutput?
     private(set) weak var delegate: SCStreamDelegate?
-    private(set) weak var sampleHandlerQueue: DispatchQueue?
 
     override init(
         filter contentFilter: SCContentFilter,
@@ -492,8 +516,15 @@ final class StreamMock: SCStream {
         type: SCStreamOutputType,
         sampleHandlerQueue: DispatchQueue?
     ) throws {
-        streamOutput = output
-        self.sampleHandlerQueue = sampleHandlerQueue
+        switch type {
+        case .screen:
+            videoStreamOutput = output
+        case .audio:
+            audioStreamOutput = output
+        @unknown default:
+            break
+        }
+
         actions.append(.addStreamOutput(type))
     }
 

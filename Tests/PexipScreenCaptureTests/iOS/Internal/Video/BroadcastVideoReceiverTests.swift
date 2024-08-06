@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ final class BroadcastVideoReceiverTests: XCTestCase {
         let maxTimeInterval = CMTime(fps: fps.value)
         var lastTime: CMTime?
         var iteration = 0
-        let delegate = BroadcastReceiverDelegateMock()
+        let delegate = BroadcastVideoReceiverDelegateMock()
 
         delegate.onReceive = { _ in
             let currentTime = CMClockGetTime(CMClockGetHostTimeClock())
@@ -136,7 +136,7 @@ final class BroadcastVideoReceiverTests: XCTestCase {
 
 // MARK: - Mocks
 
-final class BroadcastReceiverDelegateMock: BroadcastVideoReceiverDelegate {
+final class BroadcastVideoReceiverDelegateMock: BroadcastVideoReceiverDelegate {
     var onReceive: ((VideoFrame) -> Void)?
 
     func broadcastVideoReceiver(

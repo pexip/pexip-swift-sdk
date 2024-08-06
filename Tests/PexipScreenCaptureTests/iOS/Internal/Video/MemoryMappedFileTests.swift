@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -61,14 +61,14 @@ final class MemoryMappedFileTests: XCTestCase {
         )
     }
 
-    func testReadWrite() throws {
-        let data = try XCTUnwrap("test".data(using: .utf8))
+    func testReadWrite() {
+        let data = Data("test".utf8)
         XCTAssertTrue(file.write(data))
         XCTAssertEqual(file.read(), data)
     }
 
-    func testReadWriteWithDataSizeBiggerThanFileSize() throws {
-        let data = try XCTUnwrap("test2".data(using: .utf8))
+    func testReadWriteWithDataSizeBiggerThanFileSize() {
+        let data = Data("test2".utf8)
         XCTAssertFalse(file.write(data))
         XCTAssertNotEqual(file.read(), data)
     }

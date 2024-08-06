@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 #if os(macOS)
 
 import AppKit
+import AVFoundation
 import Combine
 import CoreMedia
 
@@ -33,25 +34,36 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>: NSObjec
                                                                          SCStreamOutput,
                                                                          SCStreamDelegate {
     let source: ScreenMediaSource
+    let capturesAudio: Bool
     weak var delegate: ScreenMediaCapturerDelegate?
     private(set) var isCapturing = false
 
     private let streamFactory: Factory
     private var stream: SCStream?
-    private let dispatchQueue = DispatchQueue(
-        label: "com.pexip.PexipScreenCapture.NewScreenMediaCapturer",
+    private let videoSampleBufferQueue = DispatchQueue(
+        label: "com.pexip.PexipScreenCapture.videoSampleBufferQueue",
+        qos: .userInteractive
+    )
+    private let audioSampleBufferQueue = DispatchQueue(
+        label: "com.pexip.PexipScreenCapture.audioSampleBufferQueue",
         qos: .userInteractive
     )
 
     // MARK: - Init
 
-    init(source: ScreenMediaSource, streamFactory: Factory) {
+    init(source: ScreenMediaSource, capturesAudio: Bool, streamFactory: Factory) {
         self.source = source
+        self.capturesAudio = capturesAudio
         self.streamFactory = streamFactory
     }
 
     deinit {
         try? stream?.removeStreamOutput(self, type: .screen)
+        if #available(macOS 13.0, *) {
+            if capturesAudio {
+                try? stream?.removeStreamOutput(self, type: .audio)
+            }
+        }
         stream?.stopCapture(completionHandler: { _ in })
     }
 
@@ -69,6 +81,9 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>: NSObjec
         streamConfig.minimumFrameInterval = CMTime(fps: fps)
         streamConfig.width = Int(outputDimensions.width)
         streamConfig.height = Int(outputDimensions.height)
+        if #available(macOS 13.0, *) {
+            streamConfig.capturesAudio = capturesAudio
+        }
 
         stream = try await streamFactory.createStream(
             mediaSource: source,
@@ -76,7 +91,20 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>: NSObjec
             delegate: nil
         )
 
-        try stream?.addStreamOutput(self, type: .screen, sampleHandlerQueue: dispatchQueue)
+        try stream?.addStreamOutput(
+            self,
+            type: .screen,
+            sampleHandlerQueue: videoSampleBufferQueue
+        )
+        if #available(macOS 13.0, *) {
+            if capturesAudio {
+                try stream?.addStreamOutput(
+                    self,
+                    type: .audio,
+                    sampleHandlerQueue: audioSampleBufferQueue
+                )
+            }
+        }
         try await stream?.startCapture()
         isCapturing = true
     }
@@ -84,6 +112,11 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>: NSObjec
     func stopCapture() async throws {
         isCapturing = false
         try stream?.removeStreamOutput(self, type: .screen)
+        if #available(macOS 13.0, *) {
+            if capturesAudio {
+                try stream?.removeStreamOutput(self, type: .audio)
+            }
+        }
         try await stream?.stopCapture()
         stream = nil
     }
@@ -95,6 +128,19 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>: NSObjec
         didOutputSampleBuffer sampleBuffer: CMSampleBuffer,
         of type: SCStreamOutputType
     ) {
+        switch type {
+        case .screen:
+            handleVideoSampleBuffer(sampleBuffer)
+        case .audio:
+            if capturesAudio {
+                handleAudioSampleBuffer(sampleBuffer)
+            }
+        @unknown default:
+            break
+        }
+    }
+
+    private func handleVideoSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
         guard let attachments = (CMSampleBufferGetSampleAttachmentsArray(
             sampleBuffer,
             createIfNecessary: false
@@ -146,6 +192,29 @@ final class NewScreenMediaCapturer<Factory: ScreenCaptureStreamFactory>: NSObjec
             }
         @unknown default:
             break
+        }
+    }
+
+    private func handleAudioSampleBuffer(_ buffer: CMSampleBuffer) {
+        try? buffer.withAudioBufferList { list, _ in
+            guard
+                let streamDescription = buffer.formatDescription?.audioStreamBasicDescription,
+                let firstBuffer = list.first,
+                let firstBufferPointer = firstBuffer.mData
+            else {
+                return
+            }
+
+            let frame = AudioFrame(
+                streamDescription: streamDescription,
+                data: Data(
+                    bytesNoCopy: firstBufferPointer,
+                    count: Int(firstBuffer.mDataByteSize) * list.count,
+                    deallocator: .none
+                )
+            )
+
+            delegate?.screenMediaCapturer(self, didCaptureAudioFrame: frame)
         }
     }
 }

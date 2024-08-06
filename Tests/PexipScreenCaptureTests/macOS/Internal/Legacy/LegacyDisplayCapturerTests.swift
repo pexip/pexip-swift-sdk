@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -340,9 +340,11 @@ private extension IOSurfaceRef {
 
 final class ScreenMediaCapturerDelegateMock: ScreenMediaCapturerDelegate {
     var onVideoFrame: ((VideoFrame) -> Void)?
+    var onAudioFrame: ((AudioFrame) -> Void)?
     var onStart: (() -> Void)?
     var onStop: ((Error?) -> Void)?
     private(set) var status: VideoFrame.Status?
+    private(set) var lastAudioFrame: AudioFrame?
 
     func screenMediaCapturer(
         _ capturer: ScreenMediaCapturer,
@@ -350,6 +352,14 @@ final class ScreenMediaCapturerDelegateMock: ScreenMediaCapturerDelegate {
     ) {
         status = .complete(frame)
         onVideoFrame?(frame)
+    }
+
+    func screenMediaCapturer(
+        _ capturer: any ScreenMediaCapturer,
+        didCaptureAudioFrame frame: AudioFrame
+    ) {
+        lastAudioFrame = frame
+        onAudioFrame?(frame)
     }
 
     func screenMediaCapturerDidStart(_ capturer: ScreenMediaCapturer) {

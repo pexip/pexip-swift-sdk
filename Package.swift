@@ -2,7 +2,7 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ let package = Package(
         ),
         .testTarget(
             name: "PexipScreenCaptureTests",
-            dependencies: ["PexipScreenCapture", "TestHelpers"]
+            dependencies: ["PexipScreenCapture"]
         ),
 
         // MARK: - TestHelpers
