@@ -59,19 +59,19 @@ PODS:
     - nanopb/encode (= 2.30909.0)
   - nanopb/decode (2.30909.0)
   - nanopb/encode (2.30909.0)
-  - PexipCore (0.9.0)
-  - PexipInfinityClient (0.9.0):
-    - PexipCore (= 0.9.0)
-  - PexipMedia (0.9.0):
-    - PexipCore (= 0.9.0)
-    - PexipScreenCapture (= 0.9.0)
-  - PexipRTC (0.9.0):
-    - PexipCore (= 0.9.0)
-    - PexipMedia (= 0.9.0)
+  - PexipCore (0.10.0)
+  - PexipInfinityClient (0.10.0):
+    - PexipCore (= 0.10.0)
+  - PexipMedia (0.10.0):
+    - PexipCore (= 0.10.0)
+    - PexipScreenCapture (= 0.10.0)
+  - PexipRTC (0.10.0):
+    - PexipCore (= 0.10.0)
+    - PexipMedia (= 0.10.0)
     - WebRTCObjc (= 105.0.0)
-  - PexipScreenCapture (0.9.0)
-  - PexipVideoFilters (0.9.0):
-    - PexipCore (= 0.9.0)
+  - PexipScreenCapture (0.10.0)
+  - PexipVideoFilters (0.10.0):
+    - PexipCore (= 0.10.0)
   - PromisesObjC (2.2.0)
   - Protobuf (3.22.0)
   - WebRTCObjc (105.0.0)
@@ -132,16 +132,16 @@ SPEC CHECKSUMS:
   MLKitVision: 96c96571190b7f63eddf4a12068ce8a8689e0d2c
   MLKitXenoCommon: 39b7097db51f4716a2a0ff4e4459e002499f5523
   nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431
-  PexipCore: 4abb452e22d057ea385a1df982ea16477029e5e5
-  PexipInfinityClient: fad8cd957ea2d08951e7a5c4c09f2d35487ac1be
-  PexipMedia: 9ddbb81847cf8f787779681a22e3378fddb74a6e
-  PexipRTC: eda6331a59feacfcc8ccd32ec40dcc67ccb34593
-  PexipScreenCapture: c5f03a544d66bcdf1e322b93e5ae81339c31d0fe
-  PexipVideoFilters: b916cd035e9c2a9cef15e844b41df04cb003658e
+  PexipCore: 2985521752287a025e90d16602d9c5dc2c198dc5
+  PexipInfinityClient: d7f7edff81428adfc967994eeb54ceb8e9029cf7
+  PexipMedia: 4182b9009e49aecc135fa717d6c89553fa960675
+  PexipRTC: a84057d0804c08436ce784ec997dc3f8a71062b6
+  PexipScreenCapture: 3e5a551b097a2170291a724375f99682216589c8
+  PexipVideoFilters: 672bfbb4be559f90c9dbb4ab21740108d590c04c
   PromisesObjC: 09985d6d70fbe7878040aa746d78236e6946d2ef
   Protobuf: 5e6cbc143d02fe08585d86b0098f8b755d2caaab
   WebRTCObjc: eafbb6955adb16faa7d369ff308796caf854abf3
 
 PODFILE CHECKSUM: e37a51dc80ef8d24b557f396656deda7c8ee20d6
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.15.2

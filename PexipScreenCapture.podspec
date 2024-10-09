@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipScreenCapture'
-    s.version      = '0.9.0'
+    s.version      = '0.10.0'
     s.summary      = 'High level APIs for screen capture on iOS and macOS.'
     s.description  = <<-DESC
                      Pexip Swift SDK is designed for use by iOS/macOS voice/video applications 
