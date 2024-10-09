@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -92,4 +92,5 @@ private final class Signaling: SignalingChannel {
     func takeFloor() async throws -> Bool { true }
     func releaseFloor() async throws -> Bool { true }
     func dtmf(signals: DTMFSignals) async throws -> Bool { false }
+    func setPreferredAspectRatio(_ aspectRatio: Float) async throws -> Bool { false }
 }

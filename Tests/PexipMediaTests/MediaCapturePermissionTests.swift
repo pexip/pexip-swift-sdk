@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -144,11 +144,11 @@ final class MediaCapturePermissionTests: XCTestCase {
 private final class CaptureDevice: AVCaptureDevice {
     static var status: AVAuthorizationStatus = .notDetermined
 
-    override class func authorizationStatus(for mediaType: AVMediaType) -> AVAuthorizationStatus {
+    override static func authorizationStatus(for mediaType: AVMediaType) -> AVAuthorizationStatus {
         return status
     }
 
-    override class func requestAccess(for mediaType: AVMediaType) async -> Bool {
+    override static func requestAccess(for mediaType: AVMediaType) async -> Bool {
         return status == .authorized
     }
 }

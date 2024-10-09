@@ -12,6 +12,10 @@
 		DA11E1EA2940EBF50075AE63 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11E1E92940EBF50075AE63 /* SplashView.swift */; };
 		DA11E1EB2940EBF50075AE63 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11E1E92940EBF50075AE63 /* SplashView.swift */; };
 		DA1329E627A98EC500C2EA89 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA1329D427A98EC500C2EA89 /* Assets.xcassets */; };
+		DA15C40C2CB6AD69008FFC76 /* ViewSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15C40B2CB6AD69008FFC76 /* ViewSize.swift */; };
+		DA15C40D2CB6AD69008FFC76 /* ViewSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15C40B2CB6AD69008FFC76 /* ViewSize.swift */; };
+		DA15C40F2CB6AE38008FFC76 /* TaskDebouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15C40E2CB6AE38008FFC76 /* TaskDebouncer.swift */; };
+		DA15C4102CB6AE38008FFC76 /* TaskDebouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15C40E2CB6AE38008FFC76 /* TaskDebouncer.swift */; };
 		DA1F8F70299BB83200B771D3 /* PexipScreenCapture in Frameworks */ = {isa = PBXBuildFile; productRef = DA1F8F6F299BB83200B771D3 /* PexipScreenCapture */; };
 		DA1F8F72299BB87200B771D3 /* PexipRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DA1F8F71299BB87200B771D3 /* PexipRTC */; };
 		DA1F8F74299BB87900B771D3 /* PexipInfinityClient in Frameworks */ = {isa = PBXBuildFile; productRef = DA1F8F73299BB87900B771D3 /* PexipInfinityClient */; };
@@ -144,6 +148,8 @@
 		DA11E1E92940EBF50075AE63 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		DA1329D427A98EC500C2EA89 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DA1329D927A98EC500C2EA89 /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA15C40B2CB6AD69008FFC76 /* ViewSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewSize.swift; sourceTree = "<group>"; };
+		DA15C40E2CB6AE38008FFC76 /* TaskDebouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskDebouncer.swift; sourceTree = "<group>"; };
 		DA1F8F6C299BB7FC00B771D3 /* pexip-swift-sdk */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "pexip-swift-sdk"; path = ../..; sourceTree = "<group>"; };
 		DA2FE596287110CB00D8FCAB /* ConferenceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceState.swift; sourceTree = "<group>"; };
 		DA2FE599287110DD00D8FCAB /* ConferenceModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceModal.swift; sourceTree = "<group>"; };
@@ -356,6 +362,7 @@
 		DAB78D4D27E3952300CB17C9 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				DA15C40E2CB6AE38008FFC76 /* TaskDebouncer.swift */,
 				DAB78D4E27E3953600CB17C9 /* Utils.swift */,
 			);
 			path = Utils;
@@ -420,6 +427,7 @@
 				DAFADC9A27F50C1400A9AC3D /* LinearGradient+Extensions.swift */,
 				DAFADC9927F50C1400A9AC3D /* MainVStack.swift */,
 				DAFADC9B27F50C1400A9AC3D /* ModalView.swift */,
+				DA15C40B2CB6AD69008FFC76 /* ViewSize.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -703,6 +711,7 @@
 				DAB78D4F27E3953600CB17C9 /* Utils.swift in Sources */,
 				DA7AC0FE281096B400739C4E /* AppCoordinator.swift in Sources */,
 				DAE9B7B62AB3413C0005ABFF /* AudioRoutePickerView.swift in Sources */,
+				DA15C40F2CB6AE38008FFC76 /* TaskDebouncer.swift in Sources */,
 				DA6196872878332300EA9151 /* ChatMessageStore.swift in Sources */,
 				DAFADCEF27F50C1400A9AC3D /* ChatView.swift in Sources */,
 				DAFADD0F27F50E8800A9AC3D /* PinChallengeView.swift in Sources */,
@@ -712,6 +721,7 @@
 				DA2FE59A287110DD00D8FCAB /* ConferenceModal.swift in Sources */,
 				DA93EE6D284A35200063386F /* Constants.swift in Sources */,
 				DA11E1EA2940EBF50075AE63 /* SplashView.swift in Sources */,
+				DA15C40C2CB6AD69008FFC76 /* ViewSize.swift in Sources */,
 				DAFADCC727F50C1400A9AC3D /* GeometryProxy+Extensions.swift in Sources */,
 				DAFADCDD27F50C1400A9AC3D /* AliasViewModel.swift in Sources */,
 				DAFADCE727F50C1400A9AC3D /* ConferenceView.swift in Sources */,
@@ -769,6 +779,7 @@
 				DA01A9EA283794FD002A6414 /* ScreenMediaSourcePicker.swift in Sources */,
 				DAFADD2127F5D69A00A9AC3D /* AppCoordinator.swift in Sources */,
 				DA934F0228C7A67B002434DC /* IncomingCallViewModel.swift in Sources */,
+				DA15C40D2CB6AD69008FFC76 /* ViewSize.swift in Sources */,
 				DAFADCDA27F50C1400A9AC3D /* ViewFactory.swift in Sources */,
 				DA5CF74B296C649600E4BFD8 /* ConferenceDetails.swift in Sources */,
 				DA74550B28C948F300D2323C /* AppWindow.swift in Sources */,
@@ -795,6 +806,7 @@
 				DAFADD0827F50E5D00A9AC3D /* DisplayNameViewModel.swift in Sources */,
 				DA11E1EB2940EBF50075AE63 /* SplashView.swift in Sources */,
 				DAFADCE827F50C1400A9AC3D /* ConferenceView.swift in Sources */,
+				DA15C4102CB6AE38008FFC76 /* TaskDebouncer.swift in Sources */,
 				DA934F0C28C7F41E002434DC /* Environment.swift in Sources */,
 				DA2FE598287110CB00D8FCAB /* ConferenceState.swift in Sources */,
 				DAFADCDC27F50C1400A9AC3D /* ParticipantsView.swift in Sources */,
