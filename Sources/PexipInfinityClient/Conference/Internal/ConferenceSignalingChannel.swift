@@ -166,7 +166,7 @@ final class ConferenceSignalingChannel: SignalingChannel, SignalingEventSender {
     @discardableResult
     func setPreferredAspectRatio(_ aspectRatio: Float) async throws -> Bool {
         try await participantService.preferredAspectRatio(
-            aspectRatio,
+            min(2, aspectRatio),
             token: tokenStore.token()
         )
     }

@@ -440,6 +440,30 @@ final class ConferenceSignalingChannelTests: XCTestCase {
         XCTAssertNil(callService.token)
     }
 
+    func testPreferredAspectRatio() async throws {
+        participantService.results[.preferredAspectRatio] = .success(true)
+
+        do {
+            let result = try await channel.setPreferredAspectRatio(1.5)
+            XCTAssertEqual(participantService.aspectRatio, 1.5)
+            XCTAssertTrue(result)
+        }
+
+        do {
+            let result = try await channel.setPreferredAspectRatio(2.5)
+            XCTAssertEqual(participantService.aspectRatio, 2)
+            XCTAssertTrue(result)
+        }
+
+        XCTAssertEqual(participantService.actions, [
+            .preferredAspectRatio,
+            .preferredAspectRatio
+        ])
+        XCTAssertEqual(participantService.token, token)
+        XCTAssertTrue(callService.actions.isEmpty)
+        XCTAssertNil(callService.token)
+    }
+
     // MARK: - Private
 
     @discardableResult
@@ -470,7 +494,7 @@ final class ConferenceSignalingChannelTests: XCTestCase {
 // swiftlint:disable unavailable_function
 // swiftlint:disable fatal_error_message
 private final class ParticipantServiceMock: ParticipantService {
-    enum Action {
+    enum Action: Hashable {
         case calls
         case mute
         case unmute
@@ -478,6 +502,7 @@ private final class ParticipantServiceMock: ParticipantService {
         case videoUnmuted
         case takeFloor
         case releaseFloor
+        case preferredAspectRatio
     }
 
     var results = [Action: Result<Any, Error>]()
@@ -485,6 +510,7 @@ private final class ParticipantServiceMock: ParticipantService {
     private(set) var callService = CallServiceMock()
     private(set) var token: ConferenceToken?
     private(set) var callFields: CallsFields?
+    private(set) var aspectRatio: Float?
 
     func calls(fields: CallsFields, token: ConferenceToken) async throws -> CallDetails {
         callFields = fields
@@ -520,7 +546,8 @@ private final class ParticipantServiceMock: ParticipantService {
     }
 
     func preferredAspectRatio(_ aspectRatio: Float, token: ConferenceToken) async throws -> Bool {
-        fatalError()
+        self.aspectRatio = aspectRatio
+        return try performAction(.preferredAspectRatio, token: token)
     }
 
     func call(id: String) -> CallService { callService }
