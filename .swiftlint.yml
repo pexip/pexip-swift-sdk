@@ -63,15 +63,17 @@ opt_in_rules:
   - vertical_parameter_alignment_on_call
   - vertical_whitespace_closing_braces
   - vertical_whitespace_opening_braces
-  - xct_specific_matcher
   - yoda_condition
+disabled_rules:
+  - nesting
+  - contrasted_opening_brace
+  - non_optional_string_data_conversion
+  - for_where
+  - attributes
 identifier_name:
   excluded:
     - id
     - to
-attributes:
-  always_on_same_line:
-    ["@AppStorage", "@NSApplicationDelegateAdaptor"]
 file_header:
   severity: error
   required_pattern: |

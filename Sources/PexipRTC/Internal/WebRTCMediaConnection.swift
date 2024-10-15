@@ -219,6 +219,13 @@ actor WebRTCMediaConnection: MediaConnection, DataSender {
         try await signalingChannel.dtmf(signals: signals)
     }
 
+    @discardableResult
+    func setMainRemoteVideoTrackPreferredAspectRatio(
+        _ aspectRatio: Float
+    ) async throws -> Bool {
+        try await signalingChannel.setPreferredAspectRatio(aspectRatio)
+    }
+
     // MARK: - Data channel
 
     func send(_ data: Data) async throws -> Bool {

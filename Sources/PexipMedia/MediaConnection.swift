@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -158,4 +158,14 @@ public protocol MediaConnection {
         - bitrate: a bitrate to set as maximum
     */
     func setMaxBitrate(_ bitrate: Bitrate) async
+
+    /**
+     Sets the preferred aspect ratio for remote video.
+     - Parameters:
+        - aspectRatio: a preferred aspect ratio
+     */
+    @discardableResult
+    func setMainRemoteVideoTrackPreferredAspectRatio(
+        _ aspectRatio: Float
+    ) async throws -> Bool
 }

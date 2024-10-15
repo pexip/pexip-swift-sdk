@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -72,6 +72,14 @@ public protocol SignalingChannel: AnyObject {
      */
     @discardableResult
     func dtmf(signals: DTMFSignals) async throws -> Bool
+
+    /**
+     Specifies the aspect ratio the participant would like to receive.
+     - Parameters:
+        - aspectRatio: The preferred aspect ratio
+     */
+    @discardableResult
+    func setPreferredAspectRatio(_ aspectRatio: Float) async throws -> Bool
 
     /**
      Mutes or unmutes a participant's video.

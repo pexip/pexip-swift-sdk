@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -116,6 +116,22 @@ public protocol ParticipantService: LiveCaptionsService {
      */
     @discardableResult
     func dtmf(signals: DTMFSignals, token: ConferenceToken) async throws -> Bool
+
+    /**
+     Specifies the aspect ratio the participant would like to receive.
+     See [documentation](https://docs.pexip.com/api_client/api_rest.htm#preferred_aspect_ratio)
+
+     - Parameters:
+        - aspectRatio: The preferred aspect ratio
+        - token: Current valid API token
+     - Returns: The result is true if successful, false otherwise.
+     - Throws: `HTTPError` if a network error was encountered during operation
+     */
+    @discardableResult
+    func preferredAspectRatio(
+        _ aspectRatio: Float,
+        token: ConferenceToken
+    ) async throws -> Bool
 
     /**
      Sets the call ID.
@@ -239,10 +255,44 @@ struct DefaultParticipantService: ParticipantService {
         return try await client.json(for: request)
     }
 
+    @discardableResult
+    func preferredAspectRatio(
+        _ aspectRatio: Float,
+        token: ConferenceToken
+    ) async throws -> Bool {
+        guard aspectRatio > 0 && aspectRatio <= 2 else {
+            throw ParticipantError.invalidAspectRatio
+        }
+
+        var request = URLRequest(
+            url: baseURL.appendingPathComponent("preferred_aspect_ratio"),
+            httpMethod: .POST
+        )
+        request.setHTTPHeader(.token(token.value))
+        try request.setJSONBody([
+            "aspect_ratio": aspectRatio
+        ])
+
+        return try await client.json(for: request)
+    }
+
     func call(id: String) -> CallService {
         let url = baseURL
             .appendingPathComponent("calls")
             .appendingPathComponent(id)
         return DefaultCallService(baseURL: url, client: client)
+    }
+}
+
+// MARK: - Errors
+
+enum ParticipantError: LocalizedError {
+    case invalidAspectRatio
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidAspectRatio:
+            return "Aspect ratio is not in the 0..2 range"
+        }
     }
 }

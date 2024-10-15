@@ -226,6 +226,21 @@ extension ConferenceViewModel {
         #endif
     }
 
+    func onMainRemoteVideoSizeChange(_ size: CGSize) {
+        guard size.width > 0 && size.height > 0 else {
+            return
+        }
+        let aspectRatio = size.width / size.height
+        Task {
+            do {
+                try await mediaConnection
+                    .setMainRemoteVideoTrackPreferredAspectRatio(Float(aspectRatio))
+            } catch {
+                print("Error setting aspect ratio: \(error)")
+            }
+        }
+    }
+
     func setCameraEnabled(_ enabled: Bool) {
         Task { @MainActor in
             if enabled {

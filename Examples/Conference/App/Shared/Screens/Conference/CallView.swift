@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,10 +33,12 @@ struct CallView: View {
     @Binding var microphoneEnabled: Bool
     @Binding var isPresenting: Bool
     let onToggleCamera: () -> Void
+    let onMainRemoteVideoSizeChange: (CGSize) -> Void
     let onDisconnect: () -> Void
 
     @State private var showingButtons = true
     @State private var toggleButtonsTask: Task<Void, Error>?
+    @State private var preferredSizeDebouncer = TaskDebouncer()
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
     @Environment(\.viewFactory) private var viewFactory: ViewFactory
@@ -119,7 +121,15 @@ private extension CallView {
             } else if let video = presentationRemoteVideo {
                 VideoComponent(video: video).edgesIgnoringSafeArea(.all)
             } else if let video = mainRemoteVideo {
-                VideoComponent(video: video).edgesIgnoringSafeArea(.all)
+                VideoComponent(video: video)
+                    .edgesIgnoringSafeArea(.all)
+                    .onSizeChange { sizes in
+                        if let size = sizes.first {
+                            preferredSizeDebouncer.debounce(for: 0.4) {
+                                await onMainRemoteVideoSizeChange(size)
+                            }
+                        }
+                    }
             }
         }.onTapGesture {
             withAnimation {
@@ -346,6 +356,7 @@ struct CallView_Previews: PreviewProvider {
             microphoneEnabled: .constant(true),
             isPresenting: .constant(false),
             onToggleCamera: {},
+            onMainRemoteVideoSizeChange: { _ in },
             onDisconnect: {}
         )
     }

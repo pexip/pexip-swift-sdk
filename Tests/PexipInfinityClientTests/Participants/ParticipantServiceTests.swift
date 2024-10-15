@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2024 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -229,6 +229,38 @@ final class ParticipantServiceTests: APITestCase {
                 XCTAssertTrue(result)
             }
         )
+    }
+
+    func testPreferredAspectRatio() async throws {
+        let token = ConferenceToken.randomToken()
+
+        func request(_ aspectRatio: Float) async throws {
+            try await testJSONRequest(
+                withMethod: .POST,
+                url: baseURL.appendingPathComponent("preferred_aspect_ratio"),
+                token: token,
+                body: JSONEncoder().encode([
+                    "aspect_ratio": aspectRatio
+                ]),
+                responseJSON: responseJSON,
+                execute: {
+                    let result = try await service.preferredAspectRatio(
+                        aspectRatio,
+                        token: token
+                    )
+                    XCTAssertTrue(result)
+                }
+            )
+        }
+
+        try await request(9 / 16)
+
+        do {
+            try await request(3)
+            XCTFail("Should throw an error")
+        } catch {
+            XCTAssertEqual(error as? ParticipantError, .invalidAspectRatio)
+        }
     }
 
     func testCall() throws {
