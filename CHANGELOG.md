@@ -10,6 +10,25 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## Added
 - `MediaFactory.audioSession` to use instead of deprecated `AudioSession.shared`
 
+# [0.10.0] - 2024-10-09
+
+### Added
+- Support audio in screen capture
+- Make it possible to set preferred aspect ratio
+
+## Changed
+- `MediaFactory.audioSession` to use instead of deprecated `AudioSession.shared`
+
+### Fixed
+- Fix audio configuration for screen capture
+- Don't check for host on mute/unmute
+- Support cancellation in DNS lookup
+- Use different audio session mode for audio and video calls
+
+## Removed
+- Remove various deprecated methods and types
+
+
 ## [0.9.0] - 2023-10-08
 
 ### Added
@@ -147,7 +166,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - Initial release
 
-[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.9.0...HEAD
+[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.10.0...HEAD
+[0.10.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.10.0
 [0.9.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.9.0
 [0.8.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.8.0
 [0.7.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.7.0

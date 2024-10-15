@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = 'PexipVideoFilters'
-    s.version      = '0.9.0'
+    s.version      = '0.10.0'
     s.summary      = 'A set of built-in video filters ready to use in your video conferencing app.'
     s.description  = <<-DESC
                      Pexip Swift SDK is designed for use by iOS/macOS voice/video applications 
