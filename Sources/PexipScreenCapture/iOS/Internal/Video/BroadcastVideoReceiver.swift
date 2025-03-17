@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2024 Pexip AS
+// Copyright 2023-2025 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,6 +43,9 @@ final class BroadcastVideoReceiver {
         autoreleaseFrequency: .workItem
     )
     private var displayLink: BroadcastDisplayLink?
+    private var bufferPool: CVPixelBufferPool?
+    private var bufferPoolWidth: UInt32 = 0
+    private var bufferPoolHeight: UInt32 = 0
     private let _isRunning = Synchronized(false)
 
     // MARK: - Init
@@ -135,36 +138,30 @@ final class BroadcastVideoReceiver {
 
             var position = 0
             var displayTimeNs: UInt64 = 0
-            var pixelFormat: UInt32 = 0
+            var format: UInt32 = 0
             var width: UInt32 = 0
             var height: UInt32 = 0
             var videoOrientation: UInt32 = 0
-            var pixelBuffer: CVPixelBuffer?
 
             func copyMemory<T>(to value: inout T) {
                 let count = MemoryLayout<T>.size
-                withUnsafeMutablePointer(to: &value) { value in
-                    memcpy(value, baseAddress.advanced(by: position), count)
-                    position += count
+                withUnsafeMutablePointer(to: &value) { valuePointer in
+                    valuePointer.withMemoryRebound(to: UInt8.self, capacity: count) { pointer in
+                        let source = baseAddress.advanced(by: position)
+                        let destination = UnsafeMutableRawPointer(pointer)
+                        destination.copyMemory(from: source, byteCount: count)
+                    }
                 }
+                position += count
             }
 
             copyMemory(to: &displayTimeNs)
-            copyMemory(to: &pixelFormat)
+            copyMemory(to: &format)
             copyMemory(to: &width)
             copyMemory(to: &height)
             copyMemory(to: &videoOrientation)
 
-            let result = CVPixelBufferCreate(
-                kCFAllocatorDefault,
-                Int(width),
-                Int(height),
-                pixelFormat,
-                nil,
-                &pixelBuffer
-            )
-
-            guard let pixelBuffer, result == kCVReturnSuccess else {
+            guard let pixelBuffer = pixelBuffer(width: width, height: height, format: format) else {
                 return nil
             }
 
@@ -176,8 +173,12 @@ final class BroadcastVideoReceiver {
 
             for index in 0..<pixelBuffer.planeCount {
                 let plane = pixelBuffer.plane(at: index)
-                memcpy(plane.baseAddress, baseAddress.advanced(by: position), plane.size)
-                position += plane.size
+                if let planeBaseAddress = plane.baseAddress {
+                    let source = baseAddress.advanced(by: position)
+                    let destination = UnsafeMutableRawPointer(planeBaseAddress)
+                    destination.copyMemory(from: source, byteCount: plane.size)
+                    position += plane.size
+                }
             }
 
             return VideoFrame(
@@ -186,6 +187,24 @@ final class BroadcastVideoReceiver {
                 displayTimeNs: displayTimeNs
             )
         }
+    }
+
+    private func pixelBuffer(
+        width: UInt32,
+        height: UInt32,
+        format: OSType
+    ) -> CVPixelBuffer? {
+        if bufferPool == nil || width != bufferPoolWidth || height != bufferPoolHeight {
+            bufferPool = CVPixelBufferPool.createWithAttributes(
+                width: width,
+                height: height,
+                pixelFormat: format
+            )
+            bufferPoolWidth = width
+            bufferPoolHeight = height
+        }
+
+        return bufferPool?.createPixelBuffer()
     }
 }
 

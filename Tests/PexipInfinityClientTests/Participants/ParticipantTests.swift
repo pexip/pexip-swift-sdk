@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2025 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -118,7 +118,7 @@ final class ParticipantTests: XCTestCase {
         XCTAssertEqual(participant.id, id)
         XCTAssertEqual(participant.displayName, "Test")
         XCTAssertTrue(participant.localAlias.isEmpty)
-        XCTAssertTrue(participant.overlayText.isEmpty)
+        XCTAssertNil(participant.overlayText?.isEmpty)
         XCTAssertEqual(participant.role, .chair)
         XCTAssertEqual(participant.serviceType, .conference)
         XCTAssertEqual(participant.buzzTime, 0)
@@ -173,7 +173,7 @@ final class ParticipantTests: XCTestCase {
         XCTAssertEqual(participant.id, id)
         XCTAssertEqual(participant.displayName, "Test")
         XCTAssertTrue(participant.localAlias.isEmpty)
-        XCTAssertTrue(participant.overlayText.isEmpty)
+        XCTAssertNil(participant.overlayText)
         XCTAssertEqual(participant.role, .chair)
         XCTAssertEqual(participant.serviceType, .conference)
         XCTAssertEqual(participant.buzzTime, 0)
