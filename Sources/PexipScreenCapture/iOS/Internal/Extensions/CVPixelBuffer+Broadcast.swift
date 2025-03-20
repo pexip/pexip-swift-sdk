@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2023-2025 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,6 +38,39 @@ extension CVPixelBuffer {
             bytesPerRow: CVPixelBufferGetBytesPerRowOfPlane(self, index),
             height: CVPixelBufferGetHeightOfPlane(self, index)
         )
+    }
+}
+
+extension CVPixelBufferPool {
+    static func createWithAttributes(
+        width: UInt32,
+        height: UInt32,
+        pixelFormat: OSType
+    ) -> CVPixelBufferPool? {
+        var pool: CVPixelBufferPool?
+        let attributes: NSDictionary = [
+            kCVPixelBufferPixelFormatTypeKey: pixelFormat,
+            kCVPixelBufferWidthKey: width,
+            kCVPixelBufferHeightKey: height,
+            kCVPixelBufferMetalCompatibilityKey: true,
+            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary()
+        ]
+        CVPixelBufferPoolCreate(kCFAllocatorDefault, nil, attributes, &pool)
+        return pool
+    }
+
+    static func createWithTemplate(_ template: CVPixelBuffer) -> CVPixelBufferPool? {
+        createWithAttributes(
+            width: template.width,
+            height: template.height,
+            pixelFormat: template.pixelFormat
+        )
+    }
+
+    func createPixelBuffer() -> CVPixelBuffer? {
+        var pixelBuffer: CVPixelBuffer?
+        CVPixelBufferPoolCreatePixelBuffer(nil, self, &pixelBuffer)
+        return pixelBuffer
     }
 }
 

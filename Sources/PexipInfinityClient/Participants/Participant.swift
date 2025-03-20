@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Pexip AS
+// Copyright 2022-2025 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ public struct Participant: Codable, Hashable, Identifiable {
         id: String,
         displayName: String,
         localAlias: String = "",
-        overlayText: String = "",
+        overlayText: String? = nil,
         role: Participant.Role,
         serviceType: Participant.ServiceType,
         buzzTime: TimeInterval = 0,
@@ -122,7 +122,7 @@ public struct Participant: Codable, Hashable, Identifiable {
     /// The calling or "from" alias. This is the alias that the recipient would use to return the call.
     public let localAlias: String
     /// Text that may be used as an alternative to display_name as the participant name overlay text.
-    public let overlayText: String
+    public let overlayText: String?
     /// The level of privileges the participant has in the conference.
     public let role: Role
     /// The service type.
