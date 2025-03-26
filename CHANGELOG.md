@@ -10,6 +10,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## Added
 - `MediaFactory.audioSession` to use instead of deprecated `AudioSession.shared`
 
+# [0.10.1] - 2024-03-26
+
+### Fixed
+- Fix consistency issues with video captured using ReplayKit on iOS 16+ from a broadcast extension
+
 # [0.10.0] - 2024-10-09
 
 ### Added
@@ -166,7 +171,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - Initial release
 
-[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.10.0...HEAD
+[Unreleased]: https://github.com/pexip/pexip-swift-sdk/compare/0.10.1...HEAD
+[0.10.1]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.10.1
 [0.10.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.10.0
 [0.9.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.9.0
 [0.8.0]: https://github.com/pexip/pexip-swift-sdk/releases/tag/0.8.0
