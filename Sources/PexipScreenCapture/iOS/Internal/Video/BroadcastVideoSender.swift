@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2024 Pexip AS
+// Copyright 2023-2025 Pexip AS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ final class BroadcastVideoSender {
     private let filePath: String
     private let fileManager: FileManager
     private var file: MemoryMappedFile?
+    private var transferSession: PixelTransferSession?
     private var displayLink: BroadcastDisplayLink?
     private let queue = DispatchQueue(
         label: "com.pexip.PexipScreenCapture.BroadcastVideoSender",
@@ -40,6 +41,9 @@ final class BroadcastVideoSender {
     ) {
         self.filePath = filePath
         self.fileManager = fileManager
+        if #available(iOS 16.0, *) {
+            self.transferSession = VideoToolboxTransferSession()
+        }
     }
 
     deinit {
@@ -108,12 +112,17 @@ final class BroadcastVideoSender {
             return
         }
 
+        guard let pixelBuffer = sampleBuffer.imageBuffer else {
+            return
+        }
+
         let displayTimeNs = UInt64(
             llround(timestamp * Float64(NSEC_PER_SEC))
         )
 
         guard let data = encode(
-            sampleBuffer: sampleBuffer,
+            pixelBuffer: transferSession?.transfer(pixelBuffer) ?? pixelBuffer,
+            videoOrientation: sampleBuffer.videoOrientation,
             displayTimeNs: displayTimeNs
         ) else {
             return
@@ -123,62 +132,41 @@ final class BroadcastVideoSender {
     }
 
     private func encode(
-        sampleBuffer: CMSampleBuffer,
+        pixelBuffer: CVPixelBuffer,
+        videoOrientation: UInt32,
         displayTimeNs: UInt64
     ) -> Data? {
-        guard let pixelBuffer = sampleBuffer.imageBuffer else {
-            return nil
-        }
-
         pixelBuffer.lockBaseAddress(.readOnly)
 
         defer {
             pixelBuffer.unlockBaseAddress(.readOnly)
         }
 
-        var planes = [CVPixelBuffer.Plane]()
-        var pixelBufferSize = 0
+        var data = Data()
 
-        for index in 0..<pixelBuffer.planeCount {
-            let plane = pixelBuffer.plane(at: index)
-            planes.append(plane)
-            pixelBufferSize += plane.size
-        }
-
-        let headerSize = MemoryLayout<UInt64>.size + MemoryLayout<UInt32>.size * 5
-        let totalSize = headerSize + pixelBufferSize
-
-        guard let pointer = malloc(totalSize) else {
-            return nil
-        }
-
-        var displayTimeNs = displayTimeNs
-        var pixelFormat = pixelBuffer.pixelFormat
-        var width = pixelBuffer.width
-        var height = pixelBuffer.height
-        var videoOrientation = sampleBuffer.videoOrientation
-        var position = 0
-
-        func copyMemory<T>(from value: inout T) {
-            let count = MemoryLayout<T>.size
-            withUnsafeMutablePointer(to: &value) { value in
-                memcpy(pointer.advanced(by: position), value, count)
-                position += count
+        func appendToData<T>(_ value: T) {
+            var value = value
+            withUnsafeBytes(of: &value) { buffer in
+                if let baseAddress = buffer.baseAddress {
+                    data.append(start: baseAddress, count: buffer.count)
+                }
             }
         }
 
-        copyMemory(from: &displayTimeNs)
-        copyMemory(from: &pixelFormat)
-        copyMemory(from: &width)
-        copyMemory(from: &height)
-        copyMemory(from: &videoOrientation)
+        appendToData(displayTimeNs)
+        appendToData(pixelBuffer.pixelFormat)
+        appendToData(pixelBuffer.width)
+        appendToData(pixelBuffer.height)
+        appendToData(videoOrientation)
 
-        for plane in planes {
-            memcpy(pointer.advanced(by: position), plane.baseAddress, plane.size)
-            position += plane.size
+        for index in 0..<pixelBuffer.planeCount {
+            let plane = pixelBuffer.plane(at: index)
+            if let baseAddress = plane.baseAddress {
+                data.append(start: baseAddress, count: plane.size)
+            }
         }
 
-        return Data(bytesNoCopy: pointer, count: totalSize, deallocator: .free)
+        return data
     }
 }
 
